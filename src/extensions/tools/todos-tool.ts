@@ -347,7 +347,23 @@ function renderTodosResult(result: { details?: TodoToolDetails }, options: { exp
 
 function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchema, TodoToolDetails> {
   const state = new TodoState();
-  let autoTriggerInProgress = false;
+  let pendingAutoContinue = false;
+
+  // Auto-continue trigger on turn_end when LLM idle
+  api.on("turn_end", async (_event, ctx) => {
+    if (pendingAutoContinue && ctx.isIdle()) {
+      pendingAutoContinue = false;
+      try {
+        await api.sendMessage({
+          customType: "todo-auto-continue",
+          content: "Continue with next task.",
+          display: false
+        }, { triggerTurn: true });
+      } catch (e) {
+        console.error("Auto-continue failed:", e);
+      }
+    }
+  });
 
   api.on("session_start", async (_event, ctx) => {
     await state.loadFromFile();
@@ -470,13 +486,9 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
         } catch {}
       }
 
-      // Auto-continue
-      if (op && op !== "list" && errors.length === 0 && !autoTriggerInProgress) {
-        autoTriggerInProgress = true;
-        setTimeout(() => { autoTriggerInProgress = false; }, 3000);
-        try {
-          await api.sendMessage({ customType: "todo-auto-continue", content: "Continue with next task.", display: false }, { triggerTurn: true });
-        } catch {}
+      // Auto-continue: set flag, actual trigger handled by turn_end event
+      if (op && op !== "list" && errors.length === 0) {
+        pendingAutoContinue = true;
       }
 
       return { content: [{ type: "text", text: summaryText }], details: { phases: resultPhases, storage: "file", error: errors.length ? errors.join("; ") : undefined }, isError: errors.length > 0 };

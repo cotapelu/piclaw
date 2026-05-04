@@ -127,9 +127,221 @@
           "details": "Production-ready todos tool"
         }
       ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Phase 1: Project Overview Analysis",
+      "tasks": [
+        {
+          "id": "task-20",
+          "content": "Đọc và phân tích package.json - dependencies, scripts, main entry",
+          "status": "completed"
+        },
+        {
+          "id": "task-21",
+          "content": "Đọc AGENTS.md và SYSTEM.md để hiểu project philosophy",
+          "status": "completed"
+        },
+        {
+          "id": "task-22",
+          "content": "Xem cấu trúc thư mục tổng quan (src/, llm-context/, docs/)",
+          "status": "completed"
+        },
+        {
+          "id": "task-23",
+          "content": "Kiểm tra tsconfig.json và build config",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Phase 2: Core Architecture Analysis",
+      "tasks": [
+        {
+          "id": "task-24",
+          "content": "Phân tích src/main.ts - entry point và main logic",
+          "status": "completed"
+        },
+        {
+          "id": "task-25",
+          "content": "Phân tích src/cli.ts và src/cli/args.ts - CLI handling",
+          "status": "completed"
+        },
+        {
+          "id": "task-26",
+          "content": "Phân tích src/helpers.ts - utility functions",
+          "status": "completed"
+        },
+        {
+          "id": "task-27",
+          "content": "Phân tích src/migrations.ts - database migrations",
+          "status": "abandoned"
+        }
+      ]
+    },
+    {
+      "id": "phase-7",
+      "name": "Phase 3: Configuration Analysis",
+      "tasks": [
+        {
+          "id": "task-28",
+          "content": "Phân tích src/config/config.ts - main configuration",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-29",
+          "content": "Phân tích src/config/config-manager.ts - config management",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-30",
+          "content": "Kiểm tra config files trong project (.npmrc, .env, etc.)",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-31",
+          "content": "Phân tích cách config được load và validate",
+          "status": "abandoned"
+        }
+      ]
+    },
+    {
+      "id": "phase-8",
+      "name": "Phase 4: Extensions & Tools Analysis",
+      "tasks": [
+        {
+          "id": "task-32",
+          "content": "Phân tích src/extensions/index.ts - extensions entry point",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-33",
+          "content": "Phân tích src/extensions/piclaw-extension.ts - base extension class",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-34",
+          "content": "Phân tích src/extensions/auto-memory.ts - auto memory feature",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-35",
+          "content": "Phân tích src/extensions/providers/ - LLM providers (kilo, custom)",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-36",
+          "content": "Phân tích src/extensions/tools/ - built-in tools (memory, todos, echo, system-info)",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-37",
+          "content": "Phân tích src/tools/subtool-loader.ts - sub-tool loader",
+          "status": "abandoned"
+        }
+      ]
+    },
+    {
+      "id": "phase-9",
+      "name": "Phase 5: Sub-tools Analysis",
+      "tasks": [
+        {
+          "id": "task-38",
+          "content": "Liệt kê và phân loại tất cả sub-tools trong src/tools/sub-tools/",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-39",
+          "content": "Phân tích cách sub-tools được load và registered",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-40",
+          "content": "Kiểm tra helpers.ts trong sub-tools cho common utilities",
+          "status": "abandoned"
+        },
+        {
+          "id": "task-41",
+          "content": "Phân tích system-tools.ts - system integration tools",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-42",
+          "content": "Đánh giá coverage của các sub-tools (devops, system, network, etc.)",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-10",
+      "name": "Phase 6: Tests & Dependencies Analysis",
+      "tasks": [
+        {
+          "id": "task-43",
+          "content": "Liệt kê và phân tích tất cả test files trong src/tests/",
+          "status": "pending"
+        },
+        {
+          "id": "task-44",
+          "content": "Phân tích vitest.config.ts - test configuration",
+          "status": "pending"
+        },
+        {
+          "id": "task-45",
+          "content": "Kiểm tra test coverage và quality",
+          "status": "pending"
+        },
+        {
+          "id": "task-46",
+          "content": "Phân tích node_modules và dependencies",
+          "status": "pending"
+        },
+        {
+          "id": "task-47",
+          "content": "Đánh giá llm-context - source code cho reasoning",
+          "status": "pending"
+        }
+      ]
+    },
+    {
+      "id": "phase-11",
+      "name": "Phase 7: Code Quality & Security Analysis",
+      "tasks": [
+        {
+          "id": "task-48",
+          "content": "Kiểm tra eslint.config.js - linting rules",
+          "status": "pending"
+        },
+        {
+          "id": "task-49",
+          "content": "Phân tích error handling và logging patterns",
+          "status": "pending"
+        },
+        {
+          "id": "task-50",
+          "content": "Đánh giá security - command injection, path traversal protection",
+          "status": "pending"
+        },
+        {
+          "id": "task-51",
+          "content": "Kiểm tra performance patterns và optimizations",
+          "status": "pending"
+        },
+        {
+          "id": "task-52",
+          "content": "Phân tích code organization và modularity",
+          "status": "pending"
+        },
+        {
+          "id": "task-53",
+          "content": "Tổng hợp findings và recommendations",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 20,
-  "nextPhaseId": 5,
-  "updatedAt": "2026-05-03T15:41:40.312Z"
+  "nextTaskId": 54,
+  "nextPhaseId": 12,
+  "updatedAt": "2026-05-04T15:40:37.672Z"
 }
