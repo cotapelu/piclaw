@@ -3,361 +3,38 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Refactor todos-tool.ts",
+      "name": "Giai đoạn Test",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Fix critical race condition with triggerTurn (remove duplicate triggers)",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "Implement proper locking mechanism around all state mutations",
+          "content": "Test công cụ todos",
           "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Fix auto-continue logic with proper delay and session lifecycle",
-          "status": "completed"
+          "content": "Cập nhật task",
+          "status": "in_progress"
         },
         {
           "id": "task-4",
-          "content": "Simplify normalizeParams with TypeBox validation",
-          "status": "completed"
-        },
-        {
-          "id": "task-5",
-          "content": "Add error recovery with automatic rollback on failure",
-          "status": "completed"
-        },
-        {
-          "id": "task-6",
-          "content": "Write comprehensive unit tests for edge cases",
-          "status": "completed"
-        },
-        {
-          "id": "task-7",
-          "content": "Test the refactored tool in real scenarios",
-          "status": "completed"
+          "content": "Kiểm tra thêm task mới vào phase",
+          "status": "pending"
         }
       ]
     },
     {
       "id": "phase-2",
-      "name": "Todo Tool Refactoring Complete",
+      "name": "Giai đoạn Test 2",
       "tasks": [
         {
-          "id": "task-8",
-          "content": "✅ All 5 critical issues fixed in todos-tool.ts",
-          "status": "completed",
-          "details": "Race condition, locking, auto-continue, normalizeParams, error recovery"
-        },
-        {
-          "id": "task-9",
-          "content": "✅ 192 unit tests passing with 100% coverage on core logic",
-          "status": "completed",
-          "details": "Test file: src/extensions/tools/todos-tool.test.ts"
-        },
-        {
-          "id": "task-10",
-          "content": "✅ Build successful with no TypeScript errors",
-          "status": "completed",
-          "details": "npm run build completed successfully"
-        },
-        {
-          "id": "task-11",
-          "content": "📊 Summary of improvements",
-          "status": "completed",
-          "details": "See detailed breakdown below"
-        }
-      ]
-    },
-    {
-      "id": "phase-3",
-      "name": "Next Steps - Project Improvements",
-      "tasks": [
-        {
-          "id": "task-12",
-          "content": "Review and refactor other critical tools (memory-tool.ts, subtool-loader.ts)",
-          "status": "completed"
-        },
-        {
-          "id": "task-13",
-          "content": "Add integration tests for todos tool with real session scenarios",
-          "status": "completed"
-        },
-        {
-          "id": "task-14",
-          "content": "Performance optimization: benchmark tool execution times",
-          "status": "completed"
-        },
-        {
-          "id": "task-15",
-          "content": "Documentation: Update README with new todos tool features",
-          "status": "completed"
-        }
-      ]
-    },
-    {
-      "id": "phase-4",
-      "name": "Project Validation & Final Review",
-      "tasks": [
-        {
-          "id": "task-16",
-          "content": "✅ All todos-tool.ts refactoring tasks completed",
-          "status": "completed",
-          "details": "5 critical issues fixed, 192 tests passing"
-        },
-        {
-          "id": "task-17",
-          "content": "✅ Build verification successful",
-          "status": "completed",
-          "details": "npm run build completed with no errors"
-        },
-        {
-          "id": "task-18",
-          "content": "✅ Test suite verification successful",
-          "status": "completed",
-          "details": "196/196 tests passing"
-        },
-        {
-          "id": "task-19",
-          "content": "📊 Final project status summary",
-          "status": "completed",
-          "details": "Production-ready todos tool"
-        }
-      ]
-    },
-    {
-      "id": "phase-5",
-      "name": "Phase 1: Project Overview Analysis",
-      "tasks": [
-        {
-          "id": "task-20",
-          "content": "Đọc và phân tích package.json - dependencies, scripts, main entry",
-          "status": "completed"
-        },
-        {
-          "id": "task-21",
-          "content": "Đọc AGENTS.md và SYSTEM.md để hiểu project philosophy",
-          "status": "completed"
-        },
-        {
-          "id": "task-22",
-          "content": "Xem cấu trúc thư mục tổng quan (src/, llm-context/, docs/)",
-          "status": "completed"
-        },
-        {
-          "id": "task-23",
-          "content": "Kiểm tra tsconfig.json và build config",
-          "status": "completed"
-        }
-      ]
-    },
-    {
-      "id": "phase-6",
-      "name": "Phase 2: Core Architecture Analysis",
-      "tasks": [
-        {
-          "id": "task-24",
-          "content": "Phân tích src/main.ts - entry point và main logic",
-          "status": "completed"
-        },
-        {
-          "id": "task-25",
-          "content": "Phân tích src/cli.ts và src/cli/args.ts - CLI handling",
-          "status": "completed"
-        },
-        {
-          "id": "task-26",
-          "content": "Phân tích src/helpers.ts - utility functions",
-          "status": "completed"
-        },
-        {
-          "id": "task-27",
-          "content": "Phân tích src/migrations.ts - database migrations",
-          "status": "abandoned"
-        }
-      ]
-    },
-    {
-      "id": "phase-7",
-      "name": "Phase 3: Configuration Analysis",
-      "tasks": [
-        {
-          "id": "task-28",
-          "content": "Phân tích src/config/config.ts - main configuration",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-29",
-          "content": "Phân tích src/config/config-manager.ts - config management",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-30",
-          "content": "Kiểm tra config files trong project (.npmrc, .env, etc.)",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-31",
-          "content": "Phân tích cách config được load và validate",
-          "status": "abandoned"
-        }
-      ]
-    },
-    {
-      "id": "phase-8",
-      "name": "Phase 4: Extensions & Tools Analysis",
-      "tasks": [
-        {
-          "id": "task-32",
-          "content": "Phân tích src/extensions/index.ts - extensions entry point",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-33",
-          "content": "Phân tích src/extensions/piclaw-extension.ts - base extension class",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-34",
-          "content": "Phân tích src/extensions/auto-memory.ts - auto memory feature",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-35",
-          "content": "Phân tích src/extensions/providers/ - LLM providers (kilo, custom)",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-36",
-          "content": "Phân tích src/extensions/tools/ - built-in tools (memory, todos, echo, system-info)",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-37",
-          "content": "Phân tích src/tools/subtool-loader.ts - sub-tool loader",
-          "status": "abandoned"
-        }
-      ]
-    },
-    {
-      "id": "phase-9",
-      "name": "Phase 5: Sub-tools Analysis",
-      "tasks": [
-        {
-          "id": "task-38",
-          "content": "Liệt kê và phân loại tất cả sub-tools trong src/tools/sub-tools/",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-39",
-          "content": "Phân tích cách sub-tools được load và registered",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-40",
-          "content": "Kiểm tra helpers.ts trong sub-tools cho common utilities",
-          "status": "abandoned"
-        },
-        {
-          "id": "task-41",
-          "content": "Phân tích system-tools.ts - system integration tools",
-          "status": "in_progress"
-        },
-        {
-          "id": "task-42",
-          "content": "Đánh giá coverage của các sub-tools (devops, system, network, etc.)",
-          "status": "pending"
-        }
-      ]
-    },
-    {
-      "id": "phase-10",
-      "name": "Phase 6: Tests & Dependencies Analysis",
-      "tasks": [
-        {
-          "id": "task-43",
-          "content": "Liệt kê và phân tích tất cả test files trong src/tests/",
-          "status": "pending"
-        },
-        {
-          "id": "task-44",
-          "content": "Phân tích vitest.config.ts - test configuration",
-          "status": "pending"
-        },
-        {
-          "id": "task-45",
-          "content": "Kiểm tra test coverage và quality",
-          "status": "pending"
-        },
-        {
-          "id": "task-46",
-          "content": "Phân tích node_modules và dependencies",
-          "status": "pending"
-        },
-        {
-          "id": "task-47",
-          "content": "Đánh giá llm-context - source code cho reasoning",
-          "status": "pending"
-        }
-      ]
-    },
-    {
-      "id": "phase-11",
-      "name": "Phase 7: Code Quality & Security Analysis",
-      "tasks": [
-        {
-          "id": "task-48",
-          "content": "Kiểm tra eslint.config.js - linting rules",
-          "status": "pending"
-        },
-        {
-          "id": "task-49",
-          "content": "Phân tích error handling và logging patterns",
-          "status": "pending"
-        },
-        {
-          "id": "task-50",
-          "content": "Đánh giá security - command injection, path traversal protection",
-          "status": "pending"
-        },
-        {
-          "id": "task-51",
-          "content": "Kiểm tra performance patterns và optimizations",
-          "status": "pending"
-        },
-        {
-          "id": "task-52",
-          "content": "Phân tích code organization và modularity",
-          "status": "pending"
-        },
-        {
-          "id": "task-53",
-          "content": "Tổng hợp findings và recommendations",
-          "status": "pending"
-        }
-      ]
-    },
-    {
-      "id": "phase-12",
-      "name": "Demo Phase",
-      "tasks": [
-        {
-          "id": "task-54",
-          "content": "Test todos tool",
-          "status": "pending"
-        },
-        {
-          "id": "task-55",
-          "content": "Create sample task",
+          "id": "task-5",
+          "content": "Task trong phase 2",
           "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 56,
-  "nextPhaseId": 13,
-  "updatedAt": "2026-05-05T03:30:42.866Z"
+  "nextTaskId": 6,
+  "nextPhaseId": 3,
+  "updatedAt": "2026-05-05T04:30:09.431Z"
 }

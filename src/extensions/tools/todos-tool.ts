@@ -448,7 +448,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
           else if (!at?.content || typeof at.content !== "string") errors.push("content required");
           else {
             const task = state.addTask(at.phase, at.content, at.notes, at.details);
-            if (!task) errors.push(`Phase not found`);
+            if (!task) errors.push(`Phase not found. Available phases: ${state.phases.map(p=>p.id).join(', ')}`);
           }
         }
         else if (op === "update") {
