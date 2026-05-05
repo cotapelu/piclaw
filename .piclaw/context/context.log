@@ -444,7 +444,7 @@ Every commit must:
 Current date: 2026-05-05
 Current working directory: /home/quangtynu/Qcoder/qclaw
 
---- CONVERSATION (313 messages) ---
+--- CONVERSATION (325 messages) ---
 --- Message 0 (USER, 2026-05-05T14:47:55.836Z) ---
 bạn có thể phân tích toàn bộ code và tạo cho tôi một hooks đơn giản, cứ nó dừng nghỉ thì gửi một câu. continue next task. được koong?
 
@@ -7319,6 +7319,86 @@ ok
 --- Message 312 (TOOL_RESULT, 2026-05-05T15:41:59.812Z) ---
 Successfully replaced 1 block(s) in /home/quangtynu/Qcoder/qclaw/src/extensions/auto-continue-extension.ts.
 
+--- Message 313 (ASSISTANT, 2026-05-05T15:41:59.819Z) ---
+ạy build nhanh để kiểm tra:
+</think>
+
+[toolCall]
+
+--- Message 314 (TOOL_RESULT, 2026-05-05T15:42:24.312Z) ---
+
+> piclaw@0.0.1 typecheck
+> tsc --noEmit
+
+✅ Build OK
+
+
+--- Message 315 (ASSISTANT, 2026-05-05T15:42:24.319Z) ---
+ác định:
+- File duy nhất: `src/extensions/auto-continue-extension.ts`
+- Đã đăng ký trong `src/extensions/index.ts`
+- Không cần config, hard-coded timeout 60s.
+- Hoạt động: sau khi assistant trả lời xong, nếu 60s không có activity nào, tự động gửi "Continue next task." vào conversation.
+
+Tóm tắt cho user:
+</think>
+✅ **Hoàn tất!**
+
+**File duy nhất**: `src/extensions/auto-continue-extension.ts`
+
+**Hoạt động**:
+- Khi assistant trả lời xong (`message_end`), bắt đầu đếm 60 giây.
+- Nếu không có activity nào (user nhập, tool chạy, AI trả lời) trong 60s → coi là idle.
+- Gửi message **"Continue next task."** vào conversation (như user nhập).
+- Reset timer, chờ lần idle tiếp theo.
+
+**Đã đăng ký** trong `src/extensions/index.ts` → tự động load khi Piclaw chạy.
+
+Không cần config gì thêm.
+
+--- Message 316 (USER, 2026-05-05T15:44:27.224Z) ---
+ah, bạn nên thay đổi câu này này: Continue next task in docs/TODO.md, remember update done and git commit.
+
+--- Message 317 (ASSISTANT, 2026-05-05T15:44:27.232Z) ---
+[thinking]
+Được, tôi sẽ thay đổi câu "Continue next task." thành tiếng Việt nhé: **"Tiếp tục công việc nào!"**
+
+Sửa file:
+
+--- Message 318 (USER, 2026-05-05T15:45:44.896Z) ---
+không. viết nguyên câu kia cho tôi: Continue next task in docs/TODO.md, remember update done and git commit.
+
+--- Message 319 (ASSISTANT, 2026-05-05T15:45:44.903Z) ---
+[thinking]
+Tôi sẽ sửa message thành đúng câu đó:
+[toolCall]
+
+--- Message 320 (TOOL_RESULT, 2026-05-05T15:46:20.020Z) ---
+Successfully replaced 1 block(s) in /home/quangtynu/Qcoder/qclaw/src/extensions/auto-continue-extension.ts.
+
+--- Message 321 (ASSISTANT, 2026-05-05T15:46:20.028Z) ---
+ôi vừa thay thế IDLE_TIMEOUT_MS bằng IDLE_MESSAGE. Cần thêm lại constant timeout. Sửa lại:
+</think>
+Oops, tôi vừa thay thế cả timeout. Sửa lại đúng cả hai:
+[toolCall]
+
+--- Message 322 (TOOL_RESULT, 2026-05-05T15:46:35.712Z) ---
+Successfully wrote 1993 bytes to /home/quangtynu/Qcoder/qclaw/src/extensions/auto-continue-extension.ts
+
+--- Message 323 (ASSISTANT, 2026-05-05T15:46:35.718Z) ---
+ờ typecheck và build nhé.
+</think>
+
+[toolCall]
+
+--- Message 324 (TOOL_RESULT, 2026-05-05T15:46:53.370Z) ---
+
+> piclaw@0.0.1 typecheck
+> tsc --noEmit
+
+✅ Typecheck OK
+
+
 --- AVAILABLE TOOLS (8) ---
 • read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
   Parameters: {
@@ -7490,4 +7570,4 @@ Example: {"subtool":"bash","args":{"command":"echo hello"}}
   ]
 }
 
-=== END CONTEXT LOG (2026-05-05T15:41:59.817Z) ===
+=== END CONTEXT LOG (2026-05-05T15:46:53.374Z) ===
