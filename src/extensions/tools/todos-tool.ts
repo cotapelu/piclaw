@@ -72,20 +72,13 @@ const InputPhase = Type.Object({
   tasks: Type.Optional(Type.Array(InputTask)),
 });
 
-const ReplaceOp = Type.Object({ phases: Type.Array(InputPhase) });
-const AddPhaseOp = Type.Object({ name: Type.String(), tasks: Type.Optional(Type.Array(InputTask)) });
-const AddTaskOp = Type.Object({ phase: Type.String(), content: Type.String(), notes: Type.Optional(Type.String()), details: Type.Optional(Type.String()) });
-const UpdateOp = Type.Object({ id: Type.String(), status: Type.Optional(StatusEnum), content: Type.Optional(Type.String()), notes: Type.Optional(Type.String()), details: Type.Optional(Type.String()) });
-const RemoveTaskOp = Type.Object({ id: Type.String() });
-const ListOp = Type.Object({});
-
 const todoWriteSchema = Type.Object({
-  replace: Type.Optional(ReplaceOp),
-  add_phase: Type.Optional(AddPhaseOp),
-  add_task: Type.Optional(AddTaskOp),
-  update: Type.Optional(UpdateOp),
-  remove_task: Type.Optional(RemoveTaskOp),
-  list: Type.Optional(ListOp),
+  replace: Type.Optional(Type.String()),
+  add_phase: Type.Optional(Type.String()),
+  add_task: Type.Optional(Type.String()),
+  update: Type.Optional(Type.String()),
+  remove_task: Type.Optional(Type.String()),
+  list: Type.Optional(Type.String()),
 });
 
 type TodoWriteParams = Static<typeof todoWriteSchema>;
@@ -147,6 +140,7 @@ function buildPhaseFromInput(input: { name: string; tasks?: any[] }, phaseId: st
 // ============================================================================
 
 function normalizeParams(params: any): any {
+  // Handle string input (JSON string)
   if (typeof params === "string") {
     try { params = JSON.parse(params); } catch (e) {
       throw new Error(`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`);
@@ -158,7 +152,7 @@ function normalizeParams(params: any): any {
 
   const p = { ...params };
 
-  // Parse stringified objects
+  // Parse stringified operation values
   if (p.add_phase && typeof p.add_phase === "string") {
     try { p.add_phase = JSON.parse(p.add_phase); } catch { p.add_phase = null; }
   }
@@ -556,8 +550,8 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
         return { content: [{ type: "text", text: `❌ Error: ${msg}` }], details: { phases: state.getPhases(), storage: "file", error: msg }, isError: true };
       }
 
-      // Normalize - handle malformed LLM output
-      p = normalizeParams(p);
+      // Normalize - parse JSON strings
+p = normalizeParams(p);
 
       // Check for multiple operations
       const definedOps: string[] = [];
