@@ -16,6 +16,12 @@ import { validateApiKeys, ensurePiclawExtensionRegistered } from "./helpers.js";
 import { getAgentDir } from "./config/config.js";
 import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 
 async function main(args: string[] = process.argv.slice(2)): Promise<void> {
   let config: any = undefined;
@@ -75,9 +81,6 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     process.exit(1);
   }
 }
-
-// Import join for extensionPath calculation
-import { join } from "node:path";
 
 // Export for programmatic usage (e.g., tests)
 export { main };
