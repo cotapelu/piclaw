@@ -13,6 +13,7 @@ export interface Options {
   model?: string;
   thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
   verbose?: boolean;
+  contextLogFile?: string;
 }
 
 export interface PiclawConfig {
@@ -21,6 +22,7 @@ export interface PiclawConfig {
   tools?: string[];
   sessionDir?: string;
   verbose?: boolean;
+  contextLogFile?: string;
 }
 
 /**
@@ -50,6 +52,10 @@ export function parseOptions(args: string[]): { opts: Options; cliOverrides: Pic
       opts.thinking = args[++i] as any;
       cliOverrides.thinking = opts.thinking;
     }
+    if (args[i] === "--contextLogFile" && args[i + 1]) {
+      opts.contextLogFile = args[++i];
+      cliOverrides.contextLogFile = opts.contextLogFile;
+    }
     if (args[i] === "--verbose") {
       opts.verbose = true;
       cliOverrides.verbose = true;
@@ -71,12 +77,13 @@ function printHelp(): void {
 Piclaw CLI - AI Coding Assistant
 
 Options:
-  --cwd <path>       Working directory (default: process.cwd())
-  --tools <list>     Comma-separated tool allowlist
-  --sessionDir <dir> Session directory
-  --model <id>       Model to use (e.g., anthropic:claude-opus-4-5)
-  --thinking <level> Thinking level: off|minimal|low|medium|high|xhigh
-  --verbose          Show detailed logs
-  -h, --help         Show this help
+  --cwd <path>         Working directory (default: process.cwd())
+  --tools <list>       Comma-separated tool allowlist
+  --sessionDir <dir>   Session directory
+  --model <id>         Model to use (e.g., anthropic:claude-opus-4-5)
+  --thinking <level>   Thinking level: off|minimal|low|medium|high|xhigh
+  --contextLogFile <p> Log LLM context to file (for debugging)
+  --verbose            Show detailed logs
+  -h, --help           Show this help
 `);
 }

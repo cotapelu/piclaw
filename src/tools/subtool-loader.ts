@@ -228,17 +228,19 @@ async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, c
 
 /**
  * Creates the subtool_loader tool definition.
+ *
+ * OPTIMIZATION: Use Union of Literal strings instead of Union of Objects.
+ * This reduces the JSON Schema from ~4000+ lines to ~15 lines.
  */
 export function createSubLoaderToolDefinition(cwd: string) {
-  // Build schema from all sub-tool names
-  const schema = Type.Union(
-    subToolNames.map((name) =>
-      Type.Object({
-        subtool: Type.Literal(name),
-        args: Type.Any(),
-      })
-    )
-  );
+  // Schema: { subtool: "tool1" | "tool2" | ..., args: any }
+  // Much more compact than Union of Objects!
+  const schema = Type.Object({
+    subtool: Type.Union(
+      subToolNames.map((name) => Type.Literal(name))
+    ),
+    args: Type.Any(),
+  });
 
   const description = `⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.\nOnly use in trusted environments with controlled inputs.\n\n` +
     `Unified tool for system operations.\n\n` +

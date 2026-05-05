@@ -50,6 +50,7 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
       model: config.model,
       thinking: config.thinking,
       verbose: config.verbose,
+      contextLogFile: config.contextLogFile ?? opts.contextLogFile,
     });
 
     // 6. Run interactive TUI mode

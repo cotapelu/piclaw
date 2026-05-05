@@ -2,39 +2,54 @@
   "version": 1,
   "phases": [
     {
-      "id": "phase-1",
-      "name": "Giai đoạn Test",
+      "id": "phase-8",
+      "name": "Context Logger Implementation",
       "tasks": [
         {
-          "id": "task-1",
-          "content": "Test công cụ todos",
+          "id": "task-29",
+          "content": "Create context-logger.ts utility for writing LLM context to file",
           "status": "completed"
         },
         {
-          "id": "task-3",
-          "content": "Cập nhật task",
+          "id": "task-30",
+          "content": "Add contextLogFile option to PiclawCoreOptions",
+          "status": "completed"
+        },
+        {
+          "id": "task-31",
+          "content": "Wrap agent.streamFn in bootPiclaw to log context before sending",
+          "status": "completed"
+        },
+        {
+          "id": "task-32",
+          "content": "Add CLI/config support for contextLogFile",
           "status": "in_progress"
         },
         {
-          "id": "task-4",
-          "content": "Kiểm tra thêm task mới vào phase",
+          "id": "task-33",
+          "content": "Test the logging feature manually",
           "status": "pending"
         }
       ]
     },
     {
-      "id": "phase-2",
-      "name": "Giai đoạn Test 2",
+      "id": "phase-9",
+      "name": "Fix context logger - tối ưu schema",
       "tasks": [
         {
-          "id": "task-5",
-          "content": "Task trong phase 2",
-          "status": "pending"
+          "id": "task-34",
+          "content": "Tối ưu schema trong subtool-loader.ts - thay Union object bằng Union literal",
+          "status": "completed"
+        },
+        {
+          "id": "task-35",
+          "content": "Tối ưu context-logger.ts - không dump full JSON schema",
+          "status": "completed"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
-  "nextPhaseId": 3,
-  "updatedAt": "2026-05-05T04:30:09.431Z"
+  "nextTaskId": 36,
+  "nextPhaseId": 10,
+  "updatedAt": "2026-05-05T07:52:40.062Z"
 }

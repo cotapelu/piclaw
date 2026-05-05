@@ -17,8 +17,10 @@ import {
   type SessionStartEvent,
 } from "@mariozechner/pi-coding-agent";
 import { getAgentDir } from "./config/config.js";
+import { getDefaultContextLogFile } from "./config/config-manager.js";
 import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
 import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createContextLoggingStreamFn } from "./context-logger.js";
 
 export interface PiclawCoreOptions {
   /** Working directory (default: process.cwd()) */
@@ -37,6 +39,8 @@ export interface PiclawCoreOptions {
   thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
   /** Verbose logging */
   verbose?: boolean;
+  /** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
+  contextLogFile?: string;
 }
 
 /**
@@ -54,6 +58,8 @@ export interface PiclawCoreOptions {
 export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
   const cwd = options.cwd ?? process.cwd();
   const agentDir = options.agentDir ?? getAgentDir();
+  // Default context log file if not specified
+  const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
 
   // 1. Create cwd-bound services
   const services: AgentSessionServices = await createAgentSessionServices({
@@ -106,7 +112,13 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     };
   };
 
-  // 5. Create runtime
+  // 5. Wrap streamFn with context logging if enabled
+  if (contextLogFile) {
+    const originalStreamFn = sessionResult.session.agent.streamFn;
+    sessionResult.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
+  }
+
+  // 6. Create runtime
   const runtime = new AgentSessionRuntime(
     sessionResult.session,
     services,

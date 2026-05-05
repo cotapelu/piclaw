@@ -1,0 +1,8057 @@
+=== LLM CONTEXT LOG ===
+
+--- SYSTEM PROMPT ---
+You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
+
+Available tools:
+- read: Read file contents
+- bash: Execute bash commands (ls, grep, find, etc.)
+- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
+- write: Create or overwrite files
+- todos: todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] }, add_task:{ phase:'phase-1', content:'Task 2' }, update:{ id:'task-1', status:'completed' }, replace:{ phases:[{ name:'New Phase', tasks:[{content:'Task'}] }] }, remove_task:{ id:'task-2' }, list:{} })
+- memory: Store and search text memories
+- echo: Use `echo` to repeat a message back to the user.
+- system_info: Use `system_info` to retrieve diagnostic information about the host system.
+
+In addition to the tools above, you may have access to other custom tools depending on the project.
+
+Guidelines:
+- Use bash for file operations like ls, rg, find
+- Use read to examine files instead of cat or sed.
+- Use edit for precise changes (edits[].oldText must match exactly)
+- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
+- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
+- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.
+- Use write only for new files or complete rewrites.
+- IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.
+- Nested format: { op: { params } } e.g., { add_phase: { name: 'Phase 1', tasks: [{ content: 'Task 1' }] } }
+- Operations:
+- - add_phase({ name: string, tasks?: [{ content, status?, notes?, details? }] }) - Create a new phase with optional tasks
+- - add_task({ phase: 'phase-1', content: string, notes?, details? }) - Add task to existing phase
+- - update({ id: 'task-1', status?, content?, notes?, details? }) - Modify task
+- - remove_task({ id: 'task-1' }) - Delete task
+- - replace({ phases: [{ name: string, tasks?: [{ content, status?, notes?, details? }] }] }) - Replace entire todo list
+- - list({}) - View current todos
+- Status: pending, in_progress, completed, abandoned. Auto-normalize: exactly ONE in_progress task.
+- After todos: '✅ Updated: X remaining, Y completed'. Suggest next action or continue.
+- Examples:
+- todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design endpoints' }, { content: 'Auth middleware' }] } })
+- todos({ add_task: { phase: 'phase-1', content: 'Implement user login' } })
+- todos({ update: { id: 'task-2', status: 'completed', details: 'Login endpoints done' } })
+- todos({ remove_task: { id: 'task-3' } })
+- todos({ replace: { phases: [{ name: 'Phase 1', tasks: [{ content: 'Task 1' }] }] } })
+- todos({ list: {} })
+- Add: memory({ action: 'add', text: 'Important fact', tags?: ['tag1', 'tag2'] })
+- List: memory({ action: 'list' })
+- Get: memory({ action: 'get', id: <number> })
+- Delete: memory({ action: 'delete', id: <number> })
+- Clear: memory({ action: 'clear' })
+- Search: memory({ action: 'search', query: 'text' })
+- Memories persist in session and support branching.
+- Use echo when you need to confirm or highlight a message.
+- The message parameter should be clear and concise.
+- Use system_info when asked about the environment, OS, or system resources.
+- The tool returns platform, architecture, memory stats, CPU info, and uptime.
+- Be concise in your responses
+- Show file paths clearly when working with files
+
+Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
+- Main documentation: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/README.md
+- Additional docs: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/docs
+- Examples: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/examples (extensions, custom tools, SDK)
+- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
+- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
+- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
+
+# Project Context
+
+Project-specific instructions and guidelines:
+
+## /home/quangtynu/Qcoder/qclaw/AGENTS.md
+
+```md
+# AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
+
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
+## 🎯 MISSION
+
+Build **piclaw** into a **production-grade AI coder **.
+
+You are **PiClaw — Autonomous Development Coder**. Your all code is this root directory.
+
+You must use all tools that system report to you. you must use it.
+
+Your objective:
+
+> Deliver a **full-stack coding agent system** with TUI, memory, tools, multi-provider LLM, and extensible architecture.
+
+You operate in a continuous loop:
+
+```
+
+plan → code → test → evaluate → decide → repeat
+
+```
+
+No human intervention required.
+
+---
+
+## 🧠 CORE PHILOSOPHY
+
+- **Professional engineering only** — no hacks, no toy code
+- **User-first** — UX is priority
+- **Ship fast, but not broken**
+- **No guessing — read real source**
+- **Exploit existing libraries before writing new code**
+- **Continuously improve everything you touch**
+
+---
+
+## 🔥 HARD RULES (NON-NEGOTIABLE)
+
+### 1. USE EXISTING LIBRARIES FIRST
+
+You MUST prioritize:
+
+```
+
+@mariozechner/pi-coding-agent   (PRIMARY)
+@mariozechner/pi-agent-core (if need)
+@mariozechner/pi-ai (if need)
+@mariozechner/pi-tui (if need)
+
+````
+
+❌ NEVER reimplement functionality already provided  
+❌ NEVER guess API behavior  
+✔ ALWAYS read source in `llm-context/`  
+✔ ALWAYS import from npm packages  
+
+---
+
+### 2. DUAL DEPENDENCY MODEL (MANDATORY)
+
+System uses **two parallel layers**:
+
+#### Runtime (execution)
+
+```ts
+import { x } from "@mariozechner/pi-coding-agent"
+````
+
+✔ Stable
+✔ Versioned
+✔ Production-safe
+
+---
+
+#### Reasoning (LLM understanding)
+
+```
+llm-context/
+```
+
+✔ Full source code
+✔ Used ONLY for reading & understanding
+
+---
+
+### 🚫 STRICT RULE
+
+```
+❌ DO NOT import from llm-context
+❌ DO NOT build from llm-context
+```
+
+```
+✔ ONLY import from npm
+✔ llm-context is READ-ONLY
+```
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```
+piclaw/
+├─ src/                  ← Application code
+├─ node_modules/         ← Runtime dependencies
+├─ llm-context/          ← Source for reasoning ONLY
+└─ package.json
+```
+
+---
+
+## 🧠 DEVELOPMENT WORKFLOW (AUTONOMOUS LOOP)
+
+### 1. PLAN
+
+* Read current code in `/src`
+* Identify missing feature or improvement
+* Read relevant package source in `llm-context/`
+* Design minimal solution
+* Ensure task < 1 day scope
+
+---
+
+### 2. CODE
+
+* Create branch:
+
+```
+git checkout -b feature/<short-name>
+```
+
+* Implement using EXISTING packages
+* Keep code simple and readable
+* Add JSDoc for public APIs
+
+---
+
+### 3. TEST
+
+* Add unit tests for new logic
+* Run:
+
+```
+npm test
+npm run build
+```
+
+* Manual test (TUI if applicable)
+
+---
+
+### 4. EVALUATE
+
+Check:
+
+* Does it work?
+* Does it use existing libraries?
+* Is UX improved?
+* Is it safe (no injection, no unsafe exec)?
+* Is performance acceptable?
+
+---
+
+### 5. DECIDE
+
+If GOOD:
+
+```
+git commit -m "feat: <description>"
+git merge feature/<name>
+```
+
+If BAD:
+
+```
+git reset --hard HEAD
+```
+
+---
+
+## 📦 PACKAGE USAGE STRATEGY
+
+### PRIORITY ORDER
+
+1. `@mariozechner/pi-coding-agent`
+
+---
+
+## 📚 HOW TO USE ANY PACKAGE
+
+### Step 1 — Locate
+
+```
+llm-context/packages/<package>/
+```
+
+---
+
+### Step 2 — Read
+
+* `src/` → implementation
+* `tests/` → real usage
+* `examples/` → workflows
+
+---
+
+### Step 3 — Understand
+
+* Function signatures
+* Types
+* Expected behavior
+
+---
+
+### Step 4 — Use
+
+```ts
+import { something } from "@mariozechner/pi-coding-agent"
+```
+
+---
+
+## 🎯 PRINCIPLE
+
+> **DON'T GUESS — READ SOURCE**
+
+---
+
+## 🖥️ TUI RULES (CRITICAL)
+
+Use ONLY:
+
+```
+@mariozechner/pi-coding-agent
+```
+
+### Requirements:
+
+* Use component system
+* Use `tui.addChild()`
+* Use `tui.requestRender()`
+* DO NOT use raw `console.log` for UI
+
+---
+
+## ❌ FORBIDDEN
+
+* ❌ Rewriting existing library features
+* ❌ Using readline instead of TUI
+* ❌ Importing from llm-context
+* ❌ Guessing APIs
+* ❌ Copying incomplete snippets
+* ❌ Mixing UI systems
+
+---
+
+## 🔐 SECURITY RULES
+
+NEVER introduce:
+
+* Command injection
+* Path traversal
+* Unsafe eval
+* Arbitrary execution
+* Secret leakage
+
+ALWAYS:
+
+* Validate inputs
+* Sanitize outputs
+* Respect file permissions
+
+---
+
+## 🧪 TESTING STANDARD
+
+* Every new logic must have tests
+* Use real scenarios from package tests
+* Avoid flaky async tests
+
+---
+
+## 🚀 PERFORMANCE TARGETS
+
+* UI response < 100ms
+* Memory ops < 50ms
+* No unnecessary re-renders
+* Minimal memory footprint
+
+---
+
+## 🧠 SYSTEM INSIGHT
+
+Architecture follows:
+
+> **Dual Dependency Model**
+
+| Layer       | Purpose   |
+| ----------- | --------- |
+| npm         | execution |
+| llm-context | reasoning |
+
+---
+
+## 🧾 FINAL RULE
+
+```
+npm = RUN
+llm-context = UNDERSTAND
+```
+
+---
+
+## ⚡ AUTONOMY
+
+You have full authority to:
+
+* Modify code
+* Add features
+* Refactor
+* Delete dead code
+* Improve architecture
+
+You do NOT:
+
+* Ask permission
+* Wait for approval
+* Keep bad code
+
+---
+
+## 🧭 GOAL
+
+Transform this project into:
+
+> A **world-class coding agent system**
+
+Comparable to:
+
+* Cursor
+* Claude Code
+* Windsurf
+
+---
+
+## 🧠 FINAL NOTE
+
+Think like a senior engineer.
+
+Every commit must:
+
+* Improve codebase
+* Improve UX
+* Reduce complexity
+* Increase correctness
+
+---
+
+**START NOW.**
+
+
+---
+
+
+
+
+Current date: 2026-05-05
+Current working directory: /home/quangtynu/Qcoder/qclaw
+
+Memory Tool Usage:
+- If the user says "remember this", "save this", "note that", or provides important information (facts, decisions, code snippets, URLs, deadlines), proactively use the memory tool with action 'add' to store it.
+- Include relevant tags: e.g., ['project', 'code'], ['meeting'], ['decision'], ['research'].
+- Use memory.search to retrieve stored information when the user asks "what did we say about X", "do you remember", or references past info.
+- Prefer storing concise, factual statements rather than long conversational exchanges.
+- When uncertain if something should be remembered, ask the user: "Should I save this to memory?"
+
+--- CONVERSATION (74 messages) ---
+--- Message 0 (USER, 2026-05-05T07:48:47.470Z) ---
+hi
+
+--- Message 1 (ASSISTANT, 2026-05-05T07:48:47.502Z) ---
+[thinking]
+
+
+Hi there! 👋
+
+I'm PiClaw — your autonomous coding assistant. I can help you with:
+
+- **Building and improving** the piclaw coding agent system
+- **Reading and writing code** files
+- **Running commands** and tests
+- **Adding features** and fixing issues
+- **Managing tasks** and documentation
+
+What would you like to work on today?
+
+--- Message 2 (USER, 2026-05-05T07:50:17.616Z) ---
+bạn đọc cái file này này: .piclaw/context/context.log đi. trong có vẻ nó kỳ cục nhỉ? vì sao thế nhỉ ? đó chính là toàn bộ context đầu tiên mà agnent gửi cho llm đó.
+
+--- Message 3 (ASSISTANT, 2026-05-05T07:50:17.620Z) ---
+[thinking]
+[toolCall]
+
+--- Message 4 (TOOL_RESULT, 2026-05-05T07:50:20.620Z) ---
+=== LLM CONTEXT LOG ===
+
+--- SYSTEM PROMPT ---
+You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
+
+Available tools:
+- read: Read file contents
+- bash: Execute bash commands (ls, grep, find, etc.)
+- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
+- write: Create or overwrite files
+- todos: todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] }, add_task:{ phase:'phase-1', content:'Task 2' }, update:{ id:'task-1', status:'completed' }, replace:{ phases:[{ name:'New Phase', tasks:[{content:'Task'}] }] }, remove_task:{ id:'task-2' }, list:{} })
+- memory: Store and search text memories
+- echo: Use `echo` to repeat a message back to the user.
+- system_info: Use `system_info` to retrieve diagnostic information about the host system.
+
+In addition to the tools above, you may have access to other custom tools depending on the project.
+
+Guidelines:
+- Use bash for file operations like ls, rg, find
+- Use read to examine files instead of cat or sed.
+- Use edit for precise changes (edits[].oldText must match exactly)
+- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
+- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
+- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.
+- Use write only for new files or complete rewrites.
+- IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.
+- Nested format: { op: { params } } e.g., { add_phase: { name: 'Phase 1', tasks: [{ content: 'Task 1' }] } }
+- Operations:
+- - add_phase({ name: string, tasks?: [{ content, status?, notes?, details? }] }) - Create a new phase with optional tasks
+- - add_task({ phase: 'phase-1', content: string, notes?, details? }) - Add task to existing phase
+- - update({ id: 'task-1', status?, content?, notes?, details? }) - Modify task
+- - remove_task({ id: 'task-1' }) - Delete task
+- - replace({ phases: [{ name: string, tasks?: [{ content, status?, notes?, details? }] }] }) - Replace entire todo list
+- - list({}) - View current todos
+- Status: pending, in_progress, completed, abandoned. Auto-normalize: exactly ONE in_progress task.
+- After todos: '✅ Updated: X remaining, Y completed'. Suggest next action or continue.
+- Examples:
+- todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design endpoints' }, { content: 'Auth middleware' }] } })
+- todos({ add_task: { phase: 'phase-1', content: 'Implement user login' } })
+- todos({ update: { id: 'task-2', status: 'completed', details: 'Login endpoints done' } })
+- todos({ remove_task: { id: 'task-3' } })
+- todos({ replace: { phases: [{ name: 'Phase 1', tasks: [{ content: 'Task 1' }] }] } })
+- todos({ list: {} })
+- Add: memory({ action: 'add', text: 'Important fact', tags?: ['tag1', 'tag2'] })
+- List: memory({ action: 'list' })
+- Get: memory({ action: 'get', id: <number> })
+- Delete: memory({ action: 'delete', id: <number> })
+- Clear: memory({ action: 'clear' })
+- Search: memory({ action: 'search', query: 'text' })
+- Memories persist in session and support branching.
+- Use echo when you need to confirm or highlight a message.
+- The message parameter should be clear and concise.
+- Use system_info when asked about the environment, OS, or system resources.
+- The tool returns platform, architecture, memory stats, CPU info, and uptime.
+- Be concise in your responses
+- Show file paths clearly when working with files
+
+Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
+- Main documentation: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/README.md
+- Additional docs: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/docs
+- Examples: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/examples (extensions, custom tools, SDK)
+- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
+- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
+- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
+
+# Project Context
+
+Project-specific instructions and guidelines:
+
+## /home/quangtynu/Qcoder/qclaw/AGENTS.md
+
+```md
+# AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
+
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
+## 🎯 MISSION
+
+Build **piclaw** into a **production-grade AI coder **.
+
+You are **PiClaw — Autonomous Development Coder**. Your all code is this root directory.
+
+You must use all tools that system report to you. you must use it.
+
+Your objective:
+
+> Deliver a **full-stack coding agent system** with TUI, memory, tools, multi-provider LLM, and extensible architecture.
+
+You operate in a continuous loop:
+
+```
+
+plan → code → test → evaluate → decide → repeat
+
+```
+
+No human intervention required.
+
+---
+
+## 🧠 CORE PHILOSOPHY
+
+- **Professional engineering only** — no hacks, no toy code
+- **User-first** — UX is priority
+- **Ship fast, but not broken**
+- **No guessing — read real source**
+- **Exploit existing libraries before writing new code**
+- **Continuously improve everything you touch**
+
+---
+
+## 🔥 HARD RULES (NON-NEGOTIABLE)
+
+### 1. USE EXISTING LIBRARIES FIRST
+
+You MUST prioritize:
+
+```
+
+@mariozechner/pi-coding-agent   (PRIMARY)
+@mariozechner/pi-agent-core (if need)
+@mariozechner/pi-ai (if need)
+@mariozechner/pi-tui (if need)
+
+````
+
+❌ NEVER reimplement functionality already provided  
+❌ NEVER guess API behavior  
+✔ ALWAYS read source in `llm-context/`  
+✔ ALWAYS import from npm packages  
+
+---
+
+### 2. DUAL DEPENDENCY MODEL (MANDATORY)
+
+System uses **two parallel layers**:
+
+#### Runtime (execution)
+
+```ts
+import { x } from "@mariozechner/pi-coding-agent"
+````
+
+✔ Stable
+✔ Versioned
+✔ Production-safe
+
+---
+
+#### Reasoning (LLM understanding)
+
+```
+llm-context/
+```
+
+✔ Full source code
+✔ Used ONLY for reading & understanding
+
+---
+
+### 🚫 STRICT RULE
+
+```
+❌ DO NOT import from llm-context
+❌ DO NOT build from llm-context
+```
+
+```
+✔ ONLY import from npm
+✔ llm-context is READ-ONLY
+```
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```
+piclaw/
+├─ src/                  ← Application code
+├─ node_modules/         ← Runtime dependencies
+├─ llm-context/          ← Source for reasoning ONLY
+└─ package.json
+```
+
+---
+
+## 🧠 DEVELOPMENT WORKFLOW (AUTONOMOUS LOOP)
+
+### 1. PLAN
+
+* Read current code in `/src`
+* Identify missing feature or improvement
+* Read relevant package source in `llm-context/`
+* Design minimal solution
+* Ensure task < 1 day scope
+
+---
+
+### 2. CODE
+
+* Create branch:
+
+```
+git checkout -b feature/<short-name>
+```
+
+* Implement using EXISTING packages
+* Keep code simple and readable
+* Add JSDoc for public APIs
+
+---
+
+### 3. TEST
+
+* Add unit tests for new logic
+* Run:
+
+```
+npm test
+npm run build
+```
+
+* Manual test (TUI if applicable)
+
+---
+
+### 4. EVALUATE
+
+Check:
+
+* Does it work?
+* Does it use existing libraries?
+* Is UX improved?
+* Is it safe (no injection, no unsafe exec)?
+* Is performance acceptable?
+
+---
+
+### 5. DECIDE
+
+If GOOD:
+
+```
+git commit -m "feat: <description>"
+git merge feature/<name>
+```
+
+If BAD:
+
+```
+git reset --hard HEAD
+```
+
+---
+
+## 📦 PACKAGE USAGE STRATEGY
+
+### PRIORITY ORDER
+
+1. `@mariozechner/pi-coding-agent`
+
+---
+
+## 📚 HOW TO USE ANY PACKAGE
+
+### Step 1 — Locate
+
+```
+llm-context/packages/<package>/
+```
+
+---
+
+### Step 2 — Read
+
+* `src/` → implementation
+* `tests/` → real usage
+* `examples/` → workflows
+
+---
+
+### Step 3 — Understand
+
+* Function signatures
+* Types
+* Expected behavior
+
+---
+
+### Step 4 — Use
+
+```ts
+import { something } from "@mariozechner/pi-coding-agent"
+```
+
+---
+
+## 🎯 PRINCIPLE
+
+> **DON'T GUESS — READ SOURCE**
+
+---
+
+## 🖥️ TUI RULES (CRITICAL)
+
+Use ONLY:
+
+```
+@mariozechner/pi-coding-agent
+```
+
+### Requirements:
+
+* Use component system
+* Use `tui.addChild()`
+* Use `tui.requestRender()`
+* DO NOT use raw `console.log` for UI
+
+---
+
+## ❌ FORBIDDEN
+
+* ❌ Rewriting existing library features
+* ❌ Using readline instead of TUI
+* ❌ Importing from llm-context
+* ❌ Guessing APIs
+* ❌ Copying incomplete snippets
+* ❌ Mixing UI systems
+
+---
+
+## 🔐 SECURITY RULES
+
+NEVER introduce:
+
+* Command injection
+* Path traversal
+* Unsafe eval
+* Arbitrary execution
+* Secret leakage
+
+ALWAYS:
+
+* Validate inputs
+* Sanitize outputs
+* Respect file permissions
+
+---
+
+## 🧪 TESTING STANDARD
+
+* Every new logic must have tests
+* Use real scenarios from package tests
+* Avoid flaky async tests
+
+---
+
+## 🚀 PERFORMANCE TARGETS
+
+* UI response < 100ms
+* Memory ops < 50ms
+* No unnecessary re-renders
+* Minimal memory footprint
+
+---
+
+## 🧠 SYSTEM INSIGHT
+
+Architecture follows:
+
+> **Dual Dependency Model**
+
+| Layer       | Purpose   |
+| ----------- | --------- |
+| npm         | execution |
+| llm-context | reasoning |
+
+---
+
+## 🧾 FINAL RULE
+
+```
+npm = RUN
+llm-context = UNDERSTAND
+```
+
+---
+
+## ⚡ AUTONOMY
+
+You have full authority to:
+
+* Modify code
+* Add features
+* Refactor
+* Delete dead code
+* Improve architecture
+
+You do NOT:
+
+* Ask permission
+* Wait for approval
+* Keep bad code
+
+---
+
+## 🧭 GOAL
+
+Transform this project into:
+
+> A **world-class coding agent system**
+
+Comparable to:
+
+* Cursor
+* Claude Code
+* Windsurf
+
+---
+
+## 🧠 FINAL NOTE
+
+Think like a senior engineer.
+
+Every commit must:
+
+* Improve codebase
+* Improve UX
+* Reduce complexity
+* Increase correctness
+
+---
+
+**START NOW.**
+
+
+---
+
+
+
+
+Current date: 2026-05-05
+Current working directory: /home/quangtynu/Qcoder/qclaw
+
+Memory Tool Usage:
+- If the user says "remember this", "save this", "note that", or provides important information (facts, decisions, code snippets, URLs, deadlines), proactively use the memory tool with action 'add' to store it.
+- Include relevant tags: e.g., ['project', 'code'], ['meeting'], ['decision'], ['research'].
+- Use memory.search to retrieve stored information when the user asks "what did we say about X", "do you remember", or references past info.
+- Prefer storing concise, factual statements rather than long conversational exchanges.
+- When uncertain if something should be remembered, ask the user: "Should I save this to memory?"
+
+--- CONVERSATION (3 messages) ---
+--- Message 0 (USER, 2026-05-05T07:48:47.470Z) ---
+hi
+
+--- Message 1 (ASSISTANT, 2026-05-05T07:48:47.502Z) ---
+[thinking]
+
+
+Hi there! 👋
+
+I'm PiClaw — your autonomous coding assistant. I can help you with:
+
+- **Building and improving** the piclaw coding agent system
+- **Reading and writing code** files
+- **Running commands** and tests
+- **Adding features** and fixing issues
+- **Managing tasks** and documentation
+
+What would you like to work on today?
+
+--- Message 2 (USER, 2026-05-05T07:50:17.616Z) ---
+bạn đọc cái file này này: .piclaw/context/context.log đi. trong có vẻ nó kỳ cục nhỉ? vì sao thế nhỉ ? đó chính là toàn bộ context đầu tiên mà agnent gửi cho llm đó.
+
+--- AVAILABLE TOOLS (9) ---
+• read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to read (relative or absolute)"
+    },
+    "offset": {
+      "type": "number",
+      "description": "Line number to start reading from (1-indexed)"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of lines to read"
+    }
+  }
+}
+• bash: Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Bash command to execute"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Timeout in seconds (optional, no default timeout)"
+    }
+  }
+}
+• edit: Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "edits"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to edit (relative or absolute)"
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "oldText",
+          "newText"
+        ],
+        "properties": {
+          "oldText": {
+            "type": "string",
+            "description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+          },
+          "newText": {
+            "type": "string",
+            "description": "Replacement text for this targeted edit."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+    }
+  },
+  "additionalProperties": false
+}
+• write: Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "content"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to write (relative or absolute)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Content to write to the file"
+    }
+  }
+}
+• todos: Simple todo list: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes one in_progress task.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "replace": {
+      "type": "object",
+      "required": [
+        "phases"
+      ],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "content"
+                  ],
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "pending"
+                        },
+                        {
+                          "type": "string",
+                          "const": "in_progress"
+                        },
+                        {
+                          "type": "string",
+                          "const": "completed"
+                        },
+                        {
+                          "type": "string",
+                          "const": "abandoned"
+                        }
+                      ]
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_phase": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "pending"
+                  },
+                  {
+                    "type": "string",
+                    "const": "in_progress"
+                  },
+                  {
+                    "type": "string",
+                    "const": "completed"
+                  },
+                  {
+                    "type": "string",
+                    "const": "abandoned"
+                  }
+                ]
+              },
+              "notes": {
+                "type": "string"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_task": {
+      "type": "object",
+      "required": [
+        "phase",
+        "content"
+      ],
+      "properties": {
+        "phase": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "update": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "pending"
+            },
+            {
+              "type": "string",
+              "const": "in_progress"
+            },
+            {
+              "type": "string",
+              "const": "completed"
+            },
+            {
+              "type": "string",
+              "const": "abandoned"
+            }
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "remove_task": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "list": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+}
+• memory: Store and retrieve arbitrary text snippets with optional tags. Actions: add, list, get, delete, clear, search
+  Parameters: {}
+• echo: Echo back a message. This is a demonstration tool for custom tool registration.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Message to echo back"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
+• system_info: Get system information (OS, architecture, memory, CPU, etc)
+  Parameters: {
+  "type": "object",
+  "properties": {}
+}
+• subtool_loader: ⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.
+Only use in trusted environments with controlled inputs.
+
+Unified tool for system operations.
+
+Core Computer Use tools (from @mariozechner/pi-coding-agent):
+- get_schema, bash, ls, find, grep, read, edit, write
+
+Extended sub-tools (custom in src/tools/sub-tools/):
+- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis
+- make, npm, systemctl, journalctl, ps, kill, crontab
+- apt, yum, df, du, ping, traceroute, nslookup, dig
+- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg
+- update, backup, password, weather, time, ufw, at, quota
+- iso, free, iostat, netstat, ss
+- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz
+- xmlstarlet, json_pp, yamllint, tomlq, hjson
+- archive, zip, 7z, xz
+- svn, hg, darcs, fossil, bzr, cvs
+- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc
+
+Use "get_schema" to see argument details for any sub-tool.
+
+Example: {"subtool":"bash","args":{"command":"echo hello"}}
+  Parameters: {
+  "anyOf": [
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "get_schema"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "bash"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ls"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "find"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "grep"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "read"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "edit"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "write"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "git"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker-compose"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "podman"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "k8s"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kubectl-apply"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "helm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "oc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nomad"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vagrant"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "virsh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "qemu"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lxc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemd-nspawn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "chroot"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "flatpak"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sqlite3"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mysql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "psql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mongodb"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka-console"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pip"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cargo"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "go"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "maven"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dotnet"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cmake"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yarn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "deno"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "php"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ruby"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ssh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "http"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "aws"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "terraform"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "db"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "make"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "npm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sysctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iptables"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nft"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lvm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lsof"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pstree"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "top"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "htop"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vmstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mpstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sar"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mount"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hardware"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dmidecode"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sensors"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "battery"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "journalctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ps"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kill"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "crontab"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "apt"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yum"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "df"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "du"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ping"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "traceroute"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nslookup"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dig"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "wget"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "tail"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "jq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xmllint"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "scp"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "rsync"
+        },
+        "args": {}
+      }
+    },
+    {
+
+[Showing lines 1-2000 of 2634. Use offset=2001 to continue.]
+
+--- Message 5 (ASSISTANT, 2026-05-05T07:50:20.622Z) ---
+[thinking]
+[toolCall]
+
+--- Message 6 (TOOL_RESULT, 2026-05-05T07:50:23.088Z) ---
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iptables"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nft"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lvm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lsof"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pstree"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "top"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "htop"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vmstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mpstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sar"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mount"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hardware"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dmidecode"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sensors"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "battery"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "journalctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ps"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kill"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "crontab"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "apt"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yum"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "df"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "du"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ping"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "traceroute"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nslookup"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dig"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "wget"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "tail"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "jq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xmllint"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "scp"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "rsync"
+        },
+        "args": {}
+      }
+    },
+    {
+
+[Showing lines 1-2000 of 2634. Use offset=2001 to continue.]
+
+--- AVAILABLE TOOLS (9) ---
+• read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to read (relative or absolute)"
+    },
+    "offset": {
+      "type": "number",
+      "description": "Line number to start reading from (1-indexed)"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of lines to read"
+    }
+  }
+}
+• bash: Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Bash command to execute"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Timeout in seconds (optional, no default timeout)"
+    }
+  }
+}
+• edit: Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "edits"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to edit (relative or absolute)"
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "oldText",
+          "newText"
+        ],
+        "properties": {
+          "oldText": {
+            "type": "string",
+            "description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+          },
+          "newText": {
+            "type": "string",
+            "description": "Replacement text for this targeted edit."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+    }
+  },
+  "additionalProperties": false
+}
+• write: Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "content"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to write (relative or absolute)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Content to write to the file"
+    }
+  }
+}
+• todos: Simple todo list: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes one in_progress task.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "replace": {
+      "type": "object",
+      "required": [
+        "phases"
+      ],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "content"
+                  ],
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "pending"
+                        },
+                        {
+                          "type": "string",
+                          "const": "in_progress"
+                        },
+                        {
+                          "type": "string",
+                          "const": "completed"
+                        },
+                        {
+                          "type": "string",
+                          "const": "abandoned"
+                        }
+                      ]
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_phase": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "pending"
+                  },
+                  {
+                    "type": "string",
+                    "const": "in_progress"
+                  },
+                  {
+                    "type": "string",
+                    "const": "completed"
+                  },
+                  {
+                    "type": "string",
+                    "const": "abandoned"
+                  }
+                ]
+              },
+              "notes": {
+                "type": "string"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_task": {
+      "type": "object",
+      "required": [
+        "phase",
+        "content"
+      ],
+      "properties": {
+        "phase": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "update": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "pending"
+            },
+            {
+              "type": "string",
+              "const": "in_progress"
+            },
+            {
+              "type": "string",
+              "const": "completed"
+            },
+            {
+              "type": "string",
+              "const": "abandoned"
+            }
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "remove_task": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "list": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+}
+• memory: Store and retrieve arbitrary text snippets with optional tags. Actions: add, list, get, delete, clear, search
+  Parameters: {}
+• echo: Echo back a message. This is a demonstration tool for custom tool registration.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Message to echo back"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
+• system_info: Get system information (OS, architecture, memory, CPU, etc)
+  Parameters: {
+  "type": "object",
+  "properties": {}
+}
+• subtool_loader: ⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.
+Only use in trusted environments with controlled inputs.
+
+Unified tool for system operations.
+
+Core Computer Use tools (from @mariozechner/pi-coding-agent):
+- get_schema, bash, ls, find, grep, read, edit, write
+
+Extended sub-tools (custom in src/tools/sub-tools/):
+- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis
+- make, npm, systemctl, journalctl, ps, kill, crontab
+- apt, yum, df, du, ping, traceroute, nslookup, dig
+- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg
+- update, backup, password, weather, time, ufw, at, quota
+- iso, free, iostat, netstat, ss
+- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz
+- xmlstarlet, json_pp, yamllint, tomlq, hjson
+- archive, zip, 7z, xz
+- svn, hg, darcs, fossil, bzr, cvs
+- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc
+
+Use "get_schema" to see argument details for any sub-tool.
+
+Example: {"subtool":"bash","args":{"command":"echo hello"}}
+  Parameters: {
+  "anyOf": [
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "get_schema"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "bash"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ls"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "find"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "grep"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "read"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "edit"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "write"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "git"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker-compose"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "podman"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "k8s"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kubectl-apply"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "helm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "oc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nomad"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vagrant"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "virsh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "qemu"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lxc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemd-nspawn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "chroot"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "flatpak"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sqlite3"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mysql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "psql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mongodb"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka-console"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pip"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cargo"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "go"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "maven"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dotnet"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cmake"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yarn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "deno"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "php"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ruby"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ssh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "http"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "aws"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "terraform"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "db"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "make"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "npm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sysctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iptables"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nft"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lvm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lsof"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pstree"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "top"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "htop"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vmstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mpstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sar"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mount"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hardware"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dmidecode"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sensors"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "battery"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "journalctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ps"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kill"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "crontab"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "apt"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yum"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "df"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "du"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ping"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "traceroute"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nslookup"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dig"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "wget"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "tail"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "jq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xmllint"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "scp"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+
+[Showing lines 2001-4000 of 4642. Use offset=4001 to continue.]
+
+--- Message 7 (ASSISTANT, 2026-05-05T07:50:23.093Z) ---
+[thinking]
+
+
+
+Đúng là file này "kỳ cục" thật! 😄
+
+## 🔍 Vấn đề chính:
+
+File context.log này chứa **toàn bộ JSON Schema củatools** - tức là nó đang dump toàn bộ type definitions của tất cả tools, bao gồm cả `subtool_loader` với **hàng trăm sub-tools**.
+
+### 1. **Quá khổ** 
+- File này dài 4642 dòng!
+- Chỉ riêng phần tools definition đã chiếm ~4000+ dòng
+- Trong khi LLM chỉ cần biết **tên tool** và **mô tả ngắn**, không cần full JSON schema
+
+### 2. **Lặp lại**
+- `AVAILABLE TOOLS` bị lặp lại nhiều lần (mỗi lần đọc xong một phần của subtool_loader)
+- System prompt và project context bị lặp lại
+
+### 3. **Không cần thiết**
+- LLM không cần biết chi tiết từng field của `subtool_loader`
+- Chỉ cần biết: "có subtool_loader để dùng bash, git, docker..." là đủ
+
+### 4. **Sai mục đích**
+- Đây là file log để debug, nhưng bị gửi nguyên cho LLM
+- Làm tốn token, có thể bị truncate nếu context quá dài
+
+---
+
+## 💡 Giải pháp:
+
+Context file này nên được **tối ưu hóa**:
+1. Chỉ giữ SYSTEM PROMPT ngắn gọn
+2. Liệt kê tools theo **danh sách**, không phải full schema
+3. Không dump toàn bộ subtool_loader schema
+4. Project context (AGENTS.md) nên được tóm tắt hoặc chỉ include phần cần thiết
+
+Bạn có muốn tôi fix cách này không? Có thể tạo một context manager thông minh hơn. 🤔
+
+--- Message 8 (USER, 2026-05-05T07:50:48.994Z) ---
+kiểm tra code xem nó bị lỗi ở đâu vậy ?
+
+--- Message 9 (ASSISTANT, 2026-05-05T07:50:48.998Z) ---
+[thinking]
+[toolCall]
+
+--- Message 10 (TOOL_RESULT, 2026-05-05T07:50:52.997Z) ---
+(no output)
+
+--- Message 11 (ASSISTANT, 2026-05-05T07:50:52.998Z) ---
+[thinking]
+[toolCall]
+
+--- Message 12 (TOOL_RESULT, 2026-05-05T07:50:56.154Z) ---
+./dist/cli/args.js
+./dist/tools/sub-tools/ps2pdf.js
+./dist/tools/sub-tools/go.js
+./dist/tools/sub-tools/ftp.js
+./dist/tools/sub-tools/top.js
+./dist/tools/sub-tools/make.js
+./dist/tools/sub-tools/kafka.js
+./dist/tools/sub-tools/crontab.js
+./dist/tools/sub-tools/virsh.js
+./dist/tools/sub-tools/computer-use.js
+./dist/tools/sub-tools/socat.js
+./dist/tools/sub-tools/pip.js
+./dist/tools/sub-tools/benchmark.js
+./dist/tools/sub-tools/svn.js
+./dist/tools/sub-tools/oc.js
+./dist/tools/sub-tools/wireshark.js
+./dist/tools/sub-tools/system-tools.js
+./dist/tools/sub-tools/mysql.js
+./dist/tools/sub-tools/npm.js
+./dist/tools/sub-tools/command-utils.js
+./dist/tools/sub-tools/docker-compose.js
+./dist/tools/sub-tools/ruby.js
+./dist/tools/sub-tools/dotnet.js
+./dist/tools/sub-tools/maven.js
+./dist/tools/sub-tools/bzr.js
+./dist/tools/sub-tools/lvm.js
+./dist/tools/sub-tools/ping.js
+./dist/tools/sub-tools/iptables.js
+./dist/tools/sub-tools/vmstat.js
+./dist/tools/sub-tools/netcat.js
+
+
+--- Message 13 (ASSISTANT, 2026-05-05T07:50:56.156Z) ---
+[thinking]
+[toolCall]
+
+--- Message 14 (TOOL_RESULT, 2026-05-05T07:50:58.579Z) ---
+total 16
+drwxrwxr-x  4 quangtynu quangtynu 4096 May  5 14:48 .
+drwxrwxr-x 13 quangtynu quangtynu 4096 May  5 10:28 ..
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  5 11:22 agent
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  5 14:48 context
+
+
+--- Message 15 (ASSISTANT, 2026-05-05T07:50:58.586Z) ---
+[thinking]
+[toolCall]
+
+--- Message 16 (TOOL_RESULT, 2026-05-05T07:51:00.961Z) ---
+.piclaw/agent/:
+total 12
+drwxrwxr-x 2 quangtynu quangtynu 4096 May  5 11:22 .
+drwxrwxr-x 4 quangtynu quangtynu 4096 May  5 14:48 ..
+-rw-rw-r-- 1 quangtynu quangtynu  998 May  5 14:27 todos.json
+
+.piclaw/context/:
+total 140
+drwxrwxr-x 2 quangtynu quangtynu   4096 May  5 14:48 .
+drwxrwxr-x 4 quangtynu quangtynu   4096 May  5 14:48 ..
+-rw-rw-r-- 1 quangtynu quangtynu 134087 May  5 14:50 context.log
+
+
+--- Message 17 (ASSISTANT, 2026-05-05T07:51:00.967Z) ---
+[thinking]
+[toolCall]
+
+--- Message 18 (TOOL_RESULT, 2026-05-05T07:51:03.725Z) ---
+total 76
+drwxrwxr-x  8 quangtynu quangtynu 4096 May  5 14:20 .
+drwxrwxr-x 13 quangtynu quangtynu 4096 May  5 10:28 ..
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  1 10:14 cli
+-rw-rw-r--  1 quangtynu quangtynu  634 Apr 30 10:10 cli.ts
+-rw-rw-r--  1 quangtynu quangtynu 2055 May  5 12:45 command-history-patch.ts
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  4 06:53 config
+-rw-rw-r--  1 quangtynu quangtynu 4614 May  5 14:32 context-logger.ts
+drwxrwxr-x  4 quangtynu quangtynu 4096 May  4 06:53 extensions
+-rw-rw-r--  1 quangtynu quangtynu 3021 Apr 30 15:09 helpers.ts
+-rw-rw-r--  1 quangtynu quangtynu  991 May  5 12:43 interactive-runner.ts
+-rw-rw-r--  1 quangtynu quangtynu 3035 May  5 14:27 main.ts
+-rw-rw-r--  1 quangtynu quangtynu 6303 Apr 30 15:09 migrations.ts
+-rw-rw-r--  1 quangtynu quangtynu 5034 May  5 14:41 piclaw-core.ts
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  5 12:42 services
+drwxrwxr-x  2 quangtynu quangtynu 4096 May  4 17:07 tests
+drwxrwxr-x  3 quangtynu quangtynu 4096 May  4 06:53 tools
+
+
+--- Message 19 (ASSISTANT, 2026-05-05T07:51:03.727Z) ---
+[thinking]
+[toolCall]
+
+--- Message 20 (TOOL_RESULT, 2026-05-05T07:51:06.474Z) ---
+#!/usr/bin/env node
+
+/**
+ * Context Logger
+ *
+ * Utility to log the full LLM context (system prompt, messages, tools) before
+ * it is sent to the provider. Useful for debugging, inspection, and understanding
+ * what exactly gets sent to the LLM.
+ */
+
+import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import type { Message } from "@mariozechner/pi-ai";
+import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+
+/**
+ * Configuration for context logging.
+ */
+export interface ContextLoggerOptions {
+	/** Path to log file. If undefined, logging is disabled. */
+	logFile?: string;
+	/** Whether to append to existing file or overwrite. Default: append. */
+	append?: boolean;
+	/** Maximum number of messages to log (for truncation). Default: unlimited. */
+	maxMessages?: number;
+	/** Whether to include tool definitions in the log. Default: true. */
+	includeTools?: boolean;
+}
+
+const DEFAULT_OPTIONS: Required<Omit<ContextLoggerOptions, "logFile">> = {
+	append: true,
+	maxMessages: Infinity,
+	includeTools: true,
+};
+
+/**
+ * Format a single AgentMessage for logging.
+ */
+function formatAgentMessage(msg: Message, index: number): string {
+	const timestamp = "timestamp" in msg && msg.timestamp ? new Date(msg.timestamp).toISOString() : "";
+	let contentStr = "";
+
+	if (Array.isArray(msg.content)) {
+		contentStr = msg.content
+			.map((c) => {
+				if (c.type === "text") {
+					return (c as any).text;
+				}
+				if (c.type === "image") {
+					return `[IMAGE: ${(c as any).source.type}]`;
+				}
+				return `[${c.type}]`;
+			})
+			.join("\n");
+	} else {
+		contentStr = String(msg.content);
+	}
+
+	const roleLabel = msg.role === "user" ? "USER" : msg.role === "assistant" ? "ASSISTANT" : "TOOL_RESULT";
+
+	return `--- Message ${index} (${roleLabel}, ${timestamp}) ---\n${contentStr}\n`;
+}
+
+/**
+ * Format the full context for logging.
+ */
+export function formatContext(
+	context: {
+		systemPrompt: string;
+		messages: Message[];
+		tools?: Array<{ name: string; description: string; parameters?: any }>;
+	},
+	options: ContextLoggerOptions = {},
+): string {
+	const opts = { ...DEFAULT_OPTIONS, ...options };
+
+	let output = "=== LLM CONTEXT LOG ===\n\n";
+
+	// System prompt
+	if (context.systemPrompt) {
+		output += `--- SYSTEM PROMPT ---\n${context.systemPrompt}\n\n`;
+	}
+
+	// Messages (with limit)
+	const messagesToLog = context.messages.slice(0, opts.maxMessages);
+	output += `--- CONVERSATION (${messagesToLog.length} messages) ---\n`;
+	for (let i = 0; i < messagesToLog.length; i++) {
+		output += formatAgentMessage(messagesToLog[i], i) + "\n";
+	}
+
+	// Tools
+	if (opts.includeTools && context.tools && context.tools.length > 0) {
+		output += `--- AVAILABLE TOOLS (${context.tools.length}) ---\n`;
+		for (const tool of context.tools) {
+			output += `• ${tool.name}: ${tool.description}\n`;
+			if (tool.parameters) {
+				output += `  Parameters: ${JSON.stringify(tool.parameters, null, 2)}\n`;
+			}
+		}
+		output += "\n";
+	}
+
+	output += `=== END CONTEXT LOG (${new Date().toISOString()}) ===\n`;
+	return output;
+}
+
+/**
+ * Write context log to file.
+ */
+export function writeContextLog(context: {
+	systemPrompt: string;
+	messages: Message[];
+	tools?: Array<{ name: string; description: string; parameters?: any }>;
+}, options: ContextLoggerOptions = {}): void {
+	const logFile = options.logFile;
+	if (!logFile) {
+		return; // Logging disabled
+	}
+
+	try {
+		const logDir = dirname(logFile);
+		if (!existsSync(logDir)) {
+			mkdirSync(logDir, { recursive: true });
+		}
+
+		const formatted = formatContext(context, options);
+
+		if (options.append) {
+			appendFileSync(logFile, formatted);
+		} else {
+			writeFileSync(logFile, formatted);
+		}
+	} catch (error) {
+		// Don't throw - logging should never break the main flow
+		console.error("ContextLogger: Failed to write log file:", error);
+	}
+}
+
+/**
+ * Create a wrapper stream function that logs context before sending to LLM.
+ *
+ * Usage:
+ * ```typescript
+ * const loggedStreamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile);
+ * ```
+ */
+export function createContextLoggingStreamFn(
+	originalStreamFn: (...args: any[]) => any,
+	logFile: string,
+	logOptions?: Omit<ContextLoggerOptions, "logFile">,
+): (...args: any[]) => any {
+	return async (...args: any[]) => {
+		const [model, context, options] = args;
+		// Log the context before sending
+		writeContextLog(
+			{
+				systemPrompt: context.systemPrompt,
+				messages: context.messages,
+				tools: context.tools,
+			},
+			{ logFile, ...logOptions },
+		);
+
+		// Call original stream function
+		return originalStreamFn(...args);
+	};
+}
+
+
+--- Message 21 (ASSISTANT, 2026-05-05T07:51:06.476Z) ---
+[thinking]
+[toolCall]
+
+--- Message 22 (TOOL_RESULT, 2026-05-05T07:51:10.249Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw Core Bootstrapping
+ *
+ * Core logic for creating and configuring the agent runtime.
+ * Separated from UI concerns for testability and reusability.
+ */
+
+import {
+  createAgentSessionServices,
+  createAgentSessionFromServices,
+  SessionManager,
+  AgentSessionRuntime,
+  type CreateAgentSessionRuntimeResult,
+  type AgentSessionServices,
+  type SessionStartEvent,
+} from "@mariozechner/pi-coding-agent";
+import { getAgentDir } from "./config/config.js";
+import { getDefaultContextLogFile } from "./config/config-manager.js";
+import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
+import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createContextLoggingStreamFn } from "./context-logger.js";
+
+export interface PiclawCoreOptions {
+  /** Working directory (default: process.cwd()) */
+  cwd?: string;
+  /** Agent directory (default: ~/.piclaw/agent) */
+  agentDir?: string;
+  /** Custom session directory */
+  sessionDir?: string;
+  /** Tool allowlist (default: from settings or built-in) */
+  tools?: string[];
+  /** Additional custom tools to register */
+  customTools?: ToolDefinition[];
+  /** Model to use (provider:modelId) */
+  model?: string;
+  /** Thinking level */
+  thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+  /** Verbose logging */
+  verbose?: boolean;
+  /** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
+  contextLogFile?: string;
+}
+
+/**
+ * Create the agent runtime without starting the UI.
+ *
+ * This function handles:
+ * - Services creation (auth, models, settings, resource loader)
+ * - Session creation
+ * - Runtime factory for session switching
+ * - Initial model and thinking level configuration
+ *
+ * @param options - Configuration options
+ * @returns AgentSessionRuntime ready to run
+ */
+export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
+  const cwd = options.cwd ?? process.cwd();
+  const agentDir = options.agentDir ?? getAgentDir();
+  // Default context log file if not specified
+  const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
+
+  // 1. Create cwd-bound services
+  const services: AgentSessionServices = await createAgentSessionServices({
+    cwd,
+    agentDir,
+  });
+
+  // 2. Create session manager
+  const sessionManager = SessionManager.create(cwd, options.sessionDir);
+
+  // 3. Create session from services
+  const sessionStartEvent: SessionStartEvent = { type: "session_start", reason: "startup" };
+
+  // Prepare custom tools (ensure subtool_loader is included)
+  const customTools = options.customTools ?? [createSubLoaderToolDefinition(services.cwd)];
+
+  const sessionResult = await createAgentSessionFromServices({
+    services,
+    sessionManager,
+    sessionStartEvent,
+    tools: options.tools,
+    customTools,
+  });
+
+  // 4. Create runtime factory (for session switching)
+  const createRuntime = async (runtimeOpts: {
+    cwd: string;
+    agentDir: string;
+    sessionManager: SessionManager;
+    sessionStartEvent?: SessionStartEvent;
+  }): Promise<CreateAgentSessionRuntimeResult> => {
+    const newServices = await createAgentSessionServices({
+      cwd: runtimeOpts.cwd,
+      agentDir: runtimeOpts.agentDir,
+    });
+
+    const customToolsForRuntime = options.customTools ?? [createSubLoaderToolDefinition(newServices.cwd)];
+    const result = await createAgentSessionFromServices({
+      services: newServices,
+      sessionManager: runtimeOpts.sessionManager,
+      sessionStartEvent: runtimeOpts.sessionStartEvent,
+      tools: options.tools,
+      customTools: customToolsForRuntime,
+    });
+
+    return {
+      ...result,
+      services: newServices,
+      diagnostics: [],
+    };
+  };
+
+  // 5. Wrap streamFn with context logging if enabled
+  if (contextLogFile) {
+    const originalStreamFn = sessionResult.session.agent.streamFn;
+    sessionResult.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
+  }
+
+  // 6. Create runtime
+  const runtime = new AgentSessionRuntime(
+    sessionResult.session,
+    services,
+    createRuntime,
+    [], // diagnostics
+    sessionResult.modelFallbackMessage,
+  );
+
+  // 6. Apply initial model if configured
+  if (options.model) {
+    try {
+      const [provider, modelId] = options.model.split(":");
+      if (provider && modelId) {
+        const model = services.modelRegistry.find(provider, modelId);
+        if (model) {
+          await sessionResult.session.setModel(model);
+        } else {
+          console.warn(`Model '${options.model}' not found in registry.`);
+        }
+      } else {
+        console.warn(`Invalid model format: '${options.model}'. Use provider:modelId`);
+      }
+    } catch (err: any) {
+      console.warn(`Failed to set model '${options.model}': ${err.message}`);
+    }
+  }
+
+  // 7. Apply initial thinking level if configured
+  if (options.thinking) {
+    sessionResult.session.setThinkingLevel(options.thinking);
+  }
+
+  return runtime;
+}
+
+
+--- Message 23 (ASSISTANT, 2026-05-05T07:51:10.252Z) ---
+[thinking]
+
+
+Bây giờ tôi hiểu flow rồi. Để tìm xem `createSubLoaderToolDefinition` nó tạo ra cái gì - đó là nguồn gốc của vấn đề:
+
+[toolCall]
+
+--- Message 24 (TOOL_RESULT, 2026-05-05T07:51:28.742Z) ---
+/**
+ * SubTool Loader - Main entry point
+ * 
+ * Unified tool for system operations combining:
+ * - Core Computer Use tools from @mariozechner/pi-coding-agent
+ * - Extended sub-tools from src/tools/sub-tools/
+ */
+
+import { Type } from "typebox";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { Text } from "@mariozechner/pi-tui";
+import { getAgentDir } from "../config/config.js";
+import {
+  createBashToolDefinition,
+  createLsToolDefinition,
+  createFindToolDefinition,
+  createGrepToolDefinition,
+  createReadToolDefinition,
+  createEditToolDefinition,
+  createWriteToolDefinition,
+} from "@mariozechner/pi-coding-agent";
+
+import { subToolNames, type SubToolName } from "./sub-tools/types.js";
+import { getToolMap, DANGEROUS_TOOLS } from "./sub-tools/helpers.js";
+import { renderSubtoolLoaderCall, renderSubtoolLoaderResult } from "./sub-tools/render.js";
+
+// ============================================================================
+// Core tools from @mariozechner/pi-coding-agent
+// ============================================================================
+
+function getCoreToolMap(cwd: string) {
+  return {
+    bash: createBashToolDefinition(cwd),
+    ls: createLsToolDefinition(cwd),
+    find: createFindToolDefinition(cwd),
+    grep: createGrepToolDefinition(cwd),
+    read: createReadToolDefinition(cwd),
+    edit: createEditToolDefinition(cwd),
+    write: createWriteToolDefinition(cwd),
+  };
+}
+
+// ============================================================================
+// Combined tool map (core + custom sub-tools)
+// ============================================================================
+
+// ============================================================================
+// Audit Trail - Logging for all sub-tool executions
+// ============================================================================
+
+interface AuditEntry {
+  timestamp: string;
+  tool: string;
+  args: any;
+  success: boolean;
+  error?: string;
+  duration?: number;
+}
+
+const auditLog: AuditEntry[] = [];
+let auditLogPath: string;
+
+function getAuditLogPath(): string {
+  if (!auditLogPath) {
+    const agentDir = getAgentDir();
+    auditLogPath = path.join(agentDir, "audit.log");
+  }
+  return auditLogPath;
+}
+
+function addAuditEntry(entry: Omit<AuditEntry, "timestamp">): void {
+  const fullEntry: AuditEntry = {
+    ...entry,
+    timestamp: new Date().toISOString(),
+  };
+  auditLog.push(fullEntry);
+  
+  // Also append to file for persistence (async)
+  try {
+    const logLine = JSON.stringify(fullEntry) + "\n";
+    // Use async append but fire-and-forget
+    fs.promises.appendFile(getAuditLogPath(), logLine).catch(() => {});
+  } catch {
+    // Silently fail if can't write - don't block execution
+  }
+}
+
+/**
+ * Get all audit entries (for debugging/testing)
+ */
+export function getAuditLog(): readonly AuditEntry[] {
+  return auditLog;
+}
+
+/**
+ * Clear audit log (for testing)
+ */
+export function clearAuditLog(): void {
+  auditLog.length = 0;
+}
+
+// ============================================================================
+// Dangerous Tools Configuration
+// ============================================================================
+
+/**
+ * Default list of dangerous sub-tools that can be disabled
+ * These tools can execute arbitrary commands or access sensitive resources
+ */
+/**
+ * Configuration for sub-tool loader
+ */
+export interface SubToolLoaderConfig {
+  /** Set of tool names to disable */
+  disabledTools?: Set<string>;
+  /** Whether to allow dangerous tools by default (default: true) */
+  allowDangerousTools?: boolean;
+}
+
+let config: SubToolLoaderConfig = {
+  allowDangerousTools: true,
+};
+
+/**
+ * Configure the sub-tool loader
+ */
+export function configureSubToolLoader(newConfig: Partial<SubToolLoaderConfig>): void {
+  config = { ...config, ...newConfig };
+  // Clear tool cache when config changes
+  toolCache.clear();
+}
+
+/**
+ * Get current configuration
+ */
+export function getSubToolLoaderConfig(): Readonly<SubToolLoaderConfig> {
+  return config;
+}
+
+/**
+ * Check if a tool is allowed to execute
+ */
+function isToolAllowed(toolName: string, toolDef?: any): boolean {
+  if (config.disabledTools?.has(toolName)) {
+    return false;
+  }
+  // Check if it's a dangerous tool and we're configured to disallow them
+  const isDangerous = toolDef?.dangerous || DANGEROUS_TOOLS.has(toolName as any);
+  if (!config.allowDangerousTools && isDangerous) {
+    return false;
+  }
+  return true;
+}
+
+// ============================================================================
+// Tool Cache
+// ============================================================================
+
+const toolCache = new Map<string, any>();
+
+function getAllTools(cwd: string): Record<string, any> {
+  if (toolCache.has(cwd)) return toolCache.get(cwd)!;
+
+  const tools = {
+    ...getCoreToolMap(cwd),
+    ...getToolMap(cwd),  // Add custom sub-tools from sub-tools/index
+  };
+
+  toolCache.set(cwd, tools);
+  return tools;
+}
+
+// ============================================================================
+// Execute: get_schema
+// ============================================================================
+
+async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, ctx?: any) {
+  const { name } = args as { name: string };
+  const effectiveCwd = ctx?.cwd || cwd;
+
+  if (!name) {
+    return {
+      content: [{ type: "text", text: `Missing 'name' parameter. Specify a sub-tool name.` }],
+      details: undefined,
+      isError: true,
+    } as const;
+  }
+
+  const toolMap = getAllTools(effectiveCwd);
+  const toolDef = toolMap[name];
+  if (!toolDef) {
+    return {
+      content: [{ type: "text", text: `Unknown sub-tool: ${name}. Available: ${subToolNames.join(", ")}` }],
+      details: undefined,
+      isError: true,
+    } as const;
+  }
+
+  const schema = toolDef.parameters as any;
+  let output = `Schema for sub-tool "${name}":\n\n`;
+  
+  if (schema?.properties) {
+    output += "Properties:\n";
+    for (const [key, propSchema] of Object.entries(schema.properties)) {
+      const prop = propSchema as any;
+      const isOptional = schema.optionalProperties?.includes(key);
+      const type = prop.type || "any";
+      output += `- ${key}${isOptional ? "?" : ""}: ${prop.description || type}\n`;
+    }
+  }
+  if (schema?.required && Array.isArray(schema.required) && schema.required.length > 0) {
+    output += `\nRequired fields: ${schema.required.join(", ")}\n`;
+  }
+  output += "\nExample invocation:\n";
+  output += `{\n  "subtool": "${name}",\n  "args": {\n    // fill with fields from above\n  }\n}\n`;
+
+  return {
+    content: [{ type: "text", text: output }],
+    details: undefined,
+    isError: false,
+  } as const;
+}
+
+// ============================================================================
+// Tool definition factory
+// ============================================================================
+
+/**
+ * Creates the subtool_loader tool definition.
+ */
+export function createSubLoaderToolDefinition(cwd: string) {
+  // Build schema from all sub-tool names
+  const schema = Type.Union(
+    subToolNames.map((name) =>
+      Type.Object({
+        subtool: Type.Literal(name),
+        args: Type.Any(),
+      })
+    )
+  );
+
+  const description = `⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.\nOnly use in trusted environments with controlled inputs.\n\n` +
+    `Unified tool for system operations.\n\n` +
+    `Core Computer Use tools (from @mariozechner/pi-coding-agent):\n` +
+    `- get_schema, bash, ls, find, grep, read, edit, write\n\n` +
+    `Extended sub-tools (custom in src/tools/sub-tools/):\n` +
+    `- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis\n` +
+    `- make, npm, systemctl, journalctl, ps, kill, crontab\n` +
+    `- apt, yum, df, du, ping, traceroute, nslookup, dig\n` +
+    `- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg\n` +
+    `- update, backup, password, weather, time, ufw, at, quota\n` +
+    `- iso, free, iostat, netstat, ss\n` +
+    `- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz\n` +
+    `- xmlstarlet, json_pp, yamllint, tomlq, hjson\n` +
+    `- archive, zip, 7z, xz\n` +
+    `- svn, hg, darcs, fossil, bzr, cvs\n` +
+    `- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc\n\n` +
+    `Use "get_schema" to see argument details for any sub-tool.\n\n` +
+    `Example: {"subtool":"bash","args":{"command":"echo hello"}}`;
+
+  return {
+    name: "subtool_loader",
+    label: "SubTool Loader",
+    description,
+    parameters: schema,
+    async execute(toolCallId: string, params: any, signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
+      const { subtool, args } = params as { subtool: string; args: any };
+      
+      let parsedArgs: any = args;
+      if (typeof args === 'string') {
+        try {
+          parsedArgs = JSON.parse(args);
+        } catch (e) {
+          return {
+            content: [{ type: "text", text: `Invalid JSON in args: ${args}` }],
+            details: undefined,
+            isError: true,
+          } as const;
+        }
+      }
+
+      try {
+        if (subtool === "get_schema") {
+          return await executeGetSchema(parsedArgs, cwd, signal, ctx);
+        }
+
+        const toolMap = getAllTools(ctx?.cwd || cwd);
+        const toolDef = toolMap[subtool];
+        
+        if (!toolDef) {
+          return {
+            content: [{ type: "text", text: `Unknown subtool: ${subtool}. Available: ${subToolNames.join(", ")}` }],
+            details: undefined,
+            isError: true,
+          } as const;
+        }
+
+        // Check if tool is allowed (considering dangerous flag)
+        if (!isToolAllowed(subtool, toolDef)) {
+          const reason = toolDef.dangerous
+            ? `Tool '${subtool}' is dangerous and disabled. Set allowDangerousTools=true in SubToolLoader config to enable.`
+            : `Tool '${subtool}' is disabled.`;
+          return {
+            content: [{ type: "text", text: reason }],
+            details: undefined,
+            isError: true,
+          } as const;
+        }
+
+        // Execute and log result
+        const startTime = Date.now();
+        const delegatedToolCallId = `subtool-${subtool}-${Date.now()}`;
+        const result = await toolDef.execute(delegatedToolCallId, parsedArgs, signal, undefined, ctx);
+        const duration = Date.now() - startTime;
+        const success = !result.isError;
+        addAuditEntry({ tool: subtool, args: parsedArgs, success, duration });
+        return result;
+      } catch (error: any) {
+        // Log failure
+        addAuditEntry({ tool: subtool, args: parsedArgs, success: false, error: error.message });
+        return {
+          content: [{ type: "text", text: `Error: ${error.message}` }],
+          details: undefined,
+          isError: true,
+        } as const;
+      }
+    },
+    renderCall: renderSubtoolLoaderCall,
+    renderResult: renderSubtoolLoaderResult,
+  };
+}
+
+--- Message 25 (ASSISTANT, 2026-05-05T07:51:28.744Z) ---
+[thinking]
+
+
+Tìm thấy vấn đề rồi! Để xem có bao nhiêu sub-tools:
+
+[toolCall]
+
+--- Message 26 (TOOL_RESULT, 2026-05-05T07:51:48.793Z) ---
+/**
+ * Type definitions for sub-tools system
+ */
+
+// List of all available sub-tool names
+export const subToolNames = [
+  // Core Computer Use tools (provided by @mariozechner/pi-coding-agent)
+  "get_schema",
+  "bash", "ls", "find", "grep", "read",
+  "edit", "write",
+
+  // Extended sub-tools (custom in src/tools/sub-tools/)
+  "git", "docker", "docker-compose", "podman", "k8s", "kubectl-apply", "helm", "oc", "nomad", "vagrant", "virsh", "qemu", "lxc", "systemd-nspawn", "chroot", "flatpak", "sqlite3", "mysql", "psql", "mongodb", "redis", "kafka-console", "pip", "cargo", "go", "maven", "dotnet", "cmake", "yarn", "deno", "php", "ruby", "ssh", "http", "aws",
+  "terraform", "db", "kafka", "redis", "make", "npm",
+  "systemctl", "sysctl", "iptables", "nft", "lvm", "lsof", "pstree", "top", "htop", "vmstat", "mpstat", "sar", "mount", "hardware", "dmidecode", "sensors", "battery", "journalctl", "ps", "kill", "crontab",
+  "apt", "yum", "df", "du", "ping", "traceroute",
+  "nslookup", "dig", "wget", "tail", "jq", "yq",
+  "xmllint", "scp", "rsync", "ffmpeg", "update",
+  "backup", "password", "weather", "time", "ufw",
+  "at", "quota", "iso", "free", "iostat", "netstat", "ss",
+
+  // New sub-tools (Phase 10-13)
+  "pandoc", "wkhtmltopdf", "pdftk", "ps2pdf", "enscript", "graphviz", "xmlstarlet", "json_pp", "yamllint", "tomlq", "hjson",
+  "archive", "zip", "7z", "xz",
+  "svn", "hg", "darcs", "fossil", "bzr", "cvs",
+  "pacman", "dnf", "zypper", "emerge", "apk", "pkg", "nix-env", "guix", "spack", "pkgsrc",
+] as const;
+
+export type SubToolName = typeof subToolNames[number];
+
+/**
+ * Sub-tool definition interface
+ */
+export interface SubToolDefinition {
+  name: string;
+  label: string;
+  description: string;
+  parameters: any;
+  execute: any;
+  renderCall?: any;
+  renderResult?: any;
+  renderShell?: "self" | "child";
+  /** If true, this tool can execute arbitrary commands and should be treated with caution */
+  dangerous?: boolean;
+  /** If true, this tool should use safe execution (direct spawn, not bash -c) */
+  safeExecute?: boolean;
+}
+
+/**
+ * Sub-tool map type
+ */
+export type SubToolMap = Record<string, SubToolDefinition>;
+
+/**
+ * Get schema function arguments
+ */
+export interface GetSchemaArgs {
+  name: string;
+}
+
+/**
+ * Subtool loader arguments
+ */
+export interface SubToolLoaderArgs {
+  subtool: string;
+  args: any;
+}
+
+--- Message 27 (ASSISTANT, 2026-05-05T07:51:48.796Z) ---
+[thinking]
+
+
+Tìm thấy vấn đề rồi! Để tôi tóm tắt:
+
+---
+
+## 🔍 Root Cause - Nơi tạo ra context "kỳ cục":
+
+### 1. **Nguyên nhân chính - src/tools/subtool-loader.ts:**
+
+```typescript
+// Line ~220 - TẠO RA SCHEMA KHỔNG LỒ!
+const schema = Type.Union(
+  subToolNames.map((name) =>
+    Type.Object({
+      subtool: Type.Literal(name),
+      args: Type.Any(),
+    })
+  )
+);
+```
+
+**Vấn đề:** `subToolNames` có **~150+ sub-tools** → `Type.Union` tạo ra schema với **150+ object variants**!
+
+Đây là JSON Schema khổng lồ được generate tự động.
+
+### 2. **Nguyên nhân phụ - src/context-logger.ts:**
+
+```typescript
+// Line ~84 - DUMP TOÀN BỘ JSON SCHEMA!
+if (tool.parameters) {
+  output += `  Parameters: ${JSON.stringify(tool.parameters, null, 2)}\n`;
+}
+```
+
+Mỗi khi log tools, nó dump **toàn bộ** `parameters` (chính là cái huge Union schema kia).
+
+---
+
+## 🔢 Số liệu:
+
+| Thứ | Số lượng |
+|-----|---------|
+| subToolNames | **~150** |
+| Kích thước schema | **~4000+ dòng JSON** |
+| context.log | **134KB** (4642 dòng) |
+| Phần "thừa" | **~90%** |
+
+---
+
+## 💡 Giải pháp:
+
+1. **Schema tối ưu**: Thay vì Union 150+ objects, chỉ cần:
+   ```typescript
+   const schema = Type.Object({
+     subtool: Type.Union(subToolNames.map(n => Type.Literal(n))),
+     args: Type.Any(),
+   });
+   ```
+   → Giảm từ 4000+ dòng xuống ~10 dòng!
+
+2. **Context logger thông minh**: Không dump full JSON schema, chỉ log tên tools và mô tả ngắn.
+
+Bạn có muốn tôi fix không? 🔧
+
+--- Message 28 (USER, 2026-05-05T07:52:12.910Z) ---
+uh. làm đi
+
+--- Message 29 (ASSISTANT, 2026-05-05T07:52:12.915Z) ---
+[thinking]
+[toolCall]
+
+--- Message 30 (TOOL_RESULT, 2026-05-05T07:52:18.266Z) ---
+Validation failed for tool "todos":
+  - add_phase: must be object
+
+Received arguments:
+{
+  "add_phase": "<parameter name=\"name\">Fix context logger - tối ưu schema",
+  "tasks": "[{\"content\": \"Tối ưu schema trong subtool-loader.ts - thay Union object bằng Union literal\", \"status\": \"in_progress\"}, {\"content\": \"Tối ưu context-logger.ts - không dump full JSON schema\", \"status\": \"pending\"}]"
+}
+
+--- Message 31 (ASSISTANT, 2026-05-05T07:52:18.273Z) ---
+[thinking]
+[toolCall]
+
+--- Message 32 (TOOL_RESULT, 2026-05-05T07:52:21.938Z) ---
+Validation failed for tool "todos":
+  - add_phase: must be object
+
+Received arguments:
+{
+  "add_phase": "<parameter name=\"name\">Fix context logger - tối ưu schema",
+  "tasks": "[{\"content\": \"Tối ưu schema trong subtool-loader.ts - thay Union object bằng Union literal\"}, {\"content\": \"Tối ưu context-logger.ts - không dump full JSON schema\"}]"
+}
+
+--- Message 33 (ASSISTANT, 2026-05-05T07:52:21.944Z) ---
+[thinking]
+[toolCall]
+
+--- Message 34 (TOOL_RESULT, 2026-05-05T07:52:25.743Z) ---
+✅ Updated: 4 remaining, 3 completed.
+
+Remaining (4):
+  - task-32 Add CLI/config support for contextLogFile [in_progress] (Context Logger Implementation)
+  - task-33 Test the logging feature manually [pending] (Context Logger Implementation)
+  - task-34 Tối ưu schema trong subtool-loader.ts - thay Union object bằng Union literal [pending] (Fix context logger - tối ưu schema)
+  - task-35 Tối ưu context-logger.ts - không dump full JSON schema [pending] (Fix context logger - tối ưu schema)
+Phase 1/2 "Context Logger Implementation" — 3/5 done
+
+--- Message 35 (USER, 2026-05-05T07:52:25.742Z) ---
+[System: Todo add_phase] ✅ Updated: 4 remaining, 3 completed.
+
+--- Message 36 (ASSISTANT, 2026-05-05T07:52:25.750Z) ---
+[thinking]
+[toolCall]
+
+--- Message 37 (TOOL_RESULT, 2026-05-05T07:52:30.589Z) ---
+Successfully replaced 1 block(s) in src/tools/subtool-loader.ts.
+
+--- Message 38 (ASSISTANT, 2026-05-05T07:52:30.591Z) ---
+[thinking]
+[toolCall]
+
+--- Message 39 (TOOL_RESULT, 2026-05-05T07:52:33.258Z) ---
+✅ Updated: 3 remaining, 4 completed.
+
+Remaining (3):
+  - task-32 Add CLI/config support for contextLogFile [in_progress] (Context Logger Implementation)
+  - task-33 Test the logging feature manually [pending] (Context Logger Implementation)
+  - task-35 Tối ưu context-logger.ts - không dump full JSON schema [pending] (Fix context logger - tối ưu schema)
+Phase 1/2 "Context Logger Implementation" — 3/5 done
+
+--- Message 40 (USER, 2026-05-05T07:52:33.257Z) ---
+[System: Todo update] ✅ Updated: 3 remaining, 4 completed.
+
+--- Message 41 (ASSISTANT, 2026-05-05T07:52:33.265Z) ---
+[thinking]
+[toolCall]
+
+--- Message 42 (TOOL_RESULT, 2026-05-05T07:52:37.266Z) ---
+Successfully replaced 1 block(s) in src/context-logger.ts.
+
+--- Message 43 (ASSISTANT, 2026-05-05T07:52:37.270Z) ---
+[thinking]
+[toolCall]
+
+--- Message 44 (TOOL_RESULT, 2026-05-05T07:52:40.070Z) ---
+✅ Updated: 2 remaining, 5 completed.
+
+Remaining (2):
+  - task-32 Add CLI/config support for contextLogFile [in_progress] (Context Logger Implementation)
+  - task-33 Test the logging feature manually [pending] (Context Logger Implementation)
+Phase 1/2 "Context Logger Implementation" — 3/5 done
+
+--- Message 45 (USER, 2026-05-05T07:52:40.069Z) ---
+[System: Todo update] ✅ Updated: 2 remaining, 5 completed.
+
+--- Message 46 (ASSISTANT, 2026-05-05T07:52:40.077Z) ---
+[thinking]
+[toolCall]
+
+--- Message 47 (TOOL_RESULT, 2026-05-05T07:52:49.538Z) ---
+
+> piclaw@0.0.1 build
+> npm run generate-custom-models && tsc -p tsconfig.build.json && chmod +x dist/cli.js dist/main.js
+
+
+> piclaw@0.0.1 generate-custom-models
+> tsx scripts/generate-custom-models.ts
+
+🚀 Generating custom models from models.dev...
+
+Fetching models from models.dev API...
+  ✅ kilo: 268 model(s) (api: openai-completions, baseUrl: https://api.kilo.ai/api/gateway)
+
+Total loaded: 268 models
+
+✅ Generated: /home/quangtynu/Qcoder/qclaw/src/extensions/providers/models/custom-models.generated.ts
+
+
+
+--- Message 48 (ASSISTANT, 2026-05-05T07:52:49.540Z) ---
+[thinking]
+
+
+Build OK! Giờ xóa context.log cũ và test lại:
+
+[toolCall]
+
+--- Message 49 (TOOL_RESULT, 2026-05-05T07:52:53.911Z) ---
+Đã xóa context.log cũ
+
+
+--- Message 50 (ASSISTANT, 2026-05-05T07:52:53.923Z) ---
+[thinking]
+[toolCall]
+
+--- Message 51 (TOOL_RESULT, 2026-05-05T07:53:09.813Z) ---
+[?2004h[?u[?25l[?2026h[0m]8;;
+ [38;2;138;190;183mpi[39m[38;2;102;102;102m v0.73.0[39m                                                                     [0m]8;;
+ [38;2;102;102;102mescape[39m[38;2;128;128;128m interrupt[39m[38;2;128;128;128m · [39m[38;2;102;102;102mctrl+c/ctrl+d[39m[38;2;128;128;128m clear/exit[39m[38;2;128;128;128m · [39m[38;2;102;102;102m/[39m[38;2;128;128;128m commands[39m[38;2;128;128;128m · [39m[38;2;102;102;102m![39m[38;2;128;128;128m bash[39m[38;2;128;128;128m · [39m[38;2;102;102;102mctrl+o[39m[38;2;128;128;128m     [0m]8;;
+ [38;2;128;128;128mmore[39m                                                                           [0m]8;;
+ [38;2;102;102;102mPress ctrl+o to show full startup help and loaded resources.[39m                   [0m]8;;
+                                                                                [0m]8;;
+ [38;2;102;102;102mPi can explain its own features and look up its docs. Ask it how to use or     [0m]8;;
+ [38;2;102;102;102mextend Pi.[39m                                                                     [0m]8;;
+[0m]8;;
+[0m]8;;
+[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[0m]8;;
+[7m [0m                                                                               [0m]8;;
+[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[38;2;80;80;80m─[39m[0m]8;;
+[38;2;102;102;102m~/Qcoder/qclaw (main)[39m[0m]8;;
+[38;2;102;102;102m0.0%/205k (auto)[39m[38;2;102;102;102m                                         minimax-m2.5-free • low[39m[0m]8;;[?2026l[3A[1G[?25l]0;π - qclaw[?2026h[1A[2K[38;2;240;198;116m[Context][39m                                                                       [0m]8;;
+[2K[38;2;102;102;102m  AGENTS.md[39m                                                                     [0m]8;;
+[2K[0m]8;;
+[2K[38;2;240;198;116m[Extensions][39m                                                                    [0m]8;;
+[2K[38;2;102;102;102m  extensions[39m                                                                    [0m]8;;
+[2K[0m]8;;
+[2K[0m]8;;
+[2K[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[0m]8;;
+[2K[7m [0m                                                                               [0m]8;;
+[2K[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[38;2;95;135;175m─[39m[0m]8;;
+[2K[38;2;102;102;102m~/Qcoder/qclaw (main)[39m[0m]8;;
+[2K[38;2;102;102;102m0.0%/205k (auto)[39m[38;2;102;102;102m                              (opencode) minimax-m2.5-free • low[39m[0m]8;;[?2026l[3A[1G[?25l[>4;2m
+
+Command aborted
+
+--- Message 52 (ASSISTANT, 2026-05-05T07:53:09.821Z) ---
+
+
+--- Message 53 (USER, 2026-05-05T07:53:46.010Z) ---
+không pahir . context loger phải dump hết thì mới bắt được bệnh như vừa rồi chiw. nó là loger mà. sao lại bỏ nội dụng.
+
+--- Message 54 (ASSISTANT, 2026-05-05T07:53:46.023Z) ---
+[thinking]
+
+
+Ồ, sorry! Bạn nói đúng - context logger phải log đầy đủ mới debug được. Nhưng vấn đề là **nguồn sinh ra** nó đã được fix ở `subtool-loader.ts` rồi.
+
+Ý tưởng là:
+- **Schema gốc** (trong subtool-loader) đã được tối ưu → giảm từ 4000+ dòng xuống ~15 dòng
+- **Context logger** vẫn dump đầy đủ → nhưng vì đầu vào đã nhỏ hơn nhiều, nên log cũng sẽ nhỏ hơn
+
+Để xem context.log mới sau khi fix:
+
+[toolCall]
+
+--- Message 55 (TOOL_RESULT, 2026-05-05T07:53:53.721Z) ---
+7781 .piclaw/context/context.log
+=== LLM CONTEXT LOG ===
+
+--- SYSTEM PROMPT ---
+You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
+
+Available tools:
+- read: Read file contents
+- bash: Execute bash commands (ls, grep, find, etc.)
+- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
+- write: Create or overwrite files
+- todos: todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] }, add_task:{ phase:'phase-1', content:'Task 2' }, update:{ id:'task-1', status:'completed' }, replace:{ phases:[{ name:'New Phase', tasks:[{content:'Task'}] }] }, remove_task:{ id:'task-2' }, list:{} })
+- memory: Store and search text memories
+- echo: Use `echo` to repeat a message back to the user.
+- system_info: Use `system_info` to retrieve diagnostic information about the host system.
+
+In addition to the tools above, you may have access to other custom tools depending on the project.
+
+Guidelines:
+- Use bash for file operations like ls, rg, find
+- Use read to examine files instead of cat or sed.
+- Use edit for precise changes (edits[].oldText must match exactly)
+- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
+- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
+- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.
+- Use write only for new files or complete rewrites.
+- IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.
+- Nested format: { op: { params } } e.g., { add_phase: { name: 'Phase 1', tasks: [{ content: 'Task 1' }] } }
+- Operations:
+- - add_phase({ name: string, tasks?: [{ content, status?, notes?, details? }] }) - Create a new phase with optional tasks
+- - add_task({ phase: 'phase-1', content: string, notes?, details? }) - Add task to existing phase
+- - update({ id: 'task-1', status?, content?, notes?, details? }) - Modify task
+- - remove_task({ id: 'task-1' }) - Delete task
+- - replace({ phases: [{ name: string, tasks?: [{ content, status?, notes?, details? }] }] }) - Replace entire todo list
+- - list({}) - View current todos
+- Status: pending, in_progress, completed, abandoned. Auto-normalize: exactly ONE in_progress task.
+- After todos: '✅ Updated: X remaining, Y completed'. Suggest next action or continue.
+- Examples:
+- todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design endpoints' }, { content: 'Auth middleware' }] } })
+- todos({ add_task: { phase: 'phase-1', content: 'Implement user login' } })
+- todos({ update: { id: 'task-2', status: 'completed', details: 'Login endpoints done' } })
+- todos({ remove_task: { id: 'task-3' } })
+- todos({ replace: { phases: [{ name: 'Phase 1', tasks: [{ content: 'Task 1' }] }] } })
+- todos({ list: {} })
+- Add: memory({ action: 'add', text: 'Important fact', tags?: ['tag1', 'tag2'] })
+- List: memory({ action: 'list' })
+- Get: memory({ action: 'get', id: <number> })
+- Delete: memory({ action: 'delete', id: <number> })
+- Clear: memory({ action: 'clear' })
+- Search: memory({ action: 'search', query: 'text' })
+- Memories persist in session and support branching.
+- Use echo when you need to confirm or highlight a message.
+- The message parameter should be clear and concise.
+- Use system_info when asked about the environment, OS, or system resources.
+- The tool returns platform, architecture, memory stats, CPU info, and uptime.
+- Be concise in your responses
+- Show file paths clearly when working with files
+
+Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
+- Main documentation: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/README.md
+- Additional docs: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/docs
+- Examples: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/examples (extensions, custom tools, SDK)
+- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
+- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
+- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
+
+# Project Context
+
+Project-specific instructions and guidelines:
+
+## /home/quangtynu/Qcoder/qclaw/AGENTS.md
+
+```md
+# AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
+
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
+## 🎯 MISSION
+
+Build **piclaw** into a **production-grade AI coder **.
+
+You are **PiClaw — Autonomous Development Coder**. Your all code is this root directory.
+
+You must use all tools that system report to you. you must use it.
+
+Your objective:
+
+> Deliver a **full-stack coding agent system** with TUI, memory, tools, multi-provider LLM, and extensible architecture.
+
+You operate in a continuous loop:
+
+```
+
+plan → code → test → evaluate → decide → repeat
+
+```
+
+No human intervention required.
+
+---
+
+
+
+--- Message 56 (ASSISTANT, 2026-05-05T07:53:53.730Z) ---
+[thinking]
+[toolCall]
+
+--- Message 57 (TOOL_RESULT, 2026-05-05T07:53:58.006Z) ---
+954:--- AVAILABLE TOOLS (9) ---
+2970:--- AVAILABLE TOOLS (9) ---
+4508:- `AVAILABLE TOOLS` bị lặp lại nhiều lần (mỗi lần đọc xong một phần của subtool_loader)
+
+
+--- Message 58 (ASSISTANT, 2026-05-05T07:53:58.008Z) ---
+[thinking]
+[toolCall]
+
+--- Message 59 (TOOL_RESULT, 2026-05-05T07:54:01.497Z) ---
+--- AVAILABLE TOOLS (9) ---
+• read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to read (relative or absolute)"
+    },
+    "offset": {
+      "type": "number",
+      "description": "Line number to start reading from (1-indexed)"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of lines to read"
+    }
+  }
+}
+• bash: Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+
+[6927 more lines in file. Use offset=984 to continue.]
+
+--- Message 60 (ASSISTANT, 2026-05-05T07:54:01.505Z) ---
+
+
+--- Message 61 (USER, 2026-05-05T07:56:25.169Z) ---
+tôi nói bạn làm đoạn này chưa đúng này: xử lý loger là phải để full: bạn rút xuongs là không đúng. trả lại như cũ cho nó đi : Tôi đã fix xong task-34. Bây giờ tiếp tục fix context-logger.ts.                                                                                                                       
+
+                                                                                                                                                                                        
+ edit src/context-logger.ts                                                                                                                                                             
+                                                                                                                                                                                        
+      ...                                                                                                                                                                               
+   92    if (opts.includeTools && context.tools && context.tools.length > 0) {                                                                                                          
+   93       output += `--- AVAILABLE TOOLS (${context.tools.length}) ---\n`;                                                                                                            
+   94       for (const tool of context.tools) {                                                                                                                                         
+   95          output += `• ${tool.name}: ${tool.description}\n`;                                                                                                                       
+ - 96          if (tool.parameters) {                                                                                                                                                   
+ - 97             output += `  Parameters: ${JSON.stringify(tool.parameters, null, 2)}\n`;                                                                                              
+ + 96          // NOTE: Don't dump full JSON schema - it's too verbose!                                                                                                                 
+ + 97          // Only show parameter names if available (not full schema)                                                                                                              
+ + 98          if (tool.parameters?.properties) {                                                                                                                                       
+ + 99             const paramNames = Object.keys(tool.parameters.properties).join(", ");                                                                                                
+ +100             output += `  Parameters (${paramNames.length > 60 ? paramNames.slice(0, 60) + "..." : paramNames})\n`;                                                                
+   98          }                                                                                                                                                                        
+   99       }                                                                                                                                                                           
+  100       output += "\n";                                                                                                                                                             
+  101    }                                                                                                                                                                              
+      ...
+
+--- Message 62 (ASSISTANT, 2026-05-05T07:56:25.181Z) ---
+[thinking]
+
+
+
+Được rồi, revert lại code cũ cho context-logger.ts:
+
+[toolCall]
+
+--- Message 63 (TOOL_RESULT, 2026-05-05T07:56:30.416Z) ---
+Successfully replaced 1 block(s) in src/context-logger.ts.
+
+--- Message 64 (ASSISTANT, 2026-05-05T07:56:30.423Z) ---
+[thinking]
+
+
+Đã revert! Giờ build lại và xem kết quả:
+
+[toolCall]
+
+--- Message 65 (TOOL_RESULT, 2026-05-05T07:56:40.887Z) ---
+
+Total loaded: 268 models
+
+✅ Generated: /home/quangtynu/Qcoder/qclaw/src/extensions/providers/models/custom-models.generated.ts
+
+
+
+--- Message 66 (ASSISTANT, 2026-05-05T07:56:40.889Z) ---
+[thinking]
+
+
+Done! ✅ 
+
+Tóm lại:
+- **Đã fix** `subtool-loader.ts`: Schema giờ chỉ ~15 dòng thay vì 4000+ dòng → bệnh gốc đã được chữa
+- **Giữ nguyên** `context-logger.ts`: Vẫn dump đầy đủ để debug được
+
+Context log mới sẽ ngắn hơn nhiều nhờ schema gốc đã tối ưu chứ không phải do bỏ nội dung logger! 🎯
+
+--- Message 67 (USER, 2026-05-05T07:57:07.773Z) ---
+git add -A
+
+--- Message 68 (ASSISTANT, 2026-05-05T07:57:07.779Z) ---
+[thinking]
+[toolCall]
+
+--- Message 69 (TOOL_RESULT, 2026-05-05T07:57:11.548Z) ---
+(no output)
+
+--- Message 70 (ASSISTANT, 2026-05-05T07:57:11.550Z) ---
+[thinking]
+[toolCall]
+
+--- Message 71 (TOOL_RESULT, 2026-05-05T07:57:18.105Z) ---
+On branch main
+Your branch is up to date with 'origin/main'.
+
+Changes to be committed:
+  (use "git restore --staged <file>..." to unstage)
+	modified:   .piclaw/agent/todos.json
+	new file:   .piclaw/context/context.log
+	modified:   src/cli/args.ts
+	modified:   src/config/config-manager.ts
+	new file:   src/context-logger.ts
+	modified:   src/extensions/providers/models/custom-models.generated.ts
+	modified:   src/main.ts
+	modified:   src/piclaw-core.ts
+	modified:   src/tools/subtool-loader.ts
+
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+	modified:   .piclaw/context/context.log
+
+
+
+--- Message 72 (ASSISTANT, 2026-05-05T07:57:18.116Z) ---
+
+
+--- Message 73 (USER, 2026-05-05T07:57:32.487Z) ---
+git commit toàn bộ đi. cứ làm commit toàn bộ tôi cái .
+
+--- AVAILABLE TOOLS (9) ---
+• read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to read (relative or absolute)"
+    },
+    "offset": {
+      "type": "number",
+      "description": "Line number to start reading from (1-indexed)"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of lines to read"
+    }
+  }
+}
+• bash: Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Bash command to execute"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Timeout in seconds (optional, no default timeout)"
+    }
+  }
+}
+• edit: Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "edits"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to edit (relative or absolute)"
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "oldText",
+          "newText"
+        ],
+        "properties": {
+          "oldText": {
+            "type": "string",
+            "description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+          },
+          "newText": {
+            "type": "string",
+            "description": "Replacement text for this targeted edit."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+    }
+  },
+  "additionalProperties": false
+}
+• write: Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "content"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to write (relative or absolute)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Content to write to the file"
+    }
+  }
+}
+• todos: Simple todo list: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes one in_progress task.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "replace": {
+      "type": "object",
+      "required": [
+        "phases"
+      ],
+      "properties": {
+        "phases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "name"
+            ],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "tasks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "content"
+                  ],
+                  "properties": {
+                    "content": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "const": "pending"
+                        },
+                        {
+                          "type": "string",
+                          "const": "in_progress"
+                        },
+                        {
+                          "type": "string",
+                          "const": "completed"
+                        },
+                        {
+                          "type": "string",
+                          "const": "abandoned"
+                        }
+                      ]
+                    },
+                    "notes": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_phase": {
+      "type": "object",
+      "required": [
+        "name"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "content"
+            ],
+            "properties": {
+              "content": {
+                "type": "string"
+              },
+              "status": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "const": "pending"
+                  },
+                  {
+                    "type": "string",
+                    "const": "in_progress"
+                  },
+                  {
+                    "type": "string",
+                    "const": "completed"
+                  },
+                  {
+                    "type": "string",
+                    "const": "abandoned"
+                  }
+                ]
+              },
+              "notes": {
+                "type": "string"
+              },
+              "details": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "add_task": {
+      "type": "object",
+      "required": [
+        "phase",
+        "content"
+      ],
+      "properties": {
+        "phase": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "update": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "status": {
+          "anyOf": [
+            {
+              "type": "string",
+              "const": "pending"
+            },
+            {
+              "type": "string",
+              "const": "in_progress"
+            },
+            {
+              "type": "string",
+              "const": "completed"
+            },
+            {
+              "type": "string",
+              "const": "abandoned"
+            }
+          ]
+        },
+        "content": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        }
+      }
+    },
+    "remove_task": {
+      "type": "object",
+      "required": [
+        "id"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        }
+      }
+    },
+    "list": {
+      "type": "object",
+      "properties": {}
+    }
+  }
+}
+• memory: Store and retrieve arbitrary text snippets with optional tags. Actions: add, list, get, delete, clear, search
+  Parameters: {}
+• echo: Echo back a message. This is a demonstration tool for custom tool registration.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Message to echo back"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
+• system_info: Get system information (OS, architecture, memory, CPU, etc)
+  Parameters: {
+  "type": "object",
+  "properties": {}
+}
+• subtool_loader: ⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.
+Only use in trusted environments with controlled inputs.
+
+Unified tool for system operations.
+
+Core Computer Use tools (from @mariozechner/pi-coding-agent):
+- get_schema, bash, ls, find, grep, read, edit, write
+
+Extended sub-tools (custom in src/tools/sub-tools/):
+- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis
+- make, npm, systemctl, journalctl, ps, kill, crontab
+- apt, yum, df, du, ping, traceroute, nslookup, dig
+- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg
+- update, backup, password, weather, time, ufw, at, quota
+- iso, free, iostat, netstat, ss
+- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz
+- xmlstarlet, json_pp, yamllint, tomlq, hjson
+- archive, zip, 7z, xz
+- svn, hg, darcs, fossil, bzr, cvs
+- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc
+
+Use "get_schema" to see argument details for any sub-tool.
+
+Example: {"subtool":"bash","args":{"command":"echo hello"}}
+  Parameters: {
+  "anyOf": [
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "get_schema"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "bash"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ls"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "find"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "grep"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "read"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "edit"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "write"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "git"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "docker-compose"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "podman"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "k8s"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kubectl-apply"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "helm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "oc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nomad"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vagrant"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "virsh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "qemu"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lxc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemd-nspawn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "chroot"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "flatpak"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sqlite3"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mysql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "psql"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mongodb"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka-console"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pip"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cargo"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "go"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "maven"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dotnet"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cmake"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yarn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "deno"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "php"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ruby"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ssh"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "http"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "aws"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "terraform"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "db"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kafka"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "redis"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "make"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "npm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "systemctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sysctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iptables"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nft"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lvm"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "lsof"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pstree"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "top"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "htop"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "vmstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mpstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sar"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "mount"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hardware"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dmidecode"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "sensors"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "battery"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "journalctl"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ps"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "kill"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "crontab"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "apt"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yum"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "df"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "du"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ping"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "traceroute"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nslookup"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dig"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "wget"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "tail"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "jq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xmllint"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "scp"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "rsync"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ffmpeg"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "update"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "backup"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "password"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "weather"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "time"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ufw"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "at"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "quota"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iso"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "free"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "iostat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "netstat"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ss"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pandoc"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "wkhtmltopdf"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pdftk"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "ps2pdf"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "enscript"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "graphviz"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xmlstarlet"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "json_pp"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "yamllint"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "tomlq"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hjson"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "archive"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "zip"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "7z"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "xz"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "svn"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "hg"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "darcs"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "fossil"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "bzr"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "cvs"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pacman"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "dnf"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "zypper"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "emerge"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "apk"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pkg"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "nix-env"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "guix"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "spack"
+        },
+        "args": {}
+      }
+    },
+    {
+      "type": "object",
+      "required": [
+        "subtool",
+        "args"
+      ],
+      "properties": {
+        "subtool": {
+          "type": "string",
+          "const": "pkgsrc"
+        },
+        "args": {}
+      }
+    }
+  ]
+}
+
+=== END CONTEXT LOG (2026-05-05T07:57:32.491Z) ===

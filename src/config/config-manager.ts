@@ -20,10 +20,16 @@ export interface PiclawConfig {
 	sessionDir?: string;
 	/** Whether to show verbose logs */
 	verbose?: boolean;
+	/** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
+	contextLogFile?: string;
 }
 
 function getConfigDir(): string {
   return join(homedir(), ".piclaw");
+}
+
+export function getDefaultContextLogFile(cwd: string): string {
+  return join(cwd, ".piclaw", "context", "context.log");
 }
 
 function getConfigFilePath(): string {
@@ -46,6 +52,7 @@ const DEFAULT_CONFIG: PiclawConfig = {
 	],
 	sessionDir: undefined,
 	verbose: false,
+	contextLogFile: undefined,
 };
 
 /**
