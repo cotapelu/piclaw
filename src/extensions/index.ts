@@ -8,6 +8,7 @@
 
 import { registerKiloProvider } from "./providers/kilo-provider.js";
 import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from "./tools/index.js";
+import autoContinueExtension from "./auto-continue-extension.js";
 
 export default function (api: import("@mariozechner/pi-coding-agent").ExtensionAPI) {
   // Register providers
@@ -21,5 +22,6 @@ export default function (api: import("@mariozechner/pi-coding-agent").ExtensionA
   registerEchoTool(api);
   registerSystemInfoTool(api);
 
-
+  // Register Auto Continue Extension
+  autoContinueExtension(api);
 }
