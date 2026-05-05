@@ -58,7 +58,7 @@ export interface TodoToolDetails {
 // Schemas
 // ============================================================================
 
-const StatusEnum = Type.Union([Type.Literal("pending"), Type.Literal("in_progress"), Type.Literal("completed"), Type.Literal("abandoned")]);
+const StatusEnum = Type.String();
 
 const InputTask = Type.Object({
   content: Type.String(),
@@ -520,7 +520,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
   return {
     name: "todos",
     label: "Todo",
-    description: "Simple todo list: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes one in_progress task.",
+    description: "Simple todo list: add_phase, add_task, update, remove_task, replace, list. Status: pending, in_progress, completed, abandoned. Auto-normalizes exactly ONE in_progress task.",
     promptSnippet: "todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] }, add_task:{ phase:'phase-1', content:'Task 2' }, update:{ id:'task-1', status:'completed' }, replace:{ phases:[{ name:'New Phase', tasks:[{content:'Task'}] }] }, remove_task:{ id:'task-2' }, list:{} })",
     promptGuidelines: [
       "IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.",
@@ -532,7 +532,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
       "  - remove_task({ id: 'task-1' }) - Delete task",
       "  - replace({ phases: [{ name: string, tasks?: [{ content, status?, notes?, details? }] }] }) - Replace entire todo list",
       "  - list({}) - View current todos",
-      "Status: pending, in_progress, completed, abandoned. Auto-normalize: exactly ONE in_progress task.",
+      "Status: pending, in_progress, completed, abandoned (auto-normalize: exactly ONE in_progress task).",
       "After todos: '✅ Updated: X remaining, Y completed'. Suggest next action or continue.",
       "Examples:",
       "  todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design endpoints' }, { content: 'Auth middleware' }] } })",

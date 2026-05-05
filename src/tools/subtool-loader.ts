@@ -233,12 +233,12 @@ async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, c
  * This reduces the JSON Schema from ~4000+ lines to ~15 lines.
  */
 export function createSubLoaderToolDefinition(cwd: string) {
-  // Schema: { subtool: "tool1" | "tool2" | ..., args: any }
-  // Much more compact than Union of Objects!
+  // Schema: { subtool: string, args: any }
+  // Using Type.String() instead of Type.Union(Type.Literal(...))
+  // to avoid generating huge JSON Schema (~4000 lines)
+  // LLM can still find valid tool names in the description below.
   const schema = Type.Object({
-    subtool: Type.Union(
-      subToolNames.map((name) => Type.Literal(name))
-    ),
+    subtool: Type.String(),
     args: Type.Any(),
   });
 
