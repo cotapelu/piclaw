@@ -393,7 +393,6 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
     ],
     parameters: todoWriteSchema,
     executionMode: "sequential" as const,
-    renderShell: "self" as const,
 
     async execute(_toolCallId: string, params: any, _signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
       let p: any;

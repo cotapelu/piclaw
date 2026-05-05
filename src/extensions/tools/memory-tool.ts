@@ -239,8 +239,6 @@ export function registerMemoryTool(api: ExtensionAPI): void {
           return new Text(th.fg("muted", result.content?.[0]?.text || ""), 0, 0);
       }
     },
-
-    renderShell: "self",
   };
 
   api.registerTool(tool);

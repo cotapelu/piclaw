@@ -56,7 +56,6 @@ describe('subtool_loader', () => {
       const tool = createSubLoaderToolDefinition(cwd);
       expect(tool.renderCall).toBeDefined();
       expect(tool.renderResult).toBeDefined();
-      expect(tool.renderShell).toBe('self');
     });
   });
 

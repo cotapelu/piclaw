@@ -339,9 +339,25 @@
           "status": "pending"
         }
       ]
+    },
+    {
+      "id": "phase-12",
+      "name": "Demo Phase",
+      "tasks": [
+        {
+          "id": "task-54",
+          "content": "Test todos tool",
+          "status": "pending"
+        },
+        {
+          "id": "task-55",
+          "content": "Create sample task",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 54,
-  "nextPhaseId": 12,
-  "updatedAt": "2026-05-04T15:40:37.672Z"
+  "nextTaskId": 56,
+  "nextPhaseId": 13,
+  "updatedAt": "2026-05-05T03:30:42.866Z"
 }

@@ -18,13 +18,14 @@ import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";
 
 async function main(args: string[] = process.argv.slice(2)): Promise<void> {
+  let config: any = undefined;
   try {
     // 1. Parse CLI arguments
     const { opts, cliOverrides } = parseOptions(args);
     const cwd = opts.cwd ?? process.cwd();
 
     // 2. Load persistent config (merged with CLI overrides)
-    const config = loadConfig(cliOverrides);
+    config = loadConfig(cliOverrides);
 
     // 3. Validate API keys for configured providers
     validateApiKeys(config);

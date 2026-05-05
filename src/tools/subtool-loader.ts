@@ -328,6 +328,5 @@ export function createSubLoaderToolDefinition(cwd: string) {
     },
     renderCall: renderSubtoolLoaderCall,
     renderResult: renderSubtoolLoaderResult,
-    renderShell: "self" as const,
   };
 }
