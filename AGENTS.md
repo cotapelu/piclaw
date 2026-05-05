@@ -1,6 +1,8 @@
 ```md
 # AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
 
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
 ## 🎯 MISSION
 
 Build **piclaw** into a **production-grade AI coding assistant**.
