@@ -139,6 +139,51 @@ function buildPhaseFromInput(input: { name: string; tasks?: any[] }, phaseId: st
 // Normalization - Handle common LLM output errors
 // ============================================================================
 
+/**
+ * Parse value that could be string or object into proper object.
+ * Handles: '{...}', '{"name":"..."}', { name: {...} }
+ */
+function parseValue(value: any): any {
+  if (!value) return value;
+  if (typeof value === 'object') {
+    // Check if object has a field that's a JSON string
+    if (value.name && typeof value.name === 'string' && value.name.startsWith('{')) {
+      try { return JSON.parse(value.name); } catch {}
+    }
+    return value;
+  }
+  if (typeof value === 'string') {
+    if (value.startsWith('{')) {
+      try { return JSON.parse(value); } catch {}
+    }
+  }
+  return value;
+}
+
+/**
+ * Normalize ID to standard format: task-1, phase-1
+ * Handles: "1", "task1", "task_1", "Task 1" -> "task-1"
+ */
+function normalizeId(id: string | undefined, type: 'task' | 'phase'): string | undefined {
+  if (!id) return id;
+  const s = String(id).trim().toLowerCase();
+  const prefix = type;
+  // Already correct: task-1, phase-1
+  if (/^task-\d+$/.test(s) || /^phase-\d+$/.test(s)) return s;
+  // Without prefix: 1, 2 -> task-1, phase-1
+  if (/^\d+$/.test(s)) return `${prefix}-${s}`;
+  // With prefix no dash: task1, phase1 -> task-1, phase-1  
+  const match1 = s.match(new RegExp(`^${prefix}(\\d+)$`));
+  if (match1) return `${prefix}-${match1[1]}`;
+  // task_1, phase_1 -> task-1
+  const match2 = s.match(new RegExp(`^${prefix}_(\\d+)$`));
+  if (match2) return `${prefix}-${match2[1]}`;
+  // "Task 1", "Phase 1" -> task-1
+  const match3 = s.match(new RegExp(`^${prefix}\\s+(\\d+)$`));
+  if (match3) return `${prefix}-${match3[1]}`;
+  return s;
+}
+
 function normalizeParams(params: any): any {
   // Handle string input (JSON string)
   if (typeof params === "string") {
@@ -152,36 +197,33 @@ function normalizeParams(params: any): any {
 
   const p = { ...params };
 
-  // Parse stringified operation values
-  if (p.add_phase && typeof p.add_phase === "string") {
-    try { p.add_phase = JSON.parse(p.add_phase); } catch { p.add_phase = null; }
-  }
-  if (p.replace?.phases && typeof p.replace.phases === "string") {
-    try { p.replace.phases = JSON.parse(p.replace.phases); } catch { p.replace = null; }
+
+  // add_phase: could be string, object, or wrapped
+  if (p.add_phase) p.add_phase = parseValue(p.add_phase);
+
+  // add_task
+  if (p.add_task) {
+    p.add_task = parseValue(p.add_task);
+    if (p.add_task?.phase) p.add_task.phase = normalizeId(p.add_task.phase, 'phase');
   }
 
-  // Handle add_phase.name being a stringified object (LLM puts whole object in name)
-  if (p.add_phase && typeof p.add_phase === "object") {
-    const ap = p.add_phase as any;
-    if (ap.name && typeof ap.name === "string" && ap.name.startsWith("{")) {
-      try {
-        const parsed = JSON.parse(ap.name);
-        if (parsed && typeof parsed === "object") {
-          p.add_phase = parsed;
-        }
-      } catch {}
-    }
+  // update
+  if (p.update) {
+    p.update = parseValue(p.update);
+    if (p.update?.id) p.update.id = normalizeId(p.update.id, 'task');
   }
 
-  // Handle tasks as string (comma-separated)
-  if (p.add_phase && typeof p.add_phase === "object") {
-    const ap = p.add_phase as any;
-    if (ap.tasks && typeof ap.tasks === "string") {
-      try {
-        ap.tasks = JSON.parse(ap.tasks);
-      } catch {
-        ap.tasks = ap.tasks.split(",").map((s: string) => ({ content: s.trim() }));
-      }
+  // remove_task
+  if (p.remove_task) {
+    p.remove_task = parseValue(p.remove_task);
+    if (p.remove_task?.id) p.remove_task.id = normalizeId(p.remove_task.id, 'task');
+  }
+
+  // replace
+  if (p.replace) {
+    p.replace = parseValue(p.replace);
+    if (p.replace?.phases && Array.isArray(p.replace.phases)) {
+      p.replace.phases = p.replace.phases.map((ph: any) => parseValue(ph));
     }
   }
 
