@@ -45,6 +45,9 @@ You MUST prioritize:
 ```
 
 @mariozechner/pi-coding-agent   (PRIMARY)
+@mariozechner/pi-agent-core (if need)
+@mariozechner/pi-ai (if need)
+@mariozechner/pi-tui (if need)
 
 ````
 
