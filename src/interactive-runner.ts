@@ -7,6 +7,9 @@
  * Separated from core bootstrapping for cleaner architecture.
  */
 
+// Apply persistent command history patches
+import "./command-history-patch.js";
+
 import { AgentSessionRuntime } from "@mariozechner/pi-coding-agent";
 import { InteractiveMode } from "@mariozechner/pi-coding-agent";
 import type { InteractiveModeOptions } from "@mariozechner/pi-coding-agent";
