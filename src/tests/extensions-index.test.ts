@@ -31,7 +31,6 @@ vi.mock('../tools/subtool-loader.js', () => ({
 import extensionIndex from '../extensions/index.js';
 import { registerKiloProvider } from '../extensions/providers/kilo-provider.js';
 import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from '../extensions/tools/index.js';
-import autoMemory from '../extensions/auto-memory.js';
 
 describe('extensions/index', () => {
   beforeEach(() => {
@@ -74,12 +73,6 @@ describe('extensions/index', () => {
     expect(registerSystemInfoTool).toHaveBeenCalledWith(mockApi);
   });
 
-  it('should load auto-memory integration', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(autoMemory).toHaveBeenCalledWith(mockApi);
-  });
-
   it('should call all registrations in correct order (not guaranteed but all called)', () => {
     const mockApi = createMockApi();
     extensionIndex(mockApi);
@@ -89,6 +82,5 @@ describe('extensions/index', () => {
     expect(registerMemoryTool).toHaveBeenCalledTimes(1);
     expect(registerEchoTool).toHaveBeenCalledTimes(1);
     expect(registerSystemInfoTool).toHaveBeenCalledTimes(1);
-    expect(autoMemory).toHaveBeenCalledTimes(1);
   });
 });

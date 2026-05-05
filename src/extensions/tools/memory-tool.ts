@@ -101,7 +101,7 @@ export function registerMemoryTool(api: ExtensionAPI): void {
     name: "memory",
     label: "Memory",
     description: "Store and retrieve arbitrary text snippets with optional tags. Actions: add, list, get, delete, clear, search",
-    promptSnippet: "Store and search text memories",
+    promptSnippet: "Proactively store important facts, decisions, code snippets, URLs with tags. Memories persist across sessions and help track project history.",
     promptGuidelines: [
       "Add: memory({ action: 'add', text: 'Important fact', tags?: ['tag1', 'tag2'] })",
       "List: memory({ action: 'list' })",
@@ -110,10 +110,24 @@ export function registerMemoryTool(api: ExtensionAPI): void {
       "Clear: memory({ action: 'clear' })",
       "Search: memory({ action: 'search', query: 'text' })",
       "Memories persist in session and support branching.",
+      "If the user says 'remember this', 'save this', 'note that', or provides important information (facts, decisions, code snippets, URLs, deadlines), proactively use the memory tool with action 'add' to store it.",
+      "Include relevant tags: e.g., ['project', 'code'], ['meeting'], ['decision'], ['research']",
+      "Use memory.search to retrieve stored information when the user asks 'what did we say about X', 'do you remember', or references past info.",
+      "Prefer storing concise, factual statements rather than long conversational exchanges.",
+      "When uncertain if something should be remembered, ask the user: 'Should I save this to memory?'",
     ],
     parameters: {},
 
     async execute(_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: any, _ctx: any) {
+      // Parse JSON string if needed (like todos-tool)
+      if (typeof params === "string") {
+        try {
+          params = JSON.parse(params);
+        } catch (e: any) {
+          return { content: [{ type: "text", text: `Error: Invalid JSON - ${e.message}` }], details: { action: "unknown", memories: [...memories], nextId, error: "Invalid JSON" }, isError: false };
+        }
+      }
+
       const action = params.action as string;
 
       switch (action) {

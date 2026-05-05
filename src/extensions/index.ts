@@ -8,7 +8,6 @@
 
 import { registerKiloProvider } from "./providers/kilo-provider.js";
 import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from "./tools/index.js";
-import autoMemory from "./auto-memory.js";
 
 export default function (api: import("@mariozechner/pi-coding-agent").ExtensionAPI) {
   // Register providers
@@ -22,6 +21,5 @@ export default function (api: import("@mariozechner/pi-coding-agent").ExtensionA
   registerEchoTool(api);
   registerSystemInfoTool(api);
 
-  // Load auto-memory integration
-  autoMemory(api);
+
 }
