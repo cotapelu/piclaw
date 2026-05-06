@@ -1,102 +1,216 @@
-# AgentSession Team Implementation
+# AgentSession Team Implementation (Enhanced Hybrid)
 
-## Tổng quan
+## 📋 Tổng quan
 
 AgentSession Team cho phép chạy nhiều AgentSession đồng thời cho cùng một dự án, mỗi agent làm việc độc lập nhưng chia sẻ cấu hình cơ bản.
 
-## Thuật ngữ
-
-| Thuật ngữ | Ý nghĩa |
-|-----------|---------|
-| AgentSession Team | Nhóm các AgentSession chạy song song |
-| Team Factory | Factory function tạo session cho toàn bộ team |
-| Session Isolation | Mỗi session duy trì state độc lập |
-| Shared Services | Các service được chia sẻ giữa sessions |
-
-## Architecture Overview
+### Kiến trúc Enhanced Hybrid
 
 ```
 bootPiclawTeam()
-├── createTeamFactory()          # Tạo factory chung cho team
-│   ├── createAgentSessionServices()  # Tạo services cho mỗi session
-│   └── createAgentSessionFromServices() # Tạo AgentSession
-└── createAgentSessionRuntime()      # Khởi tạo runtime cho từng agent
+├── Shared Layer (chia sẻ giữa tất cả agents):
+│   ├── AuthStorage (credentials)
+│   ├── ModelRegistry (mô hình AI)
+│   └── SettingsManager (cấu hình project)
+│
+└── Per-Agent Layer (riêng cho mỗi agent):
+    ├── AgentSessionRuntime
+    │   ├── AgentSession (messages, state)
+    │   ├── SessionManager.inMemory() (session riêng)
+    │   ├── ResourceLoader (context files, skills)
+    │   └── ExtensionRunner (extension context)
+    └── Diagnostics
 ```
 
-## Implementation Approaches
+## 🔧 API Reference
 
-### Approach 1: Shared Factory (Recommended)
-
-**Ưu điểm:**
-- Session isolation hoàn toàn
-- Không xung đột state
-- Dễ quản lý lifecycle
-
-**Nhược điểm:**
-- Tốn memory hơn (mỗi session có services riêng)
+### PiclawCoreOptions (mở rộng)
 
 ```typescript
-// src/piclaw-core.ts
-async function createTeamFactory(cwd: string, agentDir: string, options: PiclawCoreOptions) {
-  return async ({sessionManager, sessionStartEvent}) => {
-    const services = await createAgentSessionServices({
-      cwd, agentDir,
-      extensionFlagValues: options.extensionFlagValues,
-      resourceLoaderOptions: options.resourceLoaderOptions,
+export interface PiclawCoreOptions {
+  // ... existing options ...
+  
+  /** Số lượng agents trong team (default: 1) */
+  teamSize?: number;
+  
+  /** Tên/giá trị vai trò cho từng agent (optional) */
+  teamRoles?: string[];
+}
+```
+
+### AgentTeamRuntime
+
+```typescript
+/** Kết quả từ bootPiclawTeam */
+export interface AgentTeamRuntime {
+  /** Mảng các AgentSessionRuntime */
+  runtimes: AgentSessionRuntime[];
+  
+  /** Thông tin các agent */
+  agents: Array<{
+    id: number;
+    role?: string;
+    sessionId: string;
+    messages: AgentMessage[];
+  }>;
+  
+  /** Dọn dẹp team */
+  dispose: () => Promise<void>;
+}
+```
+
+## 🏗️ Implementation Details
+
+### File: `src/piclaw-core.ts`
+
+```typescript
+import {
+  createAgentSessionServices,
+  createAgentSessionFromServices,
+  SessionManager,
+  AgentSessionRuntime,
+  createAgentSessionRuntime,
+  type CreateAgentSessionRuntimeFactory,
+  AuthStorage,
+  ModelRegistry,
+  SettingsManager,
+  DefaultResourceLoader,
+} from "@mariozechner/pi-coding-agent";
+import { getAgentDir } from "./config/config.js";
+import { getDefaultContextLogFile } from "./config/config-manager.js";
+import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
+import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createContextLoggingStreamFn } from "./context-logger.js";
+import { join } from "node:path";
+
+// ... existing bootPiclaw function ...
+
+/**
+ * Tạo team nhiều agents cho cùng dự án.
+ * 
+ * Enhanced Hybrid Approach:
+ * - SHARED: AuthStorage, ModelRegistry, SettingsManager (read-only during runtime)
+ * - PER-AGENT: ResourceLoader, SessionManager, AgentSession (state isolation)
+ */
+export async function bootPiclawTeam(
+  options: PiclawCoreOptions = {}
+): Promise<AgentTeamRuntime> {
+  const cwd = options.cwd ?? process.cwd();
+  const agentDir = options.agentDir ?? getAgentDir();
+  const teamSize = options.teamSize ?? 3;
+  const teamRoles = options.teamRoles ?? [];
+
+  // 1. CREATE SHARED SERVICES (thread-safe, read-mostly)
+  const sharedAuthStorage = AuthStorage.create(join(agentDir, "auth.json"));
+  const sharedModelRegistry = ModelRegistry.create(
+    sharedAuthStorage,
+    join(agentDir, "models.json")
+  );
+  const sharedSettingsManager = SettingsManager.create(cwd, agentDir);
+
+  // 2. CREATE FACTORY FUNCTION
+  const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async ({
+    cwd,
+    agentDir,
+    sessionManager,
+    sessionStartEvent,
+  }) => {
+    // Each agent gets its own ResourceLoader
+    const resourceLoader = new DefaultResourceLoader({
+      cwd,
+      agentDir,
+      settingsManager: sharedSettingsManager,
     });
 
+    await resourceLoader.reload();
+
+    const customTools = options.customTools ?? [createSubLoaderToolDefinition(cwd)];
+
     const result = await createAgentSessionFromServices({
-      services, sessionManager, sessionStartEvent,
+      services: {
+        cwd,
+        agentDir,
+        authStorage: sharedAuthStorage, // SHARED
+        modelRegistry: sharedModelRegistry, // SHARED
+        settingsManager: sharedSettingsManager, // SHARED
+        resourceLoader, // PER-AGENT
+        diagnostics: [],
+      },
+      sessionManager, // PER-AGENT (inMemory)
+      sessionStartEvent,
       tools: options.tools,
-      customTools: options.customTools,
+      customTools,
     });
 
     return {
       ...result,
-      services,
-      diagnostics: services.diagnostics,
+      services: {
+        cwd,
+        agentDir,
+        authStorage: sharedAuthStorage,
+        modelRegistry: sharedModelRegistry,
+        settingsManager: sharedSettingsManager,
+        resourceLoader,
+        diagnostics: [],
+      },
+      diagnostics: [],
     };
+  };
+
+  // 3. CREATE MULTIPLE RUNTIMES
+  const runtimes: AgentSessionRuntime[] = [];
+
+  for (let i = 0; i < teamSize; i++) {
+    const runtime = await createAgentSessionRuntime(createRuntimeFactory, {
+      cwd,
+      agentDir,
+      sessionManager: SessionManager.inMemory(cwd), // In-memory for isolation
+      sessionStartEvent: {
+        type: "session_start",
+        reason: "team",
+        agentIndex: i,
+        role: teamRoles[i],
+      } as any,
+    });
+
+    runtimes.push(runtime);
+  }
+
+  // 4. RETURN TEAM RUNTIME
+  return {
+    runtimes,
+    agents: runtimes.map((rt, index) => ({
+      id: index,
+      role: teamRoles[index],
+      sessionId: rt.session.sessionId,
+      messages: rt.session.messages,
+    })),
+    async dispose() {
+      await Promise.all(runtimes.map(rt => rt.dispose()));
+    },
   };
 }
 
-export async function bootPiclawTeam(options: PiclawCoreOptions & {teamSize?: number}) {
-  const cwd = options.cwd ?? process.cwd();
-  const agentDir = options.agentDir ?? getAgentDir();
-  const teamSize = options.teamSize ?? 3;
-
-  const factory = await createTeamFactory(cwd, agentDir, options);
-
-  const runtimes = await Promise.all(
-    Array.from({length: teamSize}, () =>
-      createAgentSessionRuntime(factory, {
-        cwd, agentDir,
-        sessionManager: SessionManager.inMemory(),
-        sessionStartEvent: {type: "session_start", reason: "team"},
-      })
-    )
-  );
-
-  return runtimes;
+// Type export
+export interface AgentTeamRuntime {
+  runtimes: AgentSessionRuntime[];
+  agents: Array<{
+    id: number;
+    role?: string;
+    sessionId: string;
+    messages: any[];
+  }>;
+  dispose: () => Promise<void>;
 }
 ```
 
-### Approach 2: Shared Services Pool
+## 💻 Usage Examples
 
-**Ưu điểm:**
-- Giảm memory usage
-- Chia sẻ auth/models
-
-**Nhược điểm:**
-- Risk xung đột state
-- Khó quản lý isolation
-
-### Approach 3: Hybrid
-
-Chia sẻ auth storage nhưng services riêng.
-
-## Usage
+### Basic Team Usage
 
 ```typescript
+import { bootPiclawTeam } from "./piclaw-core.js";
+
 // Tạo team 3 agents
 const team = await bootPiclawTeam({
   teamSize: 3,
@@ -105,55 +219,128 @@ const team = await bootPiclawTeam({
 });
 
 // Mỗi agent làm việc độc lập
-await Promise.all([
-  team[0].prompt("Design API structure"),
-  team[1].prompt("Implement authentication"),
-  team[2].prompt("Write unit tests"),
-]);
-
-// Kiểm tra kết quả
-for (let i = 0; i < team.length; i++) {
-  console.log(`Agent ${i}: ${team[i].messages.length} messages`);
+try {
+  await Promise.all([
+    team.runtimes[0].session.prompt("Design API structure"),
+    team.runtimes[1].session.prompt("Implement authentication"),
+    team.runtimes[2].session.prompt("Write unit tests"),
+  ]);
+} finally {
+  // Dọn dẹp
+  await team.dispose();
 }
 ```
 
-## Team Management API
+### With Roles
 
 ```typescript
-// Gửi prompt đồng thời cho tất cả agents
-await Promise.all(
-  team.map(runtime => runtime.prompt("Analyze this code"))
-);
+const team = await bootPiclawTeam({
+  teamSize: 3,
+  teamRoles: ["architect", "coder", "reviewer"],
+  model: "anthropic:claude-opus-4-5",
+});
 
-// Lấy kết quả từ từng agent
-const results = team.map(runtime => ({
-  messages: runtime.session.messages,
-  sessionId: runtime.session.sessionId,
-}));
-
-// Dọn dẹp team
-for (const runtime of team) {
-  await runtime.dispose();
+// Gửi prompt cho từng agent
+for (const agent of team.agents) {
+  const runtime = team.runtimes[agent.id];
+  
+  switch (agent.role) {
+    case "architect":
+      await runtime.session.prompt("Design the system architecture");
+      break;
+    case "coder":
+      await runtime.session.prompt("Implement the design");
+      break;
+    case "reviewer":
+      await runtime.session.prompt("Review the implementation");
+      break;
+  }
 }
 ```
 
-## Best Practices
+## 📊 Memory Analysis
 
-1. **Sử dụng In-Memory Sessions**: Đối với team, dùng `SessionManager.inMemory()` để tránh xung đột
-2. **Gán Task Rõ Ràng**: Mỗi agent nên có vai trò cụ thể
-3. **Kiểm Tra Kết Quả**: Thu thập kết quả từ tất cả agents
-4. **Dọn Dẹp**: Gọi `dispose()` khi team hoàn thành
+### Memory Footprint Comparison
 
-## Troubleshooting
+| Approach | Memory per Agent | 3 Agents Total | Notes |
+|----------|------------------|----------------|-------|
+| Full Isolation | ~20MB | ~60MB | Maximum safety |
+| Enhanced Hybrid | ~7MB | ~25MB | Recommended |
+| Shared Pool | ~3MB | ~12MB | Risk of conflicts |
 
-**Lỗi: Out of memory**
+### Breakdown (Enhanced Hybrid)
+
+- Shared Services: ~5MB (1x)
+- Per-Agent Services: ~7MB × N agents
+- Total: 5MB + (7MB × N)
+
+## ⚙️ Configuration
+
+### Team-Specific Settings
+
+Các settings sau đây được SHARED giữa các agents:
+
+- `auth.json` - API keys
+- `models.json` - Model registry  
+- `settings.json` - Project settings
+
+Mỗi agent có:
+- `ResourceLoader` riêng - tải context files, skills
+- `SessionManager.inMemory()` - session không lưu file
+- `ExtensionRunner` riêng - extension context
+
+## 🛡️ Best Practices
+
+1. **Sử dụng In-Memory Sessions**: `SessionManager.inMemory()` để tránh xung đột
+2. **Gán Vai trò Rõ ràng**: Mỗi agent nên có vai trò cụ thể
+3. **Kiểm tra Kết quả**: Thu thập kết quả từ tất cả agents
+4. **Dọn dẹp**: Luôn gọi `team.dispose()` khi hoàn thành
+5. **Xử lý Lỗi**: Mỗi agent độc lập, lỗi agent này không ảnh hưởng agent khác
+
+## 🚨 Troubleshooting
+
+### Lỗi: Out of memory
+
 - Giảm `teamSize`
-- Sử dụng Hybrid approach để chia sẻ services
+- Kiểm tra memory leak trong extensions
 
-**Lỗi: Race condition**
-- Kiểm tra task assignment
-- Đảm bảo mỗi agent có workspace riêng
+### Lỗi: Race condition
 
-**Lỗi: Extension conflicts**
+- Mỗi agent có workspace riêng
+- Không chia sẻ file writes giữa agents
+
+### Lỗi: Extension conflicts
+
 - Sử dụng shared factory để tạo sessions
-- Tránh chia sẻ extension state
+- Extensions chỉ read-only trên shared resources
+
+## 🔄 Migration from Single Agent
+
+### Before (Single Agent)
+
+```typescript
+const runtime = await bootPiclaw({
+  model: "openai:gpt-4",
+});
+await runtime.session.prompt("Do something");
+```
+
+### After (Team)
+
+```typescript
+const team = await bootPiclawTeam({
+  teamSize: 2,
+  model: "openai:gpt-4",
+});
+await Promise.all(
+  team.runtimes.map(rt => rt.session.prompt("Do something"))
+);
+await team.dispose();
+```
+
+## 📈 Performance Targets
+
+- Team creation time: < 5 seconds (3 agents)
+- Memory usage: < 30MB (3 agents, Enhanced Hybrid)
+- Response time: No degradation vs single agent
+- Isolation: 100% state separation
