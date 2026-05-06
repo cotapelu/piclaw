@@ -11,7 +11,7 @@ const IDLE_TIMEOUT_MS = 60_000; // 60 giây (1 phút)
 const IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
 
 export default function (pi: ExtensionAPI) {
-  let idleTimer: NodeJS.Timeout | null = null;
+  let idleTimer: ReturnType<typeof setTimeout> | null = null;
   let currentCtx: ExtensionContext | null = null;
 
   function resetTimer(ctx: ExtensionContext): void {
