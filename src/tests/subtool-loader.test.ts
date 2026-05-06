@@ -35,21 +35,13 @@ describe('subtool_loader', () => {
       const parameters = tool.parameters as any;
       expect(parameters).toBeDefined();
 
-      // TypeBox Union schemas have anyOf property
-      const anyOf = parameters.anyOf as any[] | undefined;
-      expect(anyOf).not.toBeUndefined();
-      expect(Array.isArray(anyOf!)).toBe(true);
-
-      // Check core subtools from @mariozechner/pi-coding-agent
-      const subtoolNames = anyOf!.map((item: any) => item.properties.subtool.const);
-      expect(subtoolNames).toContain('bash');
-      expect(subtoolNames).toContain('ls');
-      expect(subtoolNames).toContain('find');
-      expect(subtoolNames).toContain('grep');
-      expect(subtoolNames).toContain('read');
-      expect(subtoolNames).toContain('edit');
-      expect(subtoolNames).toContain('write');
-      expect(subtoolNames).toContain('get_schema');
+      // Schema uses Type.String() instead of union of literals for optimization
+      // (avoids ~4000 line JSON Schema, reduces to ~15 lines)
+      expect(parameters.type).toBe('object');
+      expect(parameters.properties.subtool.type).toBe('string');
+      // args uses Type.Any() which doesn't have a 'type' property in JSON Schema
+      // just verify it exists
+      expect(parameters.properties.args).toBeDefined();
     });
 
     it('should have renderCall and renderResult defined', () => {

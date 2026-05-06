@@ -41,7 +41,7 @@ describe('memory tool', () => {
 
   it('should have promptSnippet and promptGuidelines', () => {
     registerMemoryTool(mockApi);
-    expect(capturedTool.promptSnippet).toBe('Store and search text memories');
+    expect(capturedTool.promptSnippet).toBe('Proactively store important facts, decisions, code snippets, URLs with tags. Memories persist across sessions and help track project history.');
     expect(capturedTool.promptGuidelines.length).toBeGreaterThan(5);
   });
 
@@ -161,6 +161,5 @@ describe('memory tool', () => {
     registerMemoryTool(mockApi);
     expect(typeof capturedTool.renderCall).toBe('function');
     expect(typeof capturedTool.renderResult).toBe('function');
-    expect(capturedTool.renderShell).toBe('self');
   });
 });

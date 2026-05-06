@@ -23,6 +23,10 @@ vi.mock('../extensions/auto-memory.js', () => ({
   default: vi.fn(),
 }));
 
+vi.mock('../extensions/auto-continue-extension.js', () => ({
+  default: vi.fn(),
+}));
+
 vi.mock('../tools/subtool-loader.js', () => ({
   createSubLoaderToolDefinition: vi.fn().mockReturnValue({ name: 'mock-tool' }),
 }));
@@ -31,6 +35,7 @@ vi.mock('../tools/subtool-loader.js', () => ({
 import extensionIndex from '../extensions/index.js';
 import { registerKiloProvider } from '../extensions/providers/kilo-provider.js';
 import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from '../extensions/tools/index.js';
+import autoContinueExtension from '../extensions/auto-continue-extension.js';
 
 describe('extensions/index', () => {
   beforeEach(() => {
@@ -41,7 +46,13 @@ describe('extensions/index', () => {
     expect(typeof extensionIndex).toBe('function');
   });
 
-  const createMockApi = () => ({ registerTool: vi.fn() }) as any;
+  const createMockApi = () => ({
+    registerTool: vi.fn(),
+    registerCommand: vi.fn(),
+    registerProvider: vi.fn(),
+    on: vi.fn(),
+    getFlag: vi.fn(),
+  }) as any;
 
   it('should register kilo provider', () => {
     const mockApi = createMockApi();
