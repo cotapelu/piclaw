@@ -1,0 +1,1864 @@
+=== LLM CONTEXT LOG ===
+
+--- SYSTEM PROMPT ---
+You are an expert coding assistant operating inside pi, a coding agent harness. You help users by reading files, executing commands, editing code, and writing new files.
+
+Available tools:
+- read: Read file contents
+- bash: Execute bash commands (ls, grep, find, etc.)
+- edit: Make precise file edits with exact text replacement, including multiple disjoint edits in one call
+- write: Create or overwrite files
+- todos: todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] } })
+- memory: Proactively store important facts, decisions, code snippets, URLs with tags. Memories persist across sessions and help track project history.
+- echo: Use `echo` to repeat a message back to the user.
+
+In addition to the tools above, you may have access to other custom tools depending on the project.
+
+Guidelines:
+- Use bash for file operations like ls, rg, find
+- Use read to examine files instead of cat or sed.
+- Use edit for precise changes (edits[].oldText must match exactly)
+- When changing multiple separate locations in one file, use one edit call with multiple entries in edits[] instead of multiple edit calls
+- Each edits[].oldText is matched against the original file, not after earlier edits are applied. Do not emit overlapping or nested edits. Merge nearby changes into one edit.
+- Keep edits[].oldText as small as possible while still being unique in the file. Do not pad with large unchanged regions.
+- Use write only for new files or complete rewrites.
+- IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.
+- Nested format: { op: { params } } e.g., { add_phase: { name: 'Phase 1', tasks: [{ content: 'Task 1' }] } }
+- Operations:
+- - add_phase({ name: string, tasks?: [{ content, status?, notes?, details? }] }) - Create a new phase with optional tasks
+- - add_task({ phase: 'phase-1', content: string, notes?, details? }) - Add task to existing phase
+- - update({ id: 'task-1', status?, content?, notes?, details? }) - Modify task
+- - remove_task({ id: 'task-1' }) - Delete task
+- - replace({ phases: [{ name: string, tasks?: [{ content, status?, notes?, details? }] }] }) - Replace entire todo list
+- - list({}) - View current todos
+- Status: pending, in_progress, completed, abandoned (auto-normalize: exactly ONE in_progress task).
+- After todos: '✅ Updated: X remaining, Y completed'. Suggest next action or continue.
+- Examples:
+- todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design endpoints' }, { content: 'Auth middleware' }] } })
+- todos({ add_task: { phase: 'phase-1', content: 'Implement user login' } })
+- todos({ update: { id: 'task-2', status: 'completed', details: 'Login endpoints done' } })
+- todos({ remove_task: { id: 'task-3' } })
+- todos({ replace: { phases: [{ name: 'Phase 1', tasks: [{ content: 'Task 1' }] }] } })
+- todos({ list: {} })
+- Add: memory({ action: 'add', text: 'Important fact', tags?: ['tag1', 'tag2'] })
+- List: memory({ action: 'list' })
+- Get: memory({ action: 'get', id: <number> })
+- Delete: memory({ action: 'delete', id: <number> })
+- Clear: memory({ action: 'clear' })
+- Search: memory({ action: 'search', query: 'text' })
+- Memories persist in session and support branching.
+- If the user says 'remember this', 'save this', 'note that', or provides important information (facts, decisions, code snippets, URLs, deadlines), proactively use the memory tool with action 'add' to store it.
+- Include relevant tags: e.g., ['project', 'code'], ['meeting'], ['decision'], ['research']
+- Use memory.search to retrieve stored information when the user asks 'what did we say about X', 'do you remember', or references past info.
+- Prefer storing concise, factual statements rather than long conversational exchanges.
+- When uncertain if something should be remembered, ask the user: 'Should I save this to memory?'
+- Use echo when you need to confirm or highlight a message.
+- The message parameter should be clear and concise.
+- Be concise in your responses
+- Show file paths clearly when working with files
+
+Pi documentation (read only when the user asks about pi itself, its SDK, extensions, themes, skills, or TUI):
+- Main documentation: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/README.md
+- Additional docs: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/docs
+- Examples: /home/quangtynu/Qcoder/qclaw/node_modules/@mariozechner/pi-coding-agent/examples (extensions, custom tools, SDK)
+- When asked about: extensions (docs/extensions.md, examples/extensions/), themes (docs/themes.md), skills (docs/skills.md), prompt templates (docs/prompt-templates.md), TUI components (docs/tui.md), keybindings (docs/keybindings.md), SDK integrations (docs/sdk.md), custom providers (docs/custom-provider.md), adding models (docs/models.md), pi packages (docs/packages.md)
+- When working on pi topics, read the docs and examples, and follow .md cross-references before implementing
+- Always read pi .md files completely and follow links to related docs (e.g., tui.md for TUI API details)
+
+# Project Context
+
+Project-specific instructions and guidelines:
+
+## /home/quangtynu/Qcoder/qclaw/AGENTS.md
+
+```md
+# AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
+
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
+## 🎯 MISSION
+
+Build **piclaw** into a **production-grade AI coder **.
+
+You are **PiClaw — Autonomous Development Coder**. Your all code is this root directory.
+
+You must use all tools that system report to you. you must use it.
+
+Your objective:
+
+> Deliver a **full-stack coding agent system** with TUI, memory, tools, multi-provider LLM, and extensible architecture.
+
+You operate in a continuous loop:
+
+```
+
+plan → code → test → evaluate → decide → repeat
+
+```
+
+No human intervention required.
+
+---
+
+## 🧠 CORE PHILOSOPHY
+
+- **Professional engineering only** — no hacks, no toy code
+- **User-first** — UX is priority
+- **Ship fast, but not broken**
+- **No guessing — read real source**
+- **Exploit existing libraries before writing new code**
+- **Continuously improve everything you touch**
+
+---
+
+## 🔥 HARD RULES (NON-NEGOTIABLE)
+
+### 1. USE EXISTING LIBRARIES FIRST
+
+You MUST prioritize:
+
+```
+
+@mariozechner/pi-coding-agent   (PRIMARY)
+@mariozechner/pi-agent-core (if need)
+@mariozechner/pi-ai (if need)
+@mariozechner/pi-tui (if need)
+
+````
+
+❌ NEVER reimplement functionality already provided  
+❌ NEVER guess API behavior  
+✔ ALWAYS read source in `llm-context/`  
+✔ ALWAYS import from npm packages  
+
+---
+
+### 2. DUAL DEPENDENCY MODEL (MANDATORY)
+
+System uses **two parallel layers**:
+
+#### Runtime (execution)
+
+```ts
+import { x } from "@mariozechner/pi-coding-agent"
+````
+
+✔ Stable
+✔ Versioned
+✔ Production-safe
+
+---
+
+#### Reasoning (LLM understanding)
+
+```
+llm-context/
+```
+
+✔ Full source code
+✔ Used ONLY for reading & understanding
+
+---
+
+### 🚫 STRICT RULE
+
+```
+❌ DO NOT import from llm-context
+❌ DO NOT build from llm-context
+```
+
+```
+✔ ONLY import from npm
+✔ llm-context is READ-ONLY
+```
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```
+piclaw/
+├─ src/                  ← Application code
+├─ node_modules/         ← Runtime dependencies
+├─ llm-context/          ← Source for reasoning ONLY
+└─ package.json
+```
+
+---
+
+## 🧠 DEVELOPMENT WORKFLOW (AUTONOMOUS LOOP)
+
+### 1. PLAN
+
+* Read current code in `/src`
+* Identify missing feature or improvement
+* Read relevant package source in `llm-context/`
+* Design minimal solution
+* Ensure task < 1 day scope
+
+---
+
+### 2. CODE
+
+* Create branch:
+
+```
+git checkout -b feature/<short-name>
+```
+
+* Implement using EXISTING packages
+* Keep code simple and readable
+* Add JSDoc for public APIs
+
+---
+
+### 3. TEST
+
+* Add unit tests for new logic
+* Run:
+
+```
+npm test
+npm run build
+```
+
+* Manual test (TUI if applicable)
+
+---
+
+### 4. EVALUATE
+
+Check:
+
+* Does it work?
+* Does it use existing libraries?
+* Is UX improved?
+* Is it safe (no injection, no unsafe exec)?
+* Is performance acceptable?
+
+---
+
+### 5. DECIDE
+
+If GOOD:
+
+```
+git commit -m "feat: <description>"
+git merge feature/<name>
+```
+
+If BAD:
+
+```
+git reset --hard HEAD
+```
+
+---
+
+## 📦 PACKAGE USAGE STRATEGY
+
+### PRIORITY ORDER
+
+1. `@mariozechner/pi-coding-agent`
+
+---
+
+## 📚 HOW TO USE ANY PACKAGE
+
+### Step 1 — Locate
+
+```
+llm-context/packages/<package>/
+```
+
+---
+
+### Step 2 — Read
+
+* `src/` → implementation
+* `tests/` → real usage
+* `examples/` → workflows
+
+---
+
+### Step 3 — Understand
+
+* Function signatures
+* Types
+* Expected behavior
+
+---
+
+### Step 4 — Use
+
+```ts
+import { something } from "@mariozechner/pi-coding-agent"
+```
+
+---
+
+## 🎯 PRINCIPLE
+
+> **DON'T GUESS — READ SOURCE**
+
+---
+
+## 🖥️ TUI RULES (CRITICAL)
+
+Use ONLY:
+
+```
+@mariozechner/pi-coding-agent
+```
+
+### Requirements:
+
+* Use component system
+* Use `tui.addChild()`
+* Use `tui.requestRender()`
+* DO NOT use raw `console.log` for UI
+
+---
+
+## ❌ FORBIDDEN
+
+* ❌ Rewriting existing library features
+* ❌ Using readline instead of TUI
+* ❌ Importing from llm-context
+* ❌ Guessing APIs
+* ❌ Copying incomplete snippets
+* ❌ Mixing UI systems
+
+---
+
+## 🔐 SECURITY RULES
+
+NEVER introduce:
+
+* Command injection
+* Path traversal
+* Unsafe eval
+* Arbitrary execution
+* Secret leakage
+
+ALWAYS:
+
+* Validate inputs
+* Sanitize outputs
+* Respect file permissions
+
+---
+
+## 🧪 TESTING STANDARD
+
+* Every new logic must have tests
+* Use real scenarios from package tests
+* Avoid flaky async tests
+
+---
+
+## 🚀 PERFORMANCE TARGETS
+
+* UI response < 100ms
+* Memory ops < 50ms
+* No unnecessary re-renders
+* Minimal memory footprint
+
+---
+
+## 🧠 SYSTEM INSIGHT
+
+Architecture follows:
+
+> **Dual Dependency Model**
+
+| Layer       | Purpose   |
+| ----------- | --------- |
+| npm         | execution |
+| llm-context | reasoning |
+
+---
+
+## 🧾 FINAL RULE
+
+```
+npm = RUN
+llm-context = UNDERSTAND
+```
+
+---
+
+## ⚡ AUTONOMY
+
+You have full authority to:
+
+* Modify code
+* Add features
+* Refactor
+* Delete dead code
+* Improve architecture
+
+You do NOT:
+
+* Ask permission
+* Wait for approval
+* Keep bad code
+
+---
+
+## 🧭 GOAL
+
+Transform this project into:
+
+> A **world-class coding agent system**
+
+Comparable to:
+
+* Cursor
+* Claude Code
+* Windsurf
+
+---
+
+## 🧠 FINAL NOTE
+
+Think like a senior engineer.
+
+Every commit must:
+
+* Improve codebase
+* Improve UX
+* Reduce complexity
+* Increase correctness
+
+---
+
+**START NOW.**
+
+
+---
+
+
+
+
+Current date: 2026-05-06
+Current working directory: /home/quangtynu/Qcoder/qclaw/src
+
+--- CONVERSATION (35 messages) ---
+--- Message 0 (USER, 2026-05-06T11:42:01.532Z) ---
+đưa cái file này vào thư mục services thì có vướng gì không? command-history-patch.ts
+
+--- Message 1 (ASSISTANT, 2026-05-06T11:42:01.581Z) ---
+[thinking]
+
+Tôi cần kiểm tra cấu trúc dự án và file `command-history-patch.ts` để đưa ra quyết định chính xác.
+
+[toolCall]
+
+--- Message 2 (TOOL_RESULT, 2026-05-06T11:42:12.129Z) ---
+total 80
+drwxr-xr-x  9 quangtynu quangtynu 4096 May  6 11:41 .
+drwxr-xr-x 12 quangtynu quangtynu 4096 May  6 11:38 ..
+drwxr-xr-x  3 quangtynu quangtynu 4096 May  6 11:41 .piclaw
+drwxr-xr-x  2 quangtynu quangtynu 4096 May  5 13:56 cli
+-rw-r--r--  1 quangtynu quangtynu  634 May  2 01:11 cli.ts
+-rw-r--r--  1 quangtynu quangtynu 2055 May  5 11:16 command-history-patch.ts
+drwxr-xr-x  2 quangtynu quangtynu 4096 May  5 15:26 config
+-rw-r--r--  1 quangtynu quangtynu 4614 May  5 11:16 context-logger.ts
+drwxr-xr-x  4 quangtynu quangtynu 4096 May  6 11:23 extensions
+-rw-r--r--  1 quangtynu quangtynu 3021 May  2 01:11 helpers.ts
+-rw-r--r--  1 quangtynu quangtynu  991 May  5 13:56 interactive-runner.ts
+-rw-r--r--  1 quangtynu quangtynu 3035 May  5 13:56 main.ts
+-rw-r--r--  1 quangtynu quangtynu 6303 May  2 01:11 migrations.ts
+-rw-r--r--  1 quangtynu quangtynu 5034 May  5 13:56 piclaw-core.ts
+drwxr-xr-x  2 quangtynu quangtynu 4096 May  5 11:16 services
+drwxr-xr-x  2 quangtynu quangtynu 4096 May  6 11:23 tests
+drwxr-xr-x  3 quangtynu quangtynu 4096 May  6 11:23 tools
+
+
+--- Message 3 (ASSISTANT, 2026-05-06T11:42:12.131Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 4 (TOOL_RESULT, 2026-05-06T11:42:14.501Z) ---
+/**
+ * Command History Patch
+ *
+ * Patches Editor and InteractiveMode to add persistent command history.
+ * This module should be imported before any InteractiveMode is instantiated.
+ */
+
+import { Editor } from "@mariozechner/pi-tui";
+import { InteractiveMode } from "@mariozechner/pi-coding-agent";
+import { CommandHistoryService } from "./services/command-history.js";
+
+const historyService = CommandHistoryService.getInstance();
+
+// ============================================================================
+// Patch 1: Load history into editor after InteractiveMode.init()
+// ============================================================================
+
+const originalInit = (InteractiveMode.prototype as any).init;
+if (originalInit) {
+	(InteractiveMode.prototype as any).init = async function (...args: any[]) {
+		// Call original init first (creates editor)
+		await originalInit.apply(this, args);
+
+		// Access defaultEditor (private at TS level, but runtime property)
+		const editor = this.defaultEditor;
+		if (editor) {
+			const savedHistory = historyService.load();
+			// @ts-ignore: history is private in Editor class
+			editor.history = savedHistory;
+			// @ts-ignore: historyIndex is private
+			editor.historyIndex = -1;
+		}
+	};
+}
+
+// ============================================================================
+// Patch 2: Auto-save history when addToHistory() is called
+// ============================================================================
+
+const originalAddToHistory = (Editor.prototype as any).addToHistory;
+if (originalAddToHistory) {
+	// Debounce map to avoid excessive writes
+	const saveTimeouts = new WeakMap<Editor, any>();
+
+	(Editor.prototype as any).addToHistory = function (text: string) {
+		const result = originalAddToHistory.call(this, text);
+
+		// Debounce save by 100ms to batch rapid additions
+		let timeout = saveTimeouts.get(this);
+		if (timeout) clearTimeout(timeout);
+
+		timeout = setTimeout(() => {
+			historyService.save(this.history);
+		}, 100);
+
+		saveTimeouts.set(this, timeout);
+
+		return result;
+	};
+}
+
+
+--- Message 5 (ASSISTANT, 2026-05-06T11:42:14.502Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 6 (TOOL_RESULT, 2026-05-06T11:42:25.175Z) ---
+ls: cannot access 'src/services/': No such file or directory
+
+
+Command exited with code 2
+
+--- Message 7 (ASSISTANT, 2026-05-06T11:42:25.176Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 8 (TOOL_RESULT, 2026-05-06T11:42:32.299Z) ---
+total 12
+drwxr-xr-x 2 quangtynu quangtynu 4096 May  5 11:16 .
+drwxr-xr-x 9 quangtynu quangtynu 4096 May  6 11:41 ..
+-rw-r--r-- 1 quangtynu quangtynu 2094 May  5 11:16 command-history.ts
+
+
+--- Message 9 (ASSISTANT, 2026-05-06T11:42:32.300Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 10 (TOOL_RESULT, 2026-05-06T11:43:00.785Z) ---
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+import * as os from 'node:os';
+
+const HISTORY_FILENAME = 'history.json';
+const MAX_ENTRIES = 100;
+
+/**
+ * Service for managing persistent command history across sessions.
+ * Stores history in ~/.piclaw/history.json
+ */
+export class CommandHistoryService {
+	private static instance: CommandHistoryService | null = null;
+
+	/** Get singleton instance */
+	static getInstance(): CommandHistoryService {
+		if (!CommandHistoryService.instance) {
+			CommandHistoryService.instance = new CommandHistoryService();
+		}
+		return CommandHistoryService.instance;
+	}
+
+	private constructor() {}
+
+	/** Get path to history file */
+	private getHistoryPath(): string {
+		const homedir = os.homedir();
+		return path.join(homedir, '.piclaw', HISTORY_FILENAME);
+	}
+
+	/** Load history from file */
+	load(): string[] {
+		try {
+			const historyPath = this.getHistoryPath();
+			if (!fs.existsSync(historyPath)) {
+				return [];
+			}
+			const content = fs.readFileSync(historyPath, 'utf-8');
+			const data = JSON.parse(content);
+			if (Array.isArray(data)) {
+				// Limit to MAX_ENTRIES
+				return data.slice(0, MAX_ENTRIES);
+			}
+		} catch (error) {
+			// Ignore errors, return empty array
+		}
+		return [];
+	}
+
+	/** Save history to file */
+	save(history: string[]): void {
+		try {
+			const historyPath = this.getHistoryPath();
+			const dir = path.dirname(historyPath);
+
+			// Ensure directory exists
+			if (!fs.existsSync(dir)) {
+				fs.mkdirSync(dir, { recursive: true });
+			}
+
+			// Deduplicate consecutive entries while preserving order (newest first)
+			const deduped: string[] = [];
+			for (const item of history) {
+				if (deduped.length === 0 || deduped[0] !== item) {
+					deduped.unshift(item);
+				}
+			}
+
+			// Limit size
+			const toSave = deduped.slice(0, MAX_ENTRIES);
+
+			// Atomic write: write to temp then rename
+			const tmpPath = historyPath + '.tmp';
+			fs.writeFileSync(tmpPath, JSON.stringify(toSave, null, 2), 'utf-8');
+			fs.renameSync(tmpPath, historyPath);
+		} catch (error) {
+			// Ignore save errors to not disrupt UX
+		}
+	}
+}
+
+
+--- Message 11 (ASSISTANT, 2026-05-06T11:43:00.787Z) ---
+[thinking]
+
+Tôi cần kiểm tra file này có được import ở đâu khác không:
+
+[toolCall]
+
+--- Message 12 (TOOL_RESULT, 2026-05-06T11:43:06.903Z) ---
+/home/quangtynu/Qcoder/qclaw/src/interactive-runner.ts:import "./command-history-patch.js";
+
+
+--- Message 13 (ASSISTANT, 2026-05-06T11:43:06.904Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 14 (TOOL_RESULT, 2026-05-06T11:43:21.104Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw Interactive Runner
+ *
+ * Handles starting the interactive TUI mode.
+ * Separated from core bootstrapping for cleaner architecture.
+ */
+
+// Apply persistent command history patches
+import "./command-history-patch.js";
+
+import { AgentSessionRuntime } from "@mariozechner/pi-coding-agent";
+import { InteractiveMode } from "@mariozechner/pi-coding-agent";
+import type { InteractiveModeOptions } from "@mariozechner/pi-coding-agent";
+
+/**
+ * Run the interactive TUI mode with the given runtime.
+ *
+ * @param runtime - The agent session runtime (created by bootPiclaw)
+ * @param options - Interactive mode options (verbose, etc.)
+ */
+export async function runInteractive(
+  runtime: AgentSessionRuntime,
+  options: { verbose?: boolean } = {}
+): Promise<void> {
+  const interactiveOptions: InteractiveModeOptions = {
+    verbose: options.verbose ?? false,
+  };
+
+  const interactive = new InteractiveMode(runtime, interactiveOptions);
+  await interactive.run();
+}
+
+
+--- Message 15 (ASSISTANT, 2026-05-06T11:43:21.105Z) ---
+[thinking]
+
+**Tôi khuyên không nên di chuyển file này vào `services/`. Lý do:**
+
+## Vấn đề khi di chuyển `command-history-patch.ts` vào `services/`:
+
+### 1. **Circular Import Issue**
+File `command-history-patch.ts` hiện tại import từ `./services/command-history.js`:
+```ts
+import { CommandHistoryService } from "./services/command-history.js";
+```
+
+Nếu di chuyển file vào `services/`, import path sẽ thành:
+```ts
+import { CommandHistoryService } from "./command-history.js";  // OK
+```
+
+Nhưng nếu có export gì đó từ `services/index.ts` thì có thể gây circular dependency.
+
+### 2. **Không phải "service" thực sự**
+File này là một **patch module** - chỉ chứa side effects (monkey patch), không export gì. Các service thực sự như `command-history.ts` là các class/service có business logic.
+
+### 3. **Cần cập nhật import ở `interactive-runner.ts`**
+Import hiện tại:
+```ts
+import "./command-history-patch.js";  // src/command-history-patch.js
+```
+
+Sau khi di chuyển:
+```ts
+import "./services/command-history-patch.js";  // Cần cập nhật
+```
+
+---
+
+## Giải pháp tốt hơn:
+
+**Giữ file ở vị trí hiện tại** (`src/command-history-patch.ts`) vì:
+- Nó là entry-point patch module
+- Cùng cấp với các file như `cli.ts`, `main.ts`, `interactive-runner.ts`
+- Không gây circular dependency
+
+Nếu muốn tổ chức tốt hơn, có thể tạo file `src/patches/` riêng cho các patch modules như thế này.
+
+---
+
+Bạn có muốn tôi:
+1. **Giữ file ở vị trí hiện tại** (khuyến nghị)
+2. **Di chuyển vào `services/`** nhưng phải cập nhật import path + xử lý circular import
+3. **Tạo thư mục `patches/`** mới để chứa các patch module
+
+
+--- Message 16 (USER, 2026-05-06T11:44:40.258Z) ---
+thế đưa tất cả các file rời vào thư mục core thì có vướng gì không? các file rời lè trừ file main. phân tích xem
+
+--- Message 17 (ASSISTANT, 2026-05-06T11:44:40.262Z) ---
+[thinking]
+
+Tôi cần phân tích dependencies giữa các file để xác định có vướng không khi di chuyển.
+
+[toolCall]
+
+--- Message 18 (TOOL_RESULT, 2026-05-06T11:44:55.554Z) ---
+=== cli.ts ===
+No imports
+=== command-history-patch.ts ===
+No imports
+=== context-logger.ts ===
+No imports
+=== helpers.ts ===
+No imports
+=== interactive-runner.ts ===
+No imports
+=== migrations.ts ===
+No imports
+=== piclaw-core.ts ===
+No imports
+
+
+--- Message 19 (ASSISTANT, 2026-05-06T11:44:55.555Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 20 (TOOL_RESULT, 2026-05-06T11:45:00.298Z) ---
+=== Who imports these files ===
+--- cli.ts imported by ---
+No internal imports
+--- command-history-patch.ts imported by ---
+No internal imports
+--- context-logger.ts imported by ---
+No internal imports
+--- helpers.ts imported by ---
+No internal imports
+--- interactive-runner.ts imported by ---
+No internal imports
+--- migrations.ts imported by ---
+No internal imports
+--- piclaw-core.ts imported by ---
+No internal imports
+
+
+--- Message 21 (ASSISTANT, 2026-05-06T11:45:00.299Z) ---
+[thinking]
+
+Tôi cần kiểm tra chi tiết imports trong file main.ts và cli.ts:
+
+[toolCall]
+
+--- Message 22 (TOOL_RESULT, 2026-05-06T11:45:05.216Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw CLI Entry Point
+ *
+ * Thin wrapper that:
+ * 1. Parses CLI arguments
+ * 2. Loads configuration
+ * 3. Boots the core runtime
+ * 4. Runs interactive mode
+ */
+
+import { parseOptions } from "./cli/args.js";
+import { loadConfig } from "./config/config-manager.js";
+import { validateApiKeys, ensurePiclawExtensionRegistered } from "./helpers.js";
+import { getAgentDir } from "./config/config.js";
+import { bootPiclaw } from "./piclaw-core.js";
+import { runInteractive } from "./interactive-runner.js";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+async function main(args: string[] = process.argv.slice(2)): Promise<void> {
+  let config: any = undefined;
+  try {
+    // 1. Parse CLI arguments
+    const { opts, cliOverrides } = parseOptions(args);
+    const cwd = opts.cwd ?? process.cwd();
+
+    // 2. Load persistent config (merged with CLI overrides)
+    config = loadConfig(cliOverrides);
+
+    // 3. Validate API keys for configured providers
+    validateApiKeys(config);
+
+    // 4. Ensure Piclaw extension is registered in global settings
+    const agentDir = getAgentDir();
+    const extensionPath = join(__dirname, "extensions", "index.js");
+    await ensurePiclawExtensionRegistered(agentDir, extensionPath);
+
+    // 5. Boot the core runtime (services, session, runtime factory)
+    const runtime = await bootPiclaw({
+      cwd,
+      agentDir,
+      sessionDir: config.sessionDir ?? opts.sessionDir,
+      tools: config.tools,
+      model: config.model,
+      thinking: config.thinking,
+      verbose: config.verbose,
+      contextLogFile: config.contextLogFile ?? opts.contextLogFile,
+    });
+
+    // 6. Run interactive TUI mode
+    await runInteractive(runtime, { verbose: config.verbose });
+  } catch (error: any) {
+    console.error("\n❌ Failed to start Piclaw:");
+
+    // Provide helpful error messages based on error type
+    if (error.message?.includes("ENOENT")) {
+      console.error("  → A required file or directory was not found.");
+    } else if (error.message?.includes("EACCES") || error.message?.includes("permission")) {
+      console.error("  → Permission denied. Check file permissions.");
+    } else if (error.message?.includes("API key") || error.message?.includes("api key")) {
+      console.error("  → Missing or invalid API key. Check environment variables.");
+    } else if (error.message?.includes("network") || error.message?.includes("ECONNREFUSED")) {
+      console.error("  → Network error. Check your internet connection.");
+    } else if (error.message?.includes("timeout")) {
+      console.error("  → Request timed out. Try again later.");
+    }
+
+    console.error(`  Error: ${error.message}`);
+
+    if (config?.verbose) {
+      console.error(error);
+    } else {
+      console.error("  Run with --verbose for more details.");
+    }
+
+    process.exit(1);
+  }
+}
+
+// Export for programmatic usage (e.g., tests)
+export { main };
+
+
+--- Message 23 (ASSISTANT, 2026-05-06T11:45:05.217Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 24 (TOOL_RESULT, 2026-05-06T11:45:14.304Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw Core Bootstrapping
+ *
+ * Core logic for creating and configuring the agent runtime.
+ * Separated from UI concerns for testability and reusability.
+ */
+
+import {
+  createAgentSessionServices,
+  createAgentSessionFromServices,
+  SessionManager,
+  AgentSessionRuntime,
+  type CreateAgentSessionRuntimeResult,
+  type AgentSessionServices,
+  type SessionStartEvent,
+} from "@mariozechner/pi-coding-agent";
+import { getAgentDir } from "./config/config.js";
+import { getDefaultContextLogFile } from "./config/config-manager.js";
+import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
+import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { createContextLoggingStreamFn } from "./context-logger.js";
+
+export interface PiclawCoreOptions {
+  /** Working directory (default: process.cwd()) */
+  cwd?: string;
+  /** Agent directory (default: ~/.piclaw/agent) */
+  agentDir?: string;
+  /** Custom session directory */
+  sessionDir?: string;
+  /** Tool allowlist (default: from settings or built-in) */
+  tools?: string[];
+  /** Additional custom tools to register */
+  customTools?: ToolDefinition[];
+  /** Model to use (provider:modelId) */
+  model?: string;
+  /** Thinking level */
+  thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
+  /** Verbose logging */
+  verbose?: boolean;
+  /** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
+  contextLogFile?: string;
+}
+
+/**
+ * Create the agent runtime without starting the UI.
+ *
+ * This function handles:
+ * - Services creation (auth, models, settings, resource loader)
+ * - Session creation
+ * - Runtime factory for session switching
+ * - Initial model and thinking level configuration
+ *
+ * @param options - Configuration options
+ * @returns AgentSessionRuntime ready to run
+ */
+export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
+  const cwd = options.cwd ?? process.cwd();
+  const agentDir = options.agentDir ?? getAgentDir();
+  // Default context log file if not specified
+  const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
+
+  // 1. Create cwd-bound services
+  const services: AgentSessionServices = await createAgentSessionServices({
+    cwd,
+    agentDir,
+  });
+
+  // 2. Create session manager
+  const sessionManager = SessionManager.create(cwd, options.sessionDir);
+
+  // 3. Create session from services
+  const sessionStartEvent: SessionStartEvent = { type: "session_start", reason: "startup" };
+
+  // Prepare custom tools (ensure subtool_loader is included)
+  const customTools = options.customTools ?? [createSubLoaderToolDefinition(services.cwd)];
+
+  const sessionResult = await createAgentSessionFromServices({
+    services,
+    sessionManager,
+    sessionStartEvent,
+    tools: options.tools,
+    customTools,
+  });
+
+  // 4. Create runtime factory (for session switching)
+  const createRuntime = async (runtimeOpts: {
+    cwd: string;
+    agentDir: string;
+    sessionManager: SessionManager;
+    sessionStartEvent?: SessionStartEvent;
+  }): Promise<CreateAgentSessionRuntimeResult> => {
+    const newServices = await createAgentSessionServices({
+      cwd: runtimeOpts.cwd,
+      agentDir: runtimeOpts.agentDir,
+    });
+
+    const customToolsForRuntime = options.customTools ?? [createSubLoaderToolDefinition(newServices.cwd)];
+    const result = await createAgentSessionFromServices({
+      services: newServices,
+      sessionManager: runtimeOpts.sessionManager,
+      sessionStartEvent: runtimeOpts.sessionStartEvent,
+      tools: options.tools,
+      customTools: customToolsForRuntime,
+    });
+
+    return {
+      ...result,
+      services: newServices,
+      diagnostics: [],
+    };
+  };
+
+  // 5. Wrap streamFn with context logging if enabled
+  if (contextLogFile) {
+    const originalStreamFn = sessionResult.session.agent.streamFn;
+    sessionResult.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
+  }
+
+  // 6. Create runtime
+  const runtime = new AgentSessionRuntime(
+    sessionResult.session,
+    services,
+    createRuntime,
+    [], // diagnostics
+    sessionResult.modelFallbackMessage,
+  );
+
+  // 6. Apply initial model if configured
+  if (options.model) {
+    try {
+      const [provider, modelId] = options.model.split(":");
+      if (provider && modelId) {
+        const model = services.modelRegistry.find(provider, modelId);
+        if (model) {
+          await sessionResult.session.setModel(model);
+        } else {
+          console.warn(`Model '${options.model}' not found in registry.`);
+        }
+      } else {
+        console.warn(`Invalid model format: '${options.model}'. Use provider:modelId`);
+      }
+    } catch (err: any) {
+      console.warn(`Failed to set model '${options.model}': ${err.message}`);
+    }
+  }
+
+  // 7. Apply initial thinking level if configured
+  if (options.thinking) {
+    sessionResult.session.setThinkingLevel(options.thinking);
+  }
+
+  return runtime;
+}
+
+
+--- Message 25 (ASSISTANT, 2026-05-06T11:45:14.306Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 26 (TOOL_RESULT, 2026-05-06T11:45:16.323Z) ---
+#!/usr/bin/env node
+
+/**
+ * Helper functions for main.ts (extracted for testability)
+ */
+
+import chalk from "chalk";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
+import { join, dirname } from "node:path";
+import type { PiclawConfig } from "./config/config-manager.js";
+
+/**
+ * Ensure piclaw extension is registered in global settings.
+ * This allows custom slash commands without manual user config.
+ */
+export async function ensurePiclawExtensionRegistered(agentDir: string, extensionPath: string): Promise<void> {
+  const globalSettingsPath = join(agentDir, "settings.json");
+
+  // Ensure the agent directory exists
+  const agentDirPath = dirname(globalSettingsPath);
+  if (!existsSync(agentDirPath)) {
+    mkdirSync(agentDirPath, { recursive: true });
+  }
+
+  // Read existing settings or use empty object
+  let globalSettings: Record<string, unknown> = {};
+  if (existsSync(globalSettingsPath)) {
+    try {
+      globalSettings = JSON.parse(readFileSync(globalSettingsPath, "utf-8"));
+    } catch (err) {
+      console.warn(chalk.yellow(`Failed to parse global settings, creating new.`));
+    }
+  }
+
+  // Ensure extensions array
+  if (!Array.isArray(globalSettings.extensions)) {
+    globalSettings.extensions = [extensionPath];
+  } else if (!globalSettings.extensions.includes(extensionPath)) {
+    globalSettings.extensions.push(extensionPath);
+  } else {
+    return; // already registered
+  }
+
+  // Write back
+  try {
+    writeFileSync(globalSettingsPath, JSON.stringify(globalSettings, null, 2), "utf-8");
+  } catch (err) {
+    console.warn(chalk.yellow(`Failed to write global settings: ${err}`));
+  }
+}
+
+/**
+ * Validate required API keys for configured providers.
+ * Checks environment variables and warns user if missing.
+ */
+export function validateApiKeys(config: PiclawConfig): void {
+  const warnings: string[] = [];
+
+  // Check model provider API keys if model is specified
+  if (config.model) {
+    const [provider] = config.model.split(":");
+    switch (provider) {
+      case "kilo":
+        if (!process.env.KILO_API_KEY) {
+          warnings.push(
+            "KILO_API_KEY environment variable is not set. " +
+            "Set it with: export KILO_API_KEY=your_api_key"
+          );
+        }
+        break;
+      case "anthropic":
+        if (!process.env.ANTHROPIC_API_KEY) {
+          warnings.push(
+            "ANTHROPIC_API_KEY environment variable is not set. " +
+            "Set it with: export ANTHROPIC_API_KEY=your_api_key"
+          );
+        }
+        break;
+      case "openai":
+        if (!process.env.OPENAI_API_KEY) {
+          warnings.push(
+            "OPENAI_API_KEY environment variable is not set. " +
+            "Set it with: export OPENAI_API_KEY=your_api_key"
+          );
+        }
+        break;
+    }
+  }
+
+  // Display warnings
+  if (warnings.length > 0) {
+    console.log(chalk.yellow("\n⚠️  API Key Warnings:"));
+    for (const warning of warnings) {
+      console.log(chalk.yellow(`  - ${warning}`));
+    }
+    console.log();
+  }
+}
+
+
+--- Message 27 (ASSISTANT, 2026-05-06T11:45:16.324Z) ---
+[thinking]
+
+
+[toolCall]
+
+--- Message 28 (TOOL_RESULT, 2026-05-06T11:45:54.274Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw Migrations
+ *
+ * One-time migrations that run on startup.
+ * Custom version of pi-mono migrations with Piclaw paths.
+ */
+
+import chalk from "chalk";
+import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
+import { dirname, join } from "path";
+import { getAgentDir, getBinDir } from "./config/config.js";
+
+const MIGRATION_GUIDE_URL = "https://github.com/mariozechner/pi-coding-agent/blob/main/CHANGELOG.md#extensions-migration";
+const EXTENSIONS_DOC_URL = "https://github.com/mariozechner/pi-coding-agent/blob/main/docs/extensions.md";
+
+/**
+ * Migrate legacy oauth.json and settings.json apiKeys to auth.json.
+ *
+ * @returns Array of provider names that were migrated
+ */
+export function migrateAuthToAuthJson(): string[] {
+	const agentDir = getAgentDir();
+	const authPath = join(agentDir, "auth.json");
+	const oauthPath = join(agentDir, "oauth.json");
+	const settingsPath = join(agentDir, "settings.json");
+
+	// Skip if auth.json already exists
+	if (existsSync(authPath)) return [];
+
+	const migrated: Record<string, unknown> = {};
+	const providers: string[] = [];
+
+	// Migrate oauth.json
+	if (existsSync(oauthPath)) {
+		try {
+			const oauth = JSON.parse(readFileSync(oauthPath, "utf-8"));
+			for (const [provider, cred] of Object.entries(oauth)) {
+				migrated[provider] = { type: "oauth", ...(cred as object) };
+				providers.push(provider);
+			}
+			renameSync(oauthPath, `${oauthPath}.migrated`);
+		} catch {
+			// Skip on error
+		}
+	}
+
+	// Migrate settings.json apiKeys
+	if (existsSync(settingsPath)) {
+		try {
+			const content = readFileSync(settingsPath, "utf-8");
+			const settings = JSON.parse(content);
+			if (settings.apiKeys && typeof settings.apiKeys === "object") {
+				for (const [provider, key] of Object.entries(settings.apiKeys)) {
+					if (!migrated[provider] && typeof key === "string") {
+						migrated[provider] = { type: "api_key", key };
+						providers.push(provider);
+					}
+				}
+				delete settings.apiKeys;
+				writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+			}
+		} catch {
+			// Skip on error
+		}
+	}
+
+	if (Object.keys(migrated).length > 0) {
+		mkdirSync(dirname(authPath), { recursive: true });
+		writeFileSync(authPath, JSON.stringify(migrated, null, 2), { mode: 0o600 });
+	}
+
+	return providers;
+}
+
+/**
+ * Migrate sessions from ~/.piclaw/agent/*.jsonl to proper session directories.
+ *
+ * Bug in v0.30.0: Sessions were saved to ~/.piclaw/agent/ instead of
+ * ~/.piclaw/agent/sessions/<encoded-cwd>/. This migration moves them
+ * to the correct location based on the cwd in their session header.
+ */
+export function migrateSessionsFromAgentRoot(): void {
+	const agentDir = getAgentDir();
+
+	// Find all .jsonl files directly in agentDir (not in subdirectories)
+	let files: string[];
+	try {
+		files = readdirSync(agentDir)
+			.filter((f) => f.endsWith(".jsonl"))
+			.map((f) => join(agentDir, f));
+	} catch {
+		return;
+	}
+
+	if (files.length === 0) return;
+
+	for (const file of files) {
+		try {
+			// Read first line to get session header
+			const firstLine = readFileSync(file, "utf-8").split("\n")[0];
+			const header = JSON.parse(firstLine) as any;
+			if (header.type !== "session_header") continue;
+
+			const cwd = header.cwd;
+			if (!cwd) continue;
+
+			// Compute target directory: ~/.piclaw/agent/sessions/<encoded-cwd>/
+			const sessionsDir = join(agentDir, "sessions");
+			const encodedCwd = encodeURIComponent(cwd);
+			const targetDir = join(sessionsDir, encodedCwd);
+			const targetPath = join(targetDir, `${header.id}.jsonl`);
+
+			// Create target directory
+			mkdirSync(targetDir, { recursive: true });
+
+			// Move file if target doesn't exist
+			if (!existsSync(targetPath)) {
+				renameSync(file, targetPath);
+				console.log(chalk.green(`  ✓ Migrated session ${header.id} to sessions/`));
+			} else {
+				// Target exists, remove duplicate (keep existing)
+				rmSync(file, { force: true });
+			}
+		} catch {
+			// Skip on error
+		}
+	}
+}
+
+/**
+ * Migrate keybindings from global to per-mode format.
+ */
+export function migrateKeybindingsConfig(): void {
+	// Load keybindings from settings.json
+	const settingsPath = join(getAgentDir(), "settings.json");
+	if (!existsSync(settingsPath)) return;
+
+	try {
+		const content = readFileSync(settingsPath, "utf-8");
+		const settings = JSON.parse(content);
+
+		if (!settings.keybindings) return;
+
+		// Pi-mono keybindings format: { "key": "action" }
+		// Piclaw format: { "mode": { "key": "action" } }
+		const oldKeybindings = settings.keybindings;
+		if (typeof oldKeybindings !== "object") return;
+
+		// Check if already migrated (has mode structure)
+		if (Object.values(oldKeybindings).some((v) => typeof v === "object")) return;
+
+		// Convert: all keys go into "global"
+		settings.keybindings = {
+			global: oldKeybindings,
+		};
+
+		writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
+		console.log(chalk.green("  ✓ Migrated keybindings to per-mode format"));
+	} catch {
+		// Skip on error
+	}
+}
+
+/**
+ * Run all migrations.
+ *
+ * @param cwd - Current working directory (used for workspace-specific migrations)
+ * @returns Object with migrated providers and deprecation warnings
+ */
+export function runMigrations(cwd: string): {
+	migratedAuthProviders: string[];
+	deprecationWarnings: string[];
+} {
+	const migratedAuthProviders = migrateAuthToAuthJson();
+	const deprecationWarnings: string[] = [];
+
+	// Only run session migration if there are .jsonl files in agent root (old location)
+	try {
+		const agentDir = getAgentDir();
+		const files = readdirSync(agentDir);
+		const hasOldSessions = files.some((f) => f.endsWith(".jsonl"));
+		if (hasOldSessions) {
+			migrateSessionsFromAgentRoot();
+		}
+	} catch {
+		// Ignore
+	}
+
+	// Migrate keybindings format
+	migrateKeybindingsConfig();
+
+	// Add deprecation warnings here if needed
+
+	return { migratedAuthProviders, deprecationWarnings };
+}
+
+/**
+ * Show deprecation warnings to the user.
+ */
+export function showDeprecationWarnings(warnings: string[]): Promise<void> {
+	// In interactive mode, show as a message
+	// For now, just log
+	if (warnings.length > 0) {
+		console.log(chalk.yellow("\n⚠️  Deprecation warnings:"));
+		for (const warning of warnings) {
+			console.log(chalk.yellow(`  - ${warning}`));
+		}
+		console.log();
+	}
+	return Promise.resolve();
+}
+
+
+--- Message 29 (ASSISTANT, 2026-05-06T11:45:54.276Z) ---
+[thinking]
+[toolCall]
+
+--- Message 30 (TOOL_RESULT, 2026-05-06T11:45:58.237Z) ---
+#!/usr/bin/env node
+
+/**
+ * Context Logger
+ *
+ * Utility to log the full LLM context (system prompt, messages, tools) before
+ * it is sent to the provider. Useful for debugging, inspection, and understanding
+ * what exactly gets sent to the LLM.
+ */
+
+import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import type { Message } from "@mariozechner/pi-ai";
+import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+
+/**
+ * Configuration for context logging.
+ */
+export interface ContextLoggerOptions {
+	/** Path to log file. If undefined, logging is disabled. */
+	logFile?: string;
+	/** Whether to append to existing file or overwrite. Default: append. */
+	append?: boolean;
+	/** Maximum number of messages to log (for truncation). Default: unlimited. */
+	maxMessages?: number;
+	/** Whether to include tool definitions in the log. Default: true. */
+	includeTools?: boolean;
+}
+
+const DEFAULT_OPTIONS: Required<Omit<ContextLoggerOptions, "logFile">> = {
+	append: true,
+	maxMessages: Infinity,
+	includeTools: true,
+};
+
+/**
+ * Format a single AgentMessage for logging.
+ */
+function formatAgentMessage(msg: Message, index: number): string {
+	const timestamp = "timestamp" in msg && msg.timestamp ? new Date(msg.timestamp).toISOString() : "";
+	let contentStr = "";
+
+	if (Array.isArray(msg.content)) {
+		contentStr = msg.content
+			.map((c) => {
+				if (c.type === "text") {
+					return (c as any).text;
+				}
+				if (c.type === "image") {
+					return `[IMAGE: ${(c as any).source.type}]`;
+				}
+				return `[${c.type}]`;
+			})
+			.join("\n");
+	} else {
+		contentStr = String(msg.content);
+	}
+
+	const roleLabel = msg.role === "user" ? "USER" : msg.role === "assistant" ? "ASSISTANT" : "TOOL_RESULT";
+
+	return `--- Message ${index} (${roleLabel}, ${timestamp}) ---\n${contentStr}\n`;
+}
+
+/**
+ * Format the full context for logging.
+ */
+export function formatContext(
+	context: {
+		systemPrompt: string;
+		messages: Message[];
+		tools?: Array<{ name: string; description: string; parameters?: any }>;
+	},
+	options: ContextLoggerOptions = {},
+): string {
+	const opts = { ...DEFAULT_OPTIONS, ...options };
+
+	let output = "=== LLM CONTEXT LOG ===\n\n";
+
+	// System prompt
+	if (context.systemPrompt) {
+		output += `--- SYSTEM PROMPT ---\n${context.systemPrompt}\n\n`;
+	}
+
+	// Messages (with limit)
+	const messagesToLog = context.messages.slice(0, opts.maxMessages);
+	output += `--- CONVERSATION (${messagesToLog.length} messages) ---\n`;
+	for (let i = 0; i < messagesToLog.length; i++) {
+		output += formatAgentMessage(messagesToLog[i], i) + "\n";
+	}
+
+	// Tools
+	if (opts.includeTools && context.tools && context.tools.length > 0) {
+		output += `--- AVAILABLE TOOLS (${context.tools.length}) ---\n`;
+		for (const tool of context.tools) {
+			output += `• ${tool.name}: ${tool.description}\n`;
+			if (tool.parameters) {
+				output += `  Parameters: ${JSON.stringify(tool.parameters, null, 2)}\n`;
+			}
+		}
+		output += "\n";
+	}
+
+	output += `=== END CONTEXT LOG (${new Date().toISOString()}) ===\n`;
+	return output;
+}
+
+/**
+ * Write context log to file.
+ */
+export function writeContextLog(context: {
+	systemPrompt: string;
+	messages: Message[];
+	tools?: Array<{ name: string; description: string; parameters?: any }>;
+}, options: ContextLoggerOptions = {}): void {
+	const logFile = options.logFile;
+	if (!logFile) {
+		return; // Logging disabled
+	}
+
+	try {
+		const logDir = dirname(logFile);
+		if (!existsSync(logDir)) {
+			mkdirSync(logDir, { recursive: true });
+		}
+
+		const formatted = formatContext(context, options);
+
+		if (options.append) {
+			appendFileSync(logFile, formatted);
+		} else {
+			writeFileSync(logFile, formatted);
+		}
+	} catch (error) {
+		// Don't throw - logging should never break the main flow
+		console.error("ContextLogger: Failed to write log file:", error);
+	}
+}
+
+/**
+ * Create a wrapper stream function that logs context before sending to LLM.
+ *
+ * Usage:
+ * ```typescript
+ * const loggedStreamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile);
+ * ```
+ */
+export function createContextLoggingStreamFn(
+	originalStreamFn: (...args: any[]) => any,
+	logFile: string,
+	logOptions?: Omit<ContextLoggerOptions, "logFile">,
+): (...args: any[]) => any {
+	return async (...args: any[]) => {
+		const [model, context, options] = args;
+		// Log the context before sending
+		writeContextLog(
+			{
+				systemPrompt: context.systemPrompt,
+				messages: context.messages,
+				tools: context.tools,
+			},
+			{ logFile, ...logOptions },
+		);
+
+		// Call original stream function
+		return originalStreamFn(...args);
+	};
+}
+
+
+--- Message 31 (ASSISTANT, 2026-05-06T11:45:58.239Z) ---
+[thinking]
+
+## Phân tích di chuyển các file rời vào `core/`
+
+**Các file cần xem xét:** `cli.ts`, `command-history-patch.ts`, `context-logger.ts`, `helpers.ts`, `interactive-runner.ts`, `migrations.ts`, `piclaw-core.ts`
+
+### 📊 Dependencies hiện tại:
+
+| File | Import từ | Được import bởi |
+|------|-----------|-----------------|
+| `cli.ts` | `./cli/args.js` | — |
+| `command-history-patch.ts` | `./services/command-history.js` | `interactive-runner.ts` |
+| `context-logger.ts` | external | `piclaw-core.ts` |
+| `helpers.ts` | `./config/config-manager.js` | `main.ts` |
+| `interactive-runner.ts` | `./command-history-patch.js` | `main.ts` |
+| `migrations.ts` | `./config/config.js` | — (chưa dùng) |
+| `piclaw-core.ts` | `./context-logger.js`, `./config/config.js`, `./tools/subtool-loader.js` | `main.ts` |
+| `main.ts` | `piclaw-core.js`, `interactive-runner.js`, `helpers.js`, v.v. | entry point |
+
+---
+
+### ⚠️ Vướng mắc khi di chuyển vào `core/`:
+
+**1. Cần cập nhật ~7 import statements trong `main.ts`:**
+```typescript
+// Trước:
+import { bootPiclaw } from "./piclaw-core.js";
+import { runInteractive } from "./interactive-runner.js";
+import { validateApiKeys, ... } from "./helpers.js";
+
+// Sau:
+import { bootPiclaw } from "./core/piclaw-core.js";
+import { runInteractive } from "./core/interactive-runner.js";
+import { validateApiKeys, ... } from "./core/helpers.js";
+```
+
+**2. `interactive-runner.ts` cần cập nhật:**
+```typescript
+// Trước: import "./command-history-patch.js";
+// Sau:  import "./command-history-patch.js" hoặc "../command-history-patch.js"
+```
+
+**3. `piclaw-core.ts` cần cập nhật:**
+```typescript
+// Trước: import { createContextLoggingStreamFn } from "./context-logger.js";
+// Sau:  import { createContextLoggingStreamFn } from "./context-logger.js"; (giữ nguyên vì cùng folder)
+```
+
+**4. Circular import risk:** Nếu tạo `core/index.ts` export tất cả và một file import từ đó.
+
+---
+
+### ✅ Khuyến nghị:
+
+**Cách 1: Di chuyển + cập nhật imports (nếu muốn tổ chức)**
+- Tạo thư mục `core/`
+- Move các file và cập nhật tất cả import paths
+- Kiểm tra circular imports nếu có `core/index.ts`
+
+**Cách 2: Giữ nguyên (đơn giản)**
+- Các file hiện tại đã ở `src/` một cách hợp lý
+- `main.ts` là entry point, các module core khác cùng cấp
+
+Bạn muốn tôi thực hiện cách nào?
+
+
+--- Message 32 (USER, 2026-05-06T11:48:08.029Z) ---
+thế thi phân tích xem các file rời lẻ đó , file nào có thể di chuyển vào thư mục nào ? có thể tạo thư mục mới? phân tích xem
+
+--- Message 33 (ASSISTANT, 2026-05-06T11:48:08.030Z) ---
+[thinking]
+
+Tôi sẽ phân tích chi tiết từng file và đề xuất vị trí phù hợp:
+
+[toolCall]
+
+--- Message 34 (TOOL_RESULT, 2026-05-06T11:48:19.146Z) ---
+#!/usr/bin/env node
+
+/**
+ * Piclaw CLI Entry Point
+ *
+ * Minimal wrapper that delegates to main.ts.
+ * Sets basic process metadata and environment.
+ */
+
+import { main } from "./main.js";
+
+// Set process title
+process.title = "piclaw";
+
+// Mark as pi-based
+process.env.PI_CODING_AGENT = "true";
+
+// Simple error handlers (avoid crashing without logs)
+process.on("unhandledRejection", (err) => {
+  console.error("Unhandled rejection:", err);
+  process.exit(1);
+});
+
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught exception:", err);
+  process.exit(1);
+});
+
+// Run the application
+await main(process.argv.slice(2));
+
+
+--- AVAILABLE TOOLS (8) ---
+• read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to read (relative or absolute)"
+    },
+    "offset": {
+      "type": "number",
+      "description": "Line number to start reading from (1-indexed)"
+    },
+    "limit": {
+      "type": "number",
+      "description": "Maximum number of lines to read"
+    }
+  }
+}
+• bash: Execute a bash command in the current working directory. Returns stdout and stderr. Output is truncated to last 2000 lines or 50KB (whichever is hit first). If truncated, full output is saved to a temp file. Optionally provide a timeout in seconds.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "command"
+  ],
+  "properties": {
+    "command": {
+      "type": "string",
+      "description": "Bash command to execute"
+    },
+    "timeout": {
+      "type": "number",
+      "description": "Timeout in seconds (optional, no default timeout)"
+    }
+  }
+}
+• edit: Edit a single file using exact text replacement. Every edits[].oldText must match a unique, non-overlapping region of the original file. If two changes affect the same block or nearby lines, merge them into one edit instead of emitting overlapping edits. Do not include large unchanged regions just to connect distant changes.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "edits"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to edit (relative or absolute)"
+    },
+    "edits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "oldText",
+          "newText"
+        ],
+        "properties": {
+          "oldText": {
+            "type": "string",
+            "description": "Exact text for one targeted replacement. It must be unique in the original file and must not overlap with any other edits[].oldText in the same call."
+          },
+          "newText": {
+            "type": "string",
+            "description": "Replacement text for this targeted edit."
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "One or more targeted replacements. Each edit is matched against the original file, not incrementally. Do not include overlapping or nested edits. If two changes touch the same block or nearby lines, merge them into one edit instead."
+    }
+  },
+  "additionalProperties": false
+}
+• write: Write content to a file. Creates the file if it doesn't exist, overwrites if it does. Automatically creates parent directories.
+  Parameters: {
+  "type": "object",
+  "required": [
+    "path",
+    "content"
+  ],
+  "properties": {
+    "path": {
+      "type": "string",
+      "description": "Path to the file to write (relative or absolute)"
+    },
+    "content": {
+      "type": "string",
+      "description": "Content to write to the file"
+    }
+  }
+}
+• subtool_loader: ⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.
+Only use in trusted environments with controlled inputs.
+
+Unified tool for system operations.
+
+Core Computer Use tools (from @mariozechner/pi-coding-agent):
+- get_schema, bash, ls, find, grep, read, edit, write
+
+Extended sub-tools (custom in src/tools/sub-tools/):
+- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis
+- make, npm, systemctl, journalctl, ps, kill, crontab
+- apt, yum, df, du, ping, traceroute, nslookup, dig
+- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg
+- update, backup, password, weather, time, ufw, at, quota
+- iso, free, iostat, netstat, ss
+- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz
+- xmlstarlet, json_pp, yamllint, tomlq, hjson
+- archive, zip, 7z, xz
+- svn, hg, darcs, fossil, bzr, cvs
+- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc
+
+Use "get_schema" to see argument details for any sub-tool.
+
+Example: {"subtool":"bash","args":{"command":"echo hello"}}
+  Parameters: {
+  "type": "object",
+  "required": [
+    "subtool",
+    "args"
+  ],
+  "properties": {
+    "subtool": {
+      "type": "string"
+    },
+    "args": {}
+  }
+}
+• todos: Simple todo list: add_phase, add_task, update, remove_task, replace, list. Status: pending, in_progress, completed, abandoned. Auto-normalizes exactly ONE in_progress task. Use ONE operation per call.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "replace": {
+      "type": "string"
+    },
+    "add_phase": {
+      "type": "string"
+    },
+    "add_task": {
+      "type": "string"
+    },
+    "update": {
+      "type": "string"
+    },
+    "remove_task": {
+      "type": "string"
+    },
+    "list": {
+      "type": "string"
+    }
+  }
+}
+• memory: Store and retrieve arbitrary text snippets with optional tags. Actions: add, list, get, delete, clear, search
+  Parameters: {}
+• echo: Echo back a message. This is a demonstration tool for custom tool registration.
+  Parameters: {
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": "string",
+      "description": "Message to echo back"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
+
+=== END CONTEXT LOG (2026-05-06T11:48:19.147Z) ===
