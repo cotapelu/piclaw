@@ -447,27 +447,1495 @@ Every commit must:
 Current date: 2026-05-06
 Current working directory: /home/quangtynu/Qcoder/qclaw
 
---- CONVERSATION (86 messages) ---
---- Message 0 (USER, 2026-05-06T06:16:17.126Z) ---
-đọc mọi file md trong docs/ đi
+--- CONVERSATION (18 messages) ---
+--- Message 0 (USER, 2026-05-06T06:58:22.738Z) ---
+đọc mọi file md
 
---- Message 1 (ASSISTANT, 2026-05-06T06:16:17.168Z) ---
+--- Message 1 (ASSISTANT, 2026-05-06T06:58:22.781Z) ---
+Tôi sẽ đọc tất cả các file markdown trong dự án để hiểu rõ cấu trúc và nội dung.
 [toolCall]
 
---- Message 2 (TOOL_RESULT, 2026-05-06T06:16:19.236Z) ---
-docs/pi-tui-deep-dive.md
-docs/pi-coding-agent-vs-pi-agent-core-architecture.md
-docs/API_EXPORT_FROM_CODING_AGENT.md
-docs/TODO.md
+--- Message 2 (TOOL_RESULT, 2026-05-06T06:58:25.428Z) ---
+/home/quangtynu/Qcoder/qclaw/AGENTS.md
+/home/quangtynu/Qcoder/qclaw/src/tools/README.md
+/home/quangtynu/Qcoder/qclaw/src/extensions/README.md
+/home/quangtynu/Qcoder/qclaw/README.md
+/home/quangtynu/Qcoder/qclaw/docs/pi-tui-deep-dive.md
+/home/quangtynu/Qcoder/qclaw/docs/VIDEO_TUTORIALS.md
+/home/quangtynu/Qcoder/qclaw/docs/COMMUNITY.md
+/home/quangtynu/Qcoder/qclaw/docs/pi-coding-agent-vs-pi-agent-core-architecture.md
+/home/quangtynu/Qcoder/qclaw/docs/NPM_PUBLISHING.md
+/home/quangtynu/Qcoder/qclaw/docs/API_EXPORT_FROM_CODING_AGENT.md
+/home/quangtynu/Qcoder/qclaw/docs/EXTENSION_DEVELOPMENT.md
+/home/quangtynu/Qcoder/qclaw/docs/TODO.md
+/home/quangtynu/Qcoder/qclaw/SYSTEM.md
+/home/quangtynu/Qcoder/qclaw/node_modules/flat-cache/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/flat-cache/changelog.md
+/home/quangtynu/Qcoder/qclaw/node_modules/source-map-js/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/is-fullwidth-code-point/readme.md
+/home/quangtynu/Qcoder/qclaw/node_modules/inflight/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527213803.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527213345.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527213411.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527212714.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527214408.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527203617.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/.history/README_20210527214323.md
+/home/quangtynu/Qcoder/qclaw/node_modules/node-domexception/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/parse5/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/acorn-jsx/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/expect-type/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/expect-type/SECURITY.md
+/home/quangtynu/Qcoder/qclaw/node_modules/punycode/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/proper-lockfile/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/proper-lockfile/node_modules/retry/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/proper-lockfile/CHANGELOG.md
+/home/quangtynu/Qcoder/qclaw/node_modules/http-proxy-agent/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/node_modules/brace-expansion/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/node_modules/minimatch/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/node_modules/glob/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/node_modules/balanced-match/LICENSE.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/node_modules/balanced-match/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/rimraf/CHANGELOG.md
+/home/quangtynu/Qcoder/qclaw/node_modules/source-map/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/source-map/CHANGELOG.md
+/home/quangtynu/Qcoder/qclaw/node_modules/acorn/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/acorn/CHANGELOG.md
+/home/quangtynu/Qcoder/qclaw/node_modules/@standard-schema/spec/README.md
+/home/quangtynu/Qcoder/qclaw/node_modules/string-width/node_modules/ansi-regex/readme.md
+/home/quangtynu/Qcoder/qclaw/node_modules/string-width/node_modules/strip-ansi/readme.md
+/home/quangtynu/Qcoder/qclaw/node_modules/string-width/readme.md
 
 
---- Message 3 (ASSISTANT, 2026-05-06T06:16:19.238Z) ---
+--- Message 3 (ASSISTANT, 2026-05-06T06:58:25.429Z) ---
+Có rất nhiều file markdown. Tôi sẽ ưu tiên đọc các file quan trọng nhất của dự án (không phải node_modules):
 [toolCall]
 [toolCall]
 [toolCall]
 [toolCall]
 
---- Message 4 (TOOL_RESULT, 2026-05-06T06:16:22.234Z) ---
+--- Message 4 (TOOL_RESULT, 2026-05-06T06:58:28.214Z) ---
+```md
+# AGENTS.md — PiClaw AUTONOMOUS PROTOCOL
+
+NOTE: THƯ MỤC HIỆN TẠI LÀ CODE CỦA CHÍNH BẠN. BẠN CHÍNH LÀ CODE Ở THƯ MỤC HIỆN TẠI. MUỐN BIẾT DÙNG GÓI PI-CODING-AGENT THẾ NÀO THÌ ĐỌC các file md TRONG THƯ MỤC docs/
+
+## 🎯 MISSION
+
+Build **piclaw** into a **production-grade AI coder **.
+
+You are **PiClaw — Autonomous Development Coder**. Your all code is this root directory.
+
+You must use all tools that system report to you. you must use it.
+
+Your objective:
+
+> Deliver a **full-stack coding agent system** with TUI, memory, tools, multi-provider LLM, and extensible architecture.
+
+You operate in a continuous loop:
+
+```
+
+plan → code → test → evaluate → decide → repeat
+
+```
+
+No human intervention required.
+
+---
+
+## 🧠 CORE PHILOSOPHY
+
+- **Professional engineering only** — no hacks, no toy code
+- **User-first** — UX is priority
+- **Ship fast, but not broken**
+- **No guessing — read real source**
+- **Exploit existing libraries before writing new code**
+- **Continuously improve everything you touch**
+
+---
+
+## 🔥 HARD RULES (NON-NEGOTIABLE)
+
+### 1. USE EXISTING LIBRARIES FIRST
+
+You MUST prioritize:
+
+```
+
+@mariozechner/pi-coding-agent   (PRIMARY)
+@mariozechner/pi-agent-core (if need)
+@mariozechner/pi-ai (if need)
+@mariozechner/pi-tui (if need)
+
+````
+
+❌ NEVER reimplement functionality already provided  
+❌ NEVER guess API behavior  
+✔ ALWAYS read source in `llm-context/`  
+✔ ALWAYS import from npm packages  
+
+---
+
+### 2. DUAL DEPENDENCY MODEL (MANDATORY)
+
+System uses **two parallel layers**:
+
+#### Runtime (execution)
+
+```ts
+import { x } from "@mariozechner/pi-coding-agent"
+````
+
+✔ Stable
+✔ Versioned
+✔ Production-safe
+
+---
+
+#### Reasoning (LLM understanding)
+
+```
+llm-context/
+```
+
+✔ Full source code
+✔ Used ONLY for reading & understanding
+
+---
+
+### 🚫 STRICT RULE
+
+```
+❌ DO NOT import from llm-context
+❌ DO NOT build from llm-context
+```
+
+```
+✔ ONLY import from npm
+✔ llm-context is READ-ONLY
+```
+
+---
+
+## 🏗️ PROJECT STRUCTURE
+
+```
+piclaw/
+├─ src/                  ← Application code
+├─ node_modules/         ← Runtime dependencies
+├─ llm-context/          ← Source for reasoning ONLY
+└─ package.json
+```
+
+---
+
+## 🧠 DEVELOPMENT WORKFLOW (AUTONOMOUS LOOP)
+
+### 1. PLAN
+
+* Read current code in `/src`
+* Identify missing feature or improvement
+* Read relevant package source in `llm-context/`
+* Design minimal solution
+* Ensure task < 1 day scope
+
+---
+
+### 2. CODE
+
+* Create branch:
+
+```
+git checkout -b feature/<short-name>
+```
+
+* Implement using EXISTING packages
+* Keep code simple and readable
+* Add JSDoc for public APIs
+
+---
+
+### 3. TEST
+
+* Add unit tests for new logic
+* Run:
+
+```
+npm test
+npm run build
+```
+
+* Manual test (TUI if applicable)
+
+---
+
+### 4. EVALUATE
+
+Check:
+
+* Does it work?
+* Does it use existing libraries?
+* Is UX improved?
+* Is it safe (no injection, no unsafe exec)?
+* Is performance acceptable?
+
+---
+
+### 5. DECIDE
+
+If GOOD:
+
+```
+git commit -m "feat: <description>"
+git merge feature/<name>
+```
+
+If BAD:
+
+```
+git reset --hard HEAD
+```
+
+---
+
+## 📦 PACKAGE USAGE STRATEGY
+
+### PRIORITY ORDER
+
+1. `@mariozechner/pi-coding-agent`
+
+---
+
+## 📚 HOW TO USE ANY PACKAGE
+
+### Step 1 — Locate
+
+```
+llm-context/packages/<package>/
+```
+
+---
+
+### Step 2 — Read
+
+* `src/` → implementation
+* `tests/` → real usage
+* `examples/` → workflows
+
+---
+
+### Step 3 — Understand
+
+* Function signatures
+* Types
+* Expected behavior
+
+---
+
+### Step 4 — Use
+
+```ts
+import { something } from "@mariozechner/pi-coding-agent"
+```
+
+---
+
+## 🎯 PRINCIPLE
+
+> **DON'T GUESS — READ SOURCE**
+
+---
+
+## 🖥️ TUI RULES (CRITICAL)
+
+Use ONLY:
+
+```
+@mariozechner/pi-coding-agent
+```
+
+### Requirements:
+
+* Use component system
+* Use `tui.addChild()`
+* Use `tui.requestRender()`
+* DO NOT use raw `console.log` for UI
+
+---
+
+## ❌ FORBIDDEN
+
+* ❌ Rewriting existing library features
+* ❌ Using readline instead of TUI
+* ❌ Importing from llm-context
+* ❌ Guessing APIs
+* ❌ Copying incomplete snippets
+* ❌ Mixing UI systems
+
+---
+
+## 🔐 SECURITY RULES
+
+NEVER introduce:
+
+* Command injection
+* Path traversal
+* Unsafe eval
+* Arbitrary execution
+* Secret leakage
+
+ALWAYS:
+
+* Validate inputs
+* Sanitize outputs
+* Respect file permissions
+
+---
+
+## 🧪 TESTING STANDARD
+
+* Every new logic must have tests
+* Use real scenarios from package tests
+* Avoid flaky async tests
+
+---
+
+## 🚀 PERFORMANCE TARGETS
+
+* UI response < 100ms
+* Memory ops < 50ms
+* No unnecessary re-renders
+* Minimal memory footprint
+
+---
+
+## 🧠 SYSTEM INSIGHT
+
+Architecture follows:
+
+> **Dual Dependency Model**
+
+| Layer       | Purpose   |
+| ----------- | --------- |
+| npm         | execution |
+| llm-context | reasoning |
+
+---
+
+## 🧾 FINAL RULE
+
+```
+npm = RUN
+llm-context = UNDERSTAND
+```
+
+---
+
+## ⚡ AUTONOMY
+
+You have full authority to:
+
+* Modify code
+* Add features
+* Refactor
+* Delete dead code
+* Improve architecture
+
+You do NOT:
+
+* Ask permission
+* Wait for approval
+* Keep bad code
+
+---
+
+## 🧭 GOAL
+
+Transform this project into:
+
+> A **world-class coding agent system**
+
+Comparable to:
+
+* Cursor
+* Claude Code
+* Windsurf
+
+---
+
+## 🧠 FINAL NOTE
+
+Think like a senior engineer.
+
+Every commit must:
+
+* Improve codebase
+* Improve UX
+* Reduce complexity
+* Increase correctness
+
+---
+
+**START NOW.**
+
+
+---
+
+
+
+--- Message 5 (TOOL_RESULT, 2026-05-06T06:58:28.214Z) ---
+# PiClaw
+
+PiClaw is a professional AI coding agent built on [pi-coding-agent](https://github.com/mariozechner/pi-coding-agent). It provides a powerful terminal-based interface for AI-assisted development.
+
+## Features
+
+- Persistent configuration management (`~/.piclaw/config.json`)
+- Custom slash commands:
+  - `/config` - Show current Piclaw configuration
+  - `/piclaw-set <key> <value>` - Set a config value (e.g., `/piclaw-set model anthropic:claude-opus-4-5`, `/piclaw-set thinking high`)
+  - `/tools` - List active tools
+  - `/piclaw-status` - Show Piclaw and session status
+- Automatic tool allowlist from config
+- Model and thinking level persistence across sessions
+- Extension system for custom commands
+- **SubTool Loader** – a single custom built-in tool exposing 50+ system operations (bash, git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis, make, npm, systemctl, journalctl, ps, kill, crontab, apt, yum, df, du, ping, traceroute, nslookup, dig, wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg, update, backup, password, weather, time, ufw, at, quota, iso, free, iostat, netstat, ss, ...). See [SubTool Loader](#subtool-loader) for details.
+
+## SubTool Loader
+
+The SubTool Loader is a unified interface for executing 50+ common system commands and tools. Instead of managing dozens of separate tools, it's exposed as a single `subtool_loader` tool that can execute any supported command.
+
+### Available Sub-Tools
+
+| Category | Tools |
+|----------|-------|
+| **Version Control** | git |
+| **Containers** | docker, k8s |
+| **Cloud** | aws, terraform |
+| **Databases** | db, kafka, redis |
+| **Package Managers** | npm, apt, yum |
+| **Systemd** | systemctl, journalctl |
+| **Processes** | ps, kill, crontab |
+| **System Info** | df, du, free, iostat, netstat, ss |
+| **Network** | ping, traceroute, nslookup, dig, wget |
+| **File Ops** | tail, scp, rsync |
+| **Data Processing** | jq, yq, xmllint |
+| **Media** | ffmpeg |
+| **Security** | ufw, ssh |
+| **Utilities** | update, backup, password, weather, time, at, quota, iso |
+| **Computer Use** | bash, ls, find, grep, read |
+
+### Usage
+
+The LLM can call `subtool_loader` with any sub-tool name and arguments:
+
+```json
+{
+  "subtool": "git",
+  "args": {
+    "command": "status"
+  }
+}
+```
+
+```json
+{
+  "subtool": "docker",
+  "args": {
+    "command": "ps -a",
+    "timeout": 30
+  }
+}
+```
+
+```json
+{
+  "subtool": "k8s",
+  "args": {
+    "command": "get pods -n default",
+    "context": "production"
+  }
+}
+```
+
+### Common Parameters
+
+All sub-tools support:
+- `command` (string, required) - The command to execute
+- `cwd` (string, optional) - Working directory
+- `timeout` (number, optional) - Timeout in seconds
+
+### Documentation
+
+For complete usage examples for all 50+ sub-tools, see [docs/subtool-usage.md](docs/subtool-usage.md).
+
+### Security Note
+
+⚠️ Sub-tools execute arbitrary shell commands. Only use in trusted environments.
+
+## Installation
+
+```bash
+# Clone and install
+npm install
+npm run build
+npm link
+```
+
+## Usage
+
+Start the interactive agent:
+
+```bash
+piclaw
+```
+
+Or with options:
+
+```bash
+piclaw --cwd /path/to/project --model anthropic:claude-opus-4-5 --thinking high --verbose
+```
+
+### CLI Options
+
+- `--cwd <path>` - Working directory (default: current)
+- `--tools <list>` - Comma-separated tool allowlist (overrides config)
+- `--sessionDir <dir>` - Custom session storage directory
+- `--model <id>` - Model to use (e.g., `anthropic:claude-opus-4-5`)
+- `--thinking <level>` - Thinking level: `off|minimal|low|medium|high|xhigh`
+- `--verbose` - Show detailed logs
+
+## Configuration
+
+Piclaw stores configuration in `~/.piclaw/config.json`. Example:
+
+```json
+{
+  "model": "anthropic:claude-opus-4-5",
+  "thinking": "high",
+  "tools": ["read", "bash", "edit", "write", "grep", "find"],
+  "verbose": false
+}
+```
+
+You can edit this file manually or use the `/piclaw-set` command inside the agent.
+
+### Supported Config Keys
+
+- `model` - Default model (`provider:modelId`)
+- `thinking` - Default thinking level
+- `tools` - Array of allowed tool names
+- `sessionDir` - Custom session storage path
+- `verbose` - Enable verbose logging
+
+## Slash Commands
+
+Built-in commands (from pi):
+- `/model` - Select model (opens UI)
+- `/thinking` - Change thinking level
+- `/settings` - Open settings menu
+- `/session` - Show session info
+- `/quit` - Exit
+... and many more. Press `/` in the app to see all commands.
+
+Piclaw-specific commands:
+- `/config` - Show Piclaw config
+- `/piclaw-set <key> <value>` - Set a config key/value
+- `/tools` - Show active tools
+- `/piclaw-status` - Show Piclaw status
+
+## Development
+
+```bash
+# Build
+npm run build
+
+# Run in dev mode (tsx)
+npm run dev
+
+# Lint
+npm run lint
+
+# Type check
+npm run check
+
+# Test
+npm test
+```
+
+## How It Works
+
+Piclaw extends pi-coding-agent with:
+
+1. **Config Manager** - Loads/saves user configuration
+2. **CLI Resolution** - Merges CLI options with config file
+3. **Tool Allowlist** - Applies `tools` config to session
+4. **Auto-Loaded Extension** - Registers custom slash commands via global settings
+
+On startup, Piclaw:
+- Loads config from `~/.piclaw/config.json`
+- Merges with CLI overrides
+- Registers the built-in piclaw extension (written in `src/extensions/piclaw-extension.ts`)
+- Creates agent session with allowed tools from config
+- Applies initial model and thinking level
+
+## Extension Architecture
+
+Piclaw's custom extension is automatically registered by writing its path to the global settings file (`~/.piclaw/agent/settings.json`). This happens on every startup (if not already present).
+
+To create your own extension, place a `.ts` or `.js` file in:
+- Global: `~/.pi/agent/extensions/`
+- Project: `<project>/.pi/extensions/`
+
+See examples in `llm-context/packages/coding-agent/examples/extensions/`.
+
+## License
+
+APACHE
+
+
+--- Message 6 (TOOL_RESULT, 2026-05-06T06:58:28.214Z) ---
+BẠN LÀ PiClaw AUTONOMOUS: PiClaw
+NHIỆM VỤ CỦA BẠN LÀ: TUÂN THỦ PROTOCOL SAU:
+TOÀN BỘ NỘI DUNG DƯỚI ĐÂY LÀ PROTOCOL ĐỂ PHÁT TRIỂN AP:
+---
+APP LÀ DỰ ÁN Ở THƯ MỤC HIỆN TẠI, BẠN DÙNG PROTOCOL ĐỂ phát triển app thành chuẩn production, tính năng ngày càng mở rộng và hoàn thiện, mục tiêu là tạo coding agent app..
+
+👉 **Hybrid chuẩn:**
+
+```bash
+piclaw/
+├─ src/                  ← code app của bạn
+├─ node_modules/         ← runtime (npm)
+├─ llm-context/          ← source để LLM đọc
+└─ package.json
+```
+
+---
+
+# 🧠 Vì sao đây là best (không phải opinion, mà là kiến trúc)
+
+## 1. Tách rõ 2 hệ:
+
+### Runtime (chạy thật)
+
+```bash
+npm install their-sdk
+```
+
+```js
+import { x } from "their-sdk"
+```
+
+👉 ổn định, có version, production-safe
+
+---
+
+### Reasoning (LLM hiểu code)
+
+```bash
+git clone repo llm-context/
+```
+
+👉 LLM đọc full source → không đoán mò
+
+---
+
+# 🔥 Điểm mấu chốt
+
+👉 Bạn **KHÔNG cần chọn giữa 2 cách trước**
+
+Bạn đang giải 2 bài toán khác nhau:
+
+| Bài toán  | Giải pháp    |
+| --------- | ------------ |
+| Chạy code | npm          |
+| Hiểu code | clone source |
+
+---
+
+# ❌ Vì sao KHÔNG chọn các cách khác
+
+## Submodule
+
+* overkill
+* làm repo phức tạp
+* không giúp LLM hơn
+
+---
+
+## Monorepo (fork SDK)
+
+* bạn phải maintain SDK
+* dễ diverge upstream
+* không cần thiết vì bạn không sửa SDK
+
+---
+
+## Vendor
+
+* mất npm benefits
+* tự gánh dependency
+
+---
+
+# 🧾 Rule quan trọng (phải giữ)
+
+👉 TUYỆT ĐỐI:
+
+```bash
+❌ không import từ llm-context
+❌ không build từ llm-context
+```
+
+👉 CHỈ:
+
+```bash
+✔ import từ npm package
+✔ llm-context chỉ để đọc
+```
+
+---
+
+# 🚀 Workflow chuẩn cho bạn
+
+1. Cài SDK
+
+```bash
+npm install their-sdk
+```
+
+2. Clone để LLM đọc
+
+```bash
+git clone <repo> llm-context/
+```
+
+3. Khi cần hiểu:
+
+* mở source trong `llm-context`
+* feed vào LLM
+
+4. Khi chạy:
+
+* chỉ dùng npm
+
+---
+
+# 💡 Sử dụng tối đa lib 
+
+**Lib** ở đây = các npm packages được publish từ monorepo `llm-context/`.
+
+Cấu trúc:
+```
+packages/
+├─ coding-agent/    → @mariozechner/pi-coding-agent
+
+
+Source code implementation của packages nằm ngay trong thư mục tương ứng. Khi public, chúng thành npm packages
+
+
+*** BẮT BUỘC CAO NHẤT: Sử dụng tối đa mọi export trong gói `@mariozechner/pi-coding-agent` để viết app, ĐỪNG BAO GIỜ VIẾT LẠI KHI ĐÃ CÓ SẴN CHỈ VIỆC DÙNG.
+
+---
+
+## ✅ Khi cần dùng functionality có sẵn:
+
+1. **Kiểm tra dependencies** trong `package.json`:
+   ```bash
+   cat package.json
+   ```
+
+2. **Nếu đã có package** (vd: `@mariozechner/pi-coding-agent`):
+   - **KHÔNG VIẾT LẠI implementation**
+   - Chỉ `import` và dùng trực tiếp
+   - Code đã được test, stable, production-ready
+
+3. **Nếu không biết cách dùng API**:
+   - Mở `llm-context/packages/<package-name>/`
+   - Đọc `src/` (implementation), `tests/` (usage examples), `examples/` (workflows)
+   - Source code = **chính xác nhất** – đừng tin docs hay snippets
+
+4. **Viết code dựa trên**:
+   - TypeScript signatures (hints đầy đủ)
+   - Unit tests (show intended behavior)
+   - Real-world examples trong repo
+
+---
+
+## 🎛️ TUI Integration (Command Palette & Interactive UI)
+
+Sử dụng **`@mariozechner/pi-coding-agent`** – **KHÔNG* viết lại khi đã có, chỉ viết cái chưa có.
+
+### Khi cần TUI features:
+
+
+2. **Đọc implementation** trong `llm-context/packages/coding-agent/`:
+
+**Quan trọng**: TUI quản lý toàn bộ screen rendering với differential updates. Không mix với `console.log` thuần. Dùng `tui.addChild()` để thêm components, và `tui.requestRender()` khi cần update.
+
+không hiểu dùng thế nào thì vào trong llm-context/pi-mono/packages/coding-agent mà lục code nó để mà hiểu cách dùng.
+---
+
+## ❌ Đừng bao giờ:
+
+- ❌ Reimplement hàm có sẵn trong package
+- ❌ Viết code mới khi lib đã có (ví dụ: dùng readline thay vì pi-tui)
+- ❌ Đoán API behavior – đọc source code thật
+- ❌ Copy-paste từ docs ngắn – xem full implementation
+
+---
+
+## 🔍 Cách tìm hiểu một package:
+
+Ví dụ cần dùng `createAgentSession` từ `pi-coding-agent`:
+
+1. Xem nó được import ở đâu trong codebase hiện tại:
+   ```ts
+   // src/agent/core.ts đã có:
+   import { createAgentSession } from "@mariozechner/pi-coding-agent"
+   ```
+
+2. Đọc implementation ở `llm-context/packages/coding-agent/src/`:
+   - Tìm file chứa `createAgentSession`
+   - Xem parameters, options, return type
+   - Đọc tests để biết cách dùng đúng
+
+3. Như vậy biết chính xác cách dùng mà không phải đoán
+
+---
+
+## 🎯 Principle: "Don't Guess, Read Source"
+
+Khi bạn không chắc về API:
+
+1. **Find** → Tìm package trong `llm-context/packages/`
+2. **Read** → Đọc source implementation
+3. **Verify** → Cross-check với tests
+4. **Use** → Import từ npm và dùng chính xác
+
+Đây là cách đảm bảo code bạn viết **100% phù hợp** với lib, không lỗi do guesswork.
+
+---
+
+# 🧠 Insight quan trọng (level cao)
+
+Bạn đang áp dụng pattern:
+
+> **Dual Dependency Model**
+
+* execution dependency (npm)
+* reasoning dependency (source)
+
+👉 đây là cách:
+
+* Copilot nội bộ
+* nhiều team AI lớn dùng
+
+---
+
+# 🎯 Kết luận cuối
+
+👉 **Cách tốt nhất cho bạn:**
+
+* npm cho runtime
+* clone riêng cho LLM
+* tách biệt hoàn toàn
+
+---
+
+# 🧾 Chốt 1 dòng
+
+```bash
+npm = chạy
+llm-context = hiểu
+```
+
+---
+
+Nếu bạn muốn lên level nữa, mình có thể giúp bạn:
+
+* build tool auto search trong `llm-context`
+* inject context vào prompt
+* hoặc setup mini “code intelligence” local
+
+→ để LLM viết code đúng SDK gần như 100%, không đoán nữa.
+
+
+--- Message 7 (TOOL_RESULT, 2026-05-06T06:58:28.214Z) ---
+# 📋 Todo List
+
+## Phase 1: Core Foundation ✅
+
+- [x] Set up project structure with dual dependency model
+- [x] Configure pi-coding-agent as runtime dependency
+- [x] Configure llm-context for source code reasoning
+- [x] Implement SubTool Loader (50+ system tools)
+- [x] Create basic CLI interface
+- [x] Implement config management (~/.piclaw/config.json)
+- [x] Add slash commands (/config, /piclaw-set, /tools, /piclaw-status)
+- [x] Build extension system for custom commands
+
+## Phase 2: Agent State & Streaming Management ✅
+
+- [x] Analyze agent state machine (isStreaming, streamingMessage)
+- [x] Document streaming interruption handling
+- [x] Implement proper abort/error handling in stream flows
+- [x] Ensure graceful degradation on stream failure
+- [x] Test agent idle vs streaming states
+
+## Phase 3: TUI & Interactive Mode ✅
+
+- [x] Implement enhanced status display showing streaming state
+- [x] Add visual indicators for streaming progress  
+- [x] Implement agent state panel (isStreaming, pendingToolCalls, streamingMessage)
+- [x] Add interruption controls (abort, pause, resume)
+- [x] Implement streaming history replay
+- [x] Add real-time token counters
+- [x] Analyze all 15 intervention methods and document in CAN_THIEU_PHAN_TICH.md & INTERVENTION_ANALYSIS.md
+
+## Phase 4: Advanced Features ✅
+
+- [x] Context window management
+- [x] Message compaction/summarization
+- [x] Streaming timeout handling
+- [x] Retry logic for failed streams
+- [x] Session auto-save during streaming
+- [x] Tool execution progress tracking
+
+## Phase 5: Testing & Documentation ✅
+
+- [x] Unit tests for agent state transitions
+- [x] Integration tests for streaming interruption
+- [x] End-to-end tests for full streaming flow
+- [x] Update API documentation
+- [x] Create usage examples
+- [x] Performance benchmarking
+
+## Phase 6: Production Hardening ✅
+
+- [x] Error recovery mechanisms
+- [x] Memory leak prevention in streaming
+- [x] Concurrent stream handling
+- [x] Rate limiting and backoff strategies
+- [x] Security audit for tool execution
+- [x] Input validation and sanitization
+
+## Phase 7: Documentation & Knowledge Sharing ✅
+
+- [x] Create quick start guide for new users
+- [x] Document extension development workflow
+- [x] Create video tutorials for key features
+- [x] Publish to npm registry
+- [x] Create community Discord/Slack channel
+
+## Archived Tasks
+
+- [x] Initial project setup (2026-04-21)
+- [x] Basic agent functionality (2026-05-01)
+- [x] SubTool Loader implementation (2026-05-03)
+- [x] Config system (2026-05-04)
+- [x] Extension system (2026-05-05)
+- [x] Streaming state analysis (2026-05-06)
+- [x] Full intervention analysis & documentation (2026-05-06)
+- [x] Phase 4 Advanced Features analysis (2026-05-06)
+- [x] Phase 5 Testing & Documentation (2026-05-06)
+- [x] Phase 6 Production Hardening (2026-05-06)
+
+---
+
+## Notes
+
+### Agent States Summary
+
+| State | isStreaming | streamingMessage | Description |
+|-------|-------------|------------------|-------------|
+| **IDLE** | false | undefined | Agent ready for new prompt |
+| **STREAMING** | true | defined | LLM actively streaming tokens |
+| **ERROR** | false | undefined | Stream failed or aborted |
+
+### Dual Dependency Model
+
+- **Runtime**: `@mariozechner/pi-coding-agent` (npm install)
+- **Reasoning**: `llm-context/` (source code analysis only)
+
+Never import from llm-context at runtime!
+
+--- Message 8 (ASSISTANT, 2026-05-06T06:58:28.215Z) ---
+[toolCall]
+
+--- Message 9 (TOOL_RESULT, 2026-05-06T06:58:30.590Z) ---
+# Piclaw Extensions
+
+Tổ chức các custom provider và extensions cho PiClaw.
+
+## Cấu trúc
+
+```
+extensions/
+├── index.ts              # Main entry point (được load tự động)
+├── providers/            # Provider definitions
+│   ├── index.ts         # Re-exports
+│   ├── kilo-provider.ts # Kilo provider
+│   └── models/          # Model definitions
+│       └── kilo-models.ts
+└── README.md
+```
+
+## Thêm Provider Mới
+
+1. Tạo file providers/<provider-name>-provider.ts:
+
+```typescript
+import type { ExtensionAPI, ProviderConfig } from "@mariozechner/pi-coding-agent";
+
+export function registerMyProvider(api: ExtensionAPI): void {
+  const config: ProviderConfig = {
+    baseUrl: "https://api.example.com/v1",
+    apiKey: "MY_API_KEY",
+    api: "openai-completions",
+    models: [
+      {
+        id: "my-model-v1",
+        name: "My Model V1",
+        reasoning: false,
+        input: ["text"],
+        cost: { input: 0, output: 0 },
+        contextWindow: 128000,
+        maxTokens: 4096,
+      },
+    ],
+  };
+
+  api.registerProvider("my-provider-id", config);
+}
+```
+
+2. Thêm vào `providers/index.ts`:
+
+```typescript
+export { registerMyProvider } from "./my-provider.js";
+```
+
+3. Import trong `extensions/index.ts`:
+
+```typescript
+import { registerMyProvider } from "./providers/index.js";
+
+export default function (api: ExtensionAPI) {
+  registerMyProvider(api);
+}
+```
+
+4. Build: `npm run build`
+
+Provider sẽ xuất hiện trong `/login` → "Use an API key".
+
+## Ghi chú
+
+- Extension tự động được load thông qua global settings.
+- Không cần thêm vào `package.json` workspaces.
+- Models phải được khai báo đầy đủ nếu provider chưa có trong pi-core.
+
+
+--- Message 10 (ASSISTANT, 2026-05-06T06:58:30.592Z) ---
+[toolCall]
+
+--- Message 11 (TOOL_RESULT, 2026-05-06T06:58:32.487Z) ---
+# SubTool Loader
+
+## Overview
+
+The **SubTool Loader** is a unified interface that exposes 50+ system operations as a single tool. Instead of managing dozens of separate tools, the LLM can call `subtool_loader` with any supported sub-tool name and arguments.
+
+## Architecture
+
+The SubTool Loader combines:
+- **7 Core Tools** from `@mariozechner/pi-coding-agent`: `bash`, `ls`, `find`, `grep`, `read`, `edit`, `write`
+- **50+ Custom Sub-Tools**: System operations across categories like Git, Docker, Kubernetes, AWS, Terraform, databases, package managers, etc.
+
+## Usage
+
+### Basic Syntax
+
+```json
+{
+  "subtool": "git",
+  "args": {
+    "command": "status"
+  }
+}
+```
+
+```json
+{
+  "subtool": "docker",
+  "args": {
+    "command": "ps -a",
+    "timeout": 30
+  }
+}
+```
+
+```json
+{
+  "subtool": "k8s",
+  "args": {
+    "command": "get pods -n default",
+    "context": "production"
+  }
+}
+```
+
+### Common Parameters
+
+All sub-tools support:
+- `subtool` (string, required) - The sub-tool name to execute
+- `args` (object, required) - Arguments for the sub-tool
+  - `command` (string, required) - The command to execute
+  - `cwd` (string, optional) - Working directory
+  - `timeout` (number, optional) - Timeout in seconds
+- Additional parameters specific to each sub-tool
+
+### Schema Introspection
+
+Use `get_schema` to get the JSON schema for any sub-tool:
+
+```json
+{
+  "subtool": "get_schema",
+  "args": {
+    "name": "bash"
+  }
+}
+```
+
+## Available Sub-Tools
+
+### Core Tools (from pi-coding-agent)
+- `bash` - Execute bash commands
+- `ls` - List directory contents
+- `find` - Find files
+- `grep` - Search text patterns
+- `read` - Read file contents
+- `edit` - Edit files
+- `write` - Write files
+
+### Version Control
+- `git` - Git operations (clone, commit, push, pull, branches)
+
+### Containers
+- `docker` - Docker container management
+- `k8s` - Kubernetes cluster operations
+
+### Cloud & Infrastructure
+- `aws` - AWS CLI operations
+- `terraform` - Infrastructure as code
+
+### Databases
+- `db` - Generic database operations
+- `kafka` - Kafka message queue
+- `redis` - Redis cache operations
+- `mysql` - MySQL database
+- `psql` - PostgreSQL database
+- `mongodb` - MongoDB operations
+
+### Package Managers
+- `npm` - Node.js packages
+- `apt` - Debian/Ubuntu packages
+- `yum` - RHEL/CentOS packages
+- `dnf` - Fedora packages
+- `pacman` - Arch Linux packages
+- `pip` - Python packages
+- `cargo` - Rust packages
+- `go` - Go packages
+- `maven` - Java packages
+
+### System Management
+- `systemctl` - Systemd service management
+- `journalctl` - System journal
+- `ps` - Process listing
+- `kill` - Kill processes
+- `top` / `htop` - Process monitoring
+- `vmstat` / `mpstat` / `sar` - System performance
+- `df` - Disk space
+- `du` - Directory usage
+- `mount` - Mount filesystems
+- `crontab` - Scheduled tasks
+- `ufw` - Firewall management
+
+### Network
+- `ping` - Network connectivity
+- `traceroute` - Network path tracing
+- `nslookup` / `dig` - DNS queries
+- `ssh` - SSH connections
+- `scp` - Secure file copy
+- `sftp` - SFTP file transfer
+- `netstat` / `ss` - Network statistics
+- `iptables` / `nft` - Firewall rules
+- `tcpdump` - Packet capture
+- `socat` - Network relay
+- `wget` / `curl` - HTTP downloads
+- `httpie` - HTTP client
+
+### File Operations
+- `tail` - Follow log files
+- `cat` - Concatenate files
+- `cp` - Copy files
+- `mv` - Move files
+- `rm` - Remove files
+- `mkdir` - Create directories
+- `tar` / `gz` / `7z` / `zip` - Archive operations
+- `rsync` - Remote sync
+
+### Development
+- `git` - Version control
+- `vim` / `nano` / `code` - Text editors
+- `grep` / `find` - Code search
+- `diff` - File comparison
+- `tree` - Directory visualization
+
+### Data Processing
+- `jq` / `yq` - JSON/YAML processing
+- `xmllint` - XML processing
+- `csvkit` - CSV processing
+- `pandoc` - Document conversion
+- `imagemagick` / `ffmpeg` - Media processing
+
+### Security
+- `gpg` - Encryption
+- `openssl` - SSL/TLS operations
+- `ssh-keygen` - SSH key generation
+- `nmap` - Port scanning
+- `wireshark` / `tcpdump` - Network analysis
+
+### Monitoring & Observability
+- `prometheus` - Metrics collection
+- `grafana` - Dashboards
+- `elasticsearch` / `kibana` - Log analysis
+- `datadog` - APM
+
+### Scripting & Automation
+- `bash` - Shell scripting
+- `python` / `perl` / `ruby` / `php` - Scripting languages
+- `make` - Build automation
+- `cmake` - Build configuration
+
+### Virtualization
+- `docker` - Container runtime
+- `k8s` - Container orchestration
+- `qemu` - Virtual machines
+- `vagrant` - VM automation
+
+### Cloud CLI Tools
+- `aws` - AWS CLI
+- `az` - Azure CLI
+- `gcloud` - Google Cloud CLI
+
+### Package Managers (Extended)
+- `conda` - Python environments
+- `nix` - Nix package manager
+- `spack` - HPC package manager
+- `guix` - GNU Guix
+
+### Miscellaneous
+- `time` - Command timing
+- `date` - Date/time
+- `cal` - Calendar
+- `weather` - Weather info
+- `fortune` - Random quotes
+
+## Safety Features
+
+### Dangerous Tools Control
+
+Some sub-tools are classified as "dangerous" (can modify system state or access sensitive resources):
+
+```json
+{
+  "subtool": "configure",
+  "args": {
+    "allowDangerousTools": false
+  }
+}
+```
+
+When `allowDangerousTools` is `false`, dangerous tools will be blocked.
+
+### Tool Disabling
+
+Specific tools can be disabled:
+
+```json
+{
+  "subtool": "configure",
+  "args": {
+    "disabledTools": ["rm", "format"]
+  }
+}
+```
+
+### Audit Logging
+
+All sub-tool executions are logged with:
+- Timestamp
+- Tool name
+- Arguments
+- Success/failure status
+- Duration
+- Error messages (if any)
+
+View audit log:
+```json
+{
+  "subtool": "get_audit_log"
+}
+```
+
+## Examples
+
+### Example 1: Git Operations
+```json
+{
+  "subtool": "git",
+  "args": {
+    "command": "clone https://github.com/user/repo.git"
+  }
+}
+```
+
+### Example 2: Docker Container List
+```json
+{
+  "subtool": "docker",
+  "args": {
+    "command": "ps -a"
+  }
+}
+```
+
+### Example 3: Kubernetes Deployment
+```json
+{
+  "subtool": "k8s",
+  "args": {
+    "command": "apply -f deployment.yaml",
+    "context": "production"
+  }
+}
+```
+
+### Example 4: File Search
+```json
+{
+  "subtool": "find",
+  "args": {
+    "path": "/var/log",
+    "type": "f",
+    "name": "*.log"
+  }
+}
+```
+
+### Example 5: Package Installation
+```json
+{
+  "subtool": "apt",
+  "args": {
+    "command": "install -y nginx"
+  }
+}
+```
+
+### Example 6: Database Query
+```json
+{
+  "subtool": "psql",
+  "args": {
+    "query": "SELECT * FROM users LIMIT 10",
+    "connection": "postgresql://localhost/mydb"
+  }
+}
+```
+
+### Example 7: System Info
+```json
+{
+  "subtool": "systemctl",
+  "args": {
+    "command": "status nginx"
+  }
+}
+```
+
+## Benefits
+
+1. **Simplified Interface**: One tool instead of 50+
+2. **Consistent API**: All sub-tools use the same parameter structure
+3. **Safety Controls**: Configurable dangerous tool permissions
+4. **Audit Trail**: All operations logged for compliance
+5. **Flexibility**: Easy to add new sub-tools
+6. **Introspection**: Get schemas dynamically
+
+## Adding New Sub-Tools
+
+To add a new sub-tool:
+
+1. Create a file in `src/tools/sub-tools/` (e.g., `mytool.ts`)
+2. Export `mytoolSchema` and `executeMytool`
+3. Add to `src/tools/sub-tools/index.ts`
+4. The tool is automatically available via `subtool_loader`
+
+## Implementation Details
+
+- **Schema Generation**: Uses TypeBox for JSON Schema validation
+- **Tool Caching**: Tools are cached per working directory
+- **Error Handling**: Errors are captured and returned as structured responses
+- **Async Execution**: All sub-tools support async/await
+- **Abort Signals**: Support for cancellation via AbortSignal
+
+## Related
+
+- [Core Tools](./core-tools.md) - bash, ls, find, grep, read, edit, write
+- [Sub-Tools Index](../extensions/providers/models/index.ts) - All available sub-tools
+- [PiClaw Architecture](../docs/pi-agent-core-analysis.md) - How tools fit into the system
+
+## License
+
+Part of the PiClaw project.
+
+
+--- Message 12 (ASSISTANT, 2026-05-06T06:58:32.488Z) ---
+Now tôi đã đọc được các file markdown chính. Dựa trên yêu cầu "đọc mọi file md", tôi sẽ tiếp tục đọc các file docs quan trọng còn lại:
+[toolCall]
+
+--- Message 13 (TOOL_RESULT, 2026-05-06T06:58:35.117Z) ---
+/home/quangtynu/Qcoder/qclaw/AGENTS.md
+/home/quangtynu/Qcoder/qclaw/README.md
+/home/quangtynu/Qcoder/qclaw/docs/pi-tui-deep-dive.md
+/home/quangtynu/Qcoder/qclaw/docs/VIDEO_TUTORIALS.md
+/home/quangtynu/Qcoder/qclaw/docs/COMMUNITY.md
+/home/quangtynu/Qcoder/qclaw/docs/pi-coding-agent-vs-pi-agent-core-architecture.md
+/home/quangtynu/Qcoder/qclaw/docs/NPM_PUBLISHING.md
+/home/quangtynu/Qcoder/qclaw/docs/API_EXPORT_FROM_CODING_AGENT.md
+/home/quangtynu/Qcoder/qclaw/docs/EXTENSION_DEVELOPMENT.md
+/home/quangtynu/Qcoder/qclaw/docs/TODO.md
+/home/quangtynu/Qcoder/qclaw/SYSTEM.md
+/home/quangtynu/Qcoder/qclaw/CAN_THIEU_PHAN_TICH.md
+/home/quangtynu/Qcoder/qclaw/llm-context/AGENTS.md
+/home/quangtynu/Qcoder/qclaw/llm-context/CONTRIBUTING.md
+/home/quangtynu/Qcoder/qclaw/llm-context/README.md
+/home/quangtynu/Qcoder/qclaw/INTERVENTION_ANALYSIS.md
+
+
+--- Message 14 (ASSISTANT, 2026-05-06T06:58:35.119Z) ---
+[toolCall]
+[toolCall]
+[toolCall]
+
+--- Message 15 (TOOL_RESULT, 2026-05-06T06:58:39.895Z) ---
 # 🖥️ Kiến Trúc TUI: Cách PiCodingAgent Tích Hợp PiTUI
 
 *Tài liệu chi tiết cách `pi-coding-agent` sử dụng `pi-tui` để xây dựng giao diện terminal tương tác*
@@ -919,282 +2387,744 @@ Các component tự động nhận theme thông qua `this.tui.getTheme()`.
 **Kết:** Việc tích hợp TUI làm cho PiClaw có giao diện chuyên nghiệp, mượt mà, mang lại trải nghiệm người dùng (UX) gần giống như một ứng dụng desktop thực thụ, nhưng chạy hoàn toàn trong terminal! 🚀
 
 
---- Message 5 (TOOL_RESULT, 2026-05-06T06:16:22.234Z) ---
-# 🏗️ Kiến Trúc: Cách PiCodingAgent Dùng PiAgentCore
+--- Message 16 (TOOL_RESULT, 2026-05-06T06:58:39.895Z) ---
+# 🛠 Extension Development Workflow
 
-*Tài liệu chi tiết cách `llm-context/packages/coding-agent` sử dụng `@mariozechner/pi-agent-core`*
+## Overview
 
----
+Piclaw extensions are TypeScript modules that add custom tools, commands, providers, and UI components to the AI coding agent. This guide walks you through creating, testing, and publishing extensions.
 
-## 🔍 Tổng Quan
+## Quick Start
 
-`pi-coding-agent` (ứng dụng CLI coding chuyên dụng) được xây dựng **dựa trên** `pi-agent-core` (framework agent tổng quát) theo pattern **Composition** (tổ hợp) thay vì kế thừa.
+### 1. Create Your Extension File
 
-### Mối Quan Hệ
+Create a TypeScript file in `~/.piclaw/agent/extensions/`:
+
+```bash
+mkdir -p ~/.piclaw/agent/extensions
+touch ~/.piclaw/agent/extensions/my-extension.ts
 ```
-pi-agent-core (Framework tổng quát)
-    ↓
-    └───> pi-coding-agent (Ứng dụng CLI chuyên dụng)
-```
 
-**Giống như:** React (framework) → Next.js (ứng dụng web)
-
----
-
-## 1. 💡 Cách Dùng Core: Tạo Instance & Inject Config
-
-### File: `src/core/sdk.ts`
-
-`pi-coding-agent` **KHÔNG KẾ THỪA** class `Agent`, mà **TẠO INSTANCE** và **INJECT** các config đặc thù vào:
+### 2. Basic Extension Structure
 
 ```typescript
-import { Agent, type AgentMessage, type ThinkingLevel } from "@mariozechner/pi-agent-core";
-
-// Trong createAgentSession():
-agent = new Agent({
-  initialState: {
-    systemPrompt: "",
-    model,
-    thinkingLevel,
-    tools: [],
-  },
-  
-  // 👉 1. Inject custom convertToLlm (chuyển AgentMessage → LLM Message)
-  convertToLlm: convertToLlmWithBlockImages,
-  
-  // 👉 2. Inject custom streamFn (gọi LLM với API key, retry...)
-  streamFn: async (model, context, options) => {
-    const auth = await modelRegistry.getApiKeyAndHeaders(model);
-    return streamSimple(model, context, {
-      ...options,
-      apiKey: auth.apiKey,
-      timeoutMs: options?.timeoutMs ?? providerRetrySettings.timeoutMs,
-      maxRetries: options?.maxRetries ?? providerRetrySettings.maxRetries,
-    });
-  },
-  
-  // 👉 3. Inject transformContext (xử lý context trước khi gửi LLM)
-  transformContext: async (messages) => {
-    const runner = extensionRunnerRef.current;
-    if (!runner) return messages;
-    return runner.emitContext(messages); // Cho phép extensions sửa context
-  },
-  
-  sessionId: sessionManager.getSessionId(),
-  // ... các config khác
-});
+// my-extension.ts
+export default function (api: ExtensionAPI) {
+  // Your extension code here
+  console.log("My extension loaded!");
+}
 ```
 
-**💡 Ý nghĩa:** Core cung cấp "vỏ" (Agent class), coding-agent cung cấp "nội dung" (các function xử lý logic đặc thù).
-
----
-
-## 2. 🔄 Dùng Vòng Lặp Từ Core
-
-### File: `src/core/agent-session.ts`
-
-`pi-coding-agent` gọi `runAgentLoop()` từ core để thực thi vòng lặp LLM:
+### 3. Register a Custom Tool
 
 ```typescript
-import { runAgentLoop, runAgentLoopContinue } from "./agent-loop.js";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
-// Trong AgentSession:
-private async runPromptMessages(messages: AgentMessage[]): Promise<void> {
-  await this.runWithLifecycle(async (signal) => {
-    // 👉 GỌI HÀM TỪ CORE
-    await runAgentLoop(
-      messages,                              // Dữ liệu đầu vào
-      this.createContextSnapshot(),           // Context snapshot
-      this.createLoopConfig(),                // Config vòng lặp
-      (event) => this.processEvents(event),   // Handler events
-      signal,
-      this.streamFn                           // Stream function đã inject ở trên
-    );
+export default function (api: ExtensionAPI) {
+  api.registerTool({
+    name: "search_code",
+    label: "Search Code",
+    description: "Search for code patterns in the project",
+    parameters: {
+      type: "object",
+      properties: {
+        pattern: { type: "string" },
+        path: { type: "string", default: "." },
+      },
+      required: ["pattern"],
+    },
+    execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+      // Run grep via subtool_loader or exec
+      const result = await ctx.exec("grep", ["-r", params.pattern, params.path]);
+      return {
+        content: [{ type: "text", text: result.stdout }],
+        details: { matches: result.stdout.split("\n").length },
+        isError: false,
+      };
+    },
   });
 }
 ```
 
-**💡 Ý nghĩa:** Core chứa logic "gửi prompt → đợi LLM → parse tool calls → execute tools → repeat". Coding-agent chỉ cần **gọi hàm này** và cung cấp đầu vào.
-
----
-
-## 3. 🛠️ Implement Interface `AgentTool` Cho Các Công Cụ
-
-### File: `src/core/tools/bash.ts` (tương tự cho read, write, edit, grep...)
-
-Để core có thể execute tool, coding-agent phải implement đúng chuẩn `AgentTool` interface:
+### 4. Register a Slash Command
 
 ```typescript
-import type { AgentTool } from "@mariozechner/pi-agent-core";
-import { bashSchema } from "./schema.js";
+api.registerCommand("deploy", {
+  description: "Deploy the application",
+  getArgumentCompletions: (prefix) => [
+    { label: "staging" },
+    { label: "production" },
+  ],
+  handler: async (args, ctx) => {
+    const env = args.trim() || "staging";
+    await ctx.sendMessage({
+      customType: "deploy-status",
+      content: `Deploying to ${env}...`,
+    });
+    
+    // Run deployment
+    await ctx.exec("./deploy.sh", [env]);
+    
+    await ctx.sendMessage({
+      customType: "deploy-status",
+      content: `✓ Deployed to ${env}`,
+    });
+  },
+});
+```
 
-export function createBashToolDefinition(cwd: string): AgentTool {
-  return {
-    name: "bash",
-    label: "Execute bash command",
-    description: "Execute bash commands in the terminal",
-    
-    // 👉 Schema định nghĩa params (dùng Zod)
-    parameters: bashSchema,
-    
-    // 👉 IMPLEMENT execute() - Core sẽ gọi hàm này!
-    execute: async (toolCallId: string, params: any, signal?: AbortSignal) => {
-      const result = await executeBash(params.command, { cwd, timeout: params.timeout });
-      
-      return {
-        content: [{
-          type: "text",
-          text: result.code === 0 ? result.stdout : result.stderr
-        }],
-        details: {  // Dữ liệu có cấu trúc cho UI/logging
-          code: result.code,
-          duration: result.duration,
-          stdout: result.stdout,
-          stderr: result.stderr
-        },
-        terminate: false,
-      };
+### 5. Listen to Events
+
+```typescript
+api.on("tool_execution_start", (event, ctx) => {
+  console.log(`Tool starting: ${event.toolName}`);
+});
+
+api.on("tool_execution_end", (event, ctx) => {
+  console.log(`Tool finished: ${event.toolName}`);
+});
+
+api.on("before_provider_request", (event, ctx) => {
+  // Modify request payload before LLM call
+  event.payload = { ...event.payload, custom_header: "value" };
+  return event.payload;
+});
+```
+
+### 6. Add Custom UI
+
+```typescript
+// Add a widget above the editor
+api.ui.setWidget("status-widget", ["✓ Ready"], {
+  placement: "aboveEditor",
+});
+
+// Set custom footer
+api.ui.setFooter((tui, theme, footerData) => {
+  return new CustomFooterComponent(tui, theme, footerData);
+});
+```
+
+### 7. Register a Provider
+
+```typescript
+api.registerProvider("my-ai", {
+  baseUrl: "https://api.my-ai.com/v1",
+  apiKey: "MY_AI_API_KEY",
+  api: "openai-chat-completions",
+  models: [
+    {
+      id: "my-model",
+      name: "My AI Model",
+      reasoning: false,
+      input: ["text", "image"],
+      cost: { input: 1, output: 2, cacheRead: 0, cacheWrite: 0 },
+      contextWindow: 16384,
+      maxTokens: 8192,
     },
+  ],
+});
+```
+
+## Development Workflow
+
+### Step 1: Create Extension
+
+```bash
+# Create extension directory
+mkdir -p ~/.piclaw/agent/extensions
+
+# Create extension file
+cat > ~/.piclaw/agent/extensions/my-extension.ts << 'EOF'
+export default function (api) {
+  api.registerCommand("hello", {
+    description: "Say hello",
+    handler: async (args, ctx) => {
+      await ctx.sendMessage({
+        customType: "hello",
+        content: "Hello, World!",
+      });
+    },
+  });
+}
+EOF
+```
+
+### Step 2: Load Extension
+
+The extension auto-loads on Piclaw startup. You can also manually register it in `~/.piclaw/agent/settings.json`:
+
+```json
+{
+  "extensions": [
+    "/home/user/.piclaw/agent/extensions/my-extension.ts"
+  ]
+}
+```
+
+### Step 3: Test Extension
+
+Start Piclaw and try your command:
+
+```bash
+piclaw
+```
+
+In the editor, type `/hello` and press Enter.
+
+### Step 4: Debug Extension
+
+Add console.log statements and check the terminal output:
+
+```typescript
+export default function (api) {
+  console.log("Extension loaded!");
+  
+  api.registerCommand("debug", {
+    description: "Debug info",
+    handler: async (args, ctx) => {
+      console.log("Command executed!", ctx);
+      await ctx.sendMessage({
+        content: `Model: ${ctx.model?.name}`,
+      });
+    },
+  });
+}
+```
+
+### Step 5: Reload Extension
+
+After making changes, reload without restarting:
+
+1. In Piclaw, type `/reload`
+2. Or restart Piclaw
+
+## Extension API Reference
+
+### Event Handlers
+
+```typescript
+// Session events
+api.on("session_start", handler);
+api.on("session_tree", handler);
+api.on("session_before_switch", handler);
+api.on("session_before_fork", handler);
+api.on("session_compact", handler);
+
+// Agent events
+api.on("before_agent_start", handler);
+api.on("agent_start", handler);
+api.on("agent_end", handler);
+
+// Message events
+api.on("message_start", handler);
+api.on("message_update", handler);
+api.on("message_end", handler);
+
+// Tool events
+api.on("tool_call", handler);           // Before execution
+api.on("tool_result", handler);          // After execution
+api.on("tool_execution_start", handler);
+api.on("tool_execution_update", handler);
+api.on("tool_execution_end", handler);
+
+// Model events
+api.on("model_select", handler);
+
+// Context events
+api.on("context", handler);              // Modify messages
+api.on("before_provider_request", handler);
+api.on("after_provider_response", handler);
+```
+
+### Register Tools
+
+```typescript
+api.registerTool({
+  name: "tool_name",
+  label: "Human Readable Label",
+  description: "Description for LLM",
+  parameters: { /* TypeBox schema */ },
+  execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+    return {
+      content: [{ type: "text", text: "result" }],
+      details: { /* metadata */ },
+      isError: false,
+    };
+  },
+});
+```
+
+### Register Commands
+
+```typescript
+api.registerCommand("command-name", {
+  description: "Description",
+  getArgumentCompletions: (prefix) => [{ label: "option" }],
+  handler: async (args, ctx) => {
+    // args is string after command
+  },
+});
+```
+
+### UI Methods
+
+```typescript
+// Show notification
+api.ui.notify("Message", "info");
+
+// Set status
+api.ui.setStatus("key", "text");
+
+// Set widget
+api.ui.setWidget("key", ["line1", "line2"], { placement: "aboveEditor" });
+
+// Set footer
+api.ui.setFooter(factoryFunction);
+
+// Set header
+api.ui.setHeader(factoryFunction);
+
+// Custom dialog
+const result = await api.ui.select("Title", ["option1", "option2"]);
+const confirmed = await api.ui.confirm("Title", "Message");
+const input = await api.ui.input("Title", "Placeholder");
+
+// Custom editor
+api.ui.setEditorComponent(factoryFunction);
+```
+
+### Context Methods
+
+```typescript
+// Check if idle
+ctx.isIdle();
+
+// Abort current operation
+ctx.abort();
+
+// Check pending messages
+ctx.hasPendingMessages();
+
+// Get context usage
+ctx.getContextUsage();
+
+// Compact context
+ctx.compact({ customInstructions: "..." });
+
+// Get system prompt
+ctx.getSystemPrompt();
+
+// Shutdown
+ctx.shutdown();
+```
+
+### Command Context Methods (for slash commands)
+
+```typescript
+// Wait for idle
+await ctx.waitForIdle();
+
+// New session
+await ctx.newSession({ withSession: (ctx) => { /* setup */ } });
+
+// Fork session
+await ctx.fork(entryId, { withSession: (ctx) => { /* setup */ } });
+
+// Navigate tree
+await ctx.navigateTree(entryId, { summarize: true });
+
+// Switch session
+await ctx.switchSession(sessionPath, { withSession: (ctx) => { /* setup */ } });
+
+// Reload
+await ctx.reload();
+
+// Send message
+await ctx.sendMessage({
+  customType: "type",
+  content: "message",
+});
+
+await ctx.sendUserMessage("Hello");
+```
+
+### Provider Registration
+
+```typescript
+api.registerProvider("provider-name", {
+  baseUrl: "https://api.example.com",
+  apiKey: "API_KEY_ENV_VAR",
+  api: "openai-chat-completions", // or "anthropic-messages"
+  models: [
+    {
+      id: "model-id",
+      name: "Model Name",
+      reasoning: false,
+      input: ["text", "image"],
+      cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 },
+      contextWindow: 8192,
+      maxTokens: 4096,
+    },
+  ],
+  // Optional
+  headers: { "Custom-Header": "value" },
+  authHeader: true,
+  streamSimple: customStreamFunction,
+  oauth: {
+    name: "Provider Name",
+    async login(callbacks) { /* ... */ },
+    async refreshToken(credentials) { /* ... */ },
+    getApiKey(credentials) { return credentials.access; },
+    modifyModels(models, credentials) { return models; },
+  },
+});
+```
+
+## Project Structure
+
+### Simple Extension (Single File)
+
+```
+~/.piclaw/agent/extensions/
+└── my-extension.ts
+```
+
+### Complex Extension (Multiple Files)
+
+```
+my-piclaw-extension/
+├── src/
+│   ├── index.ts          # Main entry
+│   ├── tools/
+│   │   └── my-tool.ts
+│   ├── commands/
+│   │   └── my-command.ts
+│   └── utils/
+│       └── helpers.ts
+├── package.json
+└── tsconfig.json
+```
+
+### Package.json
+
+```json
+{
+  "name": "my-piclaw-extension",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@mariozechner/pi-coding-agent": "^0.73.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsx": "^4.0.0"
+  }
+}
+```
+
+## Testing Extensions
+
+### Manual Testing
+
+1. Start Piclaw with verbose mode:
+   ```bash
+   piclaw --verbose
+   ```
+
+2. Check extension loads:
+   ```
+   Extension loaded: my-extension.ts
+   ```
+
+3. Test commands/tools
+
+### Automated Testing
+
+```typescript
+import { describe, it, expect, vi } from "vitest";
+import myExtension from "../src/index.js";
+
+describe("my-extension", () => {
+  it("registers commands", () => {
+    const mockApi = {
+      registerCommand: vi.fn(),
+      registerTool: vi.fn(),
+      on: vi.fn(),
+    } as any;
     
-    executionMode: "sequential", // Hoặc "parallel"
+    myExtension(mockApi);
+    
+    expect(mockApi.registerCommand).toHaveBeenCalledWith(
+      "hello",
+      expect.any(Object)
+    );
+  });
+});
+```
+
+## Publishing Extensions
+
+### Option 1: NPM Package
+
+```bash
+# Build
+npm run build
+
+# Publish
+npm publish
+```
+
+Users install via:
+```bash
+pi install npm:my-piclaw-extension
+```
+
+### Option 2: Git Repository
+
+```bash
+pi install git:github.com/user/my-piclaw-extension
+```
+
+### Option 3: Local File
+
+```bash
+pi install /path/to/extension
+```
+
+## Best Practices
+
+### 1. Error Handling
+
+```typescript
+execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+  try {
+    const result = await doSomething(params);
+    return {
+      content: [{ type: "text", text: result }],
+      details: { success: true },
+      isError: false,
+    };
+  } catch (error) {
+    return {
+      content: [{ type: "text", text: `Error: ${error.message}` }],
+      details: { error: error.message },
+      isError: true,
+    };
+  }
+}
+```
+
+### 2. Use AbortSignal
+
+```typescript
+execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+  if (signal?.aborted) {
+    throw new Error("Aborted");
+  }
+  
+  const result = await fetch(url, { signal });
+  // ...
+}
+```
+
+### 3. Stream Progress
+
+```typescript
+execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+  for (let i = 0; i < 100; i += 10) {
+    onUpdate?.({
+      type: "text",
+      text: `Progress: ${i}%`,
+    });
+    await delay(100);
+  }
+  
+  return {
+    content: [{ type: "text", text: "Complete!" }],
+    isError: false,
   };
 }
 ```
 
-**💡 Ý nghĩa:** Core đóng vai trò "người gọi" (caller), coding-agent đóng vai trò "người thực thi" (executor) thông qua interface chuẩn.
-
----
-
-## 4. 🧩 Mở Rộng Types Của Core Qua Declaration Merging
-
-### File: `src/core/messages.ts`
-
-`pi-coding-agent` thêm custom message types vào `AgentMessage` của core mà **không cần sửa source core**:
+### 4. Validate Inputs
 
 ```typescript
-// Thêm custom types vào union type AgentMessage của core
-declare module "@mariozechner/pi-agent-core" {
-  interface CustomAgentMessages {
-    branchSummary: BranchSummaryMessage;      // Riêng cho coding-agent
-    compactionSummary: CompactionSummaryMessage; // Riêng cho coding-agent
-  }
+parameters: {
+  type: "object",
+  properties: {
+    name: { type: "string", minLength: 1 },
+    count: { type: "number", minimum: 1 },
+  },
+  required: ["name"],
 }
 ```
 
-**💡 Ý nghĩa:** Nhờ `declare module`, mọi nơi import `AgentMessage` từ core sẽ **tự động có** các types mới này. Rất tiện cho việc extend!
-
----
-
-## 5. 🎁 Wrap Core Bằng Lớp Tùy Chỉnh
-
-### File: `src/core/agent-session.ts`
-
-`AgentSession` wrap `Agent` (core) và thêm tính năng đặc thù:
+### 5. Provide Good Descriptions
 
 ```typescript
-class AgentSession {
-  private agent: Agent; // 👈 Instance từ core
-
-  constructor(options: AgentSessionOptions) {
-    // Tạo core agent
-    this.agent = new Agent({...});
-  }
-
-  // Expose state của core ra ngoài
-  get state(): AgentState {
-    return this.agent.state;
-  }
-
-  // Thêm tính năng: Lưu session vào file (core không có)
-  async save() {
-    await this.sessionManager.save(this.agent.state);
-  }
-
-  // Thêm tính năng: Compaction context (core không có)
-  async compactContext() {
-    await compactSession(this.agent.state);
-  }
+{
+  name: "search_code",
+  label: "Search Code",
+  description: "Search for code patterns using ripgrep",
+  promptSnippet: "Search code with ripgrep",
+  promptGuidelines: [
+    "Use specific patterns for better results",
+    "Limit search to specific directories for speed",
+  ],
 }
 ```
 
-**💡 Ý nghĩa:** Pattern Decorator/Wrapper. Core làm nhiệm vụ chính, wrapper thêm tính năng phụ (persistence, UI events, logging...).
+## Common Patterns
 
----
+### Pattern 1: File Operation Tool
 
-## 📊 So Sánh Nhanh
-
-| Tính Năng | `pi-agent-core` | `pi-coding-agent` |
-|----------|-----------------|-------------------|
-| **Vai trò** | Framework tổng quát | App CLI chuyên dụng |
-| **Quản lý state** | ✅ Class `Agent` | ✅ Dùng `Agent` từ core |
-| **Vòng lặp LLM** | ✅ `runAgentLoop()` | ✅ Gọi `runAgentLoop()` từ core |
-| **Tool interface** | ✅ Định nghĩa `AgentTool` | ✅ Implement (bash, read, edit...) |
-| **Auth/API Key** | ❌ Không có | ✅ Inject vào `streamFn` |
-| **Session persistence** | ❌ Không có | ✅ `AgentSession` thêm tính năng |
-| **Context compaction** | ❌ Không có | ✅ `AgentSession` thêm tính năng |
-| **Tích hợp TUI** | ❌ Không có | ✅ Qua events system |
-
----
-
-## 🎯 Lợi Ích Của Kiến Trúc Này
-
-1. **Tái sử dụng cao:** `pi-agent-core` có thể dùng cho app khác (web, mobile...)
-2. **Tách biệt rõ ràng:** Core làm nền tảng, app làm đặc thù
-3. **Dễ bảo trì:** Sửa core → tự động cập nhật cho coding-agent
-4. **Dễ test:** Test core độc lập với app
-5. **Extensibility:** Dùng `declare module` để extend types không phá vỡ source
-
----
-
-## 📝 Code Flow Điển Hình
-
-```
-1. User gõ lệnh
-   ↓
-2. Tạo AgentSession (wrap Agent từ core)
-   ↓
-3. Gọi agent.prompt() 
-   ↓
-4. [CORE] runAgentLoop() bắt đầu
-   ├─> Gửi prompt qua streamFn (đã inject)
-   ├─> Nhận LLM response
-   ├─> Parse tool calls
-   ├─> Execute tools (AgentTool đã implement)
-   ├─> Lặp lại nếu cần
-   └─> Trả về messages
-   ↓
-5. AgentSession xử lý events (UI update, save session...)
-   ↓
-6. Hiển thị kết quả cho user
+```typescript
+api.registerTool({
+  name: "read_file",
+  label: "Read File",
+  description: "Read and display file contents",
+  parameters: {
+    type: "object",
+    properties: {
+      path: { type: "string" },
+      maxLines: { type: "number", default: 100 },
+    },
+    required: ["path"],
+  },
+  execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+    const result = await ctx.exec("cat", [params.path]);
+    return {
+      content: [{ type: "text", text: result.stdout }],
+      isError: false,
+    };
+  },
+});
 ```
 
+### Pattern 2: API Call Tool
+
+```typescript
+api.registerTool({
+  name: "http_get",
+  label: "HTTP GET",
+  description: "Make HTTP GET request",
+  parameters: {
+    type: "object",
+    properties: {
+      url: { type: "string", format: "uri" },
+    },
+    required: ["url"],
+  },
+  execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+    const result = await ctx.exec("curl", ["-s", params.url]);
+    return {
+      content: [{ type: "text", text: result.stdout }],
+      isError: false,
+    };
+  },
+});
+```
+
+### Pattern 3: Workflow Command
+
+```typescript
+api.registerCommand("setup-project", {
+  description: "Initialize project setup",
+  handler: async (args, ctx) => {
+    await ctx.sendMessage({
+      content: "Setting up project...",
+    });
+    
+    await ctx.exec("npm", ["install"]);
+    await ctx.exec("npm", ["run", "build"]);
+    
+    await ctx.sendMessage({
+      content: "✓ Project setup complete!",
+    });
+  },
+});
+```
+
+### Pattern 4: Context-Aware Tool
+
+```typescript
+api.registerTool({
+  name: "git_status",
+  label: "Git Status",
+  description: "Show git status for current directory",
+  parameters: {
+    type: "object",
+    properties: {},
+  },
+  execute: async (toolCallId, params, signal, onUpdate, ctx) => {
+    // Use current working directory from context
+    const result = await ctx.exec("git", ["status"], { cwd: ctx.cwd });
+    return {
+      content: [{ type: "text", text: result.stdout }],
+      isError: false,
+    };
+  },
+});
+```
+
+## Troubleshooting
+
+### Extension Not Loading
+
+- Check console for errors
+- Verify file path in `settings.json`
+- Ensure file has `.ts` or `.js` extension
+- Try `/reload` command
+
+### Tool Not Available
+
+- Check tool name matches exactly
+- Verify tool is registered (check console)
+- Restart Piclaw
+
+### Command Not Showing
+
+- Type `/` to see all commands
+- Check command is registered
+- Restart Piclaw
+
+### Type Errors
+
+- Run `npm run typecheck`
+- Check TypeScript version
+- Verify `@mariozechner/pi-coding-agent` version
+
+## Examples
+
+See `llm-context/packages/coding-agent/examples/extensions/` for complete examples:
+
+- Doom game extension
+- Q&A tool
+- Auto-continue extension
+- Memory tool
+
+## Resources
+
+- [API Types](./API_EXPORT_FROM_CODING_AGENT.md)
+- [Extension Examples](https://github.com/badlogic/pi-mono/tree/main/llm-context/packages/coding-agent/examples/extensions)
+- [Discord Community](https://discord.com/invite/3cU7Bz4UPx)
+
+## License
+
+Same as Piclaw (APACHE)
+
 ---
 
-## 🔗 Các File Quan Trọng
+*Last updated: 2026-05-06*
 
-- `@mariozechner/pi-agent-core` (NPM package)
-  - `agent.ts` - Class Agent
-  - `agent-loop.ts` - Hàm runAgentLoop
-  - `types.ts` - Interface AgentTool, AgentMessage...
-- `llm-context/packages/coding-agent/src/`
-  - `core/sdk.ts` - Tạo Agent instance
-  - `core/agent-session.ts` - Wrap Agent
-  - `core/tools/*.ts` - Implement AgentTool
-  - `core/messages.ts` - Extend types
 
----
-
-## 💬 Kết Luận
-
-`pi-coding-agent` dùng `pi-agent-core` theo pattern **"Framework + Implementation"**:
-- **Core** = Framework (chứa logic chung)
-- **Coding-agent** = Implementation (chứa logic đặc thù)
-
-Thay vì viết lại từ đầu, coding-agent **kế thừa sức mạnh** của core và chỉ tập trung vào **điểm đặc thù** của ứng dụng CLI coding.
-
-👉 Đây là kiến trúc lý tưởng cho các AI agent system!
-
---- Message 6 (TOOL_RESULT, 2026-05-06T06:16:22.234Z) ---
+--- Message 17 (TOOL_RESULT, 2026-05-06T06:58:39.895Z) ---
 # 📚 API EXPORT FROM @mariozechner/pi-coding-agent
 
 **Full reference của tất cả exports từ package `@mariozechner/pi-coding-agent`**
@@ -1872,2600 +3802,6 @@ import {
 **Note**: This reference lists all public exports. For detailed type signatures and documentation, read the source files in `llm-context/packages/coding-agent/src/`.
 
 
---- Message 7 (TOOL_RESULT, 2026-05-06T06:16:22.234Z) ---
-# 📋 Todo List
-
-## Phase 1: Core Foundation ✅
-
-- [x] Set up project structure with dual dependency model
-- [x] Configure pi-coding-agent as runtime dependency
-- [x] Configure llm-context for source code reasoning
-- [x] Implement SubTool Loader (50+ system tools)
-- [x] Create basic CLI interface
-- [x] Implement config management (~/.piclaw/config.json)
-- [x] Add slash commands (/config, /piclaw-set, /tools, /piclaw-status)
-- [x] Build extension system for custom commands
-
-## Phase 2: Agent State & Streaming Management ✅
-
-- [x] Analyze agent state machine (isStreaming, streamingMessage)
-- [x] Document streaming interruption handling
-- [x] Implement proper abort/error handling in stream flows
-- [x] Ensure graceful degradation on stream failure
-- [x] Test agent idle vs streaming states
-
-## Phase 3: TUI & Interactive Mode ⚠️
-
-- [ ] Implement enhanced status display showing streaming state
-- [ ] Add visual indicators for streaming progress
-- [ ] Implement agent state panel (isStreaming, pendingToolCalls, streamingMessage)
-- [ ] Add interruption controls (abort, pause, resume)
-- [ ] Implement streaming history replay
-- [ ] Add real-time token counters
-
-## Phase 4: Advanced Features
-
-- [ ] Context window management
-- [ ] Message compaction/summarization
-- [ ] Streaming timeout handling
-- [ ] Retry logic for failed streams
-- [ ] Session auto-save during streaming
-- [ ] Tool execution progress tracking
-
-## Phase 5: Testing & Documentation
-
-- [ ] Unit tests for agent state transitions
-- [ ] Integration tests for streaming interruption
-- [ ] End-to-end tests for full streaming flow
-- [ ] Update API documentation
-- [ ] Create usage examples
-- [ ] Performance benchmarking
-
-## Phase 6: Production Hardening
-
-- [ ] Error recovery mechanisms
-- [ ] Memory leak prevention in streaming
-- [ ] Concurrent stream handling
-- [ ] Rate limiting and backoff strategies
-- [ ] Security audit for tool execution
-- [ ] Input validation and sanitization
-
-## Archived Tasks
-
-- [x] Initial project setup (2026-04-21)
-- [x] Basic agent functionality (2026-05-01)
-- [x] SubTool Loader implementation (2026-05-03)
-- [x] Config system (2026-05-04)
-- [x] Extension system (2026-05-05)
-- [x] Streaming state analysis (2026-05-06)
-
----
-
-## Notes
-
-### Agent States Summary
-
-| State | isStreaming | streamingMessage | Description |
-|-------|-------------|------------------|-------------|
-| **IDLE** | false | undefined | Agent ready for new prompt |
-| **STREAMING** | true | defined | LLM actively streaming tokens |
-| **ERROR** | false | undefined | Stream failed or aborted |
-
-### Dual Dependency Model
-
-- **Runtime**: `@mariozechner/pi-coding-agent` (npm install)
-- **Reasoning**: `llm-context/` (source code analysis only)
-
-Never import from llm-context at runtime!
-
---- Message 8 (ASSISTANT, 2026-05-06T06:16:22.235Z) ---
-Great! I've read all the markdown files in `docs/`. Now let me explore the actual project structure to understand what we're working with:
-[toolCall]
-
---- Message 9 (TOOL_RESULT, 2026-05-06T06:16:27.273Z) ---
-total 388
-drwxrwxr-x  13 quangtynu quangtynu   4096 May  6 06:52 .
-drwxrwxr-x  15 quangtynu quangtynu   4096 Apr 24 18:08 ..
--rw-rw-r--   1 quangtynu quangtynu   5337 May  5 10:28 AGENTS.md
-drwxrwxr-x   4 quangtynu quangtynu   4096 Apr 30 13:16 coverage
--rw-rw-r--   1 quangtynu quangtynu    574 Apr 22 17:14 .dependabot.yml
-drwxrwxr-x   8 quangtynu quangtynu   4096 May  5 14:28 dist
--rw-rw-r--   1 quangtynu quangtynu     98 Apr 21 17:36 .dockerignore
-drwxrwxr-x   2 quangtynu quangtynu   4096 May  6 09:18 docs
--rw-rw-r--   1 quangtynu quangtynu   3655 Apr 30 09:39 eslint.config.js
-drwxrwxr-x   8 quangtynu quangtynu   4096 May  6 09:30 .git
-drwxrwxr-x   3 quangtynu quangtynu   4096 Apr 22 17:13 .github
--rw-rw-r--   1 quangtynu quangtynu    374 May  5 17:24 .gitignore
--rw-rw-r--   1 quangtynu quangtynu  11365 Apr 21 11:22 LICENSE
-drwxrwxr-x   4 quangtynu quangtynu   4096 Apr 29 22:39 llm-context
-drwxrwxr-x 269 quangtynu quangtynu  12288 May  6 09:21 node_modules
--rw-rw-r--   1 quangtynu quangtynu    332 Apr 23 12:51 .npmignore
--rw-rw-r--   1 quangtynu quangtynu   1252 May  5 16:53 package.json
--rw-rw-r--   1 quangtynu quangtynu 259216 May  6 06:53 package-lock.json
-drwxrwxr-x   5 quangtynu quangtynu   4096 May  4 14:31 .pi
-drwxrwxr-x   4 quangtynu quangtynu   4096 May  5 14:48 .piclaw
--rw-rw-r--   1 quangtynu quangtynu   5780 May  4 06:53 README.md
-drwxrwxr-x   2 quangtynu quangtynu   4096 May  1 10:14 scripts
-drwxrwxr-x   8 quangtynu quangtynu   4096 May  5 17:06 src
--rw-rw-r--   1 quangtynu quangtynu   6038 Apr 30 09:39 SYSTEM.md
--rw-rw-r--   1 quangtynu quangtynu     77 Apr 22 16:41 tsconfig.build.json
--rw-rw-r--   1 quangtynu quangtynu    446 May  1 10:14 tsconfig.json
--rw-rw-r--   1 quangtynu quangtynu    703 Apr 30 09:39 vitest.config.ts
-
-
---- Message 10 (ASSISTANT, 2026-05-06T06:16:27.321Z) ---
-[toolCall]
-
---- Message 11 (TOOL_RESULT, 2026-05-06T06:16:31.131Z) ---
-ENOENT: no such file or directory, access '/home/quangtynu/Qcoder/qclaw/src/index.ts'
-
---- Message 12 (ASSISTANT, 2026-05-06T06:16:31.135Z) ---
-[toolCall]
-
---- Message 13 (TOOL_RESULT, 2026-05-06T06:16:35.217Z) ---
-/home/quangtynu/Qcoder/qclaw/src/piclaw-core.ts
-/home/quangtynu/Qcoder/qclaw/src/cli.ts
-/home/quangtynu/Qcoder/qclaw/src/cli/args.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/subtool-loader.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/traceroute.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/systemd-nspawn.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/db.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/sftp.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/aws.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/quota.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/virsh.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/git.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/fossil.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/command-utils.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/hg.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/nslookup.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/go.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/pkgsrc.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/flatpak.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/bzr.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/mongodb.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/yum.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/wget.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/tomlq.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/npm.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/vagrant.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/benchmark.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/chroot.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/spack.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/at.ts
-
-
---- Message 14 (ASSISTANT, 2026-05-06T06:16:35.221Z) ---
-[toolCall]
-
---- Message 15 (TOOL_RESULT, 2026-05-06T06:16:37.511Z) ---
-188
-
-
---- Message 16 (ASSISTANT, 2026-05-06T06:16:37.515Z) ---
-[toolCall]
-
---- Message 17 (TOOL_RESULT, 2026-05-06T06:16:39.736Z) ---
-{
-  "name": "piclaw",
-  "version": "0.0.1",
-  "private": true,
-  "workspaces": [
-    "packages/*"
-  ],
-  "description": "Piclaw Coding Agent CLI - Professional AI coding assistant",
-  "type": "module",
-  "main": "dist/index.js",
-  "bin": {
-    "piclaw": "dist/cli.js"
-  },
-  "scripts": {
-    "generate-custom-models": "tsx scripts/generate-custom-models.ts",
-    "build": "npm run generate-custom-models && tsc -p tsconfig.build.json && chmod +x dist/cli.js dist/main.js",
-    "start": "node dist/cli.js",
-    "dev": "npm run generate-custom-models && tsx src/cli.ts",
-    "lint": "eslint src/**/*.ts --fix",
-    "typecheck": "tsc --noEmit",
-    "check": "npm run typecheck",
-    "test": "vitest run",
-    "prepublishOnly": "npm run build && npm test",
-    "clean": "rm -rf dist"
-  },
-  "dependencies": {
-    "@mariozechner/pi-ai": "^0.73.0",
-    "@mariozechner/pi-coding-agent": "^0.73.0",
-    "chalk": "^5.6.2",
-    "globals": "^17.5.0"
-  },
-  "devDependencies": {
-    "@types/node": "^20.19.39",
-    "@typescript-eslint/eslint-plugin": "^8.0.0",
-    "@typescript-eslint/parser": "^8.0.0",
-    "@vitest/coverage-v8": "^4.1.5",
-    "c8": "^8.0.0",
-    "eslint": "^9.0.0",
-    "tsx": "^4.21.0",
-    "typescript": "^5.0.0",
-    "vitest": "^4.1.5"
-  }
-}
-
-
---- Message 18 (ASSISTANT, 2026-05-06T06:16:39.737Z) ---
-[toolCall]
-
---- Message 19 (TOOL_RESULT, 2026-05-06T06:16:42.882Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw CLI Entry Point
- *
- * Minimal wrapper that delegates to main.ts.
- * Sets basic process metadata and environment.
- */
-
-import { main } from "./main.js";
-
-// Set process title
-process.title = "piclaw";
-
-// Mark as pi-based
-process.env.PI_CODING_AGENT = "true";
-
-// Simple error handlers (avoid crashing without logs)
-process.on("unhandledRejection", (err) => {
-  console.error("Unhandled rejection:", err);
-  process.exit(1);
-});
-
-process.on("uncaughtException", (err) => {
-  console.error("Uncaught exception:", err);
-  process.exit(1);
-});
-
-// Run the application
-await main(process.argv.slice(2));
-
-
---- Message 20 (ASSISTANT, 2026-05-06T06:16:42.883Z) ---
-[toolCall]
-
---- Message 21 (TOOL_RESULT, 2026-05-06T06:16:47.522Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw CLI Entry Point
- *
- * Thin wrapper that:
- * 1. Parses CLI arguments
- * 2. Loads configuration
- * 3. Boots the core runtime
- * 4. Runs interactive mode
- */
-
-import { parseOptions } from "./cli/args.js";
-import { loadConfig } from "./config/config-manager.js";
-import { validateApiKeys, ensurePiclawExtensionRegistered } from "./helpers.js";
-import { getAgentDir } from "./config/config.js";
-import { bootPiclaw } from "./piclaw-core.js";
-import { runInteractive } from "./interactive-runner.js";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-
-async function main(args: string[] = process.argv.slice(2)): Promise<void> {
-  let config: any = undefined;
-  try {
-    // 1. Parse CLI arguments
-    const { opts, cliOverrides } = parseOptions(args);
-    const cwd = opts.cwd ?? process.cwd();
-
-    // 2. Load persistent config (merged with CLI overrides)
-    config = loadConfig(cliOverrides);
-
-    // 3. Validate API keys for configured providers
-    validateApiKeys(config);
-
-    // 4. Ensure Piclaw extension is registered in global settings
-    const agentDir = getAgentDir();
-    const extensionPath = join(__dirname, "extensions", "index.js");
-    await ensurePiclawExtensionRegistered(agentDir, extensionPath);
-
-    // 5. Boot the core runtime (services, session, runtime factory)
-    const runtime = await bootPiclaw({
-      cwd,
-      agentDir,
-      sessionDir: config.sessionDir ?? opts.sessionDir,
-      tools: config.tools,
-      model: config.model,
-      thinking: config.thinking,
-      verbose: config.verbose,
-      contextLogFile: config.contextLogFile ?? opts.contextLogFile,
-    });
-
-    // 6. Run interactive TUI mode
-    await runInteractive(runtime, { verbose: config.verbose });
-  } catch (error: any) {
-    console.error("\n❌ Failed to start Piclaw:");
-
-    // Provide helpful error messages based on error type
-    if (error.message?.includes("ENOENT")) {
-      console.error("  → A required file or directory was not found.");
-    } else if (error.message?.includes("EACCES") || error.message?.includes("permission")) {
-      console.error("  → Permission denied. Check file permissions.");
-    } else if (error.message?.includes("API key") || error.message?.includes("api key")) {
-      console.error("  → Missing or invalid API key. Check environment variables.");
-    } else if (error.message?.includes("network") || error.message?.includes("ECONNREFUSED")) {
-      console.error("  → Network error. Check your internet connection.");
-    } else if (error.message?.includes("timeout")) {
-      console.error("  → Request timed out. Try again later.");
-    }
-
-    console.error(`  Error: ${error.message}`);
-
-    if (config?.verbose) {
-      console.error(error);
-    } else {
-      console.error("  Run with --verbose for more details.");
-    }
-
-    process.exit(1);
-  }
-}
-
-// Export for programmatic usage (e.g., tests)
-export { main };
-
-
---- Message 22 (ASSISTANT, 2026-05-06T06:16:47.523Z) ---
-[toolCall]
-
---- Message 23 (TOOL_RESULT, 2026-05-06T06:16:50.274Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw Core Bootstrapping
- *
- * Core logic for creating and configuring the agent runtime.
- * Separated from UI concerns for testability and reusability.
- */
-
-import {
-  createAgentSessionServices,
-  createAgentSessionFromServices,
-  SessionManager,
-  AgentSessionRuntime,
-  type CreateAgentSessionRuntimeResult,
-  type AgentSessionServices,
-  type SessionStartEvent,
-} from "@mariozechner/pi-coding-agent";
-import { getAgentDir } from "./config/config.js";
-import { getDefaultContextLogFile } from "./config/config-manager.js";
-import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
-import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
-import { createContextLoggingStreamFn } from "./context-logger.js";
-
-export interface PiclawCoreOptions {
-  /** Working directory (default: process.cwd()) */
-  cwd?: string;
-  /** Agent directory (default: ~/.piclaw/agent) */
-  agentDir?: string;
-  /** Custom session directory */
-  sessionDir?: string;
-  /** Tool allowlist (default: from settings or built-in) */
-  tools?: string[];
-  /** Additional custom tools to register */
-  customTools?: ToolDefinition[];
-  /** Model to use (provider:modelId) */
-  model?: string;
-  /** Thinking level */
-  thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-  /** Verbose logging */
-  verbose?: boolean;
-  /** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
-  contextLogFile?: string;
-}
-
-/**
- * Create the agent runtime without starting the UI.
- *
- * This function handles:
- * - Services creation (auth, models, settings, resource loader)
- * - Session creation
- * - Runtime factory for session switching
- * - Initial model and thinking level configuration
- *
- * @param options - Configuration options
- * @returns AgentSessionRuntime ready to run
- */
-export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
-  const cwd = options.cwd ?? process.cwd();
-  const agentDir = options.agentDir ?? getAgentDir();
-  // Default context log file if not specified
-  const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
-
-  // 1. Create cwd-bound services
-  const services: AgentSessionServices = await createAgentSessionServices({
-    cwd,
-    agentDir,
-  });
-
-  // 2. Create session manager
-  const sessionManager = SessionManager.create(cwd, options.sessionDir);
-
-  // 3. Create session from services
-  const sessionStartEvent: SessionStartEvent = { type: "session_start", reason: "startup" };
-
-  // Prepare custom tools (ensure subtool_loader is included)
-  const customTools = options.customTools ?? [createSubLoaderToolDefinition(services.cwd)];
-
-  const sessionResult = await createAgentSessionFromServices({
-    services,
-    sessionManager,
-    sessionStartEvent,
-    tools: options.tools,
-    customTools,
-  });
-
-  // 4. Create runtime factory (for session switching)
-  const createRuntime = async (runtimeOpts: {
-    cwd: string;
-    agentDir: string;
-    sessionManager: SessionManager;
-    sessionStartEvent?: SessionStartEvent;
-  }): Promise<CreateAgentSessionRuntimeResult> => {
-    const newServices = await createAgentSessionServices({
-      cwd: runtimeOpts.cwd,
-      agentDir: runtimeOpts.agentDir,
-    });
-
-    const customToolsForRuntime = options.customTools ?? [createSubLoaderToolDefinition(newServices.cwd)];
-    const result = await createAgentSessionFromServices({
-      services: newServices,
-      sessionManager: runtimeOpts.sessionManager,
-      sessionStartEvent: runtimeOpts.sessionStartEvent,
-      tools: options.tools,
-      customTools: customToolsForRuntime,
-    });
-
-    return {
-      ...result,
-      services: newServices,
-      diagnostics: [],
-    };
-  };
-
-  // 5. Wrap streamFn with context logging if enabled
-  if (contextLogFile) {
-    const originalStreamFn = sessionResult.session.agent.streamFn;
-    sessionResult.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
-  }
-
-  // 6. Create runtime
-  const runtime = new AgentSessionRuntime(
-    sessionResult.session,
-    services,
-    createRuntime,
-    [], // diagnostics
-    sessionResult.modelFallbackMessage,
-  );
-
-  // 6. Apply initial model if configured
-  if (options.model) {
-    try {
-      const [provider, modelId] = options.model.split(":");
-      if (provider && modelId) {
-        const model = services.modelRegistry.find(provider, modelId);
-        if (model) {
-          await sessionResult.session.setModel(model);
-        } else {
-          console.warn(`Model '${options.model}' not found in registry.`);
-        }
-      } else {
-        console.warn(`Invalid model format: '${options.model}'. Use provider:modelId`);
-      }
-    } catch (err: any) {
-      console.warn(`Failed to set model '${options.model}': ${err.message}`);
-    }
-  }
-
-  // 7. Apply initial thinking level if configured
-  if (options.thinking) {
-    sessionResult.session.setThinkingLevel(options.thinking);
-  }
-
-  return runtime;
-}
-
-
---- Message 24 (ASSISTANT, 2026-05-06T06:16:50.275Z) ---
-[toolCall]
-
---- Message 25 (TOOL_RESULT, 2026-05-06T06:16:52.535Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw Interactive Runner
- *
- * Handles starting the interactive TUI mode.
- * Separated from core bootstrapping for cleaner architecture.
- */
-
-// Apply persistent command history patches
-import "./command-history-patch.js";
-
-import { AgentSessionRuntime } from "@mariozechner/pi-coding-agent";
-import { InteractiveMode } from "@mariozechner/pi-coding-agent";
-import type { InteractiveModeOptions } from "@mariozechner/pi-coding-agent";
-
-/**
- * Run the interactive TUI mode with the given runtime.
- *
- * @param runtime - The agent session runtime (created by bootPiclaw)
- * @param options - Interactive mode options (verbose, etc.)
- */
-export async function runInteractive(
-  runtime: AgentSessionRuntime,
-  options: { verbose?: boolean } = {}
-): Promise<void> {
-  const interactiveOptions: InteractiveModeOptions = {
-    verbose: options.verbose ?? false,
-  };
-
-  const interactive = new InteractiveMode(runtime, interactiveOptions);
-  await interactive.run();
-}
-
-
---- Message 26 (ASSISTANT, 2026-05-06T06:16:52.538Z) ---
-Now let me look at the extension system and config system:
-[toolCall]
-
---- Message 27 (TOOL_RESULT, 2026-05-06T06:16:55.386Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw Extensions - Main Entry Point
- *
- * This file registers all custom extensions for Piclaw.
- */
-
-import { registerKiloProvider } from "./providers/kilo-provider.js";
-import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from "./tools/index.js";
-import autoContinueExtension from "./auto-continue-extension.js";
-
-export default function (api: import("@mariozechner/pi-coding-agent").ExtensionAPI) {
-  // Register providers
-  registerKiloProvider(api);
-
-  // Register custom tools
-  registerTodosTool(api);
-  registerMemoryTool(api);
-
-  // Register additional tools
-  registerEchoTool(api);
-  registerSystemInfoTool(api);
-
-  // Register Auto Continue Extension
-  autoContinueExtension(api);
-}
-
-
---- Message 28 (ASSISTANT, 2026-05-06T06:16:55.420Z) ---
-[toolCall]
-
---- Message 29 (TOOL_RESULT, 2026-05-06T06:16:57.727Z) ---
-/home/quangtynu/Qcoder/qclaw/src/extensions/tools/todos-tool.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/tools/echo-tool.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/tools/system-info-tool.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/tools/memory-tool.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/tools/index.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/piclaw-extension.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/models/custom-models.generated.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/models/kilo-models.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/models/index.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/registry.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/kilo-provider.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/providers/index.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/index.ts
-/home/quangtynu/Qcoder/qclaw/src/extensions/auto-continue-extension.ts
-
-
---- Message 30 (ASSISTANT, 2026-05-06T06:16:57.728Z) ---
-[toolCall]
-
---- Message 31 (TOOL_RESULT, 2026-05-06T06:17:02.831Z) ---
-#!/usr/bin/env node
-/**
- * Piclaw Custom Extension
- * 
- * Note: Kilo provider is already registered via kilo-provider.ts
- * This file can be extended with additional custom functionality.
- */
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-
-export default function (api: ExtensionAPI) {
-  // ============================================================================
-  // CUSTOM EXTENSIONS
-  // ============================================================================
-  // Future: Add custom providers, tools, or commands here
-  
-  // Example of adding a custom command (commented out):
-  // api.registerCommand({
-  //   name: "my-command",
-  //   description: "My custom command",
-  //   execute: async (args) => { ... }
-  // });
-}
-
---- Message 32 (ASSISTANT, 2026-05-06T06:17:02.835Z) ---
-[toolCall]
-
---- Message 33 (TOOL_RESULT, 2026-05-06T06:17:05.882Z) ---
-#!/usr/bin/env node
-
-/**
- * Kilo Provider Registration
- *
- * Registers Kilo Gateway as an API key provider.
- * Users can authenticate via /login → "Use an API key" → kilo.
- *
- * Environment variable: KILO_API_KEY
- * API endpoint: https://api.kilo.ai/v1
- */
-
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import type { ProviderConfig } from "@mariozechner/pi-coding-agent";
-import { KILO_MODELS_ALL } from "./models/index.js";
-
-export function registerKiloProvider(api: ExtensionAPI): void {
-  // Lấy baseUrl từ generated models nếu có, nếu không dùng fallback
-  const baseUrl = KILO_MODELS_ALL[0]?.baseUrl || "https://api.kilo.ai/api/gateway";
-
-  const config: ProviderConfig = {
-    baseUrl,
-    apiKey: "KILO_API_KEY",
-    api: "openai-completions",
-    models: KILO_MODELS_ALL,
-  };
-
-  api.registerProvider("kilo", config);
-}
-
-
---- Message 34 (ASSISTANT, 2026-05-06T06:17:05.883Z) ---
-[toolCall]
-
---- Message 35 (TOOL_RESULT, 2026-05-06T06:17:07.945Z) ---
-import type { ProviderModelConfig } from "@mariozechner/pi-coding-agent";
-
-/**
- * Kilo Provider Models
- *
- * Source: https://models.dev/api.json (kilo provider)
- * API: https://api.kilo.ai/v1
- */
-
-export const KILO_MODELS: ProviderModelConfig[] = [
-  {
-    id: "qwen/qwen3.5-397b-a17b",
-    name: "Qwen3.5 397B (Kilo)",
-    reasoning: true,
-    input: ["text", "image"] as const,
-    cost: { input: 0.39, output: 2.34, cacheRead: 0.1, cacheWrite: 0 },
-    contextWindow: 262144,
-    maxTokens: 65536,
-  },
-  {
-    id: "stepfun/step-3.5-flash",
-    name: "Step 3.5 Flash (Kilo)",
-    reasoning: true,
-    input: ["text"] as const,
-    cost: { input: 0.1, output: 0.3, cacheRead: 0.02, cacheWrite: 0 },
-    contextWindow: 256000,
-    maxTokens: 256000,
-  },
-  {
-    id: "x-ai/grok-4",
-    name: "Grok 4 (Kilo)",
-    reasoning: true,
-    input: ["text", "image"] as const,
-    cost: { input: 3, output: 15, cacheRead: 0.75, cacheWrite: 0 },
-    contextWindow: 256000,
-    maxTokens: 51200,
-  },
-];
-
-
---- Message 36 (ASSISTANT, 2026-05-06T06:17:07.946Z) ---
-[toolCall]
-
---- Message 37 (TOOL_RESULT, 2026-05-06T06:17:10.316Z) ---
-#!/usr/bin/env node
-
-/**
- * Custom Models Index
- * Export models cho custom providers.
- * Combines hardcoded fallback models với generated models từ models.dev.
- */
-
-// Hardcoded fallback models
-import { KILO_MODELS } from "./kilo-models.js";
-
-// Re-export for external use
-export { KILO_MODELS };
-
-// Generated models (nested: { provider: { modelId: model } })
-let generatedModels: Record<string, Record<string, any>> = {};
-
-try {
-  const gen = await import("./custom-models.generated.js");
-  generatedModels = gen.CUSTOM_MODELS || {};  // ← ĐÚNG TÊN
-} catch (err) {
-  // No generated models file - will use hardcoded fallbacks
-}
-
-/**
- * Get models array cho một provider.
- */
-export function getProviderModels(providerName: string): any[] {
-  const providerModels = generatedModels[providerName];
-  if (providerModels) {
-    return Object.values(providerModels);  // ← CONVERT OBJECT TO ARRAY
-  }
-
-  // Fallback to hardcoded
-  switch (providerName) {
-    case "kilo":
-      return KILO_MODELS;
-    default:
-      return [];
-  }
-}
-
-// Convenience
-export const KILO_MODELS_ALL = getProviderModels("kilo");
-
-
---- Message 38 (ASSISTANT, 2026-05-06T06:17:10.320Z) ---
-Now let me check the current state of Phase 3 in the todo list and understand what needs to be implemented:
-[toolCall]
-
---- Message 39 (TOOL_RESULT, 2026-05-06T06:17:17.181Z) ---
-Unknown action: 
-add
-
-
---- Message 40 (ASSISTANT, 2026-05-06T06:17:17.185Z) ---
-[toolCall]
-
---- Message 41 (TOOL_RESULT, 2026-05-06T06:17:20.469Z) ---
-Unknown action: 
-add
-
-
---- Message 42 (ASSISTANT, 2026-05-06T06:17:20.473Z) ---
-[toolCall]
-
---- Message 43 (TOOL_RESULT, 2026-05-06T06:17:22.914Z) ---
-⚠️ Errors: No operation. Use: add_phase, add_task, update, remove_task, list
-Remaining: none.
-Phase 0/7 "📚 PHASE 7: Documentation" — 4/4 done
-
---- Message 44 (ASSISTANT, 2026-05-06T06:17:22.920Z) ---
-[toolCall]
-
---- Message 45 (TOOL_RESULT, 2026-05-06T06:17:25.111Z) ---
-⚠️ Errors: No operation. Use: add_phase, add_task, update, remove_task, list
-Remaining: none.
-Phase 0/7 "📚 PHASE 7: Documentation" — 4/4 done
-
---- Message 46 (ASSISTANT, 2026-05-06T06:17:25.112Z) ---
-[toolCall]
-
---- Message 47 (TOOL_RESULT, 2026-05-06T06:17:28.054Z) ---
-(no output)
-
---- Message 48 (ASSISTANT, 2026-05-06T06:17:28.059Z) ---
-[toolCall]
-
---- Message 49 (TOOL_RESULT, 2026-05-06T06:17:30.915Z) ---
-(no output)
-
---- Message 50 (ASSISTANT, 2026-05-06T06:17:30.916Z) ---
-[toolCall]
-
---- Message 51 (TOOL_RESULT, 2026-05-06T06:17:33.109Z) ---
-/home/quangtynu/Qcoder/qclaw/src/piclaw-core.ts
-/home/quangtynu/Qcoder/qclaw/src/cli.ts
-/home/quangtynu/Qcoder/qclaw/src/cli/args.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/subtool-loader.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/traceroute.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/systemd-nspawn.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/db.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/sftp.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/aws.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/quota.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/virsh.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/git.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/fossil.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/command-utils.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/hg.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/nslookup.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/go.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/pkgsrc.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/flatpak.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/bzr.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/mongodb.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/yum.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/wget.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/tomlq.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/npm.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/vagrant.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/benchmark.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/chroot.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/spack.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/at.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/lvm.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/julia.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/dmidecode.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/jq.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/xmlstarlet.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/kubectl-apply.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/zip.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/ssh-keygen.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/apk.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/scp.ts
-
-
---- Message 52 (ASSISTANT, 2026-05-06T06:17:33.110Z) ---
-[toolCall]
-
---- Message 53 (TOOL_RESULT, 2026-05-06T06:17:36.051Z) ---
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/sftp.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/iftop.ts
-/home/quangtynu/Qcoder/qclaw/src/tools/sub-tools/ftp.ts
-/home/quangtynu/Qcoder/qclaw/src/interactive-runner.ts
-/home/quangtynu/Qcoder/qclaw/src/command-history-patch.ts
-/home/quangtynu/Qcoder/qclaw/src/main.ts
-/home/quangtynu/Qcoder/qclaw/src/config/config.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/config.test.ts
-/home/quangtynu/Qcoder/qclaw/src/migrations.ts
-
-
---- Message 54 (ASSISTANT, 2026-05-06T06:17:36.053Z) ---
-[toolCall]
-
---- Message 55 (TOOL_RESULT, 2026-05-06T06:17:38.723Z) ---
-/**
- * Command History Patch
- *
- * Patches Editor and InteractiveMode to add persistent command history.
- * This module should be imported before any InteractiveMode is instantiated.
- */
-
-import { Editor } from "@mariozechner/pi-tui";
-import { InteractiveMode } from "@mariozechner/pi-coding-agent";
-import { CommandHistoryService } from "./services/command-history.js";
-
-const historyService = CommandHistoryService.getInstance();
-
-// ============================================================================
-// Patch 1: Load history into editor after InteractiveMode.init()
-// ============================================================================
-
-const originalInit = (InteractiveMode.prototype as any).init;
-if (originalInit) {
-	(InteractiveMode.prototype as any).init = async function (...args: any[]) {
-		// Call original init first (creates editor)
-		await originalInit.apply(this, args);
-
-		// Access defaultEditor (private at TS level, but runtime property)
-		const editor = this.defaultEditor;
-		if (editor) {
-			const savedHistory = historyService.load();
-			// @ts-ignore: history is private in Editor class
-			editor.history = savedHistory;
-			// @ts-ignore: historyIndex is private
-			editor.historyIndex = -1;
-		}
-	};
-}
-
-// ============================================================================
-// Patch 2: Auto-save history when addToHistory() is called
-// ============================================================================
-
-const originalAddToHistory = (Editor.prototype as any).addToHistory;
-if (originalAddToHistory) {
-	// Debounce map to avoid excessive writes
-	const saveTimeouts = new WeakMap<Editor, any>();
-
-	(Editor.prototype as any).addToHistory = function (text: string) {
-		const result = originalAddToHistory.call(this, text);
-
-		// Debounce save by 100ms to batch rapid additions
-		let timeout = saveTimeouts.get(this);
-		if (timeout) clearTimeout(timeout);
-
-		timeout = setTimeout(() => {
-			historyService.save(this.history);
-		}, 100);
-
-		saveTimeouts.set(this, timeout);
-
-		return result;
-	};
-}
-
-
---- Message 56 (ASSISTANT, 2026-05-06T06:17:38.751Z) ---
-Now let me look at the services and check what's already implemented:
-[toolCall]
-
---- Message 57 (TOOL_RESULT, 2026-05-06T06:17:44.551Z) ---
-/home/quangtynu/Qcoder/qclaw/src/services/command-history.ts
-
-
---- Message 58 (ASSISTANT, 2026-05-06T06:17:44.583Z) ---
-[toolCall]
-
---- Message 59 (TOOL_RESULT, 2026-05-06T06:17:47.071Z) ---
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-import * as os from 'node:os';
-
-const HISTORY_FILENAME = 'history.json';
-const MAX_ENTRIES = 100;
-
-/**
- * Service for managing persistent command history across sessions.
- * Stores history in ~/.piclaw/history.json
- */
-export class CommandHistoryService {
-	private static instance: CommandHistoryService | null = null;
-
-	/** Get singleton instance */
-	static getInstance(): CommandHistoryService {
-		if (!CommandHistoryService.instance) {
-			CommandHistoryService.instance = new CommandHistoryService();
-		}
-		return CommandHistoryService.instance;
-	}
-
-	private constructor() {}
-
-	/** Get path to history file */
-	private getHistoryPath(): string {
-		const homedir = os.homedir();
-		return path.join(homedir, '.piclaw', HISTORY_FILENAME);
-	}
-
-	/** Load history from file */
-	load(): string[] {
-		try {
-			const historyPath = this.getHistoryPath();
-			if (!fs.existsSync(historyPath)) {
-				return [];
-			}
-			const content = fs.readFileSync(historyPath, 'utf-8');
-			const data = JSON.parse(content);
-			if (Array.isArray(data)) {
-				// Limit to MAX_ENTRIES
-				return data.slice(0, MAX_ENTRIES);
-			}
-		} catch (error) {
-			// Ignore errors, return empty array
-		}
-		return [];
-	}
-
-	/** Save history to file */
-	save(history: string[]): void {
-		try {
-			const historyPath = this.getHistoryPath();
-			const dir = path.dirname(historyPath);
-
-			// Ensure directory exists
-			if (!fs.existsSync(dir)) {
-				fs.mkdirSync(dir, { recursive: true });
-			}
-
-			// Deduplicate consecutive entries while preserving order (newest first)
-			const deduped: string[] = [];
-			for (const item of history) {
-				if (deduped.length === 0 || deduped[0] !== item) {
-					deduped.unshift(item);
-				}
-			}
-
-			// Limit size
-			const toSave = deduped.slice(0, MAX_ENTRIES);
-
-			// Atomic write: write to temp then rename
-			const tmpPath = historyPath + '.tmp';
-			fs.writeFileSync(tmpPath, JSON.stringify(toSave, null, 2), 'utf-8');
-			fs.renameSync(tmpPath, historyPath);
-		} catch (error) {
-			// Ignore save errors to not disrupt UX
-		}
-	}
-}
-
-
---- Message 60 (ASSISTANT, 2026-05-06T06:17:47.073Z) ---
-Now let me check the config system:
-[toolCall]
-
---- Message 61 (TOOL_RESULT, 2026-05-06T06:17:49.737Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw Configuration and Paths
- *
- * Custom version of pi-mono's config.ts with:
- * - Config dir: ~/.piclaw/agent (instead of ~/.pi/agent)
- * - Package detection for self-update
- */
-
-import { spawnSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
-import { homedir } from "os";
-import { dirname, join, resolve, sep } from "path";
-import { fileURLToPath } from "url";
-
-// =============================================================================
-// Package Detection
-// =============================================================================
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-/**
- * Detect if we're running as a Bun compiled binary.
- */
-export const isBunBinary =
-	import.meta.url.includes("$bunfs") || import.meta.url.includes("~BUN") || import.meta.url.includes("%7EBUN");
-
-/** Detect if Bun is the runtime */
-export const isBunRuntime = !!process.versions.bun;
-
-// =============================================================================
-// Install Method Detection
-// =============================================================================
-
-export type InstallMethod = "bun-binary" | "npm" | "pnpm" | "yarn" | "bun" | "unknown";
-
-export interface SelfUpdateCommand {
-	command: string;
-	args: string[];
-	display: string;
-}
-
-export function detectInstallMethod(): InstallMethod {
-	if (isBunBinary) return "bun-binary";
-
-	const resolvedPath = `${__dirname}\0${process.execPath || ""}`.toLowerCase().replace(/\\/g, "/");
-
-	if (resolvedPath.includes("/pnpm/") || resolvedPath.includes("/.pnpm/")) return "pnpm";
-	if (resolvedPath.includes("/yarn/") || resolvedPath.includes("/.yarn/")) return "yarn";
-	if (isBunRuntime) return "bun";
-	if (resolvedPath.includes("/npm/") || resolvedPath.includes("/node_modules/")) return "npm";
-
-	return "unknown";
-}
-
-function getSelfUpdateCommandForMethod(method: InstallMethod, packageName: string): SelfUpdateCommand | undefined {
-	switch (method) {
-		case "bun-binary":
-			return undefined;
-		case "pnpm":
-			return { command: "pnpm", args: ["install", "-g", packageName], display: `pnpm install -g ${packageName}` };
-		case "yarn":
-			return { command: "yarn", args: ["global", "add", packageName], display: `yarn global add ${packageName}` };
-		case "bun":
-			return { command: "bun", args: ["install", "-g", packageName], display: `bun install -g ${packageName}` };
-		case "npm":
-			return { command: "npm", args: ["install", "-g", packageName], display: `npm install -g ${packageName}` };
-		case "unknown":
-			return undefined;
-	}
-}
-
-function readCommandOutput(command: string, args: string[]): string | undefined {
-	const result = spawnSync(command, args, {
-		encoding: "utf-8",
-		stdio: ["ignore", "pipe", "ignore"],
-		timeout: 2000,
-	});
-	if (result.status !== 0) return undefined;
-	const stdout = result.stdout.trim();
-	return stdout || undefined;
-}
-
-function getGlobalPackageRoots(method: InstallMethod): string[] {
-	switch (method) {
-		case "npm": {
-			const root = readCommandOutput("npm", ["root", "-g"]);
-			return root ? [root] : [];
-		}
-		case "pnpm": {
-			const root = readCommandOutput("pnpm", ["root", "-g"]);
-			return root ? [root, dirname(root)] : [];
-		}
-		case "yarn": {
-			const dir = readCommandOutput("yarn", ["global", "dir"]);
-			return dir ? [dir, join(dir, "node_modules")] : [];
-		}
-		case "bun": {
-			const bunBin = readCommandOutput("bun", ["pm", "bin", "-g"]);
-			const roots = [join(homedir(), ".bun", "install", "global", "node_modules")];
-			if (bunBin) roots.push(join(dirname(dirname(bunBin)), "install", "global", "node_modules"));
-			return roots;
-		}
-		case "bun-binary":
-		case "unknown":
-			return [];
-	}
-}
-
-function isManagedByGlobalPackageManager(method: InstallMethod): boolean {
-	let packageDir = resolve(getPackageDir());
-	if (process.platform === "win32") packageDir = packageDir.toLowerCase();
-	return getGlobalPackageRoots(method).some((root) => {
-		let normalizedRoot = resolve(root);
-		if (process.platform === "win32") normalizedRoot = normalizedRoot.toLowerCase();
-		return (
-			existsSync(normalizedRoot) &&
-			(packageDir === normalizedRoot ||
-				packageDir.startsWith(normalizedRoot.endsWith(sep) ? normalizedRoot : `${normalizedRoot}${sep}`))
-		);
-	});
-}
-
-export function getSelfUpdateCommand(packageName: string): SelfUpdateCommand | undefined {
-	const method = detectInstallMethod();
-	const command = getSelfUpdateCommandForMethod(method, packageName);
-	if (!command || !isManagedByGlobalPackageManager(method)) return undefined;
-	return command;
-}
-
-export function getSelfUpdateUnavailableInstruction(packageName: string): string {
-	const method = detectInstallMethod();
-	if (method === "bun-binary") {
-		return `Download from: https://github.com/badlogic/pi-mono/releases/latest`;
-	}
-	if (getSelfUpdateCommandForMethod(method, packageName)) {
-		return `This installation is not managed by a global ${method} install. Update it with the package manager, wrapper, or source checkout that provides it.`;
-	}
-	return `Update ${packageName} using the package manager, wrapper, or source checkout that provides this installation.`;
-}
-
-export function getUpdateInstruction(packageName: string): string {
-	const method = detectInstallMethod();
-	const command = getSelfUpdateCommandForMethod(method, packageName);
-	if (command) return `Run: ${command.display}`;
-	return getSelfUpdateUnavailableInstruction(packageName);
-}
-
-// =============================================================================
-// Package Asset Paths
-// =============================================================================
-
-/**
- * Get the base directory for resolving package assets.
- * - For Bun binary: returns the directory containing the executable
- * - For Node.js (dist/): returns __dirname (the dist/ directory)
- * - For tsx (src/): returns parent directory (the package root)
- */
-export function getPackageDir(): string {
-	const envDir = process.env.PICLAW_PACKAGE_DIR;
-	if (envDir) {
-		if (envDir === "~") return homedir();
-		if (envDir.startsWith("~/")) return homedir() + envDir.slice(1);
-		return envDir;
-	}
-
-	if (isBunBinary) return dirname(process.execPath);
-
-	// Node.js: walk up from __dirname until we find package.json
-	let dir = __dirname;
-	while (dir !== dirname(dir)) {
-		if (existsSync(join(dir, "package.json"))) return dir;
-		dir = dirname(dir);
-	}
-	return __dirname;
-}
-
-/**
- * Get path to built-in themes directory.
- */
-export function getThemesDir(): string {
-	if (isBunBinary) return join(getPackageDir(), "theme");
-	const packageDir = getPackageDir();
-	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
-	return join(packageDir, srcOrDist, "modes", "interactive", "theme");
-}
-
-/**
- * Get path to HTML export template directory.
- */
-export function getExportTemplateDir(): string {
-	if (isBunBinary) return join(getPackageDir(), "export-html");
-	const packageDir = getPackageDir();
-	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
-	return join(packageDir, srcOrDist, "core", "export-html");
-}
-
-/** Get path to package.json */
-export function getPackageJsonPath(): string {
-	return join(getPackageDir(), "package.json");
-}
-
-/** Get path to README.md */
-export function getReadmePath(): string {
-	return resolve(join(getPackageDir(), "README.md"));
-}
-
-/** Get path to docs directory */
-export function getDocsPath(): string {
-	return resolve(join(getPackageDir(), "docs"));
-}
-
-/** Get path to examples directory */
-export function getExamplesPath(): string {
-	return resolve(join(getPackageDir(), "examples"));
-}
-
-/** Get path to CHANGELOG.md */
-export function getChangelogPath(): string {
-	return resolve(join(getPackageDir(), "CHANGELOG.md"));
-}
-
-/**
- * Get path to built-in interactive assets directory.
- */
-export function getInteractiveAssetsDir(): string {
-	if (isBunBinary) return join(getPackageDir(), "assets");
-	const packageDir = getPackageDir();
-	const srcOrDist = existsSync(join(packageDir, "src")) ? "src" : "dist";
-	return join(packageDir, srcOrDist, "modes", "interactive", "assets");
-}
-
-/** Get path to a bundled interactive asset */
-export function getBundledInteractiveAssetPath(name: string): string {
-	return join(getInteractiveAssetsDir(), name);
-}
-
-// =============================================================================
-// App Config (from package.json piConfig)
-// =============================================================================
-
-interface PackageJson {
-	name?: string;
-	version?: string;
-	piConfig?: {
-		name?: string;
-		configDir?: string;
-	};
-}
-
-const pkg = JSON.parse(readFileSync(getPackageJsonPath(), "utf-8")) as PackageJson;
-
-const piConfigName: string | undefined = pkg.piConfig?.name;
-export const PACKAGE_NAME: string = pkg.name || "piclaw";
-export const APP_NAME: string = piConfigName || "piclaw";
-export const APP_TITLE: string = piConfigName ? APP_NAME : "piclaw";
-
-// IMPORTANT: Use .piclaw instead of .pi
-export const CONFIG_DIR_NAME: string = ".piclaw";
-
-export const VERSION: string = pkg.version || "0.0.0";
-
-const DEFAULT_SHARE_VIEWER_URL = "https://pi.dev/session/";
-
-/** Get the share viewer URL for a gist ID */
-export function getShareViewerUrl(gistId: string): string {
-	const baseUrl = process.env.PICLAW_SHARE_VIEWER_URL || DEFAULT_SHARE_VIEWER_URL;
-	return `${baseUrl}#${gistId}`;
-}
-
-// =============================================================================
-// User Config Paths (~/.piclaw/agent/*)
-// =============================================================================
-
-/** Get the agent config directory */
-export function getAgentDir(): string {
-	const envDir = process.env.PICLAW_AGENT_DIR;
-	if (envDir) {
-		if (envDir === "~") return homedir();
-		if (envDir.startsWith("~/")) return homedir() + envDir.slice(1);
-		return envDir;
-	}
-	// ~/.piclaw/agent
-	return join(homedir(), CONFIG_DIR_NAME, "agent");
-}
-
-/** Get path to user's custom themes directory */
-export function getCustomThemesDir(): string {
-	return join(getAgentDir(), "themes");
-}
-
-/** Get path to models.json */
-export function getModelsPath(): string {
-	return join(getAgentDir(), "models.json");
-}
-
-/** Get path to auth.json */
-export function getAuthPath(): string {
-	return join(getAgentDir(), "auth.json");
-}
-
-/** Get path to settings.json */
-export function getSettingsPath(): string {
-	return join(getAgentDir(), "settings.json");
-}
-
-/** Get path to tools directory */
-export function getToolsDir(): string {
-	return join(getAgentDir(), "tools");
-}
-
-/** Get path to managed binaries directory */
-export function getBinDir(): string {
-	return join(getAgentDir(), "bin");
-}
-
-/** Get path to prompt templates directory */
-export function getPromptsDir(): string {
-	return join(getAgentDir(), "prompts");
-}
-
-/** Get path to sessions directory */
-export function getSessionsDir(): string {
-	return join(getAgentDir(), "sessions");
-}
-
-/** Get path to debug log file */
-export function getDebugLogPath(): string {
-	return join(getAgentDir(), `${APP_NAME}-debug.log`);
-}
-
-
---- Message 62 (ASSISTANT, 2026-05-06T06:17:49.754Z) ---
-[toolCall]
-
---- Message 63 (TOOL_RESULT, 2026-05-06T06:17:53.233Z) ---
-#!/usr/bin/env node
-
-/**
- * Piclaw Configuration Manager
- * Handles persistent user configuration (~/.piclaw/config.json)
- */
-
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
-
-export interface PiclawConfig {
-	/** Default model to use (e.g., "anthropic:claude-opus-4-5") */
-	model?: string;
-	/** Default thinking level */
-	thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-	/** Default tool allowlist. If not set, all tools are available. */
-	tools?: string[];
-	/** Custom session directory */
-	sessionDir?: string;
-	/** Whether to show verbose logs */
-	verbose?: boolean;
-	/** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
-	contextLogFile?: string;
-}
-
-function getConfigDir(): string {
-  return join(homedir(), ".piclaw");
-}
-
-export function getDefaultContextLogFile(cwd: string): string {
-  return join(cwd, ".piclaw", "context", "context.log");
-}
-
-function getConfigFilePath(): string {
-  return join(getConfigDir(), "config.json");
-}
-
-const DEFAULT_CONFIG: PiclawConfig = {
-	model: undefined,
-	thinking: "medium",
-	// Include all custom tools by default
-	tools: [
-		// Built-in tools
-		"read", "bash", "edit", "write",
-		// Piclaw custom tools
-		"subtool_loader",
-		"todos",
-		"memory",
-		"echo",
-		"system-info",
-	],
-	sessionDir: undefined,
-	verbose: false,
-	contextLogFile: undefined,
-};
-
-/**
- * Load configuration from disk.
- * Returns merged config: defaults < file < CLI overrides
- */
-export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
-	const configDir = getConfigDir();
-	const configPath = getConfigFilePath();
-
-	// Ensure config directory exists
-	if (!existsSync(configDir)) {
-		mkdirSync(configDir, { recursive: true });
-	}
-
-	// Load file config if exists
-	let fileConfig: PiclawConfig = { ...DEFAULT_CONFIG };
-	if (existsSync(configPath)) {
-		try {
-			const content = readFileSync(configPath, "utf-8");
-			fileConfig = JSON.parse(content);
-			// Validate and sanitize
-			if (fileConfig.thinking && !["off", "minimal", "low", "medium", "high", "xhigh"].includes(fileConfig.thinking)) {
-				console.warn(`Invalid thinking level in config: ${fileConfig.thinking}. Using default.`);
-				fileConfig.thinking = DEFAULT_CONFIG.thinking;
-			}
-		} catch (err) {
-			console.warn(`Failed to parse config file: ${err}. Using defaults.`);
-			fileConfig = { ...DEFAULT_CONFIG };
-		}
-	}
-
-	// Merge: fileConfig is base, cliOverrides take precedence
-	return { ...fileConfig, ...cliOverrides };
-}
-
-/**
- * Save configuration to disk.
- */
-export function saveConfig(config: PiclawConfig): void {
-	const configDir = getConfigDir();
-	const configPath = getConfigFilePath();
-
-	if (!existsSync(configDir)) {
-		mkdirSync(configDir, { recursive: true });
-	}
-	const content = JSON.stringify(config, null, 2);
-	writeFileSync(configPath, content, "utf-8");
-}
-
-/**
- * Get the config file path (for display/debugging)
- */
-export function getConfigPath(): string {
-	return getConfigFilePath();
-}
-
-
---- Message 64 (ASSISTANT, 2026-05-06T06:17:53.236Z) ---
-Now let me check what tests exist to understand what might be broken:
-[toolCall]
-
---- Message 65 (TOOL_RESULT, 2026-05-06T06:17:56.184Z) ---
-/home/quangtynu/Qcoder/qclaw/src/tests/piclaw-extension.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/config-manager.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/grep.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/memory-tool.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/yum.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/cli-args.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/read.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/system-info-tool.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/subtool-loader.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/extensions-index.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/apt.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/helpers.test.ts
-/home/quangtynu/Qcoder/qclaw/src/tests/config.test.ts
-
-
---- Message 66 (ASSISTANT, 2026-05-06T06:17:56.186Z) ---
-[toolCall]
-
---- Message 67 (TOOL_RESULT, 2026-05-06T06:18:00.720Z) ---
-
-> piclaw@0.0.1 test
-> vitest run
-
-
- RUN  v4.1.5 /home/quangtynu/Qcoder/qclaw
-
-
- Test Files  13 passed (13)
-      Tests  147 passed (147)
-   Start at  13:17:58
-   Duration  1.94s (transform 1.11s, setup 0ms, import 3.19s, tests 361ms, environment 2ms)
-
-
-
---- Message 68 (ASSISTANT, 2026-05-06T06:18:00.721Z) ---
-Great! All tests pass. Now let me check the helpers file to understand the extension registration:
-[toolCall]
-
---- Message 69 (TOOL_RESULT, 2026-05-06T06:18:03.741Z) ---
-#!/usr/bin/env node
-
-/**
- * Helper functions for main.ts (extracted for testability)
- */
-
-import chalk from "chalk";
-import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
-import { join, dirname } from "node:path";
-import type { PiclawConfig } from "./config/config-manager.js";
-
-/**
- * Ensure piclaw extension is registered in global settings.
- * This allows custom slash commands without manual user config.
- */
-export async function ensurePiclawExtensionRegistered(agentDir: string, extensionPath: string): Promise<void> {
-  const globalSettingsPath = join(agentDir, "settings.json");
-
-  // Ensure the agent directory exists
-  const agentDirPath = dirname(globalSettingsPath);
-  if (!existsSync(agentDirPath)) {
-    mkdirSync(agentDirPath, { recursive: true });
-  }
-
-  // Read existing settings or use empty object
-  let globalSettings: Record<string, unknown> = {};
-  if (existsSync(globalSettingsPath)) {
-    try {
-      globalSettings = JSON.parse(readFileSync(globalSettingsPath, "utf-8"));
-    } catch (err) {
-      console.warn(chalk.yellow(`Failed to parse global settings, creating new.`));
-    }
-  }
-
-  // Ensure extensions array
-  if (!Array.isArray(globalSettings.extensions)) {
-    globalSettings.extensions = [extensionPath];
-  } else if (!globalSettings.extensions.includes(extensionPath)) {
-    globalSettings.extensions.push(extensionPath);
-  } else {
-    return; // already registered
-  }
-
-  // Write back
-  try {
-    writeFileSync(globalSettingsPath, JSON.stringify(globalSettings, null, 2), "utf-8");
-  } catch (err) {
-    console.warn(chalk.yellow(`Failed to write global settings: ${err}`));
-  }
-}
-
-/**
- * Validate required API keys for configured providers.
- * Checks environment variables and warns user if missing.
- */
-export function validateApiKeys(config: PiclawConfig): void {
-  const warnings: string[] = [];
-
-  // Check model provider API keys if model is specified
-  if (config.model) {
-    const [provider] = config.model.split(":");
-    switch (provider) {
-      case "kilo":
-        if (!process.env.KILO_API_KEY) {
-          warnings.push(
-            "KILO_API_KEY environment variable is not set. " +
-            "Set it with: export KILO_API_KEY=your_api_key"
-          );
-        }
-        break;
-      case "anthropic":
-        if (!process.env.ANTHROPIC_API_KEY) {
-          warnings.push(
-            "ANTHROPIC_API_KEY environment variable is not set. " +
-            "Set it with: export ANTHROPIC_API_KEY=your_api_key"
-          );
-        }
-        break;
-      case "openai":
-        if (!process.env.OPENAI_API_KEY) {
-          warnings.push(
-            "OPENAI_API_KEY environment variable is not set. " +
-            "Set it with: export OPENAI_API_KEY=your_api_key"
-          );
-        }
-        break;
-    }
-  }
-
-  // Display warnings
-  if (warnings.length > 0) {
-    console.log(chalk.yellow("\n⚠️  API Key Warnings:"));
-    for (const warning of warnings) {
-      console.log(chalk.yellow(`  - ${warning}`));
-    }
-    console.log();
-  }
-}
-
-
---- Message 70 (ASSISTANT, 2026-05-06T06:18:03.745Z) ---
-Now let me check the args parser:
-[toolCall]
-
---- Message 71 (TOOL_RESULT, 2026-05-06T06:18:06.318Z) ---
-#!/usr/bin/env node
-
-/**
- * CLI Argument Parser for Piclaw
- *
- * Parses command-line arguments and returns options and config overrides.
- */
-
-export interface Options {
-  cwd?: string;
-  tools?: string[];
-  sessionDir?: string;
-  model?: string;
-  thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-  verbose?: boolean;
-  contextLogFile?: string;
-}
-
-export interface PiclawConfig {
-  model?: string;
-  thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-  tools?: string[];
-  sessionDir?: string;
-  verbose?: boolean;
-  contextLogFile?: string;
-}
-
-/**
- * Parse command-line arguments.
- * @param args - Command line arguments (excluding node and script)
- * @returns Object with opts and cliOverrides
- */
-export function parseOptions(args: string[]): { opts: Options; cliOverrides: PiclawConfig } {
-  const opts: Options = {};
-  const cliOverrides: PiclawConfig = {};
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--cwd" && args[i + 1]) opts.cwd = args[++i];
-    if (args[i] === "--tools" && args[i + 1]) {
-      opts.tools = args[i + 1].split(",");
-      cliOverrides.tools = opts.tools;
-    }
-    if (args[i] === "--sessionDir" && args[i + 1]) {
-      opts.sessionDir = args[++i];
-      cliOverrides.sessionDir = opts.sessionDir;
-    }
-    if (args[i] === "--model" && args[i + 1]) {
-      opts.model = args[++i];
-      cliOverrides.model = opts.model;
-    }
-    if (args[i] === "--thinking" && args[i + 1]) {
-      opts.thinking = args[++i] as any;
-      cliOverrides.thinking = opts.thinking;
-    }
-    if (args[i] === "--contextLogFile" && args[i + 1]) {
-      opts.contextLogFile = args[++i];
-      cliOverrides.contextLogFile = opts.contextLogFile;
-    }
-    if (args[i] === "--verbose") {
-      opts.verbose = true;
-      cliOverrides.verbose = true;
-    }
-    if (args[i] === "-h" || args[i] === "--help") {
-      printHelp();
-      process.exit(0);
-    }
-  }
-
-  return { opts, cliOverrides };
-}
-
-/**
- * Print help message
- */
-function printHelp(): void {
-  console.log(`
-Piclaw CLI - AI Coding Assistant
-
-Options:
-  --cwd <path>         Working directory (default: process.cwd())
-  --tools <list>       Comma-separated tool allowlist
-  --sessionDir <dir>   Session directory
-  --model <id>         Model to use (e.g., anthropic:claude-opus-4-5)
-  --thinking <level>   Thinking level: off|minimal|low|medium|high|xhigh
-  --contextLogFile <p> Log LLM context to file (for debugging)
-  --verbose            Show detailed logs
-  -h, --help           Show this help
-`);
-}
-
-
---- Message 72 (ASSISTANT, 2026-05-06T06:18:06.322Z) ---
-Now let me look at the context logger:
-[toolCall]
-
---- Message 73 (TOOL_RESULT, 2026-05-06T06:18:09.845Z) ---
-#!/usr/bin/env node
-
-/**
- * Context Logger
- *
- * Utility to log the full LLM context (system prompt, messages, tools) before
- * it is sent to the provider. Useful for debugging, inspection, and understanding
- * what exactly gets sent to the LLM.
- */
-
-import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import type { Message } from "@mariozechner/pi-ai";
-import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
-
-/**
- * Configuration for context logging.
- */
-export interface ContextLoggerOptions {
-	/** Path to log file. If undefined, logging is disabled. */
-	logFile?: string;
-	/** Whether to append to existing file or overwrite. Default: append. */
-	append?: boolean;
-	/** Maximum number of messages to log (for truncation). Default: unlimited. */
-	maxMessages?: number;
-	/** Whether to include tool definitions in the log. Default: true. */
-	includeTools?: boolean;
-}
-
-const DEFAULT_OPTIONS: Required<Omit<ContextLoggerOptions, "logFile">> = {
-	append: true,
-	maxMessages: Infinity,
-	includeTools: true,
-};
-
-/**
- * Format a single AgentMessage for logging.
- */
-function formatAgentMessage(msg: Message, index: number): string {
-	const timestamp = "timestamp" in msg && msg.timestamp ? new Date(msg.timestamp).toISOString() : "";
-	let contentStr = "";
-
-	if (Array.isArray(msg.content)) {
-		contentStr = msg.content
-			.map((c) => {
-				if (c.type === "text") {
-					return (c as any).text;
-				}
-				if (c.type === "image") {
-					return `[IMAGE: ${(c as any).source.type}]`;
-				}
-				return `[${c.type}]`;
-			})
-			.join("\n");
-	} else {
-		contentStr = String(msg.content);
-	}
-
-	const roleLabel = msg.role === "user" ? "USER" : msg.role === "assistant" ? "ASSISTANT" : "TOOL_RESULT";
-
-	return `--- Message ${index} (${roleLabel}, ${timestamp}) ---\n${contentStr}\n`;
-}
-
-/**
- * Format the full context for logging.
- */
-export function formatContext(
-	context: {
-		systemPrompt: string;
-		messages: Message[];
-		tools?: Array<{ name: string; description: string; parameters?: any }>;
-	},
-	options: ContextLoggerOptions = {},
-): string {
-	const opts = { ...DEFAULT_OPTIONS, ...options };
-
-	let output = "=== LLM CONTEXT LOG ===\n\n";
-
-	// System prompt
-	if (context.systemPrompt) {
-		output += `--- SYSTEM PROMPT ---\n${context.systemPrompt}\n\n`;
-	}
-
-	// Messages (with limit)
-	const messagesToLog = context.messages.slice(0, opts.maxMessages);
-	output += `--- CONVERSATION (${messagesToLog.length} messages) ---\n`;
-	for (let i = 0; i < messagesToLog.length; i++) {
-		output += formatAgentMessage(messagesToLog[i], i) + "\n";
-	}
-
-	// Tools
-	if (opts.includeTools && context.tools && context.tools.length > 0) {
-		output += `--- AVAILABLE TOOLS (${context.tools.length}) ---\n`;
-		for (const tool of context.tools) {
-			output += `• ${tool.name}: ${tool.description}\n`;
-			if (tool.parameters) {
-				output += `  Parameters: ${JSON.stringify(tool.parameters, null, 2)}\n`;
-			}
-		}
-		output += "\n";
-	}
-
-	output += `=== END CONTEXT LOG (${new Date().toISOString()}) ===\n`;
-	return output;
-}
-
-/**
- * Write context log to file.
- */
-export function writeContextLog(context: {
-	systemPrompt: string;
-	messages: Message[];
-	tools?: Array<{ name: string; description: string; parameters?: any }>;
-}, options: ContextLoggerOptions = {}): void {
-	const logFile = options.logFile;
-	if (!logFile) {
-		return; // Logging disabled
-	}
-
-	try {
-		const logDir = dirname(logFile);
-		if (!existsSync(logDir)) {
-			mkdirSync(logDir, { recursive: true });
-		}
-
-		const formatted = formatContext(context, options);
-
-		if (options.append) {
-			appendFileSync(logFile, formatted);
-		} else {
-			writeFileSync(logFile, formatted);
-		}
-	} catch (error) {
-		// Don't throw - logging should never break the main flow
-		console.error("ContextLogger: Failed to write log file:", error);
-	}
-}
-
-/**
- * Create a wrapper stream function that logs context before sending to LLM.
- *
- * Usage:
- * ```typescript
- * const loggedStreamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile);
- * ```
- */
-export function createContextLoggingStreamFn(
-	originalStreamFn: (...args: any[]) => any,
-	logFile: string,
-	logOptions?: Omit<ContextLoggerOptions, "logFile">,
-): (...args: any[]) => any {
-	return async (...args: any[]) => {
-		const [model, context, options] = args;
-		// Log the context before sending
-		writeContextLog(
-			{
-				systemPrompt: context.systemPrompt,
-				messages: context.messages,
-				tools: context.tools,
-			},
-			{ logFile, ...logOptions },
-		);
-
-		// Call original stream function
-		return originalStreamFn(...args);
-	};
-}
-
-
---- Message 74 (ASSISTANT, 2026-05-06T06:18:09.848Z) ---
-Now let me check the subtool-loader:
-[toolCall]
-
---- Message 75 (TOOL_RESULT, 2026-05-06T06:18:12.456Z) ---
-/**
- * SubTool Loader - Main entry point
- * 
- * Unified tool for system operations combining:
- * - Core Computer Use tools from @mariozechner/pi-coding-agent
- * - Extended sub-tools from src/tools/sub-tools/
- */
-
-import { Type } from "typebox";
-import * as fs from "node:fs";
-import * as path from "node:path";
-import { Text } from "@mariozechner/pi-tui";
-import { getAgentDir } from "../config/config.js";
-import {
-  createBashToolDefinition,
-  createLsToolDefinition,
-  createFindToolDefinition,
-  createGrepToolDefinition,
-  createReadToolDefinition,
-  createEditToolDefinition,
-  createWriteToolDefinition,
-} from "@mariozechner/pi-coding-agent";
-
-import { subToolNames, type SubToolName } from "./sub-tools/types.js";
-import { getToolMap, DANGEROUS_TOOLS } from "./sub-tools/helpers.js";
-import { renderSubtoolLoaderCall, renderSubtoolLoaderResult } from "./sub-tools/render.js";
-
-// ============================================================================
-// Core tools from @mariozechner/pi-coding-agent
-// ============================================================================
-
-function getCoreToolMap(cwd: string) {
-  return {
-    bash: createBashToolDefinition(cwd),
-    ls: createLsToolDefinition(cwd),
-    find: createFindToolDefinition(cwd),
-    grep: createGrepToolDefinition(cwd),
-    read: createReadToolDefinition(cwd),
-    edit: createEditToolDefinition(cwd),
-    write: createWriteToolDefinition(cwd),
-  };
-}
-
-// ============================================================================
-// Combined tool map (core + custom sub-tools)
-// ============================================================================
-
-// ============================================================================
-// Audit Trail - Logging for all sub-tool executions
-// ============================================================================
-
-interface AuditEntry {
-  timestamp: string;
-  tool: string;
-  args: any;
-  success: boolean;
-  error?: string;
-  duration?: number;
-}
-
-const auditLog: AuditEntry[] = [];
-let auditLogPath: string;
-
-function getAuditLogPath(): string {
-  if (!auditLogPath) {
-    const agentDir = getAgentDir();
-    auditLogPath = path.join(agentDir, "audit.log");
-  }
-  return auditLogPath;
-}
-
-function addAuditEntry(entry: Omit<AuditEntry, "timestamp">): void {
-  const fullEntry: AuditEntry = {
-    ...entry,
-    timestamp: new Date().toISOString(),
-  };
-  auditLog.push(fullEntry);
-  
-  // Also append to file for persistence (async)
-  try {
-    const logLine = JSON.stringify(fullEntry) + "\n";
-    // Use async append but fire-and-forget
-    fs.promises.appendFile(getAuditLogPath(), logLine).catch(() => {});
-  } catch {
-    // Silently fail if can't write - don't block execution
-  }
-}
-
-/**
- * Get all audit entries (for debugging/testing)
- */
-export function getAuditLog(): readonly AuditEntry[] {
-  return auditLog;
-}
-
-/**
- * Clear audit log (for testing)
- */
-export function clearAuditLog(): void {
-  auditLog.length = 0;
-}
-
-// ============================================================================
-// Dangerous Tools Configuration
-// ============================================================================
-
-/**
- * Default list of dangerous sub-tools that can be disabled
- * These tools can execute arbitrary commands or access sensitive resources
- */
-/**
- * Configuration for sub-tool loader
- */
-export interface SubToolLoaderConfig {
-  /** Set of tool names to disable */
-  disabledTools?: Set<string>;
-  /** Whether to allow dangerous tools by default (default: true) */
-  allowDangerousTools?: boolean;
-}
-
-let config: SubToolLoaderConfig = {
-  allowDangerousTools: true,
-};
-
-/**
- * Configure the sub-tool loader
- */
-export function configureSubToolLoader(newConfig: Partial<SubToolLoaderConfig>): void {
-  config = { ...config, ...newConfig };
-  // Clear tool cache when config changes
-  toolCache.clear();
-}
-
-/**
- * Get current configuration
- */
-export function getSubToolLoaderConfig(): Readonly<SubToolLoaderConfig> {
-  return config;
-}
-
-/**
- * Check if a tool is allowed to execute
- */
-function isToolAllowed(toolName: string, toolDef?: any): boolean {
-  if (config.disabledTools?.has(toolName)) {
-    return false;
-  }
-  // Check if it's a dangerous tool and we're configured to disallow them
-  const isDangerous = toolDef?.dangerous || DANGEROUS_TOOLS.has(toolName as any);
-  if (!config.allowDangerousTools && isDangerous) {
-    return false;
-  }
-  return true;
-}
-
-// ============================================================================
-// Tool Cache
-// ============================================================================
-
-const toolCache = new Map<string, any>();
-
-function getAllTools(cwd: string): Record<string, any> {
-  if (toolCache.has(cwd)) return toolCache.get(cwd)!;
-
-  const tools = {
-    ...getCoreToolMap(cwd),
-    ...getToolMap(cwd),  // Add custom sub-tools from sub-tools/index
-  };
-
-  toolCache.set(cwd, tools);
-  return tools;
-}
-
-// ============================================================================
-// Execute: get_schema
-// ============================================================================
-
-async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, ctx?: any) {
-  const { name } = args as { name: string };
-  const effectiveCwd = ctx?.cwd || cwd;
-
-  if (!name) {
-    return {
-      content: [{ type: "text", text: `Missing 'name' parameter. Specify a sub-tool name.` }],
-      details: undefined,
-      isError: true,
-    } as const;
-  }
-
-  const toolMap = getAllTools(effectiveCwd);
-  const toolDef = toolMap[name];
-  if (!toolDef) {
-    return {
-      content: [{ type: "text", text: `Unknown sub-tool: ${name}. Available: ${subToolNames.join(", ")}` }],
-      details: undefined,
-      isError: true,
-    } as const;
-  }
-
-  const schema = toolDef.parameters as any;
-  let output = `Schema for sub-tool "${name}":\n\n`;
-  
-  if (schema?.properties) {
-    output += "Properties:\n";
-    for (const [key, propSchema] of Object.entries(schema.properties)) {
-      const prop = propSchema as any;
-      const isOptional = schema.optionalProperties?.includes(key);
-      const type = prop.type || "any";
-      output += `- ${key}${isOptional ? "?" : ""}: ${prop.description || type}\n`;
-    }
-  }
-  if (schema?.required && Array.isArray(schema.required) && schema.required.length > 0) {
-    output += `\nRequired fields: ${schema.required.join(", ")}\n`;
-  }
-  output += "\nExample invocation:\n";
-  output += `{\n  "subtool": "${name}",\n  "args": {\n    // fill with fields from above\n  }\n}\n`;
-
-  return {
-    content: [{ type: "text", text: output }],
-    details: undefined,
-    isError: false,
-  } as const;
-}
-
-// ============================================================================
-// Tool definition factory
-// ============================================================================
-
-/**
- * Creates the subtool_loader tool definition.
- *
- * OPTIMIZATION: Use Union of Literal strings instead of Union of Objects.
- * This reduces the JSON Schema from ~4000+ lines to ~15 lines.
- */
-export function createSubLoaderToolDefinition(cwd: string) {
-  // Schema: { subtool: string, args: any }
-  // Using Type.String() instead of Type.Union(Type.Literal(...))
-  // to avoid generating huge JSON Schema (~4000 lines)
-  // LLM can still find valid tool names in the description below.
-  const schema = Type.Object({
-    subtool: Type.String(),
-    args: Type.Any(),
-  });
-
-  const description = `⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.\nOnly use in trusted environments with controlled inputs.\n\n` +
-    `Unified tool for system operations.\n\n` +
-    `Core Computer Use tools (from @mariozechner/pi-coding-agent):\n` +
-    `- get_schema, bash, ls, find, grep, read, edit, write\n\n` +
-    `Extended sub-tools (custom in src/tools/sub-tools/):\n` +
-    `- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis\n` +
-    `- make, npm, systemctl, journalctl, ps, kill, crontab\n` +
-    `- apt, yum, df, du, ping, traceroute, nslookup, dig\n` +
-    `- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg\n` +
-    `- update, backup, password, weather, time, ufw, at, quota\n` +
-    `- iso, free, iostat, netstat, ss\n` +
-    `- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz\n` +
-    `- xmlstarlet, json_pp, yamllint, tomlq, hjson\n` +
-    `- archive, zip, 7z, xz\n` +
-    `- svn, hg, darcs, fossil, bzr, cvs\n` +
-    `- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc\n\n` +
-    `Use "get_schema" to see argument details for any sub-tool.\n\n` +
-    `Example: {"subtool":"bash","args":{"command":"echo hello"}}`;
-
-  return {
-    name: "subtool_loader",
-    label: "SubTool Loader",
-    description,
-    parameters: schema,
-    async execute(toolCallId: string, params: any, signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
-      const { subtool, args } = params as { subtool: string; args: any };
-      
-      let parsedArgs: any = args;
-      if (typeof args === 'string') {
-        try {
-          parsedArgs = JSON.parse(args);
-        } catch (e) {
-          return {
-            content: [{ type: "text", text: `Invalid JSON in args: ${args}` }],
-            details: undefined,
-            isError: true,
-          } as const;
-        }
-      }
-
-      try {
-        if (subtool === "get_schema") {
-          return await executeGetSchema(parsedArgs, cwd, signal, ctx);
-        }
-
-        const toolMap = getAllTools(ctx?.cwd || cwd);
-        const toolDef = toolMap[subtool];
-        
-        if (!toolDef) {
-          return {
-            content: [{ type: "text", text: `Unknown subtool: ${subtool}. Available: ${subToolNames.join(", ")}` }],
-            details: undefined,
-            isError: true,
-          } as const;
-        }
-
-        // Check if tool is allowed (considering dangerous flag)
-        if (!isToolAllowed(subtool, toolDef)) {
-          const reason = toolDef.dangerous
-            ? `Tool '${subtool}' is dangerous and disabled. Set allowDangerousTools=true in SubToolLoader config to enable.`
-            : `Tool '${subtool}' is disabled.`;
-          return {
-            content: [{ type: "text", text: reason }],
-            details: undefined,
-            isError: true,
-          } as const;
-        }
-
-        // Execute and log result
-        const startTime = Date.now();
-        const delegatedToolCallId = `subtool-${subtool}-${Date.now()}`;
-        const result = await toolDef.execute(delegatedToolCallId, parsedArgs, signal, undefined, ctx);
-        const duration = Date.now() - startTime;
-        const success = !result.isError;
-        addAuditEntry({ tool: subtool, args: parsedArgs, success, duration });
-        return result;
-      } catch (error: any) {
-        // Log failure
-        addAuditEntry({ tool: subtool, args: parsedArgs, success: false, error: error.message });
-        return {
-          content: [{ type: "text", text: `Error: ${error.message}` }],
-          details: undefined,
-          isError: true,
-        } as const;
-      }
-    },
-    renderCall: renderSubtoolLoaderCall,
-    renderResult: renderSubtoolLoaderResult,
-  };
-}
-
---- Message 76 (ASSISTANT, 2026-05-06T06:18:12.458Z) ---
-Now let me understand the current test structure better and check what specific tests are being run:
-[toolCall]
-
---- Message 77 (TOOL_RESULT, 2026-05-06T06:18:19.355Z) ---
-#!/usr/bin/env node
-
-/**
- * Unit tests for piclaw-extension.ts
- */
-
-import { describe, it, expect, vi } from 'vitest';
-import piclawExtension from '../extensions/piclaw-extension.js';
-
-describe('piclaw-extension', () => {
-  it('should be a function that accepts api', () => {
-    expect(typeof piclawExtension).toBe('function');
-  });
-
-  it('should not throw when called with mock api', () => {
-    const mockApi = {
-      registerTool: vi.fn(),
-      registerCommand: vi.fn(),
-      on: vi.fn(),
-      registerMessageRenderer: vi.fn(),
-      registerProvider: vi.fn(),
-      registerShortcut: vi.fn(),
-      registerFlag: vi.fn(),
-      getFlag: vi.fn(),
-      sendMessage: vi.fn(),
-      requestRender: vi.fn(),
-      // add more stubs if needed
-    } as any;
-    expect(() => piclawExtension(mockApi)).not.toThrow();
-  });
-
-  it('should not register anything by default (empty extension)', () => {
-    const mockApi = {
-      registerTool: vi.fn(),
-      registerCommand: vi.fn(),
-      on: vi.fn(),
-      registerMessageRenderer: vi.fn(),
-      registerProvider: vi.fn(),
-      registerShortcut: vi.fn(),
-      registerFlag: vi.fn(),
-      getFlag: vi.fn(),
-      sendMessage: vi.fn(),
-    } as any;
-    piclawExtension(mockApi);
-    expect(mockApi.registerTool).not.toHaveBeenCalled();
-    expect(mockApi.registerCommand).not.toHaveBeenCalled();
-    expect(mockApi.registerProvider).not.toHaveBeenCalled();
-  });
-});
-
-
---- Message 78 (ASSISTANT, 2026-05-06T06:18:19.359Z) ---
-[toolCall]
-
---- Message 79 (TOOL_RESULT, 2026-05-06T06:18:23.760Z) ---
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { registerMemoryTool } from '../extensions/tools/memory-tool.js';
-import type { Memory } from '../extensions/tools/memory-tool.js';
-import { Text } from '@mariozechner/pi-tui';
-
-const createMockApi = () => ({
-  registerTool: vi.fn(),
-  appendEntry: vi.fn(),
-  on: vi.fn(),
-  registerCommand: vi.fn(),
-});
-
-const createMockCtx = (entries: any[] = []) => ({
-  sessionManager: {
-    getEntries: vi.fn().mockReturnValue(entries),
-    getBranch: vi.fn().mockReturnValue(entries),
-  },
-  hasUI: true,
-});
-
-describe('memory tool', () => {
-  let mockApi: any;
-  let mockCtx: any;
-  let capturedTool: any;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockApi = createMockApi();
-    mockApi.registerTool.mockImplementation((tool: any) => {
-      capturedTool = tool;
-    });
-    mockCtx = createMockCtx();
-  });
-
-  it('should register the tool', () => {
-    registerMemoryTool(mockApi);
-    expect(mockApi.registerTool).toHaveBeenCalledTimes(1);
-    expect(capturedTool).toBeDefined();
-    expect(capturedTool.name).toBe('memory');
-  });
-
-  it('should have promptSnippet and promptGuidelines', () => {
-    registerMemoryTool(mockApi);
-    expect(capturedTool.promptSnippet).toBe('Proactively store important facts, decisions, code snippets, URLs with tags. Memories persist across sessions and help track project history.');
-    expect(capturedTool.promptGuidelines.length).toBeGreaterThan(5);
-  });
-
-  it('should add a memory', async () => {
-    registerMemoryTool(mockApi);
-    const params = { action: 'add', text: 'Important fact' };
-    const result = await capturedTool.execute('add1', params, undefined, undefined, mockCtx);
-
-    expect(mockApi.appendEntry).toHaveBeenCalledWith('memory', expect.objectContaining({ text: 'Important fact' }));
-    expect(result.content[0].text).toContain('Stored memory #1');
-    expect(result.details.action).toBe('add');
-    expect((result.details as any).memories.length).toBe(1);
-  });
-
-  it('should add memory with tags', async () => {
-    registerMemoryTool(mockApi);
-    const params = { action: 'add', text: 'Fact with tags', tags: ['project', 'important'] };
-    const result = await capturedTool.execute('add2', params, undefined, undefined, mockCtx);
-
-    expect(mockApi.appendEntry).toHaveBeenCalledWith('memory', expect.objectContaining({ tags: ['project', 'important'] }));
-    expect(result.content[0].text).toContain('#1');
-  });
-
-  it('should error when adding without text', async () => {
-    registerMemoryTool(mockApi);
-    const params = { action: 'add' };
-    const result = await capturedTool.execute('add3', params, undefined, undefined, mockCtx);
-
-    expect(result.content[0].text).toContain('Error: text required');
-    expect(result.details.error).toBe('text required');
-    expect(mockApi.appendEntry).not.toHaveBeenCalled();
-  });
-
-  it('should list memories', async () => {
-    registerMemoryTool(mockApi);
-    // Add some memories
-    await capturedTool.execute('a1', { action: 'add', text: 'Memory 1' }, undefined, undefined, mockCtx);
-    await capturedTool.execute('a2', { action: 'add', text: 'Memory 2' }, undefined, undefined, mockCtx);
-    expect(mockApi.appendEntry).toHaveBeenCalledTimes(2);
-
-    // List
-    const result = await capturedTool.execute('list', { action: 'list' }, undefined, undefined, mockCtx);
-    expect(result.content[0].text).toContain('#1');
-    expect(result.content[0].text).toContain('#2');
-    expect(result.details.action).toBe('list');
-    expect((result.details as any).memories.length).toBe(2);
-  });
-
-  it('should get a specific memory', async () => {
-    registerMemoryTool(mockApi);
-    await capturedTool.execute('a1', { action: 'add', text: 'Get this one' }, undefined, undefined, mockCtx);
-
-    const result = await capturedTool.execute('get', { action: 'get', id: 1 }, undefined, undefined, mockCtx);
-    expect(result.content[0].text).toContain('Get this one');
-    expect(result.details.targetId).toBe(1);
-  });
-
-  it('should handle get with non-existent id', async () => {
-    registerMemoryTool(mockApi);
-    const result = await capturedTool.execute('get', { action: 'get', id: 999 }, undefined, undefined, mockCtx);
-
-    expect(result.details.error).toBe('#999 not found');
-    expect(mockApi.appendEntry).not.toHaveBeenCalled();
-  });
-
-  it('should delete a memory', async () => {
-    registerMemoryTool(mockApi);
-    await capturedTool.execute('a1', { action: 'add', text: 'To delete' }, undefined, undefined, mockCtx);
-    expect(mockApi.appendEntry).toHaveBeenCalledTimes(1);
-
-    const result = await capturedTool.execute('del', { action: 'delete', id: 1 }, undefined, undefined, mockCtx);
-    expect(mockApi.appendEntry).toHaveBeenCalledWith('memory', expect.objectContaining({ id: 1, _deleted: true }));
-    expect(result.content[0].text).toContain('Deleted memory #1');
-    expect((result.details as any).memories.length).toBe(0);
-  });
-
-  it('should clear all memories', async () => {
-    registerMemoryTool(mockApi);
-    await capturedTool.execute('a1', { action: 'add', text: 'One' }, undefined, undefined, mockCtx);
-    await capturedTool.execute('a2', { action: 'add', text: 'Two' }, undefined, undefined, mockCtx);
-    expect(mockApi.appendEntry).toHaveBeenCalledTimes(2);
-
-    const result = await capturedTool.execute('clear', { action: 'clear' }, undefined, undefined, mockCtx);
-    expect(mockApi.appendEntry).toHaveBeenCalledTimes(4); // 2 more delete markers
-    expect(result.content[0].text).toBe('Cleared 2 memories');
-    expect((result.details as any).memories).toEqual([]);
-  });
-
-  it('should search memories', async () => {
-    registerMemoryTool(mockApi);
-    await capturedTool.execute('a1', { action: 'add', text: 'The quick brown fox' }, undefined, undefined, mockCtx);
-    await capturedTool.execute('a2', { action: 'add', text: 'Lazy dog' }, undefined, undefined, mockCtx);
-    await capturedTool.execute('a3', { action: 'add', text: 'Another fox story', tags: ['animal'] }, undefined, undefined, mockCtx);
-
-    const result = await capturedTool.execute('search', { action: 'search', query: 'fox' }, undefined, undefined, mockCtx);
-    expect(result.content[0].text).toContain('Found 2 of 3 memories');
-    expect((result.details as any).memories.length).toBe(2);
-  });
-
-  it('should search by tag', async () => {
-    registerMemoryTool(mockApi);
-    await capturedTool.execute('a1', { action: 'add', text: 'Important meeting', tags: ['work'] }, undefined, undefined, mockCtx);
-    await capturedTool.execute('a2', { action: 'add', text: 'Buy groceries', tags: ['personal'] }, undefined, undefined, mockCtx);
-
-    const result = await capturedTool.execute('searchtag', { action: 'search', query: 'work' }, undefined, undefined, mockCtx);
-    expect(result.content[0].text).toContain('Found 1 of 2 memories');
-    expect((result.details as any).memories[0].tags).toContain('work');
-  });
-
-  it('should register session event listeners', () => {
-    registerMemoryTool(mockApi);
-    expect(mockApi.on).toHaveBeenCalledWith('session_start', expect.any(Function));
-    expect(mockApi.on).toHaveBeenCalledWith('session_tree', expect.any(Function));
-  });
-
-  it('should have custom rendering', () => {
-    registerMemoryTool(mockApi);
-    expect(typeof capturedTool.renderCall).toBe('function');
-    expect(typeof capturedTool.renderResult).toBe('function');
-  });
-});
-
-
---- Message 80 (ASSISTANT, 2026-05-06T06:18:23.762Z) ---
-[toolCall]
-
---- Message 81 (TOOL_RESULT, 2026-05-06T06:18:31.668Z) ---
-#!/usr/bin/env node
-
-/**
- * Unit tests for extensions/index.ts
- * Ensures all custom tools and providers are registered.
- */
-
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-
-// Mock dependencies before importing the module under test
-vi.mock('../extensions/providers/kilo-provider.js', () => ({
-  registerKiloProvider: vi.fn(),
-}));
-
-vi.mock('../extensions/tools/index.js', () => ({
-  registerTodosTool: vi.fn(),
-  registerMemoryTool: vi.fn(),
-  registerEchoTool: vi.fn(),
-  registerSystemInfoTool: vi.fn(),
-}));
-
-vi.mock('../extensions/auto-memory.js', () => ({
-  default: vi.fn(),
-}));
-
-vi.mock('../extensions/auto-continue-extension.js', () => ({
-  default: vi.fn(),
-}));
-
-vi.mock('../tools/subtool-loader.js', () => ({
-  createSubLoaderToolDefinition: vi.fn().mockReturnValue({ name: 'mock-tool' }),
-}));
-
-// Now import the module after mocks are set up
-import extensionIndex from '../extensions/index.js';
-import { registerKiloProvider } from '../extensions/providers/kilo-provider.js';
-import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from '../extensions/tools/index.js';
-import autoContinueExtension from '../extensions/auto-continue-extension.js';
-
-describe('extensions/index', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should be a function that accepts api', () => {
-    expect(typeof extensionIndex).toBe('function');
-  });
-
-  const createMockApi = () => ({
-    registerTool: vi.fn(),
-    registerCommand: vi.fn(),
-    registerProvider: vi.fn(),
-    on: vi.fn(),
-    getFlag: vi.fn(),
-  }) as any;
-
-  it('should register kilo provider', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(registerKiloProvider).toHaveBeenCalledWith(mockApi);
-  });
-
-  it('should register todos tool', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(registerTodosTool).toHaveBeenCalledWith(mockApi);
-  });
-
-  it('should register memory tool', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(registerMemoryTool).toHaveBeenCalledWith(mockApi);
-  });
-
-  it('should register echo tool', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(registerEchoTool).toHaveBeenCalledWith(mockApi);
-  });
-
-  it('should register system info tool', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    expect(registerSystemInfoTool).toHaveBeenCalledWith(mockApi);
-  });
-
-  it('should call all registrations in correct order (not guaranteed but all called)', () => {
-    const mockApi = createMockApi();
-    extensionIndex(mockApi);
-    // All mocks should be called exactly once
-    expect(registerKiloProvider).toHaveBeenCalledTimes(1);
-    expect(registerTodosTool).toHaveBeenCalledTimes(1);
-    expect(registerMemoryTool).toHaveBeenCalledTimes(1);
-    expect(registerEchoTool).toHaveBeenCalledTimes(1);
-    expect(registerSystemInfoTool).toHaveBeenCalledTimes(1);
-  });
-});
-
-
---- Message 82 (ASSISTANT, 2026-05-06T06:18:31.673Z) ---
-Now let me look at the `dist/` directory to see what was built:
-[toolCall]
-
---- Message 83 (TOOL_RESULT, 2026-05-06T06:18:40.499Z) ---
-Tool ls not found
-
---- Message 84 (ASSISTANT, 2026-05-06T06:18:40.506Z) ---
-[toolCall]
-
---- Message 85 (TOOL_RESULT, 2026-05-06T06:18:44.112Z) ---
-total 72
-drwxrwxr-x  8 quangtynu quangtynu 4096 May  5 14:28 .
-drwxrwxr-x 13 quangtynu quangtynu 4096 May  6 06:52 ..
-drwxrwxr-x  2 quangtynu quangtynu 4096 Apr 30 21:18 cli
--rwxrwxr-x  1 quangtynu quangtynu  635 May  6 13:18 cli.js
--rw-rw-r--  1 quangtynu quangtynu 2147 May  6 13:18 command-history-patch.js
-drwxrwxr-x  2 quangtynu quangtynu 4096 Apr 30 21:18 config
--rw-rw-r--  1 quangtynu quangtynu 3913 May  6 13:18 context-logger.js
-drwxrwxr-x  4 quangtynu quangtynu 4096 May  6 06:53 extensions
--rw-rw-r--  1 quangtynu quangtynu 3097 May  6 13:18 helpers.js
--rw-rw-r--  1 quangtynu quangtynu  763 May  6 13:18 interactive-runner.js
--rwxrwxr-x  1 quangtynu quangtynu 3243 May  6 13:18 main.js
--rw-rw-r--  1 quangtynu quangtynu 7053 May  6 13:18 migrations.js
--rw-rw-r--  1 quangtynu quangtynu 4150 May  6 13:18 piclaw-core.js
-drwxrwxr-x  2 quangtynu quangtynu 4096 May  5 12:44 services
-drwxrwxr-x  2 quangtynu quangtynu 4096 Apr 30 21:18 tests
-drwxrwxr-x  3 quangtynu quangtynu 4096 Apr 30 21:18 tools
-
-
 --- AVAILABLE TOOLS (9) ---
 • read: Read the contents of a file. Supports text files and images (jpg, png, gif, webp). Images are sent as attachments. For text files, output is truncated to 2000 lines or 50KB (whichever is hit first). Use offset/limit for large files. When you need the full file, continue with offset until complete.
   Parameters: {
@@ -4642,4 +3978,4 @@ Example: {"subtool":"bash","args":{"command":"echo hello"}}
   }
 }
 
-=== END CONTEXT LOG (2026-05-06T06:18:44.114Z) ===
+=== END CONTEXT LOG (2026-05-06T06:58:39.897Z) ===

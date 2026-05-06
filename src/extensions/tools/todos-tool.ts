@@ -511,16 +511,23 @@ function renderTodosResult(result: { details?: TodoToolDetails }, options: { exp
   const lines: string[] = [theme.fg("toolTitle", `Todos: ${allTasks.length} tasks`)];
   for (const phase of phases) {
     if (phases.length > 1) lines.push(theme.fg("accent", `▼ ${phase.name}`));
-    for (const task of phase.tasks) {
-      const color = task.status === "completed" || task.status === "abandoned" ? "dim" : task.status === "in_progress" ? "accent" : "text";
-      const prefix = task.status === "in_progress" ? "→" : task.status === "completed" ? "✓" : task.status === "abandoned" ? "✗" : " ";
-      lines.push(`${theme.fg(color, `  ${prefix} ${task.id} ${task.content}`)}`);
-      if (task.status === "in_progress" && task.details) {
-        for (const line of task.details.split("\n")) {
-          lines.push(theme.fg("dim", `    ${line}`));
+// 🚀 Chiến thuật 2-task: Chỉ hiển thị 2 task sát nhất để tối ưu token LLM
+        let visibleTasks = 0;
+        for (const task of phase.tasks) {
+          if (visibleTasks >= 2) {
+            lines.push(`  ${theme.fg("dim", "...")}`);
+            break;
+          }
+          const color = task.status === "completed" || task.status === "abandoned" ? "dim" : task.status === "in_progress" ? "accent" : "text";
+          const prefix = task.status === "in_progress" ? "→" : task.status === "completed" ? "✓" : task.status === "abandoned" ? "✗" : " ";
+          lines.push(`${theme.fg(color, `  ${prefix} ${task.id} ${task.content}`)}`);
+          if (task.status === "in_progress" && task.details) {
+            for (const line of task.details.split("\n")) {
+              lines.push(theme.fg("dim", `    ${line}`));
+            }
+          }
+          visibleTasks++;
         }
-      }
-    }
   }
 
   if (options.expanded) {
