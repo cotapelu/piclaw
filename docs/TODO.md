@@ -76,6 +76,39 @@
 - [x] Phase 4 Advanced Features analysis (2026-05-06)
 - [x] Phase 5 Testing & Documentation (2026-05-06)
 - [x] Phase 6 Production Hardening (2026-05-06)
+- [x] Refactor piclaw-core.ts to use factory pattern (2026-05-06)
+- [x] Generate updated custom models (2026-05-06)
+
+---
+
+## Phase 8: Extension Features Implementation (Pending)
+
+### 8.1 Session Events (High Priority)
+- [ ] Implement `session_before_switch` event hook
+- [ ] Implement `session_before_fork` event hook
+- [ ] Implement `session_before_compact` event hook
+- [ ] Implement `session_shutdown` event hook
+
+### 8.2 Context Manipulation
+- [ ] Implement `ctx.abort()` - Dừng agent loop
+- [ ] Implement `ctx.hasPendingMessages()` - Kiểm tra message pending
+- [ ] Implement `ctx.getContextUsage()` - Token usage tracking
+- [ ] Implement `ctx.getSystemPrompt()` - View current system prompt
+
+### 8.3 UI Enhancements
+- [ ] Add `api.ui.notify()` - Toast notifications
+- [ ] Add `api.ui.setFooter()` - Custom footer component
+- [ ] Add `api.ui.select()` - Selection dialog
+- [ ] Add `api.ui.confirm()` - Confirm dialog
+- [ ] Add `api.ui.input()` - Input dialog
+
+### 8.4 Custom Commands
+- [ ] Implement `api.registerCommand()` for slash commands
+- [ ] Add `api.registerShortcut()` for keyboard shortcuts
+
+### 8.5 Tool Rendering
+- [ ] Custom `renderCall()` for tool calls
+- [ ] Custom `renderResult()` for tool results
 
 ---
 

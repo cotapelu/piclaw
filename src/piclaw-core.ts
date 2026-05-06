@@ -12,9 +12,9 @@ import {
   createAgentSessionFromServices,
   SessionManager,
   AgentSessionRuntime,
+  createAgentSessionRuntime,
+  type CreateAgentSessionRuntimeFactory,
   type CreateAgentSessionRuntimeResult,
-  type AgentSessionServices,
-  type SessionStartEvent,
 } from "@mariozechner/pi-coding-agent";
 import { getAgentDir } from "./config/config.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
@@ -48,8 +48,7 @@ export interface PiclawCoreOptions {
  *
  * This function handles:
  * - Services creation (auth, models, settings, resource loader)
- * - Session creation
- * - Runtime factory for session switching
+ * - Session creation using factory system
  * - Initial model and thinking level configuration
  *
  * @param options - Configuration options
@@ -58,83 +57,64 @@ export interface PiclawCoreOptions {
 export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
   const cwd = options.cwd ?? process.cwd();
   const agentDir = options.agentDir ?? getAgentDir();
-  // Default context log file if not specified
+
+  // Context log file if logging is enabled
   const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
 
-  // 1. Create cwd-bound services
-  const services: AgentSessionServices = await createAgentSessionServices({
+  // Create factory for session switching
+  const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async ({
     cwd,
     agentDir,
-  });
-
-  // 2. Create session manager
-  const sessionManager = SessionManager.create(cwd, options.sessionDir);
-
-  // 3. Create session from services
-  const sessionStartEvent: SessionStartEvent = { type: "session_start", reason: "startup" };
-
-  // Prepare custom tools (ensure subtool_loader is included)
-  const customTools = options.customTools ?? [createSubLoaderToolDefinition(services.cwd)];
-
-  const sessionResult = await createAgentSessionFromServices({
-    services,
     sessionManager,
     sessionStartEvent,
-    tools: options.tools,
-    customTools,
-  });
-
-  // 4. Create runtime factory (for session switching)
-  const createRuntime = async (runtimeOpts: {
-    cwd: string;
-    agentDir: string;
-    sessionManager: SessionManager;
-    sessionStartEvent?: SessionStartEvent;
-  }): Promise<CreateAgentSessionRuntimeResult> => {
+  }) => {
     const newServices = await createAgentSessionServices({
-      cwd: runtimeOpts.cwd,
-      agentDir: runtimeOpts.agentDir,
+      cwd,
+      agentDir,
     });
 
-    const customToolsForRuntime = options.customTools ?? [createSubLoaderToolDefinition(newServices.cwd)];
+    const customTools = options.customTools ?? [createSubLoaderToolDefinition(cwd)];
+    
     const result = await createAgentSessionFromServices({
       services: newServices,
-      sessionManager: runtimeOpts.sessionManager,
-      sessionStartEvent: runtimeOpts.sessionStartEvent,
+      sessionManager,
+      sessionStartEvent,
       tools: options.tools,
-      customTools: customToolsForRuntime,
+      customTools,
     });
 
     return {
       ...result,
       services: newServices,
-      diagnostics: [],
+      diagnostics: newServices.diagnostics,
     };
   };
 
-  // 5. Wrap streamFn with context logging if enabled
-  if (contextLogFile) {
-    const originalStreamFn = sessionResult.session.agent.streamFn;
-    sessionResult.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
+  // Create initial session manager
+  const sessionManager = SessionManager.create(cwd, options.sessionDir);
+
+  // Create runtime using factory system
+  const runtime = await createAgentSessionRuntime(createRuntimeFactory, {
+    cwd,
+    agentDir,
+    sessionManager,
+    sessionStartEvent: { type: "session_start", reason: "startup" },
+  });
+
+  // Wrap streamFn with context logging if enabled
+  if (contextLogFile && runtime.session?.agent?.streamFn) {
+    const originalStreamFn = runtime.session.agent.streamFn;
+    runtime.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
   }
 
-  // 6. Create runtime
-  const runtime = new AgentSessionRuntime(
-    sessionResult.session,
-    services,
-    createRuntime,
-    [], // diagnostics
-    sessionResult.modelFallbackMessage,
-  );
-
-  // 6. Apply initial model if configured
-  if (options.model) {
+  // Apply initial model if configured
+  if (options.model && runtime.session?.model) {
     try {
       const [provider, modelId] = options.model.split(":");
       if (provider && modelId) {
-        const model = services.modelRegistry.find(provider, modelId);
+        const model = runtime.services.modelRegistry.find(provider, modelId);
         if (model) {
-          await sessionResult.session.setModel(model);
+          await runtime.session.setModel(model);
         } else {
           console.warn(`Model '${options.model}' not found in registry.`);
         }
@@ -146,9 +126,9 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     }
   }
 
-  // 7. Apply initial thinking level if configured
-  if (options.thinking) {
-    sessionResult.session.setThinkingLevel(options.thinking);
+  // Apply initial thinking level if configured
+  if (options.thinking && runtime.session) {
+    runtime.session.setThinkingLevel(options.thinking);
   }
 
   return runtime;
