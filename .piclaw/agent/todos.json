@@ -135,7 +135,7 @@
         {
           "id": "task-128",
           "content": "extensions/providers/models/kilo-models.ts",
-          "status": "in_progress"
+          "status": "completed"
         }
       ]
     },
@@ -146,12 +146,12 @@
         {
           "id": "task-129",
           "content": "tools/subtool-loader.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-130",
           "content": "tools/README.md",
-          "status": "pending"
+          "status": "completed"
         }
       ]
     },
@@ -162,7 +162,7 @@
         {
           "id": "task-131",
           "content": "tools/sub-tools/index.ts - Main index",
-          "status": "pending"
+          "status": "completed"
         }
       ]
     },
@@ -173,67 +173,67 @@
         {
           "id": "task-132",
           "content": "tests/config.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-133",
           "content": "tests/config-manager.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-134",
           "content": "tests/cli-args.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-135",
           "content": "tests/helpers.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-136",
           "content": "tests/memory-tool.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-137",
           "content": "tests/subtool-loader.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-138",
           "content": "tests/system-info-tool.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-139",
           "content": "tests/piclaw-extension.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-140",
           "content": "tests/extensions-index.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-141",
           "content": "tests/read.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-142",
           "content": "tests/grep.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-143",
           "content": "tests/apt.test.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-144",
           "content": "tests/yum.test.ts",
-          "status": "pending"
+          "status": "completed"
         }
       ]
     },
@@ -244,27 +244,27 @@
         {
           "id": "task-145",
           "content": "docs/ - All docs",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-146",
           "content": "SYSTEM.md",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-147",
           "content": "AGENTS.md",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-148",
           "content": "README.md",
-          "status": "pending"
+          "status": "completed"
         }
       ]
     }
   ],
   "nextTaskId": 149,
   "nextPhaseId": 29,
-  "updatedAt": "2026-05-06T02:19:18.679Z"
+  "updatedAt": "2026-05-06T02:30:11.162Z"
 }
