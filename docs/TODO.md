@@ -61,7 +61,7 @@
 - [x] Create quick start guide for new users
 - [x] Document extension development workflow
 - [x] Create video tutorials for key features
-- [ ] Publish to npm registry
+- [x] Publish to npm registry
 - [ ] Create community Discord/Slack channel
 
 ## Archived Tasks
