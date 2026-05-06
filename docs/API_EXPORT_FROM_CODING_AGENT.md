@@ -4,13 +4,18 @@
 
 File: `llm-context/packages/coding-agent/src/index.ts`
 
-Tổng: **~308 exports** (types, classes, functions, constants)
+Tổng: **315 exports** (types, classes, functions, constants)
+> Ghi chú: 315 khai báo TypeScript (88 kiểu dữ liệu + 227 giá trị). Các exports truy cập được tại runtime: 127.
+> 
+> Tài liệu này tham chiếu các khai báo từ file `index.ts` (bản biên dịch `.d.ts`). Số lượng exports truy cập được thực tế khi import package là 127 (bao gồm classes, functions, constants).
 
 ---
 
 ## 📦 MODULE BREAKDOWN
 
 ### 1. Config (`./config.js`)
+
+**Giá trị** (2):
 - `getAgentDir(): string` – Get agent directory path (`~/.pi/agent`)
 - `VERSION: string` – Package version
 
@@ -20,7 +25,7 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 
 ### 2. AgentSession (`./core/agent-session.js`)
 
-**Types** (8):
+**Kiểu** (8):
 - `AgentSession` – Main session class instance
 - `AgentSessionConfig` – Configuration for agent session
 - `AgentSessionEvent` – Union of all session events
@@ -30,7 +35,7 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 - `PromptOptions` – Options for prompting
 - `SessionStats` – Statistics about session
 
-**Functions** (1):
+**Hàm/Lớp** (1):
 - `parseSkillBlock(text: string): ParsedSkillBlock | null` – Parse skill block from user message
 
 **Purpose**: Core agent session management, message handling, statistics.
@@ -39,19 +44,20 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 
 ### 3. Auth Storage (`./core/auth-storage.js`)
 
-**Types** (7):
+**Kiểu** (7):
 - `ApiKeyCredential` – API key credential shape
 - `AuthCredential` – Union of credential types
 - `AuthStatus` – Provider auth status
 - `AuthStorageBackend` – Backend interface
 - `OAuthCredential` – OAuth credential shape
-- `FileAuthStorageBackend` – File-based backend
-- `InMemoryAuthStorageBackend` – In-memory backend
+- `FileAuthStorageBackend` – File-based backend type
+- `InMemoryAuthStorageBackend` – In-memory backend type
 
-**Classes** (2):
+**Giá trị** (4):
 - `AuthStorage` – Main storage class for credentials
 - `FileAuthStorageBackend` – File backend implementation
 - `InMemoryAuthStorageBackend` – Memory backend implementation
+- `OAuthCredential` (type, also exported as value)
 
 **Purpose**: Manage API keys and OAuth credentials.
 
@@ -59,7 +65,7 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 
 ### 4. Compaction (`./core/compaction/index.js`)
 
-**Types** (16):
+**Kiểu** (7):
 - `BranchPreparation` – Data for branch summarization
 - `BranchSummaryResult` – Result of branch summary
 - `CollectEntriesResult` – Result from collecting entries
@@ -67,12 +73,12 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 - `CutPointResult` – Result from finding cut point
 - `FileOperations` – File operations for compaction
 - `GenerateBranchSummaryOptions` – Options for summary generation
-- `...` (and more)
 
-**Functions** (12):
+**Giá trị** (13):
 - `calculateContextTokens(messages): number` – Calculate token count
 - `collectEntriesForBranchSummary(options): BranchPreparation` – Collect entries to summarize
 - `compact(sessionManager, options?): Promise<CompactionResult>` – Compact session
+- `DEFAULT_COMPACTION_SETTINGS: CompactionSettings` – Default compaction config
 - `estimateTokens(text): number` – Rough token estimation
 - `findCutPoint(entries, options?): CutPointResult` – Find where to cut
 - `findTurnStartIndex(entries, fromIndex): number` – Find turn start
@@ -83,20 +89,17 @@ Tổng: **~308 exports** (types, classes, functions, constants)
 - `serializeConversation(messages): string` – Serialize to text
 - `shouldCompact(contextUsage, settings): boolean` – Determine if compaction needed
 
-**Constants** (1):
-- `DEFAULT_COMPACTION_SETTINGS: CompactionSettings` – Default compaction config
-
 **Purpose**: Context window management, summarization, compaction.
 
 ---
 
 ### 5. Event Bus (`./core/event-bus.js`)
 
-**Types** (2):
+**Kiểu** (2):
 - `EventBus` – Event bus interface
 - `EventBusController` – Controller for event bus
 
-**Functions** (1):
+**Hàm** (1):
 - `createEventBus(): EventBus` – Create new event bus
 
 **Purpose**: Decoupled event system for extensions.
