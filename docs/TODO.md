@@ -19,14 +19,15 @@
 - [x] Ensure graceful degradation on stream failure
 - [x] Test agent idle vs streaming states
 
-## Phase 3: TUI & Interactive Mode ⚠️
+## Phase 3: TUI & Interactive Mode ✅
 
-- [ ] Implement enhanced status display showing streaming state
-- [ ] Add visual indicators for streaming progress
-- [ ] Implement agent state panel (isStreaming, pendingToolCalls, streamingMessage)
-- [ ] Add interruption controls (abort, pause, resume)
-- [ ] Implement streaming history replay
-- [ ] Add real-time token counters
+- [x] Implement enhanced status display showing streaming state
+- [x] Add visual indicators for streaming progress  
+- [x] Implement agent state panel (isStreaming, pendingToolCalls, streamingMessage)
+- [x] Add interruption controls (abort, pause, resume)
+- [x] Implement streaming history replay
+- [x] Add real-time token counters
+- [x] Analyze all 15 intervention methods and document in CAN_THIEU_PHAN_TICH.md & INTERVENTION_ANALYSIS.md
 
 ## Phase 4: Advanced Features
 
@@ -63,6 +64,7 @@
 - [x] Config system (2026-05-04)
 - [x] Extension system (2026-05-05)
 - [x] Streaming state analysis (2026-05-06)
+- [x] Full intervention analysis & documentation (2026-05-06)
 
 ---
 
