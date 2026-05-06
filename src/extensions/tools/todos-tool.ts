@@ -143,21 +143,41 @@ function buildPhaseFromInput(input: { name: string; tasks?: any[] }, phaseId: st
  * Parse value that could be string or object into proper object.
  * Handles: '{...}', '{"name":"..."}', { name: {...} }
  */
-function parseValue(value: any): any {
+function parseInputValue(value: any): any {
   if (!value) return value;
-  if (typeof value === 'object') {
-    // Check if object has a field that's a JSON string
-    if (value.name && typeof value.name === 'string' && value.name.startsWith('{')) {
-      try { return JSON.parse(value.name); } catch {}
-    }
-    return value;
-  }
-  if (typeof value === 'string') {
-    if (value.startsWith('{')) {
-      try { return JSON.parse(value); } catch {}
+  if (typeof value === "object") return value;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        // Keep original if parse fails
+      }
     }
   }
   return value;
+}
+
+function countOperations(params: any): number {
+  let count = 0;
+  if (params.replace) count++;
+  if (params.add_phase) count++;
+  if (params.add_task) count++;
+  if (params.update) count++;
+  if (params.remove_task) count++;
+  if (params.list !== undefined) count++;
+  return count;
+}
+
+function getOperationName(params: any): string {
+  if (params.replace) return "replace";
+  if (params.add_phase) return "add_phase";
+  if (params.add_task) return "add_task";
+  if (params.update) return "update";
+  if (params.remove_task) return "remove_task";
+  if (params.list !== undefined) return "list";
+  return "unknown";
 }
 
 /**
@@ -199,31 +219,31 @@ function normalizeParams(params: any): any {
 
 
   // add_phase: could be string, object, or wrapped
-  if (p.add_phase) p.add_phase = parseValue(p.add_phase);
+  if (p.add_phase) p.add_phase = parseInputValue(p.add_phase);
 
   // add_task
   if (p.add_task) {
-    p.add_task = parseValue(p.add_task);
+    p.add_task = parseInputValue(p.add_task);
     if (p.add_task?.phase) p.add_task.phase = normalizeId(p.add_task.phase, 'phase');
   }
 
   // update
   if (p.update) {
-    p.update = parseValue(p.update);
+    p.update = parseInputValue(p.update);
     if (p.update?.id) p.update.id = normalizeId(p.update.id, 'task');
   }
 
   // remove_task
   if (p.remove_task) {
-    p.remove_task = parseValue(p.remove_task);
+    p.remove_task = parseInputValue(p.remove_task);
     if (p.remove_task?.id) p.remove_task.id = normalizeId(p.remove_task.id, 'task');
   }
 
   // replace
   if (p.replace) {
-    p.replace = parseValue(p.replace);
+    p.replace = parseInputValue(p.replace);
     if (p.replace?.phases && Array.isArray(p.replace.phases)) {
-      p.replace.phases = p.replace.phases.map((ph: any) => parseValue(ph));
+      p.replace.phases = p.replace.phases.map((ph: any) => parseInputValue(ph));
     }
   }
 
@@ -511,32 +531,21 @@ function renderTodosResult(result: { details?: TodoToolDetails }, options: { exp
   const lines: string[] = [theme.fg("toolTitle", `Todos: ${allTasks.length} tasks`)];
   for (const phase of phases) {
     if (phases.length > 1) lines.push(theme.fg("accent", `▼ ${phase.name}`));
-// 🚀 Chiến thuật 2-task: Chỉ hiển thị 2 task sát nhất để tối ưu token LLM
-        let visibleTasks = 0;
-        for (const task of phase.tasks) {
-          if (visibleTasks >= 2) {
-            lines.push(`  ${theme.fg("dim", "...")}`);
-            break;
-          }
-          const color = task.status === "completed" || task.status === "abandoned" ? "dim" : task.status === "in_progress" ? "accent" : "text";
-          const prefix = task.status === "in_progress" ? "→" : task.status === "completed" ? "✓" : task.status === "abandoned" ? "✗" : " ";
-          lines.push(`${theme.fg(color, `  ${prefix} ${task.id} ${task.content}`)}`);
-          if (task.status === "in_progress" && task.details) {
-            for (const line of task.details.split("\n")) {
-              lines.push(theme.fg("dim", `    ${line}`));
-            }
-          }
-          visibleTasks++;
+    const displayTasks = options.expanded ? phase.tasks : phase.tasks.slice(0, 5);
+    for (const task of displayTasks) {
+      const color = task.status === "completed" || task.status === "abandoned" ? "dim" : task.status === "in_progress" ? "accent" : "text";
+      const prefix = task.status === "in_progress" ? "→" : task.status === "completed" ? "✓" : task.status === "abandoned" ? "✗" : " ";
+      lines.push(`${theme.fg(color, `  ${prefix} ${task.id} ${task.content}`)}`);
+      if (task.status === "in_progress" && task.details) {
+        for (const line of task.details.split("\n")) {
+          lines.push(theme.fg("dim", `    ${line}`));
         }
-  }
+      }
+    }
 
-  if (options.expanded) {
-    const total = allTasks.length;
-    const completed = allTasks.filter((t: any) => t.status === "completed").length;
-    const inProgress = allTasks.filter((t: any) => t.status === "in_progress").length;
-    const pending = allTasks.filter((t: any) => t.status === "pending").length;
-    lines.push("");
-    lines.push(theme.fg("muted", `Summary: ${completed} completed, ${inProgress} in progress, ${pending} pending`));
+    if (!options.expanded && phase.tasks.length > 5) {
+      lines.push(theme.fg("dim", `  ... ${phase.tasks.length - 5} more`));
+    }
   }
 
   return new Text(lines.join("\n"), 0, 0);
@@ -563,8 +572,8 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
   return {
     name: "todos",
     label: "Todo",
-    description: "Simple todo list: add_phase, add_task, update, remove_task, replace, list. Status: pending, in_progress, completed, abandoned. Auto-normalizes exactly ONE in_progress task.",
-    promptSnippet: "todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] }, add_task:{ phase:'phase-1', content:'Task 2' }, update:{ id:'task-1', status:'completed' }, replace:{ phases:[{ name:'New Phase', tasks:[{content:'Task'}] }] }, remove_task:{ id:'task-2' }, list:{} })",
+    description: "Simple todo list: add_phase, add_task, update, remove_task, replace, list. Status: pending, in_progress, completed, abandoned. Auto-normalizes exactly ONE in_progress task. Use ONE operation per call.",
+    promptSnippet: "todos({ add_phase:{ name:'Phase 1', tasks:[{content:'Task 1'}] } })",
     promptGuidelines: [
       "IMPORTANT: All parameters must be OBJECTS, not strings. Do not JSON.stringify any values.",
       "Nested format: { op: { params } } e.g., { add_phase: { name: 'Phase 1', tasks: [{ content: 'Task 1' }] } }",
@@ -602,21 +611,14 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
       // Normalize - parse JSON strings
 p = normalizeParams(p);
 
-      // Check for multiple operations
-      const definedOps: string[] = [];
-      if (p.replace) definedOps.push("replace");
-      if (p.add_phase) definedOps.push("add_phase");
-      if (p.add_task) definedOps.push("add_task");
-      if (p.update) definedOps.push("update");
-      if (p.remove_task) definedOps.push("remove_task");
-      if (p.list) definedOps.push("list");
-
       const errors: string[] = [];
-      if (definedOps.length > 1) {
-        errors.push(`Multiple operations: ${definedOps.join(", ")}. Only one per call.`);
-      }
 
-      const op = p.replace ? "replace" : p.add_phase ? "add_phase" : p.add_task ? "add_task" : p.update ? "update" : p.remove_task ? "remove_task" : p.list ? "list" : null;
+      const opCount = countOperations(p);
+      if (opCount === 0) errors.push("No operation specified. Use: add_phase, add_task, update, remove_task, replace, or list");
+      if (opCount > 1) errors.push("Multiple operations detected. Use only ONE operation per call.");
+
+      const opName = getOperationName(p);
+      const op = opName === "unknown" ? null : opName;
       if (!op) { errors.push("No operation. Use: add_phase, add_task, update, remove_task, list"); }
 
       // Apply pure operation
