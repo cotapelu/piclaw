@@ -125,17 +125,17 @@
         {
           "id": "task-126",
           "content": "extensions/providers/kilo-provider.ts",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-127",
           "content": "extensions/providers/models/index.ts",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-128",
           "content": "extensions/providers/models/kilo-models.ts",
-          "status": "pending"
+          "status": "in_progress"
         }
       ]
     },
@@ -266,5 +266,5 @@
   ],
   "nextTaskId": 149,
   "nextPhaseId": 29,
-  "updatedAt": "2026-05-05T09:41:18.406Z"
+  "updatedAt": "2026-05-06T02:19:18.679Z"
 }
