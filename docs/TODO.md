@@ -60,7 +60,7 @@
 
 - [x] Create quick start guide for new users
 - [x] Document extension development workflow
-- [ ] Create video tutorials for key features
+- [x] Create video tutorials for key features
 - [ ] Publish to npm registry
 - [ ] Create community Discord/Slack channel
 
