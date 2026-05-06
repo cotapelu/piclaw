@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin node
 /**
  * Piclaw Custom Extension
  * 
@@ -6,17 +6,19 @@
  * This file can be extended with additional custom functionality.
  */
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import { registerTodosTool } from "./tools/todos-tool.js";
+import { registerMemoryTool } from "./tools/memory-tool.js";
+import { registerEchoTool } from "./tools/echo-tool.js";
+import { registerSystemInfoTool } from "./tools/system-info-tool.js";
+import { registerTeamTool } from "./tools/team-tool.js";
 
 export default function (api: ExtensionAPI) {
-  // ============================================================================
-  // CUSTOM EXTENSIONS
-  // ============================================================================
-  // Future: Add custom providers, tools, or commands here
+  // Register custom tools
+  registerTodosTool(api);
+  registerMemoryTool(api);
+  registerEchoTool(api);
+  registerSystemInfoTool(api);
   
-  // Example of adding a custom command (commented out):
-  // api.registerCommand({
-  //   name: "my-command",
-  //   description: "My custom command",
-  //   execute: async (args) => { ... }
-  // });
+  // Register team tool - allows LLM to spawn multiple agents
+  registerTeamTool(api);
 }
