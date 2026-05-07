@@ -43,52 +43,18 @@ export function registerTeamTool(api: ExtensionAPI): void {
     label: "Team",
     description: "Create and manage collaborative agent teams with messaging, workspace sharing, and dynamic task coordination. Teams run in background; parent receives events and can interact.",
     promptSnippet: 'spawn_team({ action: "create", tasks: ["task1", "task2"], size: 3 })',
-    promptGuidelines: [
-      "spawn_team manages collaborative AI agent teams with real-time messaging and conflict resolution.",
-      "",
-      "ACTIONS:",
-      "• create: Start a new team with N child agents. Returns teamId immediately. Non-blocking.",
-      "  spawn_team({ action: \"create\", tasks: [\"Analyze\", \"Build\", \"Test\"], size: 3 })",
-      "  → Returns { teamId, agents, taskCount, message }",
-      "",
-      "• status: Check team progress and get results if completed.",
-      "  spawn_team({ action: \"status\", teamId: \"<id>\" })",
-      "  → Returns { status, summary, results? }",
-      "",
-      "• send: Send a message to the team's chat or direct to an agent.",
-      "  spawn_team({ action: \"send\", teamId: \"<id>\", channel: \"team.chat\", content: \"Focus on X!\" })",
-      "",
-      "• dispose: Manually dispose a team (clean resources).",
-      "  spawn_team({ action: \"dispose\", teamId: \"<id>\" })",
-      "",
-      "• list: List all active teams.",
-      "  spawn_team({ action: \"list\" })",
-      "",
-      "EVENTS (automatically emitted to your session):",
-      "- team_created: teamId, agentCount, taskCount, tasks",
-      "- team_progress: teamId, completed, total, activeAgents (every ~2s)",
-      "- team_completed: teamId, results[], status",
-      "- team_disposed: teamId",
-      "",
-      "EXAMPLE WORKFLOW:",
-      "1. Create team:",
-      "   const result = spawn_team({ action: \"create\", tasks: [\"Analyze DB\", \"Design API\", \"Write tests\"], size: 3 });",
-      "   // result.teamId → save it",
-      "",
-      "2. Continue other work (non-blocking). Optionally, listen for events:",
-      "   session.on('team_completed', (evt) => { /* handle results */ });",
-      "",
-      "3. Check status manually if needed:",
-      "   spawn_team({ action: \"status\", teamId: result.teamId });",
-      "",
-      "4. Send guidance to team:",
-      "   spawn_team({ action: \"send\", teamId: result.teamId, channel: \"team.chat\", content: \"Use PostgreSQL\" });",
-      "",
-      "5. When done (or auto via event), dispose:",
-      "   spawn_team({ action: \"dispose\", teamId: result.teamId });",
-      "",
-      "Note: Child agents use team_ops tool internally to collaborate. They poll messages, lock artifacts, steal tasks, etc.",
-    ],
+    promptGuidelines: `spawn_team creates and manages collaborative agent teams.
+
+ACTIONS:
+• create: spawn_team({ action: "create", tasks: ["Analyze", "Build"], size: 3 })
+• status: spawn_team({ action: "status", teamId: "<id>" })
+• send: spawn_team({ action: "send", teamId: "<id>", channel: "team.chat", content: "message" })
+• dispose: spawn_team({ action: "dispose", teamId: "<id>" })
+• list: spawn_team({ action: "list" })
+
+create: tasks[] required, size 1-4 (default 2). Non-blocking, returns teamId.
+send: channel can be "team.chat" or "direct.<agentId>".
+Events auto-emitted: team_created, team_progress, team_completed, team_disposed.`
     parameters: {
       type: "object",
       properties: {
