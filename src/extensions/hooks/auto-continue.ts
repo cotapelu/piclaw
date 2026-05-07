@@ -8,12 +8,28 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 
-const IDLE_TIMEOUT_MS = 60_000; // 60 giây (1 phút)
+const IDLE_TIMEOUT_MS = 5_000; // 5 giây (test)
 const IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
 
 export default function (pi: ExtensionAPI) {
   let enabled = false;
   let idleTimer: ReturnType<typeof setTimeout> | null = null;
+
+  // Start idle timer
+  const startIdleTimer = () => {
+    if (idleTimer) return;
+    idleTimer = setTimeout(() => {
+      console.log("[AutoContinue] Timer fired, enabled:", enabled);
+      if (enabled) {
+        (pi.sendMessage as any)(
+          { content: IDLE_MESSAGE },
+          { triggerTurn: true, deliverAs: "followUp" }
+        );
+        console.log("[AutoContinue] Sent idle reminder message.");
+      }
+      idleTimer = null;
+    }, IDLE_TIMEOUT_MS);
+  };
 
   // Register /gnp command
   pi.registerCommand("gnp", {
@@ -25,6 +41,11 @@ export default function (pi: ExtensionAPI) {
         // Enable: show notification via ctx
         if (ctx.hasUI) {
           ctx.ui.notify("Auto-continue đã BẬT - sẽ gửi reminder sau 1 phút idle", "info");
+        }
+        // Nếu đang idle thì start timer ngay
+        if (ctx.isIdle()) {
+          startIdleTimer();
+          console.log("[AutoContinue] Started timer immediately (was idle)");
         }
         console.log("[AutoContinue] Enabled");
       } else {
@@ -44,18 +65,7 @@ export default function (pi: ExtensionAPI) {
   // Listen to agent_end using pi.on()
   pi.on("agent_end", () => {
     console.log("[AutoContinue] agent_end fired, enabled:", enabled);
-    if (!enabled || idleTimer) return;
-
-    idleTimer = setTimeout(() => {
-      console.log("[AutoContinue] Timer fired, enabled:", enabled);
-      if (enabled) {
-        (pi.sendMessage as any)(
-          { content: IDLE_MESSAGE },
-          { triggerTurn: true, deliverAs: "followUp" }
-        );
-        console.log("[AutoContinue] Sent idle reminder message.");
-      }
-      idleTimer = null;
-    }, IDLE_TIMEOUT_MS);
+    if (!enabled) return;
+    startIdleTimer();
   });
 }
