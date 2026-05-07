@@ -43,18 +43,20 @@ export function registerTeamTool(api: ExtensionAPI): void {
     label: "Team",
     description: "Create and manage collaborative agent teams with messaging, workspace sharing, and dynamic task coordination. Teams run in background; parent receives events and can interact.",
     promptSnippet: 'spawn_team({ action: "create", tasks: ["task1", "task2"], size: 3 })',
-    promptGuidelines: `spawn_team creates and manages collaborative agent teams.
-
-ACTIONS:
-• create: spawn_team({ action: "create", tasks: ["Analyze", "Build"], size: 3 })
-• status: spawn_team({ action: "status", teamId: "<id>" })
-• send: spawn_team({ action: "send", teamId: "<id>", channel: "team.chat", content: "message" })
-• dispose: spawn_team({ action: "dispose", teamId: "<id>" })
-• list: spawn_team({ action: "list" })
-
-create: tasks[] required, size 1-4 (default 2). Non-blocking, returns teamId.
-send: channel can be "team.chat" or "direct.<agentId>".
-Events auto-emitted: team_created, team_progress, team_completed, team_disposed.`
+    promptGuidelines: [
+      'spawn_team creates and manages collaborative agent teams.',
+      '',
+      'ACTIONS:',
+      '• create: spawn_team({ action: "create", tasks: ["Analyze", "Build"], size: 3 })',
+      '• status: spawn_team({ action: "status", teamId: "<id>" })',
+      '• send: spawn_team({ action: "send", teamId: "<id>", channel: "team.chat", content: "message" })',
+      '• dispose: spawn_team({ action: "dispose", teamId: "<id>" })',
+      '• list: spawn_team({ action: "list" })',
+      '',
+      'create: tasks[] required, size 1-4 (default 2). Non-blocking, returns teamId.',
+      'send: channel can be "team.chat" or "direct.<agentId>".',
+      'Events auto-emitted: team_created, team_progress, team_completed, team_disposed.',
+    ],
     parameters: {
       type: "object",
       properties: {
