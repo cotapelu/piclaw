@@ -2,17 +2,16 @@
  * Team Management Tool
  * Allows LLM to spawn multiple agents to work in parallel on complex tasks
  */
-import type { ExtensionAPI, ToolDefinition, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ToolDefinition } from "@mariozechner/pi-coding-agent";
 
 export interface TeamResult {
-  results?: string[];
+  results: string[];
   size: number;
-  mode: string;
   error?: string;
 }
 
 export function registerTeamTool(api: ExtensionAPI): void {
-  const tool: any = {
+  const tool: ToolDefinition = {
     name: "spawn_team",
     label: "Team",
     description: "Spawn multiple AI agents to work in parallel. Use when you have multiple independent tasks to complete faster.",
@@ -27,10 +26,24 @@ export function registerTeamTool(api: ExtensionAPI): void {
     parameters: {
       type: "object",
       properties: {
-        size: { type: "number", description: "Number of child agents (1-4, default 2)" },
-        tasks: { type: "array", items: { type: "string" }, description: "Tasks for agents" },
-        roles: { type: "array", items: { type: "string" }, description: "Optional roles for children (parent always first)" },
-        mode: { type: "string", enum: ["parallel", "sequential"], description: "Execution mode" },
+        size: {
+          type: "number",
+          minimum: 1,
+          maximum: 4,
+          default: 2,
+          description: "Number of child agents (1-4)"
+        },
+        tasks: {
+          type: "array",
+          minItems: 1,
+          items: { type: "string" },
+          description: "Tasks for agents (independent tasks)"
+        },
+        roles: {
+          type: "array",
+          items: { type: "string" },
+          description: "Optional roles for children"
+        },
       },
       required: ["tasks"],
     },
@@ -38,50 +51,55 @@ export function registerTeamTool(api: ExtensionAPI): void {
       const { bootPiclawTeam, executeTeamTasks } = await import("../../team/team-manager.js");
 
       const size = Math.min(Math.max(1, params.size ?? 2), 4);
-      const mode = params.mode ?? "parallel";
 
       // Get parent runtime from context
-      const parentRuntime = ctx?.runtime || (ctx?.session?.runtime as any);
+      const parentRuntime = (ctx as any)?.runtime || ctx?.session?.runtime;
       if (!parentRuntime) {
         return {
           content: [{ type: "text", text: "Error: No parent runtime available" }],
-          details: { error: "No parent runtime", size, mode } as TeamResult,
+          details: { error: "No parent runtime", size } as TeamResult,
           isError: true,
         };
       }
 
+      let team: any = null;
       try {
         // Team = parent + children
-        const team = await bootPiclawTeam(parentRuntime, {
+        team = await bootPiclawTeam(parentRuntime, {
           teamSize: size,
           teamRoles: params.roles,
         });
 
-        const results = await executeTeamTasks(team, params.tasks, mode);
-        await team.dispose(); // Only disposes children
+        // Execute tasks in parallel across child agents
+        const results = await executeTeamTasks(team, params.tasks);
 
         return {
-          content: [{ type: "text", text: `Team complete.\n\n${results.map((r, i) => `Agent ${i + 1}: ${r.substring(0, 200)}...`).join("\n\n")}` }],
-          details: { results, size: team.size, mode } as TeamResult,
+          content: [{
+            type: "text",
+            text: `✅ Team complete (${team.size} agents)\n\nResults:\n${results.map((r: string, i: number) => `Agent ${i + 1}: ${r}`).join("\n\n")}`
+          }],
+          details: { results, size: team.size } as TeamResult,
           isError: false,
         };
       } catch (error: any) {
         return {
-          content: [{ type: "text", text: `Team error: ${error.message}` }],
-          details: { error: error.message, size, mode, results: [] } as TeamResult,
+          content: [{ type: "text", text: `❌ Team error: ${error.message}` }],
+          details: { error: error.message, size, results: [] } as TeamResult,
           isError: true,
         };
+      } finally {
+        if (team) {
+          try {
+            await team.dispose();
+          } catch (e) {
+            console.error("Failed to dispose team:", e);
+          }
+        }
       }
     },
-    renderCall: (args: any) => {
-      const { tasks, size } = args as { tasks: string[]; size?: number };
-      return `spawn_team(${size ?? 2} children + parent, ${tasks?.length ?? 0} tasks)`;
-    },
-    renderResult: (result: any, options: any) => {
-      const details: TeamResult = result?.details;
-      if (!details) return "";
-      return `Team: ${details.size} agents • ${details.mode} • ${details.results?.length ?? 0} results`;
-    },
+    // Optional rendering functions
+    // renderCall: (args) => string,
+    // renderResult: (result) => string,
   };
 
   api.registerTool(tool);

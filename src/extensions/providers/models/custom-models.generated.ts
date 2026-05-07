@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED
 // Source: https://models.dev/api.json
-// Generated: 2026-05-06T15:07:38.995Z
+// Generated: 2026-05-07T01:03:47.362Z
 // DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update
 
 import type { Model } from "@mariozechner/pi-ai";
@@ -4196,7 +4196,7 @@ export const CUSTOM_MODELS = {
       provider: "kilo",
       baseUrl: "https://api.kilo.ai/api/gateway",
       reasoning: true,
-      input: ["text"],
+      input: ["text", "image"],
       cost: {
         input: 0.4,
         output: 2,
@@ -4221,7 +4221,7 @@ export const CUSTOM_MODELS = {
         cacheWrite: 0,
       },
       contextWindow: 1048576,
-      maxTokens: 128000,
+      maxTokens: 131072,
     } satisfies Model<"openai-completions">,
     "z-ai/glm-4-32b": {
       id: "z-ai/glm-4-32b",

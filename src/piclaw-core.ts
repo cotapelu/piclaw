@@ -1,4 +1,4 @@
-#!/usr/bin node
+#!/usr/bin/env node
 
 /**
  * Piclaw Core Bootstrapping
@@ -137,4 +137,4 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
 }
 
 // Team functions are in src/team/team-manager.ts
-export { bootPiclawTeam, executeTeamTasks, type AgentTeamRuntime, type TeamExecutionMode } from "./team/team-manager.js";
+export { bootPiclawTeam, executeTeamTasks, type AgentTeam } from "./team/team-manager.js";
