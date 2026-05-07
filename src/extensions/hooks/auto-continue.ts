@@ -41,8 +41,8 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  // Listen to agent_end - khi agent trả lời xong
-  pi.events.on("agent_end", () => {
+  // Listen to agent_end using pi.on()
+  pi.on("agent_end", () => {
     console.log("[AutoContinue] agent_end fired, enabled:", enabled);
     if (!enabled || idleTimer) return;
 
