@@ -55,11 +55,11 @@ export function registerTeamTool(api: ExtensionAPI): void {
 
       const size = Math.min(Math.max(1, params.size ?? 2), 4);
 
-      // Get parent runtime from context (exposed via extension runtime)
-      const parentRuntime = (ctx as any)?.runtime?.sessionRuntime || (ctx as any)?.session?.runtime;
+      // Get parent runtime from context (exposed via sessionManager)
+      const parentRuntime = (ctx as any)?.sessionManager?.parentRuntime;
       if (!parentRuntime) {
         return {
-          content: [{ type: "text", text: "Error: No parent runtime available" }],
+          content: [{ type: "text", text: "Error: No parent runtime available. Make sure piclaw is running with team support." }],
           details: { error: "No parent runtime", size } as TeamResult,
           isError: true,
         };
