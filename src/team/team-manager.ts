@@ -328,6 +328,7 @@ function createTeamOpsTool(team: AgentTeam): ToolDefinition {
  * AgentTeam: Full collaborative team with all features
  */
 export class AgentTeam implements AgentTeamRuntime {
+  id: string = '';  // Team ID
   runtimes: AgentSessionRuntime[] = [];
   roles: string[] = [];
   size = 0;
@@ -362,6 +363,11 @@ export class AgentTeam implements AgentTeamRuntime {
     this.collaborativeWorkspace = new CollaborativeWorkspace(this.conflictManager);
     this.context = new TeamContextManager("team-" + Date.now(), 0, "");
     this.dynamicManager = new DynamicTaskManager(this.context, 0);
+  }
+
+  /** Set team ID */
+  setTeamId(id: string): void {
+    this.id = id;
   }
   
   getContext(): TeamContextManager {
@@ -715,6 +721,10 @@ export async function bootPiclawTeam(
     team.registerRuntime(runtime, normalizedRoles[i]);
   }
 
+  // Set team ID and parent reference for events
+  team.id = `team-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  (team as any)._parentRuntime = parentRuntime;
+
   return team;
 }
 
@@ -731,12 +741,23 @@ export async function bootPiclawTeam(
 export async function executeTeamTasks(
   team: AgentTeam,
   tasks: string[]
-): Promise<string[]> {
+): Promise<void> {
   // Initialize team with enhanced context
   team.initialize(tasks);
   
   const context = team.getContext();
   context.setTeamFocus(`Working on ${tasks.length} tasks`, "collaborative_execution");
+  
+  // Emit team_created event
+  const parentRuntime = (team as any)._parentRuntime as any;
+  if (parentRuntime?.emit) {
+    parentRuntime.emit("team_created", {
+      teamId: team.id,
+      agentCount: team.roles.length,
+      taskCount: tasks.length,
+      tasks: tasks
+    });
+  }
   
   // Enhanced bootstrap prompt that teaches collaboration
   const bootstrapTasksList = tasks.map((t, i) => `[${i}] ${t}`).join("\n");
@@ -812,12 +833,35 @@ Let's collaborate!`;
     })
   );
 
-  // Wait for all tasks to complete
-  await team.waitForCompletion();
-
-  // Broadcast completion
-  team.getMessageBus().broadcast("team", "All tasks completed!", "notification");
-
-  // Return results in task order
-  return team.getResults();
+  // Start background monitor to emit progress events
+  const monitorInterval = setInterval(() => {
+    const summary = team.getContext().getTeamSummary();
+    const parentRuntime = (team as any)._parentRuntime as any;
+    
+    // Emit progress event
+    if (parentRuntime?.emit) {
+      parentRuntime.emit("team_progress", {
+        teamId: team.id,
+        completed: summary.completedTasks,
+        total: summary.totalTasks,
+        activeAgents: summary.activeAgents,
+      });
+    }
+    
+    if (summary.completedTasks === summary.totalTasks) {
+      clearInterval(monitorInterval);
+      // Emit completion event with results
+      if (parentRuntime?.emit) {
+        const results = team.getResults();
+        parentRuntime.emit("team_completed", {
+          teamId: team.id,
+          results,
+          status: team.getTeamStatus(),
+        });
+      }
+    }
+  }, 2000);
+  
+  // Return void — team runs asynchronously
+  return;
 }
