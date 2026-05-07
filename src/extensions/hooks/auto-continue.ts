@@ -84,11 +84,9 @@ export default function (pi: ExtensionAPI) {
     handler: async () => {
       enabled = !enabled;
       if (enabled) {
-        console.log("[AutoContinue] Enabled - sẽ gửi reminder sau 15 phút idle");
-        pi.appendEntry("system", { content: "🤖 Auto-continue đã BẬT" });
+        console.log("[AutoContinue] Enabled - sẽ gửi reminder sau 1 phút idle");
       } else {
         console.log("[AutoContinue] Disabled");
-        pi.appendEntry("system", { content: "🤖 Auto-continue đã TẮT" });
       }
     },
   });
