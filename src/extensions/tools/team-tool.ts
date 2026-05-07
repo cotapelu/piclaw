@@ -82,11 +82,26 @@ export function registerTeamTool(api: ExtensionAPI): void {
       try {
         // ==================== CREATE ====================
         if (action === "create") {
-          // Validate tasks parameter
-          if (!params.tasks || !Array.isArray(params.tasks) || params.tasks.length === 0) {
+          // Validate and parse tasks parameter
+          let tasks = params.tasks;
+          
+          // Handle tasks passed as JSON string
+          if (typeof tasks === 'string') {
+            try {
+              tasks = JSON.parse(tasks);
+            } catch (e) {
+              return {
+                content: [{ type: "text", text: `❌ Error: tasks must be a non-empty array of task strings.\nExample: spawn_team({ action: "create", tasks: ["Analyze requirements", "Build feature"], size: 2 })` }],
+                details: { error: "Invalid tasks parameter (JSON parse failed)", action: "create", providedTasks: params.tasks } as any,
+                isError: true,
+              };
+            }
+          }
+          
+          if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
             return {
               content: [{ type: "text", text: "❌ Error: tasks must be a non-empty array of task strings.\nExample: spawn_team({ action: \"create\", tasks: [\"Analyze requirements\", \"Build feature\"], size: 2 })" }],
-              details: { error: "Invalid tasks parameter", action: "create", providedTasks: params.tasks } as any,
+              details: { error: "Invalid tasks parameter", action: "create", providedTasks: params.tasks, parsedTasks: tasks } as any,
               isError: true,
             };
           }
@@ -101,7 +116,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
           (team as any)._parentRuntime = parentRuntime;
 
           // Start team execution in background (non-blocking)
-          const execPromise = executeTeamTasks(team, params.tasks)
+          const execPromise = executeTeamTasks(team, tasks)
             .finally(() => {
               // Auto-remove from registry after completion (optional)
               // We keep it so status can be checked; manual dispose recommended
@@ -113,18 +128,18 @@ export function registerTeamTool(api: ExtensionAPI): void {
           });
 
           // Emit team_created event
-          parentRuntime.emit("team_created", {
+          parentRuntime?.session?.extensionRunner?.emit("team_created", {
             teamId,
             agentCount: team.roles.length,
-            taskCount: params.tasks.length,
-            tasks: params.tasks,
+            taskCount: tasks.length,
+            tasks: tasks,
           });
 
           return {
             content: [{ 
               type: "text", 
               text: `✅ Team created (${team.roles.length} agents: ${team.roles.join(", ")})\n` +
-                    `📋 Tasks (${params.tasks.length}): ${params.tasks.map((t: string, i: number) => `[${i}] ${t}`).join(", ")}\n` +
+                    `📋 Tasks (${tasks.length}): ${tasks.map((t: string, i: number) => `[${i}] ${t}`).join(", ")}\n` +
                     `🆔 Team ID: ${teamId}\n` +
                     `▶️ Team running in background. Listen for events: team_created, team_progress, team_completed.\n` +
                     `   Use spawn_team({action: \"status\", teamId: \"${teamId}\"}) to check progress.` 
@@ -133,7 +148,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
               teamId, 
               status: "running", 
               agents: team.roles.length,
-              taskCount: params.tasks.length,
+              taskCount: tasks.length,
               message: "Team started. Non-blocking. Events will be emitted.",
               action: "create"
             } as any,
