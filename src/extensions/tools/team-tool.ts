@@ -15,6 +15,7 @@
  * - team_disposed: { teamId }
  */
 
+import { Type } from "typebox";
 import type { ExtensionAPI, ToolDefinition } from "@mariozechner/pi-coding-agent";
 import type { AgentTeam } from "../../team/team-manager.js";
 
@@ -41,7 +42,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
   const tool: ToolDefinition = {
     name: "spawn_team",
     label: "Team",
-    description: "Create and manage collaborative agent teams with messaging, workspace sharing, and dynamic task coordination. Teams run in background; parent receives events and can interact.",
+    description: `Create and manage collaborative agent teams with messaging, workspace sharing, and dynamic task coordination. Teams run in background; parent receives events and can interact.\n\nParameters:\n- action (required): "create" | "status" | "send" | "dispose" | "list"\n- tasks (for create): Array of task strings - ["Analyze", "Build"]\n- size (for create): Number 1-4, default 2 - number of child agents\n- roles (for create): Optional array like ["analyst", "developer"]\n- teamId (for status/send/dispose): Team ID returned from create\n- channel (for send): "team.chat" | "team.help" | "direct.<agentId>"\n- content (for send): Message text to send\n- to (for send): Specific agent ID for direct message\n\nEvents emitted: team_created, team_progress, team_completed, team_disposed`,
     promptSnippet: 'spawn_team({ action: "create", tasks: ["task1", "task2"], size: 3 })',
     promptGuidelines: [
       'spawn_team creates and manages collaborative agent teams.',
@@ -57,73 +58,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
       'send: channel can be "team.chat" or "direct.<agentId>".',
       'Events auto-emitted: team_created, team_progress, team_completed, team_disposed.',
     ],
-    parameters: {
-      type: "object",
-      properties: {
-        action: {
-          type: "string",
-          enum: ["create", "status", "send", "dispose", "list"],
-          description: "Action to perform",
-          default: "create"
-        },
-        // create action:
-        tasks: {
-          type: "array",
-          items: { type: "string" },
-          description: "Tasks for agents (required for create)"
-        },
-        size: {
-          type: "number",
-          minimum: 1,
-          maximum: 4,
-          default: 2,
-          description: "Number of child agents (1-4, default 2)"
-        },
-        roles: {
-          type: "array",
-          items: { type: "string" },
-          description: "Optional roles for children (e.g., [\"analyst\", \"developer\"])"
-        },
-        // other actions:
-        teamId: {
-          type: "string",
-          description: "Team ID (returned from create)"
-        },
-        // send action:
-        channel: {
-          type: "string",
-          default: "team.chat",
-          description: "Channel to send message to (team.chat, team.help, direct.<agentId>)"
-        },
-        content: {
-          type: "string",
-          description: "Message content (for send action)"
-        },
-        to: {
-          type: "string",
-          description: "Recipient agent ID (for direct messages, use with direct.<agentId> channel)"
-        },
-      },
-      required: ["action"],
-      allOf: [
-        {
-          if: { properties: { action: { const: "create" } } },
-          then: { required: ["tasks"] }
-        },
-        {
-          if: { properties: { action: { const: "send" } } },
-          then: { required: ["teamId", "content"] }
-        },
-        {
-          if: { properties: { action: { const: "status" } } },
-          then: { required: ["teamId"] }
-        },
-        {
-          if: { properties: { action: { const: "dispose" } } },
-          then: { required: ["teamId"] }
-        }
-      ]
-    },
+    parameters: Type.Any(),
     async execute(toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: any, ctx?: any) {
       const { bootPiclawTeam, executeTeamTasks } = await import("../../team/team-manager.js");
 
