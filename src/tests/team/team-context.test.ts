@@ -225,7 +225,7 @@ describe("TeamContextManager", () => {
       
       // Try to modify snapshot (should not affect original)
       const agent = snapshot.agentStates.get("agent-1")!;
-      // @ts-expect-error - testing immutability
+
       agent.status = "idle";
       
       // Original should be unchanged

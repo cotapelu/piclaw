@@ -345,9 +345,15 @@ export class AgentTeam implements AgentTeamRuntime {
   tasks: string[] = []
   private taskStatuses: Map<number, any> = new Map();
   private agentStatuses: Map<string, any> = new Map();
+  monitorInterval: any = null;
   
   constructor() {
     this.dispose = async () => {
+      // Clear monitor interval if running
+      if (this.monitorInterval) {
+        clearInterval(this.monitorInterval);
+        this.monitorInterval = null;
+      }
       await Promise.allSettled(
         this.runtimes.slice(1).map(rt =>
           rt.dispose().catch(err =>
@@ -604,6 +610,7 @@ export class AgentTeam implements AgentTeamRuntime {
         agentStatus.progress = 100;
       }
       
+      // Also update shared context so waitForCompletion works
       this.context.completeTask(agentId, taskIndex, result);
     }
   }
@@ -748,16 +755,7 @@ export async function executeTeamTasks(
   const context = team.getContext();
   context.setTeamFocus(`Working on ${tasks.length} tasks`, "collaborative_execution");
   
-  // Emit team_created event
-  const parentRuntime = (team as any)._parentRuntime as any;
-  if (parentRuntime?.emit) {
-    parentRuntime.emit("team_created", {
-      teamId: team.id,
-      agentCount: team.roles.length,
-      taskCount: tasks.length,
-      tasks: tasks
-    });
-  }
+  // Note: team_created event already emitted by tool when team was created
   
   // Enhanced bootstrap prompt that teaches collaboration
   const bootstrapTasksList = tasks.map((t, i) => `[${i}] ${t}`).join("\n");
@@ -834,13 +832,13 @@ Let's collaborate!`;
   );
 
   // Start background monitor to emit progress events
-  const monitorInterval = setInterval(() => {
+  team.monitorInterval = setInterval(() => {
     const summary = team.getContext().getTeamSummary();
     const parentRuntime = (team as any)._parentRuntime as any;
     
     // Emit progress event
-    if (parentRuntime?.emit) {
-      parentRuntime.emit("team_progress", {
+    if (parentRuntime?.session?.extensionRunner?.emit) {
+      parentRuntime.session.extensionRunner.emit("team_progress", {
         teamId: team.id,
         completed: summary.completedTasks,
         total: summary.totalTasks,
@@ -849,11 +847,12 @@ Let's collaborate!`;
     }
     
     if (summary.completedTasks === summary.totalTasks) {
-      clearInterval(monitorInterval);
+      clearInterval(team.monitorInterval);
+      team.monitorInterval = null;
       // Emit completion event with results
-      if (parentRuntime?.emit) {
+      if (parentRuntime?.session?.extensionRunner?.emit) {
         const results = team.getResults();
-        parentRuntime.emit("team_completed", {
+        parentRuntime.session.extensionRunner.emit("team_completed", {
           teamId: team.id,
           results,
           status: team.getTeamStatus(),

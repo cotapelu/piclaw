@@ -88,7 +88,7 @@ export class TeamMessageBus {
    * Subscribe to a channel (async iterator pattern)
    * Returns an iterator that yields new messages
    */
-  subscribe(agentId: string, channel: string, options: { since?: number; sinceMessageId?: string } = {}): TeamMessage[] {
+  subscribe(agentId: string, channel: string, options: { since?: number; sinceMessageId?: string; callback?: (message: TeamMessage) => void } = {}): TeamMessage[] {
     // Get messages since timestamp/messageId
     let messages = this.messages;
     
@@ -111,6 +111,7 @@ export class TeamMessageBus {
       agentId,
       channel,
       lastSeenMessageId: messages.length > 0 ? messages[messages.length - 1].id : "",
+      callback: options.callback,
     };
     this.subscriptions.push(subscription);
     
@@ -124,11 +125,12 @@ export class TeamMessageBus {
     let messages = this.messages.filter(m => m.channel === channel);
     
     if (options.since !== undefined) {
-      messages = messages.filter(m => m.timestamp > (options.since!));
+      // Use > for "strictly after" semantics - since means "get messages AFTER this time"
+      messages = messages.filter(m => m.timestamp > options.since!);
     }
     
     if (options.limit) {
-      messages = messages.slice(-options.limit);
+      messages = messages.slice(0, options.limit);
     }
     
     return messages;
@@ -141,29 +143,47 @@ export class TeamMessageBus {
     const subscription = this.subscriptions.find(s => s.agentId === agentId && s.channel === channel);
     const lastSeen = lastSeenMessageId || subscription?.lastSeenMessageId;
     
+    // Get only messages for this channel
+    const channelMessages = this.messages.filter(m => m.channel === channel);
+    
     if (!lastSeen) {
-      return this.messages.filter(m => m.channel === channel).length;
+      return channelMessages.length;
     }
     
     const index = this.messages.findIndex(m => m.id === lastSeen);
     if (index === -1) {
-      return this.messages.filter(m => m.channel === channel).length;
+      return channelMessages.length;
     }
     
-    return this.messages.length - index - 1;
+    // Count messages in this channel after the last seen
+    const channelIndex = channelMessages.findIndex(m => m.id === lastSeen);
+    if (channelIndex === -1) {
+      return channelMessages.length;
+    }
+    
+    return channelMessages.length - channelIndex - 1;
   }
   
   /**
    * Mark messages as read (update subscription pointer)
    */
   markAsRead(agentId: string, channel: string, messageId?: string): void {
-    const subscription = this.subscriptions.find(s => s.agentId === agentId && s.channel === channel);
-    if (subscription) {
-      subscription.lastSeenMessageId = messageId || 
-        (this.messages.filter(m => m.channel === channel).length > 0 
-          ? this.messages[this.messages.length - 1].id 
-          : "");
+    let subscription = this.subscriptions.find(s => s.agentId === agentId && s.channel === channel);
+    
+    // If no existing subscription, create one for tracking
+    if (!subscription) {
+      subscription = {
+        agentId,
+        channel,
+        lastSeenMessageId: "",
+      };
+      this.subscriptions.push(subscription);
     }
+    
+    subscription.lastSeenMessageId = messageId || 
+      (this.messages.filter(m => m.channel === channel).length > 0 
+        ? this.messages[this.messages.length - 1].id 
+        : "");
   }
   
   /**

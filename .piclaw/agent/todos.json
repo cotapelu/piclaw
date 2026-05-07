@@ -262,9 +262,41 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-29",
+      "name": "Test spawn_team tool",
+      "tasks": [
+        {
+          "id": "task-149",
+          "content": "Understand spawn_team API and requirements",
+          "status": "completed",
+          "details": "Đã hiểu spawn_team API và fix lỗi: ctx.runtime không tồn tại trong ExtensionContext. Sửa thành ctx.sessionManager.parentRuntime. Code đã typecheck passed."
+        },
+        {
+          "id": "task-150",
+          "content": "Test spawn_team with SDK/runtime",
+          "status": "completed"
+        },
+        {
+          "id": "task-151",
+          "content": "Test different scenarios (1 task, multiple tasks, edge cases)",
+          "status": "completed"
+        },
+        {
+          "id": "task-152",
+          "content": "Document findings in team-log.md",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-153",
+          "content": "Fix any issues found",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 149,
-  "nextPhaseId": 29,
-  "updatedAt": "2026-05-06T02:30:11.162Z"
+  "nextTaskId": 154,
+  "nextPhaseId": 30,
+  "updatedAt": "2026-05-07T04:25:02.812Z"
 }

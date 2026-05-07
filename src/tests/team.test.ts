@@ -112,6 +112,9 @@ describe("AgentTeam coordination", () => {
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
     team.initialize(["Task A"]);
 
+    // Simulate task being claimed and completed by an agent
+    team.claimTask("agent-1"); // Must claim first
+    
     // Simulate async completion
     setTimeout(() => team.reportResult(0, "Done"), 100);
 

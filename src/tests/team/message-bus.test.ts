@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { TeamMessageBus, CHANNELS } from "../../team/message-bus.js";
+import { TeamMessageBus, CHANNELS, type TeamMessage } from "../../team/message-bus.js";
 
 describe("TeamMessageBus", () => {
   let bus: TeamMessageBus;
@@ -25,7 +25,7 @@ describe("TeamMessageBus", () => {
     });
     
     it("should subscribe and receive messages", () => {
-      const messages: any[] = [];
+      const messages: TeamMessage[] = [];
       bus.subscribe("agent-2", "team.chat", {
         callback: (msg) => messages.push(msg)
       });
@@ -42,7 +42,7 @@ describe("TeamMessageBus", () => {
     });
     
     it("should not deliver sender's own message to themselves", () => {
-      const messages: any[] = [];
+      const messages: TeamMessage[] = [];
       bus.subscribe("agent-1", "team.chat", {
         callback: (msg) => messages.push(msg)
       });
@@ -57,8 +57,8 @@ describe("TeamMessageBus", () => {
     });
     
     it("should deliver messages from different senders", () => {
-      const agent2Messages: any[] = [];
-      const agent3Messages: any[] = [];
+      const agent2Messages: TeamMessage[] = [];
+      const agent3Messages: TeamMessage[] = [];
       
       bus.subscribe("agent-2", "team.chat", { callback: (msg) => agent2Messages.push(msg) });
       bus.subscribe("agent-3", "team.chat", { callback: (msg) => agent3Messages.push(msg) });
@@ -93,13 +93,19 @@ describe("TeamMessageBus", () => {
       expect(recent[0].content).toBe("Msg 0"); // FIFO order preserved
     });
     
-    it("should filter by since timestamp", () => {
-      const t1 = Date.now();
+    it("should filter by since timestamp", async () => {
       bus.publish({ channel: "team.chat", from: "agent-1", content: "Old" });
-      const t2 = Date.now();
+      
+      // Wait a ms to ensure different timestamps
+      await new Promise(r => setTimeout(r, 2));
+      
+      // Capture timestamp AFTER waiting
+      const tAfterFirst = Date.now();
+      
       bus.publish({ channel: "team.chat", from: "agent-1", content: "New" });
       
-      const messages = bus.getMessages("team.chat", { since: t1 });
+      // Use tAfterFirst as since time - should only get "New"
+      const messages = bus.getMessages("team.chat", { since: tAfterFirst });
       expect(messages).toHaveLength(1);
       expect(messages[0].content).toBe("New");
     });
@@ -107,7 +113,7 @@ describe("TeamMessageBus", () => {
   
   describe("direct messages", () => {
     it("should send direct message to specific agent", () => {
-      const directMsgs: any[] = [];
+      const directMsgs: TeamMessage[] = [];
       bus.subscribe("agent-2", CHANNELS.direct("agent-2"), {
         callback: (msg) => directMsgs.push(msg)
       });
@@ -131,8 +137,8 @@ describe("TeamMessageBus", () => {
   
   describe("broadcast", () => {
     it("should broadcast to all agents except sender", () => {
-      const agent2Msgs: any[] = [];
-      const agent3Msgs: any[] = [];
+      const agent2Msgs: TeamMessage[] = [];
+      const agent3Msgs: TeamMessage[] = [];
       
       bus.subscribe("agent-2", "team.broadcast", { callback: (msg) => agent2Msgs.push(msg) });
       bus.subscribe("agent-3", "team.broadcast", { callback: (msg) => agent3Msgs.push(msg) });

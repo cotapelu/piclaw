@@ -99,14 +99,14 @@ export interface TeamContext {
 export class TeamContextManager {
   private context: TeamContext;
   
-  constructor(teamId: string, totalTasks: number, initialFocus: string = "") {
+  constructor(teamId: string, totalTasks: number, initialPhase: string = "") {
     this.context = {
       teamId,
       createdAt: Date.now(),
       agentStates: new Map(),
       taskStates: new Map(),
-      teamFocus: initialFocus,
-      currentPhase: "initialization",
+      teamFocus: initialPhase || "Working",
+      currentPhase: initialPhase || "initialization",
       decisions: [],
       blockers: [],
       recentChatMessages: [],
@@ -139,12 +139,20 @@ export class TeamContextManager {
   
   /**
    * Freeze context to prevent mutation during reads
+   * Deep clone to ensure true immutability
    */
   private freezeContext(): Readonly<TeamContext> {
+    const deepCloneAgentState = (state: AgentState): AgentState => ({ ...state });
+    const deepCloneTaskStatus = (task: TaskStatus): TaskStatus => ({ ...task, helpers: [...task.helpers] });
+    
     return {
       ...this.context,
-      agentStates: new Map<string, AgentState>(this.context.agentStates),
-      taskStates: new Map<number, TaskStatus>(this.context.taskStates),
+      agentStates: new Map<string, AgentState>(
+        Array.from(this.context.agentStates.entries()).map(([k, v]) => [k, deepCloneAgentState(v)])
+      ),
+      taskStates: new Map<number, TaskStatus>(
+        Array.from(this.context.taskStates.entries()).map(([k, v]) => [k, deepCloneTaskStatus(v)])
+      ),
       decisions: [...this.context.decisions],
       blockers: [...this.context.blockers],
       recentChatMessages: [...this.context.recentChatMessages],

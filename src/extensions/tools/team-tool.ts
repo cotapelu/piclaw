@@ -311,7 +311,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
 
           // Emit team_disposed event
           const parentRuntime = (ctx as any)?.runtime?.sessionRuntime || (ctx as any)?.session?.runtime;
-          parentRuntime?.emit("team_disposed", { teamId: params.teamId });
+          parentRuntime?.session?.extensionRunner?.emit("team_disposed", { teamId: params.teamId });
 
           return {
             content: [{ type: "text", text: `🗑️ Team ${params.teamId} disposed` }],
