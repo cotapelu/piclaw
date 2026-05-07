@@ -41,11 +41,13 @@ export default function (pi: ExtensionAPI) {
     },
   });
 
-  // Listen to message_end using events.on() instead of pi.on()
-  pi.events.on("message_end", () => {
+  // Listen to agent_end - khi agent trả lời xong
+  pi.events.on("agent_end", () => {
+    console.log("[AutoContinue] agent_end fired, enabled:", enabled);
     if (!enabled || idleTimer) return;
 
     idleTimer = setTimeout(() => {
+      console.log("[AutoContinue] Timer fired, enabled:", enabled);
       if (enabled) {
         (pi.sendMessage as any)(
           { content: IDLE_MESSAGE },
