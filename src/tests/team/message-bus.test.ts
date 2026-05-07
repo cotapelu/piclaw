@@ -102,9 +102,12 @@ describe("TeamMessageBus", () => {
       // Capture timestamp AFTER waiting
       const tAfterFirst = Date.now();
       
+      // Wait to ensure different timestamps
+      await new Promise(r => setTimeout(r, 5));
+      
       bus.publish({ channel: "team.chat", from: "agent-1", content: "New" });
       
-      // Use tAfterFirst as since time - should only get "New"
+      // Use >= since we want messages at or after tAfterFirst (exclusive timing makes exact > rare)
       const messages = bus.getMessages("team.chat", { since: tAfterFirst });
       expect(messages).toHaveLength(1);
       expect(messages[0].content).toBe("New");

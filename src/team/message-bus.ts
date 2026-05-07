@@ -125,8 +125,8 @@ export class TeamMessageBus {
     let messages = this.messages.filter(m => m.channel === channel);
     
     if (options.since !== undefined) {
-      // Use > for "strictly after" semantics - since means "get messages AFTER this time"
-      messages = messages.filter(m => m.timestamp > options.since!);
+      // Use >= for inclusive semantics - gets messages at or after since time
+      messages = messages.filter(m => m.timestamp >= options.since!);
     }
     
     if (options.limit) {

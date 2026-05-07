@@ -62,11 +62,16 @@ export function registerTeamTool(api: ExtensionAPI): void {
     async execute(toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: any, ctx?: any) {
       const { bootPiclawTeam, executeTeamTasks } = await import("../../team/team-manager.js");
 
-      const parentRuntime = (ctx as any)?.runtime?.sessionRuntime || (ctx as any)?.session?.runtime;
+      // Try multiple sources to find parent runtime
+      const parentRuntime = 
+        (ctx as any)?.sessionManager?.parentRuntime ||
+        (ctx as any)?.runtime?.sessionRuntime ||
+        (ctx as any)?.session?.runtime ||
+        (ctx as any)?.runtime;
       if (!parentRuntime) {
         return {
           content: [{ type: "text", text: "❌ Error: No parent runtime available" }],
-          details: { error: "No parent runtime", action: params.action } as any,
+          details: { error: "No parent runtime", action: params.action, ctxKeys: Object.keys(ctx || {}) } as any,
           isError: true,
         };
       }
@@ -213,8 +218,13 @@ export function registerTeamTool(api: ExtensionAPI): void {
           registry.delete(params.teamId);
 
           // Emit team_disposed event
-          const parentRuntime = (ctx as any)?.runtime?.sessionRuntime || (ctx as any)?.session?.runtime;
-          parentRuntime?.session?.extensionRunner?.emit("team_disposed", { teamId: params.teamId });
+          try {
+            const runtimeForDispose = registry.get(params.teamId);
+            const extRunner = parentRuntime?.session?.extensionRunner;
+            extRunner?.emit("team_disposed", { teamId: params.teamId });
+          } catch (e) {
+            // Ignore emit errors
+          }
 
           return {
             content: [{ type: "text", text: `🗑️ Team ${params.teamId} disposed` }],
