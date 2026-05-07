@@ -17,6 +17,7 @@ describe("AgentSession Team", () => {
     expect(team.roles).toEqual(["parent", "coder", "tester"]);
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("should share session manager", async () => {
@@ -27,6 +28,7 @@ describe("AgentSession Team", () => {
       .toBe(team.runtimes[1].session.sessionManager);
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("should use same codebase", async () => {
@@ -36,6 +38,7 @@ describe("AgentSession Team", () => {
     expect(team.runtimes[0].cwd).toBe(parent.cwd);
 
     await team.dispose();
+    await parent.dispose();
   });
 });
 
@@ -54,6 +57,7 @@ describe("AgentTeam coordination", () => {
     expect(task3).toBe(2);
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("should not reassign claimed tasks", async () => {
@@ -70,6 +74,7 @@ describe("AgentTeam coordination", () => {
     expect(task3).toBeNull();
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("should report results and complete", async () => {
@@ -84,6 +89,7 @@ describe("AgentTeam coordination", () => {
     expect(results).toEqual(["Result A", "Result B"]);
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("workspace should store and retrieve values", async () => {
@@ -98,6 +104,7 @@ describe("AgentTeam coordination", () => {
     expect(team.getWorkspace().list()).toHaveLength(2);
 
     await team.dispose();
+    await parent.dispose();
   });
 
   it("should wait for completion when all tasks reported", async () => {
@@ -111,5 +118,6 @@ describe("AgentTeam coordination", () => {
     await expect(team.waitForCompletion()).resolves.toBeUndefined();
 
     await team.dispose();
+    await parent.dispose();
   });
 });
