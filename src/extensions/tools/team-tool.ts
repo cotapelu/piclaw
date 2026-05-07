@@ -55,8 +55,8 @@ export function registerTeamTool(api: ExtensionAPI): void {
 
       const size = Math.min(Math.max(1, params.size ?? 2), 4);
 
-      // Get parent runtime from context
-      const parentRuntime = (ctx as any)?.runtime || ctx?.session?.runtime;
+      // Get parent runtime from context (exposed via extension runtime)
+      const parentRuntime = (ctx as any)?.runtime?.sessionRuntime || (ctx as any)?.session?.runtime;
       if (!parentRuntime) {
         return {
           content: [{ type: "text", text: "Error: No parent runtime available" }],

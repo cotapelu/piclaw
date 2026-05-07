@@ -109,6 +109,13 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     runtime.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
   }
 
+  // Expose the AgentSessionRuntime on the extension runner's runtime object for team operations
+  // This allows the spawn_team tool to access the parent runtime via ctx.runtime.sessionRuntime
+  const extensionRunner = runtime.session.extensionRunner as any;
+  if (extensionRunner.runtime) {
+    extensionRunner.runtime.sessionRuntime = runtime;
+  }
+
   // Apply initial model if configured
   if (options.model && runtime.session?.model) {
     try {
