@@ -23,7 +23,7 @@ vi.mock('../extensions/auto-memory.js', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('../extensions/auto-continue-extension.js', () => ({
+vi.mock('../extensions/hooks/auto-continue.js', () => ({
   default: vi.fn(),
 }));
 
@@ -35,7 +35,7 @@ vi.mock('../tools/subtool-loader.js', () => ({
 import extensionIndex from '../extensions/index.js';
 import { registerKiloProvider } from '../extensions/providers/kilo-provider.js';
 import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from '../extensions/tools/index.js';
-import autoContinueExtension from '../extensions/auto-continue-extension.js';
+import autoContinueExtension from '../extensions/hooks/auto-continue.js';
 
 describe('extensions/index', () => {
   beforeEach(() => {

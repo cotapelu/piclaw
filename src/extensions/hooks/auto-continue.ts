@@ -7,7 +7,7 @@
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
 
-const IDLE_TIMEOUT_MS = 300_000; // 300 giây (5 phút)
+const IDLE_TIMEOUT_MS = 900_000; // 900 giây (15 phút)
 const IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
 
 export default function (pi: ExtensionAPI) {
