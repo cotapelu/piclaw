@@ -82,6 +82,14 @@ export function registerTeamTool(api: ExtensionAPI): void {
       try {
         // ==================== CREATE ====================
         if (action === "create") {
+          // Validate tasks parameter
+          if (!params.tasks || !Array.isArray(params.tasks) || params.tasks.length === 0) {
+            return {
+              content: [{ type: "text", text: "❌ Error: tasks must be a non-empty array of task strings.\nExample: spawn_team({ action: \"create\", tasks: [\"Analyze requirements\", \"Build feature\"], size: 2 })" }],
+              details: { error: "Invalid tasks parameter", action: "create", providedTasks: params.tasks } as any,
+              isError: true,
+            };
+          }
           const size = Math.min(Math.max(1, params.size ?? 2), 4);
           const team = await bootPiclawTeam(parentRuntime, {
             teamSize: size,
