@@ -84,9 +84,25 @@ export default function (pi: ExtensionAPI) {
         return;
       }
 
-      // If no args or unknown, show status
-      if (ctx.hasUI) {
-        ctx.ui.notify(`Auto-continue: ${enabled ? "ON" : "OFF"}, timeout=${idleTimeoutMs / 1000}s`, "info");
+      // If no args, toggle
+      enabled = !enabled;
+      if (enabled) {
+        if (ctx.hasUI) {
+          ctx.ui.notify(`Auto-continue đã BẬT - timeout=${idleTimeoutMs / 1000}s`, "info");
+        }
+        if (ctx.isIdle()) {
+          startIdleTimer();
+        }
+        console.log("[AutoContinue] Enabled via toggle");
+      } else {
+        if (idleTimer) {
+          clearTimeout(idleTimer);
+          idleTimer = null;
+        }
+        if (ctx.hasUI) {
+          ctx.ui.notify("Auto-continue đã TẮT", "info");
+        }
+        console.log("[AutoContinue] Disabled via toggle");
       }
     },
   });
