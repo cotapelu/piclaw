@@ -15,6 +15,36 @@ import type { Static } from "typebox";
 import { Text } from "@mariozechner/pi-tui";
 
 // ============================================================================
+// Simple async mutex to prevent race conditions
+// ============================================================================
+class Mutex {
+  private locked = false;
+  private queue: (() => void)[] = [];
+
+  async lock(): Promise<() => void> {
+    if (!this.locked) {
+      this.locked = true;
+      return () => this.unlock();
+    }
+    return new Promise(resolve => {
+      this.queue.push(() => resolve(() => this.unlock()));
+    });
+  }
+
+  private unlock() {
+    if (this.queue.length > 0) {
+      const next = this.queue.shift()!;
+      next();
+    } else {
+      this.locked = false;
+    }
+  }
+}
+
+// Global mutex shared across all instances (state is global anyway)
+const stateMutex = new Mutex();
+
+// ============================================================================
 // Types
 // ============================================================================
 
@@ -404,31 +434,22 @@ class TodoState {
   phases: TodoPhase[] = [];
   nextTaskId: number = 1;
   nextPhaseId: number = 1;
-  private _lockState = false;
   private listeners: Set<() => void> = new Set();
-
-  get isLocked() { return this._lockState; }
-  set _lock(val: boolean) { this._lockState = val; }
 
   subscribe(listener: () => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   private notify() { for (const l of this.listeners) l(); }
 
   async loadFromFile(): Promise<boolean> {
-    if (this._lockState) return false;
-    this._lockState = true;
-    try {
-      const fileData = await loadTodoFromFile();
-      if (!fileData) { this.phases = []; this.nextTaskId = 1; this.nextPhaseId = 1; return false; }
-      this.phases = clonePhases(fileData.phases);
-      this.nextTaskId = fileData.nextTaskId;
-      this.nextPhaseId = fileData.nextPhaseId;
-      this.notify();
-      return true;
-    } finally { this._lockState = false; }
+    const fileData = await loadTodoFromFile();
+    if (!fileData) { this.phases = []; this.nextTaskId = 1; this.nextPhaseId = 1; return false; }
+    this.phases = clonePhases(fileData.phases);
+    this.nextTaskId = fileData.nextTaskId;
+    this.nextPhaseId = fileData.nextPhaseId;
+    this.notify();
+    return true;
   }
 
   async saveToFile(): Promise<void> {
-    if (this._lockState) return;
     const ids = getNextIds(this.phases);
     await saveTodoToFile({ phases: clonePhases(this.phases), nextTaskId: ids.nextTaskId, nextPhaseId: ids.nextPhaseId });
   }
@@ -560,13 +581,23 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
   let autoTriggering = false;
 
   api.on("session_start", async (_event, ctx) => {
-    await state.loadFromFile();
-    state.reconstructFromEntries(ctx.sessionManager.getBranch());
+    const release = await stateMutex.lock();
+    try {
+      await state.loadFromFile();
+      state.reconstructFromEntries(ctx.sessionManager.getBranch());
+    } finally {
+      release();
+    }
   });
 
   api.on("session_tree", async (_event, ctx) => {
-    state.reconstructFromEntries(ctx.sessionManager.getBranch());
-    await state.loadFromFile();
+    const release = await stateMutex.lock();
+    try {
+      state.reconstructFromEntries(ctx.sessionManager.getBranch());
+      await state.loadFromFile();
+    } finally {
+      release();
+    }
   });
 
   return {
@@ -597,7 +628,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
     parameters: todoWriteSchema,
     executionMode: "sequential" as const,
 
-    async execute(_toolCallId: string, params: any, _signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
+    async execute(_toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: ((update: any) => void) | undefined, ctx: ExtensionContext) {
       let p: any;
       try {
         if (typeof params === "string") params = JSON.parse(params);

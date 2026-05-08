@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED
 // Source: https://models.dev/api.json
-// Generated: 2026-05-07T14:05:44.645Z
+// Generated: 2026-05-08T02:36:29.631Z
 // DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update
 
 import type { Model } from "@mariozechner/pi-ai";
@@ -40,23 +40,6 @@ export const CUSTOM_MODELS = {
       },
       contextWindow: 131072,
       maxTokens: 131072,
-    } satisfies Model<"openai-completions">,
-    "allenai/olmo-3.1-32b-instruct": {
-      id: "allenai/olmo-3.1-32b-instruct",
-      name: "AllenAI: Olmo 3.1 32B Instruct",
-      api: "openai-completions",
-      provider: "kilo",
-      baseUrl: "https://api.kilo.ai/api/gateway",
-      reasoning: false,
-      input: ["text"],
-      cost: {
-        input: 0.2,
-        output: 0.6,
-        cacheRead: 0,
-        cacheWrite: 0,
-      },
-      contextWindow: 65536,
-      maxTokens: 32768,
     } satisfies Model<"openai-completions">,
     "amazon/nova-2-lite-v1": {
       id: "amazon/nova-2-lite-v1",
@@ -448,6 +431,23 @@ export const CUSTOM_MODELS = {
       },
       contextWindow: 131072,
       maxTokens: 64000,
+    } satisfies Model<"openai-completions">,
+    "baidu/cobuddy:free": {
+      id: "baidu/cobuddy:free",
+      name: "Baidu: CoBuddy (free)",
+      api: "openai-completions",
+      provider: "kilo",
+      baseUrl: "https://api.kilo.ai/api/gateway",
+      reasoning: true,
+      input: ["text"],
+      cost: {
+        input: 0,
+        output: 0,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
+      contextWindow: 131072,
+      maxTokens: 65536,
     } satisfies Model<"openai-completions">,
     "baidu/ernie-4.5-21b-a3b": {
       id: "baidu/ernie-4.5-21b-a3b",
@@ -1588,6 +1588,23 @@ export const CUSTOM_MODELS = {
       contextWindow: 131072,
       maxTokens: 26215,
     } satisfies Model<"openai-completions">,
+    "mistralai/mistral-medium-3-5": {
+      id: "mistralai/mistral-medium-3-5",
+      name: "Mistral: Mistral Medium 3.5",
+      api: "openai-completions",
+      provider: "kilo",
+      baseUrl: "https://api.kilo.ai/api/gateway",
+      reasoning: true,
+      input: ["text", "image"],
+      cost: {
+        input: 1.5,
+        output: 7.5,
+        cacheRead: 0,
+        cacheWrite: 0,
+      },
+      contextWindow: 262144,
+      maxTokens: 262144,
+    } satisfies Model<"openai-completions">,
     "mistralai/mistral-medium-3.1": {
       id: "mistralai/mistral-medium-3.1",
       name: "Mistral: Mistral Medium 3.1",
@@ -2691,6 +2708,23 @@ export const CUSTOM_MODELS = {
         cacheWrite: 0,
       },
       contextWindow: 1050000,
+      maxTokens: 128000,
+    } satisfies Model<"openai-completions">,
+    "openai/gpt-chat-latest": {
+      id: "openai/gpt-chat-latest",
+      name: "OpenAI: GPT Chat Latest",
+      api: "openai-completions",
+      provider: "kilo",
+      baseUrl: "https://api.kilo.ai/api/gateway",
+      reasoning: true,
+      input: ["text", "image"],
+      cost: {
+        input: 5,
+        output: 30,
+        cacheRead: 0.5,
+        cacheWrite: 0,
+      },
+      contextWindow: 400000,
       maxTokens: 128000,
     } satisfies Model<"openai-completions">,
     "openai/gpt-oss-120b": {

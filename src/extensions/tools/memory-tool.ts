@@ -4,6 +4,33 @@ import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-cod
 import { Type, StringEnum } from "@mariozechner/pi-ai";
 import { matchesKey, Text } from "@mariozechner/pi-tui";
 
+// Simple async mutex to prevent race conditions
+class Mutex {
+  private locked = false;
+  private queue: (() => void)[] = [];
+
+  async lock(): Promise<() => void> {
+    if (!this.locked) {
+      this.locked = true;
+      return () => this.unlock();
+    }
+    return new Promise(resolve => {
+      this.queue.push(() => resolve(() => this.unlock()));
+    });
+  }
+
+  private unlock() {
+    if (this.queue.length > 0) {
+      const next = this.queue.shift()!;
+      next();
+    } else {
+      this.locked = false;
+    }
+  }
+}
+
+const stateMutex = new Mutex();
+
 export interface Memory {
   id: number;
   text: string;
@@ -80,22 +107,27 @@ export function registerMemoryTool(api: ExtensionAPI): void {
   let memories: Memory[] = [];
   let nextId = 1;
 
-  const reconstructState = (ctx: ExtensionContext) => {
-    memories = [];
-    nextId = 1;
-    for (const entry of ctx.sessionManager.getBranch()) {
-      if (entry.type === "message" && entry.message.role === "toolResult" && entry.message.toolName === "memory") {
-        const details = (entry.message.details as any);
-        if (details && Array.isArray(details.memories)) {
-          memories = details.memories;
-          nextId = details.nextId;
+  const reconstructState = async (ctx: ExtensionContext) => {
+    const release = await stateMutex.lock();
+    try {
+      memories = [];
+      nextId = 1;
+      for (const entry of ctx.sessionManager.getBranch()) {
+        if (entry.type === "message" && entry.message.role === "toolResult" && entry.message.toolName === "memory") {
+          const details = (entry.message.details as any);
+          if (details && Array.isArray(details.memories)) {
+            memories = details.memories;
+            nextId = details.nextId;
+          }
         }
       }
+    } finally {
+      release();
     }
   };
 
-  api.on("session_start", async (_event, ctx) => reconstructState(ctx));
-  api.on("session_tree", async (_event, ctx) => reconstructState(ctx));
+  api.on("session_start", async (_event, ctx) => { await reconstructState(ctx); });
+  api.on("session_tree", async (_event, ctx) => { await reconstructState(ctx); });
 
   const tool: any = {
     name: "memory",
@@ -118,95 +150,100 @@ export function registerMemoryTool(api: ExtensionAPI): void {
     ],
     parameters: {},
 
-    async execute(_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: any, _ctx: any) {
-      // Parse JSON string if needed (like todos-tool)
-      if (typeof params === "string") {
-        try {
-          params = JSON.parse(params);
-        } catch (e: any) {
-          return { content: [{ type: "text", text: `Error: Invalid JSON - ${e.message}` }], details: { action: "unknown", memories: [...memories], nextId, error: "Invalid JSON" }, isError: false };
-        }
-      }
-
-      const action = params.action as string;
-
-      switch (action) {
-        case "add": {
-          const text = params.text as string | undefined;
-          if (!text) {
-            return { content: [{ type: "text", text: "Error: text required for add" }], details: { action, memories: [...memories], nextId, error: "text required" }, isError: false };
+    async execute(_toolCallId: string, params: any, _signal: AbortSignal | undefined, _onUpdate: any, ctx: ExtensionContext) {
+      const release = await stateMutex.lock();
+      try {
+        // Parse JSON string if needed (like todos-tool)
+        if (typeof params === "string") {
+          try {
+            params = JSON.parse(params);
+          } catch (e: any) {
+            return { content: [{ type: "text", text: `Error: Invalid JSON - ${e.message}` }], details: { action: "unknown", memories: [...memories], nextId, error: "Invalid JSON" }, isError: false };
           }
-          const mem: Memory = {
-            id: nextId++,
-            text,
-            tags: params.tags as string[] | undefined,
-            created: Date.now(),
-          };
-          memories.push(mem);
-          api.appendEntry("memory", mem);
-          return { content: [{ type: "text", text: `Stored memory #${mem.id}` }], details: { action, memories: [...memories], nextId }, isError: false };
         }
 
-        case "list": {
-          const details = { action, memories: [...memories], nextId };
-          if (memories.length === 0) {
-            return { content: [{ type: "text", text: "No memories stored." }], details, isError: false };
-          }
-          const lines = memories.map(m => `#${m.id}: ${m.text.length > 80 ? m.text.substring(0, 80) + "..." : m.text}${m.tags ? ` [${m.tags.join(", ")}]` : ""}`);
-          return { content: [{ type: "text", text: lines.join("\n") }], details, isError: false };
-        }
+        const action = params.action as string;
 
-        case "get": {
-          const id = params.id as number | undefined;
-          if (id === undefined) {
-            return { content: [{ type: "text", text: "Error: id required for get" }], details: { action, memories: [...memories], nextId, error: "id required" }, isError: false };
+        switch (action) {
+          case "add": {
+            const text = params.text as string | undefined;
+            if (!text) {
+              return { content: [{ type: "text", text: "Error: text required for add" }], details: { action, memories: [...memories], nextId, error: "text required" }, isError: false };
+            }
+            const mem: Memory = {
+              id: nextId++,
+              text,
+              tags: params.tags as string[] | undefined,
+              created: Date.now(),
+            };
+            memories.push(mem);
+            api.appendEntry("memory", mem);
+            return { content: [{ type: "text", text: `Stored memory #${mem.id}` }], details: { action, memories: [...memories], nextId }, isError: false };
           }
-          const mem = memories.find(m => m.id === id);
-          if (!mem) {
-            return { content: [{ type: "text", text: `Memory #${id} not found` }], details: { action, memories: [...memories], nextId, targetId: id, error: `#${id} not found` }, isError: false };
-          }
-          return { content: [{ type: "text", text: mem.text }], details: { action, memories: [...memories], nextId, targetId: id }, isError: false };
-        }
 
-        case "delete": {
-          const id = params.id as number | undefined;
-          if (id === undefined) {
-            return { content: [{ type: "text", text: "Error: id required for delete" }], details: { action, memories: [...memories], nextId, error: "id required" }, isError: false };
+          case "list": {
+            const details = { action, memories: [...memories], nextId };
+            if (memories.length === 0) {
+              return { content: [{ type: "text", text: "No memories stored." }], details, isError: false };
+            }
+            const lines = memories.map(m => `#${m.id}: ${m.text.length > 80 ? m.text.substring(0, 80) + "..." : m.text}${m.tags ? ` [${m.tags.join(", ")}]` : ""}`);
+            return { content: [{ type: "text", text: lines.join("\n") }], details, isError: false };
           }
-          const index = memories.findIndex(m => m.id === id);
-          if (index === -1) {
-            return { content: [{ type: "text", text: `Memory #${id} not found` }], details: { action, memories: [...memories], nextId, targetId: id, error: `#${id} not found` }, isError: false };
-          }
-          const deleted = memories.splice(index, 1)[0];
-          api.appendEntry("memory", { ...deleted, _deleted: true });
-          return { content: [{ type: "text", text: `Deleted memory #${id}` }], details: { action, memories: [...memories], nextId, targetId: id }, isError: false };
-        }
 
-        case "clear": {
-          const count = memories.length;
-          for (const mem of memories) {
-            api.appendEntry("memory", { ...mem, _deleted: true });
+          case "get": {
+            const id = params.id as number | undefined;
+            if (id === undefined) {
+              return { content: [{ type: "text", text: "Error: id required for get" }], details: { action, memories: [...memories], nextId, error: "id required" }, isError: false };
+            }
+            const mem = memories.find(m => m.id === id);
+            if (!mem) {
+              return { content: [{ type: "text", text: `Memory #${id} not found` }], details: { action, memories: [...memories], nextId, targetId: id, error: `#${id} not found` }, isError: false };
+            }
+            return { content: [{ type: "text", text: mem.text }], details: { action, memories: [...memories], nextId, targetId: id }, isError: false };
           }
-          memories = [];
-          nextId = 1;
-          return { content: [{ type: "text", text: `Cleared ${count} memories` }], details: { action, memories: [], nextId: 1 }, isError: false };
-        }
 
-        case "search": {
-          const query = params.query as string | undefined;
-          if (!query) {
-            return { content: [{ type: "text", text: "Error: query required for search" }], details: { action, memories: [...memories], nextId, error: "query required" }, isError: false };
+          case "delete": {
+            const id = params.id as number | undefined;
+            if (id === undefined) {
+              return { content: [{ type: "text", text: "Error: id required for delete" }], details: { action, memories: [...memories], nextId, error: "id required" }, isError: false };
+            }
+            const index = memories.findIndex(m => m.id === id);
+            if (index === -1) {
+              return { content: [{ type: "text", text: `Memory #${id} not found` }], details: { action, memories: [...memories], nextId, targetId: id, error: `#${id} not found` }, isError: false };
+            }
+            const deleted = memories.splice(index, 1)[0];
+            api.appendEntry("memory", { ...deleted, _deleted: true });
+            return { content: [{ type: "text", text: `Deleted memory #${id}` }], details: { action, memories: [...memories], nextId, targetId: id }, isError: false };
           }
-          const q = query.toLowerCase();
-          const results = memories.filter(m => m.text.toLowerCase().includes(q) || (m.tags?.some(t => t.toLowerCase().includes(q))));
-          const lines = results.map(m => `#${m.id}: ${m.text}${m.tags ? ` [${m.tags.join(", ")}]` : ""}`);
-          const summary = `Found ${results.length} of ${memories.length} memories:\n` + lines.join("\n");
-          return { content: [{ type: "text", text: summary }], details: { action: "search", memories: results, nextId }, isError: false };
-        }
 
-        default: {
-          return { content: [{ type: "text", text: `Unknown action: ${action}` }], details: { action: "list", memories: [...memories], nextId }, isError: false };
+          case "clear": {
+            const count = memories.length;
+            for (const mem of memories) {
+              api.appendEntry("memory", { ...mem, _deleted: true });
+            }
+            memories = [];
+            nextId = 1;
+            return { content: [{ type: "text", text: `Cleared ${count} memories` }], details: { action, memories: [], nextId: 1 }, isError: false };
+          }
+
+          case "search": {
+            const query = params.query as string | undefined;
+            if (!query) {
+              return { content: [{ type: "text", text: "Error: query required for search" }], details: { action, memories: [...memories], nextId, error: "query required" }, isError: false };
+            }
+            const q = query.toLowerCase();
+            const results = memories.filter(m => m.text.toLowerCase().includes(q) || (m.tags?.some(t => t.toLowerCase().includes(q))));
+            const lines = results.map(m => `#${m.id}: ${m.text}${m.tags ? ` [${m.tags.join(", ")}]` : ""}`);
+            const summary = `Found ${results.length} of ${memories.length} memories:\n` + lines.join("\n");
+            return { content: [{ type: "text", text: summary }], details: { action: "search", memories: results, nextId }, isError: false };
+          }
+
+          default: {
+            return { content: [{ type: "text", text: `Unknown action: ${action}` }], details: { action: "list", memories: [...memories], nextId }, isError: false };
+          }
         }
+      } finally {
+        release();
       }
     },
 

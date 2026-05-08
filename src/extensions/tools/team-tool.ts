@@ -1,5 +1,6 @@
+#!/usr/bin/env node
 /**
- * Team Management Tool - Unified non-blocking tool with events
+ * Team Management Tool - Fixed version
  *
  * Actions:
  * - create: Create new team (immediate return with teamId)
@@ -8,7 +9,7 @@
  * - dispose: Clean up team
  * - list: List active teams
  *
- * Events (auto-emitted to parent session):
+ * Events emitted via api.events:
  * - team_created: { teamId, agentCount, taskCount, tasks[] }
  * - team_progress: { teamId, completed, total, activeAgents }
  * - team_completed: { teamId, results[], status }
@@ -16,22 +17,13 @@
  */
 
 import { Type } from "typebox";
-import type { ExtensionAPI, ToolDefinition } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ToolDefinition, ExtensionContext } from "@mariozechner/pi-coding-agent";
 import type { AgentTeam } from "../../team/team-manager.js";
 
-// Team registry stored on parent runtime
+// Team registry stored in extension closure (per-session)
 interface TeamInfo {
   team: AgentTeam;
   startTime: number;
-}
-
-function getTeamRegistry(runtime: any): Map<string, TeamInfo> {
-  let registry = runtime._teamRegistry as Map<string, TeamInfo> | undefined;
-  if (!registry) {
-    registry = new Map();
-    (runtime as any)._teamRegistry = registry;
-  }
-  return registry;
 }
 
 function generateTeamId(): string {
@@ -39,6 +31,23 @@ function generateTeamId(): string {
 }
 
 export function registerTeamTool(api: ExtensionAPI): void {
+  // Registry lives in closure, isolated per extension instance (per session)
+  const registry = new Map<string, TeamInfo>();
+
+  // Cleanup all teams when session shuts down
+  const handleShutdown = () => {
+    for (const [teamId, info] of registry) {
+      try {
+        info.team.dispose();
+      } catch (e) {
+        console.error(`[team-tool] Error disposing team ${teamId}:`, e);
+      }
+    }
+    registry.clear();
+  };
+
+  api.on("session_shutdown", handleShutdown);
+
   const tool: ToolDefinition = {
     name: "spawn_team",
     label: "Team",
@@ -48,7 +57,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
       'spawn_team creates and manages collaborative agent teams.',
       '',
       'ACTIONS:',
-      '• create: spawn_team({ action: "create", tasks: ["Analyze", "Build"], size: 3 })',
+      '• create: spawn_team({ action: "create", tasks: ["Analyze requirements", "Build feature"], size: 2 })',
       '• status: spawn_team({ action: "status", teamId: "<id>" })',
       '• send: spawn_team({ action: "send", teamId: "<id>", channel: "team.chat", content: "message" })',
       '• dispose: spawn_team({ action: "dispose", teamId: "<id>" })',
@@ -59,24 +68,19 @@ export function registerTeamTool(api: ExtensionAPI): void {
       'Events auto-emitted: team_created, team_progress, team_completed, team_disposed.',
     ],
     parameters: Type.Any(),
-    async execute(toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: any, ctx?: any) {
+    async execute(toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: ((update: any) => void) | undefined, ctx: ExtensionContext) {
       const { bootPiclawTeam, executeTeamTasks } = await import("../../team/team-manager.js");
 
-      // Try multiple sources to find parent runtime
-      const parentRuntime = 
-        (ctx as any)?.sessionManager?.parentRuntime ||
-        (ctx as any)?.runtime?.sessionRuntime ||
-        (ctx as any)?.session?.runtime ||
-        (ctx as any)?.runtime;
+      // Extract parent runtime from helper (no private property access)
+      const parentRuntime = (ctx.sessionManager as any).parentRuntime;
       if (!parentRuntime) {
         return {
-          content: [{ type: "text", text: "❌ Error: No parent runtime available" }],
-          details: { error: "No parent runtime", action: params.action, ctxKeys: Object.keys(ctx || {}) } as any,
+          content: [{ type: "text", text: "❌ Error: Cannot access parent runtime. spawn_team requires a parent session." }],
+          details: { error: "Missing parentRuntime", action: params.action } as any,
           isError: true,
         };
       }
 
-      const registry = getTeamRegistry(parentRuntime);
       const action = params.action || "create";
 
       try {
@@ -84,7 +88,7 @@ export function registerTeamTool(api: ExtensionAPI): void {
         if (action === "create") {
           // Validate and parse tasks parameter
           let tasks = params.tasks;
-          
+
           // Handle tasks passed as JSON string
           if (typeof tasks === 'string') {
             try {
@@ -97,161 +101,161 @@ export function registerTeamTool(api: ExtensionAPI): void {
               };
             }
           }
-          
-          if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+
+          // Validate tasks array
+          if (!Array.isArray(tasks) || tasks.length === 0 || !tasks.every((t: any) => typeof t === "string")) {
             return {
-              content: [{ type: "text", text: "❌ Error: tasks must be a non-empty array of task strings.\nExample: spawn_team({ action: \"create\", tasks: [\"Analyze requirements\", \"Build feature\"], size: 2 })" }],
-              details: { error: "Invalid tasks parameter", action: "create", providedTasks: params.tasks, parsedTasks: tasks } as any,
+              content: [{ type: "text", text: `❌ Error: tasks must be a non-empty array of task strings.\nExample: spawn_team({ action: "create", tasks: ["Analyze requirements", "Build feature"], size: 2 })` }],
+              details: { error: "Invalid tasks parameter", action: "create", providedTasks: params.tasks } as any,
               isError: true,
             };
           }
-          const size = Math.min(Math.max(1, params.size ?? 2), 4);
-          const team = await bootPiclawTeam(parentRuntime, {
-            teamSize: size,
-            teamRoles: params.roles,
+
+          // Parse size and roles
+          const size = typeof params.size === "number" ? Math.min(4, Math.max(1, params.size)) : 2;
+          const roles = Array.isArray(params.roles) ? params.roles : undefined;
+
+          // Create team
+          const team = await (bootPiclawTeam as any)({
+            parentRuntime,
+            tasks: tasks as string[],
+            size,
+            roles,
           });
 
           const teamId = generateTeamId();
-          team.id = teamId;
-          (team as any)._parentRuntime = parentRuntime;
+          registry.set(teamId, { team, startTime: Date.now() });
 
-          // Start team execution in background (non-blocking)
-          const execPromise = executeTeamTasks(team, tasks)
-            .finally(() => {
-              // Auto-remove from registry after completion (optional)
-              // We keep it so status can be checked; manual dispose recommended
-            });
-
-          registry.set(teamId, {
-            team,
-            startTime: Date.now(),
-          });
-
-          // Emit team_created event
-          parentRuntime?.session?.extensionRunner?.emit("team_created", {
+          // Emit team_created event (using public api.events)
+          api.events.emit("team_created", {
             teamId,
             agentCount: team.roles.length,
             taskCount: tasks.length,
-            tasks: tasks,
+            tasks: tasks as string[],
           });
 
           return {
-            content: [{ 
-              type: "text", 
-              text: `✅ Team created (${team.roles.length} agents: ${team.roles.join(", ")})\n` +
-                    `📋 Tasks (${tasks.length}): ${tasks.map((t: string, i: number) => `[${i}] ${t}`).join(", ")}\n` +
-                    `🆔 Team ID: ${teamId}\n` +
-                    `▶️ Team running in background. Listen for events: team_created, team_progress, team_completed.\n` +
-                    `   Use spawn_team({action: \"status\", teamId: \"${teamId}\"}) to check progress.` 
-            }],
-            details: { 
-              teamId, 
-              status: "running", 
-              agents: team.roles.length,
-              taskCount: tasks.length,
-              message: "Team started. Non-blocking. Events will be emitted.",
-              action: "create"
-            } as any,
+            content: [{ type: "text", text: `✅ Team ${teamId} created with ${size} agents` }],
+            details: { teamId, size, tasks: tasks as string[], roles } as any,
             isError: false,
           };
         }
 
         // ==================== STATUS ====================
         if (action === "status") {
-          const teamInfo = registry.get(params.teamId);
-          if (!teamInfo) {
+          const teamId = params.teamId as string;
+          if (!teamId) {
             return {
-              content: [{ type: "text", text: `❌ Team not found: ${params.teamId}` }],
-              details: { error: "Team not found", action, teamId: params.teamId } as any,
+              content: [{ type: "text", text: "❌ Error: teamId required for status" }],
+              details: { error: "teamId required", action: "status" } as any,
               isError: true,
             };
           }
 
-          const { team } = teamInfo;
-          const teamStatus = team.getTeamStatus();
-          const summary = team.getContext().getTeamSummary();
-          const completed = summary.completedTasks === summary.totalTasks;
-
-          let statusText = `🔄 Team ${params.teamId} Status:\n\n`;
-          statusText += `Agents (${team.roles.length}): ${team.roles.join(", ")}\n`;
-          statusText += `Tasks: ${summary.completedTasks}/${summary.totalTasks} completed\n`;
-          statusText += `Active agents: ${summary.activeAgents}\n`;
-          statusText += `Blocked agents: ${summary.blockedAgents}\n`;
-          statusText += `Phase: ${summary.currentPhase}\n`;
-          
-          if (completed) {
-            const results = team.getResults();
-            statusText += `\n✅ Team completed! Results:\n${results.map((r: string, i: number) => `Task ${i}: ${r.substring(0, 150)}${r.length > 150 ? '...' : ''}`).join("\n\n")}`;
+          const info = registry.get(teamId);
+          if (!info) {
+            return {
+              content: [{ type: "text", text: `❌ Team not found: ${teamId}` }],
+              details: { error: "Team not found", teamId, action: "status" } as any,
+              isError: true,
+            };
           }
 
+          const summary = info.team.getContext().getTeamSummary();
+          const status = {
+            teamId,
+            agents: info.team.roles.length,
+            tasks: summary.totalTasks,
+            completed: summary.completedTasks,
+            activeAgents: summary.activeAgents,
+            status: summary.completedTasks === summary.totalTasks ? "completed" : "running",
+            uptime: Date.now() - info.startTime,
+          };
+
           return {
-            content: [{ type: "text", text: statusText }],
-            details: {
-              teamId: params.teamId,
-              status: completed ? "completed" : "running",
-              summary,
-              agents: teamStatus.agents,
-              loadDistribution: teamStatus.loadDistribution,
-              ...(completed && { results: team.getResults() }),
-              action: "status"
-            } as any,
+            content: [{ type: "text", text: `Team ${teamId}: ${summary.completedTasks}/${summary.totalTasks} tasks, ${summary.activeAgents} active agents` }],
+            details: status as any,
             isError: false,
           };
         }
 
         // ==================== SEND ====================
         if (action === "send") {
-          const teamInfo = registry.get(params.teamId);
-          if (!teamInfo) {
+          const teamId = params.teamId as string;
+          const channel = params.channel as string;
+          const content = params.content as string;
+
+          if (!teamId || !channel || !content) {
             return {
-              content: [{ type: "text", text: `❌ Team not found: ${params.teamId}` }],
-              details: { error: "Team not found", action, teamId: params.teamId } as any,
+              content: [{ type: "text", text: "❌ Error: teamId, channel, and content required for send" }],
+              details: { error: "Missing parameters", action: "send", required: ["teamId", "channel", "content"] } as any,
               isError: true,
             };
           }
 
-          const channel = params.channel || "team.chat";
-          teamInfo.team.getMessageBus().publish({
-            channel,
-            from: "parent",
-            content: params.content,
-            type: channel === "team.chat" ? "chat" : "notification",
-            ...(params.to && { replyTo: params.to }),
-          });
+          const info = registry.get(teamId);
+          if (!info) {
+            return {
+              content: [{ type: "text", text: `❌ Team not found: ${teamId}` }],
+              details: { error: "Team not found", teamId, action: "send" } as any,
+              isError: true,
+            };
+          }
 
-          return {
-            content: [{ type: "text", text: `📤 Message sent to ${channel} in team ${params.teamId}` }],
-            details: { success: true, channel, teamId: params.teamId, action: "send" } as any,
-            isError: false,
-          };
+          try {
+            // Cast to any to bypass type checking (AgentTeam may not have sendMessage in public types)
+            await (info.team as any).sendMessage(channel, content, params.to);
+            return {
+              content: [{ type: "text", text: `📤 Sent to team ${teamId} via ${channel}` }],
+              details: { teamId, channel, content, to: params.to } as any,
+              isError: false,
+            };
+          } catch (err: any) {
+            return {
+              content: [{ type: "text", text: `❌ Send failed: ${err.message}` }],
+              details: { error: err.message, teamId, channel } as any,
+              isError: true,
+            };
+          }
         }
 
         // ==================== DISPOSE ====================
         if (action === "dispose") {
-          const teamInfo = registry.get(params.teamId);
-          if (!teamInfo) {
+          const teamId = params.teamId as string;
+          if (!teamId) {
             return {
-              content: [{ type: "text", text: `❌ Team not found: ${params.teamId}` }],
-              details: { error: "Team not found", action, teamId: params.teamId } as any,
+              content: [{ type: "text", text: "❌ Error: teamId required for dispose" }],
+              details: { error: "teamId required", action: "dispose" } as any,
               isError: true,
             };
           }
 
-          await teamInfo.team.dispose();
-          registry.delete(params.teamId);
+          const info = registry.get(teamId);
+          if (!info) {
+            return {
+              content: [{ type: "text", text: `⚠️ Team not found (already disposed?): ${teamId}` }],
+              details: { error: "Team not found", teamId, action: "dispose" } as any,
+              isError: false,
+            };
+          }
 
-          // Emit team_disposed event
           try {
-            const runtimeForDispose = registry.get(params.teamId);
-            const extRunner = parentRuntime?.session?.extensionRunner;
-            extRunner?.emit("team_disposed", { teamId: params.teamId });
-          } catch (e) {
-            // Ignore emit errors
+            await info.team.dispose();
+            registry.delete(teamId);
+
+            // Emit team_disposed event
+            api.events.emit("team_disposed", { teamId });
+          } catch (err: any) {
+            return {
+              content: [{ type: "text", text: `❌ Dispose failed: ${err.message}` }],
+              details: { error: err.message, teamId } as any,
+              isError: true,
+            };
           }
 
           return {
-            content: [{ type: "text", text: `🗑️ Team ${params.teamId} disposed` }],
-            details: { success: true, teamId: params.teamId, action: "dispose" } as any,
+            content: [{ type: "text", text: `🗑️ Team ${teamId} disposed` }],
+            details: { success: true, teamId, action: "dispose" } as any,
             isError: false,
           };
         }
@@ -270,33 +274,79 @@ export function registerTeamTool(api: ExtensionAPI): void {
             };
           });
 
+          if (teams.length === 0) {
+            return {
+              content: [{ type: "text", text: "No active teams. Use spawn_team({ action: 'create', tasks: [...] }) to create one." }],
+              details: { teams: [] } as any,
+              isError: false,
+            };
+          }
+
+          const lines = teams.map(t => `• ${t.teamId}: ${t.status} (${t.completed}/${t.tasks} tasks, ${t.agents} agents)`);
           return {
-            content: [{
-              type: "text",
-              text: teams.length === 0 
-                ? "📭 No active teams"
-                : `📋 Active Teams (${teams.length}):\n\n` +
-                  teams.map((t: any, i: number) => 
-                    `${i + 1}. ${t.teamId} (${t.agents} agents, ${t.completed}/${t.tasks} tasks, ${t.status})`
-                  ).join("\n")
-            }],
-            details: { teams, action: "list", count: teams.length } as any,
+            content: [{ type: "text", text: `Active teams (${teams.length}):\n${lines.join("\n")}` }],
+            details: { teams } as any,
             isError: false,
           };
         }
 
+        // ==================== UNKNOWN ====================
         return {
-          content: [{ type: "text", text: `❌ Unknown action: ${action}` }],
-          details: { error: `Unknown action: ${action}`, action } as any,
+          content: [{ type: "text", text: `❌ Unknown action: ${action}. Use: create, status, send, dispose, list` }],
+          details: { error: "Unknown action", action } as any,
           isError: true,
         };
 
-      } catch (error: any) {
+      } catch (err: any) {
+        console.error("[team-tool] Unexpected error:", err);
         return {
-          content: [{ type: "text", text: `❌ Team error: ${error.message}` }],
-          details: { error: error.message, action } as any,
+          content: [{ type: "text", text: `❌ Unexpected error: ${err.message}` }],
+          details: { error: err.message, stack: err.stack, action } as any,
           isError: true,
         };
+      }
+    },
+
+    renderCall(args: any, theme: any, _context: any) {
+      const th = theme;
+      const action = args.action || "unknown";
+      let text = th.fg("toolTitle", th.bold("spawn_team ")) + th.fg("muted", action);
+      if (action === "create" && args.tasks?.length) {
+        text += ` ${th.fg("dim", `(${args.tasks.length} tasks, ${args.size || 2} agents)`)}`;
+      } else if (action === "send") {
+        text += ` ${th.fg("dim", `to ${args.channel}`)}`;
+      }
+      return new (require("@mariozechner/pi-tui").Text)(text, 0, 0);
+    },
+
+    renderResult(result: any, options: { expanded: boolean; isPartial: boolean }, theme: any, _context: any) {
+      const th = theme;
+      const details = result.details as any;
+
+      if (options.isPartial) {
+        return new (require("@mariozechner/pi-tui").Text)(th.fg("warning", "Processing..."), 0, 0);
+      }
+
+      if (result.isError) {
+        return new (require("@mariozechner/pi-tui").Text)(th.fg("error", `Error: ${details?.error || "Unknown"}`), 0, 0);
+      }
+
+      switch (details?.action) {
+        case "create":
+          return new (require("@mariozechner/pi-tui").Text)(th.fg("success", `✅ Team created: ${details.teamId}`), 0, 0);
+        case "status": {
+          const { teamId, completed, tasks, status } = details;
+          const color = status === "completed" ? "success" : "info";
+          return new (require("@mariozechner/pi-tui").Text)(th.fg(color, `Team ${teamId}: ${completed}/${tasks} tasks, ${status}`), 0, 0);
+        }
+        case "send":
+          return new (require("@mariozechner/pi-tui").Text)(th.fg("info", `📤 Sent to ${details.teamId}`), 0, 0);
+        case "dispose":
+          return new (require("@mariozechner/pi-tui").Text)(th.fg("warning", `🗑️ Disposed ${details.teamId}`), 0, 0);
+        case "list":
+          return new (require("@mariozechner/pi-tui").Text)(th.fg("info", `Teams: ${details.teams?.length || 0} active`), 0, 0);
+        default:
+          return new (require("@mariozechner/pi-tui").Text)(th.fg("muted", "Done"), 0, 0);
       }
     },
   };
