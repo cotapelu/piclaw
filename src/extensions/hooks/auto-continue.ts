@@ -28,21 +28,21 @@ export default function (pi: ExtensionAPI) {
   const startIdleTimer = () => {
     if (idleTimer) return;
     idleTimer = setTimeout(() => {
-      console.log("[AutoContinue] Timer fired, enabled:", enabled);
+      //console.log("[AutoContinue] Timer fired, enabled:", enabled);
       if (enabled) {
         pi.sendMessage(
           { customType: "auto-continue", content: IDLE_MESSAGE, display: false },
           { triggerTurn: true, deliverAs: "followUp" }
         );
-        console.log("[AutoContinue] Sent idle reminder message.");
+        //console.log("[AutoContinue] Sent idle reminder message.");
       }
       idleTimer = null;
     }, idleTimeoutMs);
   };
 
-  // Register /gnp command
-  pi.registerCommand("gnp", {
-    description: "Toggle auto-continue: /gnp [on|off|seconds]. Bật/tắt hoặc set timeout (seconds)",
+  // Register /gnpi command
+  pi.registerCommand("gnpi", {
+    description: "Toggle auto-continue: /gnpi [on|off|seconds]. Bật/tắt hoặc set timeout (seconds)",
     handler: async (args: string, ctx: ExtensionContext) => {
       const parts = args.trim().split(/\s+/);
       const command = parts[0].toLowerCase();
@@ -56,7 +56,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.hasUI) {
           ctx.ui.notify("Auto-continue đã TẮT", "info");
         }
-        console.log("[AutoContinue] Disabled");
+        //console.log("[AutoContinue] Disabled");
         return;
       }
 
@@ -69,7 +69,7 @@ export default function (pi: ExtensionAPI) {
           startIdleTimer();
           console.log("[AutoContinue] Started timer immediately (was idle)");
         }
-        console.log("[AutoContinue] Enabled");
+        //console.log("[AutoContinue] Enabled");
         return;
       }
 
@@ -93,7 +93,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.isIdle()) {
           startIdleTimer();
         }
-        console.log("[AutoContinue] Enabled via toggle");
+        //console.log("[AutoContinue] Enabled via toggle");
       } else {
         if (idleTimer) {
           clearTimeout(idleTimer);
@@ -102,14 +102,14 @@ export default function (pi: ExtensionAPI) {
         if (ctx.hasUI) {
           ctx.ui.notify("Auto-continue đã TẮT", "info");
         }
-        console.log("[AutoContinue] Disabled via toggle");
+        //console.log("[AutoContinue] Disabled via toggle");
       }
     },
   });
 
   // Listen to agent_end using pi.on()
   pi.on("agent_end", () => {
-    console.log("[AutoContinue] agent_end fired, enabled:", enabled);
+    //console.log("[AutoContinue] agent_end fired, enabled:", enabled);
     if (!enabled) return;
     startIdleTimer();
   });
