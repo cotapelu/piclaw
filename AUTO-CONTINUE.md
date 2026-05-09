@@ -1,2 +1,1 @@
-Hãy tiếp tục làm task tiếp theo trong docs/TODO.md.
-Nhớ cập nhật trạng thái đã làm xong và git commit.
+App đỉnh nhất thế giới. No devops. No infra. No CI/CD. No deployment. No cloud. No server. No ops. No meetings. Security: có. Testing: có. Bug fix: triệt để. Code quality: sạch. Performance: nhanh. Scalability: mở rộng. Business logic: hoàn hảo. User experience: tuyệt vời. Features: đột phá. UI: đẹp. UX: mượt. Speed: nhanh. Reliability: 100%. App chạy 24/7. App chạy ổn định. App không lỗi. User yêu app. App đỉnh nhất. Nhiệm vụ: viết code.
