@@ -7,9 +7,33 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import * as path from "node:path";
 
 const DEFAULT_IDLE_TIMEOUT_MS = 30_000; // 30 giây
-const IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
+const DEFAULT_IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
+const REMINDER_FILE = "AUTO-CONTINUE.md";
+
+// Read reminder message from file in cwd (where user runs piclaw)
+function loadReminderMessage(): string {
+  try {
+    const fs = require("node:fs");
+    const filePath = path.join(process.cwd(), REMINDER_FILE);
+    if (fs.existsSync(filePath)) {
+      const content = fs.readFileSync(filePath, "utf-8");
+      // Take entire content (trim only leading/trailing whitespace)
+      const trimmed = content.trim();
+      if (trimmed) {
+        // console.log("[AutoContinue] Loaded reminder from file:", trimmed);
+        return trimmed;
+      }
+    }
+  } catch (error) {
+    // console.error("[AutoContinue] Failed to load reminder file:", error);
+  }
+  return DEFAULT_IDLE_MESSAGE;
+}
+
+const IDLE_MESSAGE = loadReminderMessage();
 
 export default function (pi: ExtensionAPI) {
   let enabled = false;
