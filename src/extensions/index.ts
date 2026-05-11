@@ -11,6 +11,8 @@ import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystem
 import autoContinueExtension from "./hooks/auto-continue.js";
 import { registerTeamTool } from "./tools/team-tool.js";
 
+import piclawHeader from "./piclaw-header.js";
+
 export default function (api: import("@mariozechner/pi-coding-agent").ExtensionAPI) {
   // Register providers
   registerKiloProvider(api);
@@ -28,4 +30,7 @@ export default function (api: import("@mariozechner/pi-coding-agent").ExtensionA
 
   // Register Auto Continue Extension
   autoContinueExtension(api);
+
+  // Register Piclaw Header
+  piclawHeader(api);
 }
