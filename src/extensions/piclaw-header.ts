@@ -31,16 +31,42 @@ for (const path of possiblePaths) {
     }
 }
 
+async function checkForUpdate(): Promise<string | undefined> {
+    if (process.env.PI_SKIP_VERSION_CHECK || process.env.PI_OFFLINE) return undefined;
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 10000);
+        const response = await fetch("https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest", {
+            signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+        if (!response.ok) return undefined;
+        const data = await response.json();
+        const latestVersion = data.version;
+        if (latestVersion && latestVersion !== PI_VERSION) {
+            return latestVersion;
+        }
+    } catch {
+        // ignore errors
+    }
+    return undefined;
+}
+
 export default function (api: ExtensionAPI): void {
 	api.on("session_start", async (_event, ctx) => {
 		if (ctx.hasUI) {
+			const updateVersion = await checkForUpdate();
+
 			ctx.ui.setHeader((_tui, theme) => {
-				const line1 = theme.fg("dim", `${PICLAW_APP_NAME} agent build on top of pi.dev sdk.`);
-				const line2 = theme.bold(theme.fg("accent", PICLAW_APP_NAME)) + theme.fg("dim", ` v${PICLAW_VERSION}`);
-				return new Text(`${line1}\n${line2}`, 1, 0);
+				let header = `${theme.fg("dim", `${PICLAW_APP_NAME} agent build on top of pi.dev sdk.`)} \n`;
+				header += `${theme.bold(theme.fg("accent", PICLAW_APP_NAME))}${theme.fg("dim", ` v${PICLAW_VERSION}`)}`;
+				if (updateVersion) {
+					header += `\n${theme.fg("warning", "Update Available")}`;
+					header += `\n${theme.fg("dim", `New version ${updateVersion} is available.`)}`;
+					header += `\n${theme.bold("Run piclaw update")}`;
+				}
+				return new Text(header, 1, 0);
 			});
 		}
 	});
-
-
 }
