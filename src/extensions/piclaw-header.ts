@@ -41,8 +41,8 @@ async function checkForUpdate(): Promise<string | undefined> {
         });
         clearTimeout(timeoutId);
         if (!response.ok) return undefined;
-        const data = await response.json() as { version: string };
-        const latestVersion = data.version;
+        const data = await response.json();
+        const latestVersion = (data as any).version;
         if (latestVersion && latestVersion !== PI_VERSION) {
             return latestVersion;
         }
