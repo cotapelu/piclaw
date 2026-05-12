@@ -1,16 +1,17 @@
 #!/usr/bin/env node
 /**
- * Simple Todo Tool - Core operations only
+ * Full-Featured Todo Tool - Complete implementation with all backup features
  * - 6 ops: replace, add_phase, add_task, update, remove_task, list
  * - Auto-normalize: one in_progress task
  * - File persistence: ./.piclaw/agent/todos.json
  * - System messages + auto-continue
+ * - Strict validation + mergeCallAndResult
  */
 
 import { existsSync, mkdirSync, promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ToolDefinition, ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Type, StringEnum } from "@mariozechner/pi-ai";
+import { Type } from "@mariozechner/pi-ai";
 import type { Static } from "typebox";
 import { Text } from "@mariozechner/pi-tui";
 
@@ -78,9 +79,10 @@ interface PersistedTodo {
   updatedAt: string;
 }
 
+// BACKUP: storage detection - session vs file
 export interface TodoToolDetails {
   phases: TodoPhase[];
-  storage: string;
+  storage: "session" | "memory" | "file";  // Added "file" for extension
   error?: string;
 }
 
@@ -148,39 +150,39 @@ type TodoWriteParams = Static<typeof todoWriteSchema>;
 // ============================================================================
 
 function getProjectTodoFilePath(): string {
-	return join(process.cwd(), ".piclaw", "agent", "todos.json");
+  return join(process.cwd(), ".piclaw", "agent", "todos.json");
 }
 
 async function loadTodoFromFile(): Promise<TodoFile | null> {
-	const filePath = getProjectTodoFilePath();
-	if (!existsSync(filePath)) return null;
-	try {
-		const content = await fs.readFile(filePath, "utf-8");
-		const parsed: PersistedTodo = JSON.parse(content);
-		if (parsed.version !== 1) return null;
-		return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
-	} catch (e) {
-		console.error("Load todos failed:", e);
-		return null;
-	}
+  const filePath = getProjectTodoFilePath();
+  if (!existsSync(filePath)) return null;
+  try {
+    const content = await fs.readFile(filePath, "utf-8");
+    const parsed: PersistedTodo = JSON.parse(content);
+    if (parsed.version !== 1) return null;
+    return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
+  } catch (e) {
+    console.error("Load todos failed:", e);
+    return null;
+  }
 }
 
 async function saveTodoToFile(todo: TodoFile): Promise<void> {
-	const filePath = getProjectTodoFilePath();
-	const dir = dirname(filePath);
-	if (!existsSync(dir)) await fs.mkdir(dir, { recursive: true });
-	const persisted: PersistedTodo = {
-		version: 1,
-		phases: todo.phases,
-		nextTaskId: todo.nextTaskId,
-		nextPhaseId: todo.nextPhaseId,
-		updatedAt: new Date().toISOString(),
-	};
-	await fs.writeFile(filePath, JSON.stringify(persisted, null, 2));
+  const filePath = getProjectTodoFilePath();
+  const dir = dirname(filePath);
+  if (!existsSync(dir)) await fs.mkdir(dir, { recursive: true });
+  const persisted: PersistedTodo = {
+    version: 1,
+    phases: todo.phases,
+    nextTaskId: todo.nextTaskId,
+    nextPhaseId: todo.nextPhaseId,
+    updatedAt: new Date().toISOString(),
+  };
+  await fs.writeFile(filePath, JSON.stringify(persisted, null, 2));
 }
 
 // ============================================================================
-// Helpers
+// Helpers (IDENTICAL to backup)
 // ============================================================================
 
 function clonePhases(phases: TodoPhase[]): TodoPhase[] {
@@ -196,389 +198,335 @@ function findTask(phases: TodoPhase[], id: string): TodoItem | undefined {
 }
 
 function buildPhaseFromInput(
-	input: { name: string; tasks?: Array<{ content: string; status?: string; notes?: string; details?: string }> },
-	phaseId: string,
-	nextTaskId: number,
+  input: { name: string; tasks?: Array<{ content: string; status?: string; notes?: string; details?: string }> },
+  phaseId: string,
+  nextTaskId: number,
 ): { phase: TodoPhase; nextTaskId: number } {
-	const tasks: TodoItem[] = [];
-	let tid = nextTaskId;
-	for (const t of input.tasks ?? []) {
-		// Cast status to TodoStatus if valid, otherwise default to pending
-		let status: TodoStatus = "pending";
-		if (t.status && ["pending", "in_progress", "completed", "abandoned"].includes(t.status)) {
-			status = t.status as TodoStatus;
-		}
-		tasks.push({
-			id: `task-${tid++}`,
-			content: t.content,
-			status,
-			notes: t.notes,
-			details: t.details,
-		});
-	}
-	return { phase: { id: phaseId, name: input.name, tasks }, nextTaskId: tid };
+  const tasks: TodoItem[] = [];
+  let tid = nextTaskId;
+  for (const t of input.tasks ?? []) {
+    // Cast status to TodoStatus if valid, otherwise default to pending
+    let status: TodoStatus = "pending";
+    if (t.status && ["pending", "in_progress", "completed", "abandoned"].includes(t.status)) {
+      status = t.status as TodoStatus;
+    }
+    tasks.push({
+      id: `task-${tid++}`,
+      content: t.content,
+      status,
+      notes: t.notes,
+      details: t.details,
+    });
+  }
+  return { phase: { id: phaseId, name: input.name, tasks }, nextTaskId: tid };
 }
 
 function getNextIds(phases: TodoPhase[]): { nextTaskId: number; nextPhaseId: number } {
-	let maxTaskId = 0;
-	let maxPhaseId = 0;
+  let maxTaskId = 0;
+  let maxPhaseId = 0;
 
-	for (const phase of phases) {
-		const phaseMatch = /^phase-(\d+)$/.exec(phase.id);
-		if (phaseMatch) {
-			const value = Number.parseInt(phaseMatch[1], 10);
-			if (Number.isFinite(value) && value > maxPhaseId) maxPhaseId = value;
-		}
+  for (const phase of phases) {
+    const phaseMatch = /^phase-(\d+)$/.exec(phase.id);
+    if (phaseMatch) {
+      const value = Number.parseInt(phaseMatch[1], 10);
+      if (Number.isFinite(value) && value > maxPhaseId) maxPhaseId = value;
+    }
 
-		for (const task of phase.tasks) {
-			const taskMatch = /^task-(\d+)$/.exec(task.id);
-			if (!taskMatch) continue;
-			const value = Number.parseInt(taskMatch[1], 10);
-			if (Number.isFinite(value) && value > maxTaskId) maxTaskId = value;
-		}
-	}
+    for (const task of phase.tasks) {
+      const taskMatch = /^task-(\d+)$/.exec(task.id);
+      if (!taskMatch) continue;
+      const value = Number.parseInt(taskMatch[1], 10);
+      if (Number.isFinite(value) && value > maxTaskId) maxTaskId = value;
+    }
+  }
 
-	return { nextTaskId: maxTaskId + 1, nextPhaseId: maxPhaseId + 1 };
+  return { nextTaskId: maxTaskId + 1, nextPhaseId: maxPhaseId + 1 };
 }
 
-function fileFromPhases(phases: TodoPhase[]): TodoFile {
-	const { nextTaskId, nextPhaseId } = getNextIds(phases);
-	return { phases, nextTaskId, nextPhaseId };
-}
-
-function normalizeInProgressTask(phases: TodoPhase[]): void {
-	const orderedTasks = phases.flatMap((phase) => phase.tasks);
-	if (orderedTasks.length === 0) return;
-
-	const inProgressTasks = orderedTasks.filter((task) => task.status === "in_progress");
-	if (inProgressTasks.length > 1) {
-		for (const task of inProgressTasks.slice(1)) {
-			task.status = "pending";
-		}
-	}
-
-	if (inProgressTasks.length > 0) return;
-
-	const firstPendingTask = orderedTasks.find((task) => task.status === "pending");
-	if (firstPendingTask) firstPendingTask.status = "in_progress";
+function normalizeInProgress(phases: TodoPhase[]): void {
+  const all = phases.flatMap(p => p.tasks);
+  if (all.length === 0) return;
+  const inProg = all.filter(t => t.status === "in_progress");
+  if (inProg.length > 1) for (const t of inProg.slice(1)) t.status = "pending";
+  if (inProg.length > 0) return;
+  const first = all.find(t => t.status === "pending");
+  if (first) first.status = "in_progress";
 }
 
 // ============================================================================
-// Input normalization - Handle string fallback and common LLM errors
+// Input normalization (IDENTICAL to backup)
 // ============================================================================
 
-/**
- * Normalizes input parameters to handle common LLM errors:
- * - Stringified JSON objects
- * - Missing required fields
- * - Wrong data types
- */
 function normalizeParams(params: unknown): TodoWriteParams {
-	// If params is a string, try to parse it
-	if (typeof params === "string") {
-		try {
-			params = JSON.parse(params);
-		} catch (e) {
-			throw new Error(`Invalid JSON string: ${e instanceof Error ? e.message : String(e)}`);
-		}
-	}
+  if (typeof params === "string") {
+    try {
+      params = JSON.parse(params);
+    } catch (e) {
+      throw new Error(`Invalid JSON string: ${e instanceof Error ? e.message : String(e)}`);
+    }
+  }
 
-	// Ensure params is an object
-	if (typeof params !== "object" || params === null) {
-		throw new Error("Parameters must be an object");
-	}
+  if (typeof params !== "object" || params === null) {
+    throw new Error("Parameters must be an object");
+  }
 
-	const normalized = params as Record<string, unknown>;
+  const normalized = params as Record<string, unknown>;
 
-	// Handle add_phase being a string instead of object
-	if (normalized.add_phase && typeof normalized.add_phase === "string") {
-		try {
-			normalized.add_phase = JSON.parse(normalized.add_phase);
-		} catch (e) {
-			throw new Error(
-				`add_phase must be an object, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
-			);
-		}
-	}
+  if (normalized.add_phase && typeof normalized.add_phase === "string") {
+    try {
+      normalized.add_phase = JSON.parse(normalized.add_phase);
+    } catch (e) {
+      throw new Error(
+        `add_phase must be an object, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
+      );
+    }
+  }
 
-	// Handle add_phase.name being a stringified object
-	if (normalized.add_phase && typeof normalized.add_phase === "object") {
-		const addPhase = normalized.add_phase as Record<string, unknown>;
-		if (addPhase.name && typeof addPhase.name === "string" && addPhase.name.startsWith("{")) {
-			try {
-				const parsed = JSON.parse(addPhase.name);
-				if (typeof parsed === "object" && parsed !== null) {
-					// LLM put the whole object in name field
-					normalized.add_phase = parsed;
-				}
-			} catch {
-				// Keep original if parse fails
-			}
-		}
-	}
-
-	// Handle tasks being a string instead of array
-	if (normalized.add_phase && typeof normalized.add_phase === "object") {
-		const addPhase = normalized.add_phase as Record<string, unknown>;
-		if (addPhase.tasks && typeof addPhase.tasks === "string") {
-			try {
-				addPhase.tasks = JSON.parse(addPhase.tasks);
-			} catch {
-				// If it's a comma-separated string, split it
-				addPhase.tasks = (addPhase.tasks as string).split(",").map((s) => ({ content: s.trim() }));
-			}
-		}
-	}
-
-	// Handle replace.phases being a string
-	if (normalized.replace && typeof normalized.replace === "object") {
-		const replace = normalized.replace as Record<string, unknown>;
-		if (replace.phases && typeof replace.phases === "string") {
-			try {
-				replace.phases = JSON.parse(replace.phases);
-			} catch (e) {
-				throw new Error(
-					`replace.phases must be an array, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
-				);
-			}
-		}
-	}
-
-	return normalized as TodoWriteParams;
-}
-
-// ============================================================================
-// Apply single op (nested format detection)
-// ============================================================================
-
-function makeEmptyFile(): TodoFile {
-	return { phases: [], nextTaskId: 1, nextPhaseId: 1 };
-}
-
-/**
- * Applies a single operation to the todo file.
- * This is the main operation handler for the nested format.
- */
-function applySingleOp(file: TodoFile, params: TodoWriteParams): { file: TodoFile; errors: string[] } {
-	const errors: string[] = [];
-
-	// Detect which operation is being called
-	if (params.replace) {
-		const op = params.replace;
-		if (!Array.isArray(op.phases)) {
-			errors.push("replace.phases must be an array");
-			return { file, errors };
-		}
-		const next = makeEmptyFile();
-		for (const inputPhase of op.phases) {
-			if (!inputPhase || typeof inputPhase !== "object") {
-				errors.push("Each phase must be an object");
-				continue;
-			}
-			if (!inputPhase.name || typeof inputPhase.name !== "string") {
-				errors.push("Each phase must have a name (string)");
-				continue;
-			}
-			const phaseId = `phase-${next.nextPhaseId++}`;
-			const { phase, nextTaskId } = buildPhaseFromInput(inputPhase as any, phaseId, next.nextTaskId);
-			next.phases.push(phase);
-			next.nextTaskId = nextTaskId;
-		}
-		file = next;
-		normalizeInProgressTask(file.phases);
-		return { file, errors };
-	}
-
-	if (params.add_phase) {
-		const op = params.add_phase;
-		if (!op || typeof op !== "object") {
-			errors.push("add_phase must be an object");
-			return { file, errors };
-		}
-		if (!op.name || typeof op.name !== "string") {
-			errors.push("add_phase.name must be a string (not an object or array)");
-			return { file, errors };
-		}
-		if (op.tasks && !Array.isArray(op.tasks)) {
-			errors.push("add_phase.tasks must be an array");
-			return { file, errors };
-		}
-		const phaseId = `phase-${file.nextPhaseId++}`;
-		const { phase, nextTaskId } = buildPhaseFromInput(op, phaseId, file.nextTaskId);
-		file.phases.push(phase);
-		file.nextTaskId = nextTaskId;
-		normalizeInProgressTask(file.phases);
-		return { file, errors };
-	}
-
-	if (params.add_task) {
-		const op = params.add_task;
-		if (!op || typeof op !== "object") {
-			errors.push("add_task must be an object");
-			return { file, errors };
-		}
-		if (!op.phase || typeof op.phase !== "string") {
-			errors.push("add_task.phase must be a string (e.g., 'phase-1')");
-			return { file, errors };
-		}
-		if (!op.content || typeof op.content !== "string") {
-			errors.push("add_task.content must be a string");
-			return { file, errors };
-		}
-		const target = file.phases.find((p) => p.id === op.phase);
-		if (!target) {
-			errors.push(`Phase "${op.phase}" not found`);
-		} else {
-			target.tasks.push({
-				id: `task-${file.nextTaskId++}`,
-				content: op.content,
-				status: "pending",
-				notes: op.notes,
-				details: op.details,
-			});
-		}
-		normalizeInProgressTask(file.phases);
-		return { file, errors };
-	}
-
-	if (params.update) {
-		const op = params.update;
-		if (!op || typeof op !== "object") {
-			errors.push("update must be an object");
-			return { file, errors };
-		}
-		if (!op.id || typeof op.id !== "string") {
-			errors.push("update.id must be a string (e.g., 'task-1')");
-			return { file, errors };
-		}
-		const task = findTask(file.phases, op.id);
-		if (!task) {
-			errors.push(`Task "${op.id}" not found`);
-		} else {
-			if (op.status !== undefined) {
-				if (typeof op.status === "string" && ["pending", "in_progress", "completed", "abandoned"].includes(op.status)) {
-					task.status = op.status as TodoStatus;
-				} else {
-					errors.push(`Invalid status: ${op.status}. Must be pending, in_progress, completed, or abandoned.`);
-				}
-			}
-			if (op.content !== undefined) task.content = op.content;
-			if (op.notes !== undefined) task.notes = op.notes;
-			if (op.details !== undefined) task.details = op.details;
-		}
-		normalizeInProgressTask(file.phases);
-		return { file, errors };
-	}
-
-	if (params.remove_task) {
-		const op = params.remove_task;
-		if (!op || typeof op !== "object") {
-			errors.push("remove_task must be an object");
-			return { file, errors };
-		}
-		if (!op.id || typeof op.id !== "string") {
-			errors.push("remove_task.id must be a string (e.g., 'task-1')");
-			return { file, errors };
-		}
-		let removed = false;
-		for (const phase of file.phases) {
-			const idx = phase.tasks.findIndex((t) => t.id === op.id);
-			if (idx !== -1) {
-				phase.tasks.splice(idx, 1);
-				removed = true;
-				break;
-			}
-		}
-		if (!removed) {
-			errors.push(`Task "${op.id}" not found`);
-		}
-		normalizeInProgressTask(file.phases);
-		return { file, errors };
-	}
-
-	if (params.list !== undefined) {
-		// List operation - no modification, just return current state
-		return { file, errors };
-	}
-
-	// No operation specified
-	errors.push("No operation specified");
-	normalizeInProgressTask(file.phases);
-	return { file, errors };
-}
-
-function formatSummary(phases: TodoPhase[], errors: string[]): string {
-	const tasks = phases.flatMap((p) => p.tasks);
-	if (tasks.length === 0) return errors.length > 0 ? `Errors: ${errors.join("; ")}` : "Todo list cleared.";
-
-	const remainingByPhase = phases
-		.map((phase) => ({
-			name: phase.name,
-			tasks: phase.tasks.filter((task) => task.status === "pending" || task.status === "in_progress"),
-		}))
-		.filter((phase) => phase.tasks.length > 0);
-	const remainingTasks = remainingByPhase.flatMap((phase) =>
-		phase.tasks.map((task) => ({ ...task, phase: phase.name })),
-	);
-
-	// Find current phase
-	let currentIdx = phases.findIndex((p) => p.tasks.some((t) => t.status === "pending" || t.status === "in_progress"));
-	if (currentIdx === -1) currentIdx = phases.length - 1;
-	const current = phases[currentIdx];
-	const done = current?.tasks.filter((t) => t.status === "completed" || t.status === "abandoned").length ?? 0;
-
-	const lines: string[] = [];
-	if (errors.length > 0) {
-		lines.push(`⚠️ Errors: ${errors.join("; ")}`);
-	} else {
-		const pending = tasks.filter((t) => t.status === "pending" || t.status === "in_progress").length;
-		const completed = tasks.filter((t) => t.status === "completed").length;
-		lines.push(`✅ Todo updated: ${pending} remaining, ${completed} completed.`);
-		lines.push(`📊 Use /todos to view, or continue with next task.`);
-		lines.push("");
-	}
-	if (remainingTasks.length === 0) {
-		lines.push("Remaining items: none.");
-	} else {
-		lines.push(`Remaining items (${remainingTasks.length}):`);
-		for (const task of remainingTasks) {
-			lines.push(`  - ${task.id} ${task.content} [${task.status}] (${task.phase})`);
-			if (task.status === "in_progress" && task.details) {
-				for (const line of task.details.split("\n")) {
-					lines.push(`      ${line}`);
-				}
-			}
-		}
-	}
-	lines.push(
-		`Phase ${currentIdx + 1}/${phases.length} "${current?.name ?? "unknown"}" — ${done}/${current?.tasks.length ?? 0} tasks complete`,
-	);
-	return lines.join("\n");
-}
-
-// ============================================================================
-// Normalization - Handle common LLM output errors
-// ============================================================================
-
-/**
- * Parse value that could be string or object into proper object.
- * Handles: '{...}', '{"name":"..."}', { name: {...} }
- */
-function parseInputValue(value: any): any {
-  if (!value) return value;
-  if (typeof value === "object") return value;
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+  if (normalized.add_phase && typeof normalized.add_phase === "object") {
+    const addPhase = normalized.add_phase as Record<string, unknown>;
+    if (addPhase.name && typeof addPhase.name === "string" && addPhase.name.startsWith("{")) {
       try {
-        return JSON.parse(trimmed);
+        const parsed = JSON.parse(addPhase.name);
+        if (typeof parsed === "object" && parsed !== null) {
+          normalized.add_phase = parsed;
+        }
       } catch {
         // Keep original if parse fails
       }
     }
   }
-  return value;
+
+  if (normalized.add_phase && typeof normalized.add_phase === "object") {
+    const addPhase = normalized.add_phase as Record<string, unknown>;
+    if (addPhase.tasks && typeof addPhase.tasks === "string") {
+      try {
+        addPhase.tasks = JSON.parse(addPhase.tasks);
+      } catch {
+        addPhase.tasks = (addPhase.tasks as string).split(",").map((s) => ({ content: s.trim() }));
+      }
+    }
+  }
+
+  if (normalized.replace && typeof normalized.replace === "object") {
+    const replace = normalized.replace as Record<string, unknown>;
+    if (replace.phases && typeof replace.phases === "string") {
+      try {
+        replace.phases = JSON.parse(replace.phases);
+      } catch (e) {
+        throw new Error(
+          `replace.phases must be an array, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    }
+  }
+
+  return normalized as TodoWriteParams;
 }
+
+// ============================================================================
+// Apply single op (IDENTICAL to backup)
+// ============================================================================
+
+function makeEmptyFile(): TodoFile {
+  return { phases: [], nextTaskId: 1, nextPhaseId: 1 };
+}
+
+function applySingleOp(file: TodoFile, params: TodoWriteParams): { file: TodoFile; errors: string[] } {
+  const errors: string[] = [];
+
+  if (params.replace) {
+    const op = params.replace;
+    if (!Array.isArray(op.phases)) {
+      errors.push("replace.phases must be an array");
+      return { file, errors };
+    }
+    const next = makeEmptyFile();
+    for (const inputPhase of op.phases) {
+      if (!inputPhase || typeof inputPhase !== "object") {
+        errors.push("Each phase must be an object");
+        continue;
+      }
+      if (!inputPhase.name || typeof inputPhase.name !== "string") {
+        errors.push("Each phase must have a name (string)");
+        continue;
+      }
+      const phaseId = `phase-${next.nextPhaseId++}`;
+      const { phase, nextTaskId } = buildPhaseFromInput(inputPhase as any, phaseId, next.nextTaskId);
+      next.phases.push(phase);
+      next.nextTaskId = nextTaskId;
+    }
+    file = next;
+    normalizeInProgress(file.phases);
+    return { file, errors };
+  }
+
+  if (params.add_phase) {
+    const op = params.add_phase;
+    if (!op || typeof op !== "object") {
+      errors.push("add_phase must be an object");
+      return { file, errors };
+    }
+    if (!op.name || typeof op.name !== "string") {
+      errors.push("add_phase.name must be a string (not an object or array)");
+      return { file, errors };
+    }
+    if (op.tasks && !Array.isArray(op.tasks)) {
+      errors.push("add_phase.tasks must be an array");
+      return { file, errors };
+    }
+    const phaseId = `phase-${file.nextPhaseId++}`;
+    const { phase, nextTaskId } = buildPhaseFromInput(op, phaseId, file.nextTaskId);
+    file.phases.push(phase);
+    file.nextTaskId = nextTaskId;
+    normalizeInProgress(file.phases);
+    return { file, errors };
+  }
+
+  if (params.add_task) {
+    const op = params.add_task;
+    if (!op || typeof op !== "object") {
+      errors.push("add_task must be an object");
+      return { file, errors };
+    }
+    if (!op.phase || typeof op.phase !== "string") {
+      errors.push("add_task.phase must be a string (e.g., 'phase-1')");
+      return { file, errors };
+    }
+    if (!op.content || typeof op.content !== "string") {
+      errors.push("add_task.content must be a string");
+      return { file, errors };
+    }
+    const target = file.phases.find((p) => p.id === op.phase);
+    if (!target) {
+      errors.push(`Phase "${op.phase}" not found`);
+    } else {
+      target.tasks.push({
+        id: `task-${file.nextTaskId++}`,
+        content: op.content,
+        status: "pending",
+        notes: op.notes,
+        details: op.details,
+      });
+    }
+    normalizeInProgress(file.phases);
+    return { file, errors };
+  }
+
+  if (params.update) {
+    const op = params.update;
+    if (!op || typeof op !== "object") {
+      errors.push("update must be an object");
+      return { file, errors };
+    }
+    if (!op.id || typeof op.id !== "string") {
+      errors.push("update.id must be a string (e.g., 'task-1')");
+      return { file, errors };
+    }
+    const task = findTask(file.phases, op.id);
+    if (!task) {
+      errors.push(`Task "${op.id}" not found`);
+    } else {
+      if (op.status !== undefined) {
+        if (typeof op.status === "string" && ["pending", "in_progress", "completed", "abandoned"].includes(op.status)) {
+          task.status = op.status as TodoStatus;
+        } else {
+          errors.push(`Invalid status: ${op.status}. Must be pending, in_progress, completed, or abandoned.`);
+        }
+      }
+      if (op.content !== undefined) task.content = op.content;
+      if (op.notes !== undefined) task.notes = op.notes;
+      if (op.details !== undefined) task.details = op.details;
+    }
+    normalizeInProgress(file.phases);
+    return { file, errors };
+  }
+
+  if (params.remove_task) {
+    const op = params.remove_task;
+    if (!op || typeof op !== "object") {
+      errors.push("remove_task must be an object");
+      return { file, errors };
+    }
+    if (!op.id || typeof op.id !== "string") {
+      errors.push("remove_task.id must be a string (e.g., 'task-1')");
+      return { file, errors };
+    }
+    let removed = false;
+    for (const phase of file.phases) {
+      const idx = phase.tasks.findIndex((t) => t.id === op.id);
+      if (idx !== -1) {
+        phase.tasks.splice(idx, 1);
+        removed = true;
+        break;
+      }
+    }
+    if (!removed) {
+      errors.push(`Task "${op.id}" not found`);
+    }
+    normalizeInProgress(file.phases);
+    return { file, errors };
+  }
+
+  if (params.list !== undefined) {
+    return { file, errors };
+  }
+
+  errors.push("No operation specified");
+  normalizeInProgress(file.phases);
+  return { file, errors };
+}
+
+function formatSummary(phases: TodoPhase[], errors: string[]): string {
+  const tasks = phases.flatMap((p) => p.tasks);
+  if (tasks.length === 0) return errors.length > 0 ? `Errors: ${errors.join("; ")}` : "Todo list cleared.";
+
+  const remainingByPhase = phases
+    .map((phase) => ({
+      name: phase.name,
+      tasks: phase.tasks.filter((task) => task.status === "pending" || task.status === "in_progress"),
+    }))
+    .filter((phase) => phase.tasks.length > 0);
+  const remainingTasks = remainingByPhase.flatMap((phase) =>
+    phase.tasks.map((task) => ({ ...task, phase: phase.name })),
+  );
+
+  let currentIdx = phases.findIndex((p) => p.tasks.some((t) => t.status === "pending" || t.status === "in_progress"));
+  if (currentIdx === -1) currentIdx = phases.length - 1;
+  const current = phases[currentIdx];
+  const done = current?.tasks.filter((t) => t.status === "completed" || t.status === "abandoned").length ?? 0;
+
+  const lines: string[] = [];
+  if (errors.length > 0) {
+    lines.push(`⚠️ Errors: ${errors.join("; ")}`);
+  } else {
+    const pending = tasks.filter((t) => t.status === "pending" || t.status === "in_progress").length;
+    const completed = tasks.filter((t) => t.status === "completed").length;
+    lines.push(`✅ Todo updated: ${pending} remaining, ${completed} completed.`);
+    lines.push(`📊 Use /todos to view, or continue with next task.`);
+    lines.push("");
+  }
+  if (remainingTasks.length === 0) {
+    lines.push("Remaining items: none.");
+  } else {
+    lines.push(`Remaining items (${remainingTasks.length}):`);
+    for (const task of remainingTasks) {
+      lines.push(`  - ${task.id} ${task.content} [${task.status}] (${task.phase})`);
+      if (task.status === "in_progress" && task.details) {
+        for (const line of task.details.split("\n")) {
+          lines.push(`      ${line}`);
+        }
+      }
+    }
+  }
+  lines.push(
+    `Phase ${currentIdx + 1}/${phases.length} "${current?.name ?? "unknown"}" — ${done}/${current?.tasks.length ?? 0} tasks complete`,
+  );
+  return lines.join("\n");
+}
+
+// ============================================================================
+// Helper functions (from backup)
+// ============================================================================
 
 function countOperations(params: any): number {
   let count = 0;
@@ -601,33 +549,6 @@ function getOperationName(params: any): string {
   return "unknown";
 }
 
-/**
- * Normalize ID to standard format: task-1, phase-1
- * Handles: "1", "task1", "task_1", "Task 1" -> "task-1"
- */
-function normalizeId(id: string | undefined, type: 'task' | 'phase'): string | undefined {
-  if (!id) return id;
-  const s = String(id).trim().toLowerCase();
-  const prefix = type;
-  // Already correct: task-1, phase-1
-  if (/^task-\d+$/.test(s) || /^phase-\d+$/.test(s)) return s;
-  // Without prefix: 1, 2 -> task-1, phase-1
-  if (/^\d+$/.test(s)) return `${prefix}-${s}`;
-  // With prefix no dash: task1, phase1 -> task-1, phase-1  
-  const match1 = s.match(new RegExp(`^${prefix}(\\d+)$`));
-  if (match1) return `${prefix}-${match1[1]}`;
-  // task_1, phase_1 -> task-1
-  const match2 = s.match(new RegExp(`^${prefix}_(\\d+)$`));
-  if (match2) return `${prefix}-${match2[1]}`;
-  // "Task 1", "Phase 1" -> task-1
-  const match3 = s.match(new RegExp(`^${prefix}\\s+(\\d+)$`));
-  if (match3) return `${prefix}-${match3[1]}`;
-  return s;
-}
-
-// ============================================================================
-// Pure Operations - Apply single op, return new state + errors
-// ============================================================================
 
 function applyOp(
   phases: TodoPhase[],
@@ -645,24 +566,33 @@ function applyOp(
   };
 }
 
-function normalizeInProgress(phases: TodoPhase[]): void {
-  const all = phases.flatMap(p => p.tasks);
-  if (all.length === 0) return;
-  const inProg = all.filter(t => t.status === "in_progress");
-  if (inProg.length > 1) for (const t of inProg.slice(1)) t.status = "pending";
-  if (inProg.length > 0) return;
-  const first = all.find(t => t.status === "pending");
-  if (first) first.status = "in_progress";
+// BACKUP: getLatestTodoPhasesFromEntries (reconstruct from history)
+export function getLatestTodoPhasesFromEntries(entries: any[]): TodoPhase[] {
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    if (entry.type !== "message") continue;
+
+    const message = entry.message as { role?: string; toolName?: string; details?: unknown; isError?: boolean };
+    if (message.role !== "toolResult" || (message.toolName !== "todos" && message.toolName !== "todo_write") || message.isError) continue;
+
+    const details = message.details as { phases?: unknown } | undefined;
+    if (!details || !Array.isArray(details.phases)) continue;
+
+    return clonePhases(details.phases as TodoPhase[]);
+  }
+
+  return [];
 }
 
 // ============================================================================
-// State
+// State (Enhanced with session-based detection)
 // ============================================================================
 
 class TodoState {
   phases: TodoPhase[] = [];
   nextTaskId: number = 1;
   nextPhaseId: number = 1;
+  storageType: "session" | "memory" | "file" = "file"; // NEW: track storage type
   private listeners: Set<() => void> = new Set();
 
   subscribe(listener: () => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
@@ -670,10 +600,11 @@ class TodoState {
 
   async loadFromFile(): Promise<boolean> {
     const fileData = await loadTodoFromFile();
-    if (!fileData) { this.phases = []; this.nextTaskId = 1; this.nextPhaseId = 1; return false; }
+    if (!fileData) { this.phases = []; this.nextTaskId = 1; this.nextPhaseId = 1; this.storageType = "file"; return false; }
     this.phases = clonePhases(fileData.phases);
     this.nextTaskId = fileData.nextTaskId;
     this.nextPhaseId = fileData.nextPhaseId;
+    this.storageType = "file";
     this.notify();
     return true;
   }
@@ -683,6 +614,7 @@ class TodoState {
     await saveTodoToFile({ phases: clonePhases(this.phases), nextTaskId: ids.nextTaskId, nextPhaseId: ids.nextPhaseId });
   }
 
+  // BACKUP: reconstructFromEntries (identical logic)
   reconstructFromEntries(entries: any[]): void {
     for (let i = entries.length - 1; i >= 0; i--) {
       const e = entries[i];
@@ -700,6 +632,7 @@ class TodoState {
     }
   }
 
+  // BACKUP: All these methods are identical
   addPhase(name: string, tasks?: any[]): TodoPhase {
     const phaseId = `phase-${this.nextPhaseId++}`;
     const { phase, nextTaskId } = buildPhaseFromInput({ name, tasks }, phaseId, this.nextTaskId);
@@ -756,11 +689,36 @@ class TodoState {
   getPhases(): TodoPhase[] {
     return clonePhases(this.phases);
   }
+
+  // NEW: method to set storage type
+  setStorageType(type: "session" | "memory" | "file"): void {
+    this.storageType = type;
+  }
 }
 
 // ============================================================================
-// Render Functions
+// Render Functions (Enhanced with backup's formatTodoLine)
 // ============================================================================
+
+// BACKUP: formatTodoLine function (adapted for pi-tui Text)
+function formatTodoLineExtension(item: TodoItem, theme: any, prefix: string): string {
+  // Since we're using Text, we can't mix colors inline. We'll return plain text.
+  // For colored output, we'd need multiple Text segments or use theme.fg.
+  switch (item.status) {
+    case "completed":
+      return `${prefix}[✓] ${item.content}`;
+    case "in_progress": {
+      const main = `${prefix}[→] ${item.content}`;
+      if (!item.details) return main;
+      const detailLines = item.details.split("\n").map(l => `${prefix}  ${l}`);
+      return [main, ...detailLines].join("\n");
+    }
+    case "abandoned":
+      return `${prefix}[✗] ${item.content}`;
+    default:
+      return `${prefix}[ ] ${item.content}`;
+  }
+}
 
 function renderTodosCall(args: any, theme: any): Text {
   const op = args.replace ? "replace" : args.add_phase ? "add_phase" : args.add_task ? "add_task" : args.update ? "update" : args.remove_task ? "remove_task" : args.list ? "list" : "todo";
@@ -802,7 +760,7 @@ function renderTodosResult(result: { details?: TodoToolDetails }, options: { exp
 }
 
 // ============================================================================
-// Tool Factory
+// Tool Factory (with mergeCallAndResult support)
 // ============================================================================
 
 function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchema, TodoToolDetails> {
@@ -812,8 +770,14 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
   api.on("session_start", async (_event, ctx) => {
     const release = await stateMutex.lock();
     try {
-      await state.loadFromFile();
+      // Try to reconstruct from session history first (backward compatibility)
       state.reconstructFromEntries(ctx.sessionManager.getBranch());
+      // Then load from file (file takes precedence if exists)
+      const loaded = await state.loadFromFile();
+      if (!loaded) {
+        // If no file, mark as memory/session storage
+        state.setStorageType("memory");
+      }
     } finally {
       release();
     }
@@ -824,15 +788,49 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
     try {
       state.reconstructFromEntries(ctx.sessionManager.getBranch());
       await state.loadFromFile();
+      // If we reconstructed from entries but file exists, file is source of truth
+      // If file doesn't exist, we're in memory/session mode
+      const filePath = getProjectTodoFilePath();
+      if (!existsSync(filePath)) {
+        state.setStorageType("memory");
+      } else {
+        state.setStorageType("file");
+      }
     } finally {
       release();
+    }
+  });
+
+  // Auto-continue: only when agent ends (idle), check if there are pending tasks
+  api.on("agent_end", async () => {
+    if (autoTriggering) return; // Avoid re-entrancy
+
+    const phases = state.getPhases();
+    const hasPendingTasks = phases.some(phase =>
+      phase.tasks.some(task => task.status !== "completed" && task.status !== "abandoned")
+    );
+
+    if (!hasPendingTasks) return;
+
+    autoTriggering = true;
+    try {
+      await api.sendMessage({
+        customType: "todo-auto-continue",
+        content: "Continue with the next task. If no tasks remain, validate the work and add new tasks.",
+        display: false,
+        details: { autoTrigger: true, timestamp: Date.now() }
+      }, { triggerTurn: true, deliverAs: "followUp" });
+    } catch (e) {
+      console.error("[todos] Auto-continue failed:", e);
+    } finally {
+      setTimeout(() => { autoTriggering = false; }, 500);
     }
   });
 
   return {
     name: "todos",
     label: "Todo",
-    description: "Simple todo list: add_phase, add_task, update, remove_task, replace, list. Status: pending, in_progress, completed, abandoned. Auto-normalizes exactly ONE in_progress task. Use ONE operation per call.",
+    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. Supports session history reconstruction.",
     promptSnippet: "todos({ add_phase: { name: 'Phase 1' } })",
     promptGuidelines: [
       "Format: todos({ OPERATION: { params } }) - EXACTLY ONE operation per call.",
@@ -840,7 +838,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
       "Operations:",
       "  add_phase: { name: string (required), tasks?: [{ content: string (required) }] }",
       "  add_task:  { phase: 'phase-1' (required), content: string (required) }",
-      "  update:    { id: 'task-1' (required), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string }",
+      "  update:    { id: 'task-1' (required), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string, notes?: string, details?: string }",
       "  remove_task: { id: 'task-1' (required) }",
       "  replace:   { phases: [{ name: string (required), tasks?: [{ content: string }] }] (required) }",
       "  list:      { } (view only)",
@@ -849,6 +847,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
       "  - Values are objects, not strings. Do not JSON.stringify.",
       "  - Auto-creates ONE 'in_progress' task if none exist.",
       "  - Return: '✅ Updated: X remaining, Y completed.'",
+      "  - Storage: file (.piclaw/agent/todos.json), falls back to session memory.",
       "",
       "Examples:",
       "  todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design' }, { content: 'Auth' }] } })",
@@ -859,7 +858,6 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
       "  todos({ list: {} })",
     ],
     parameters: todoWriteSchema,
-    executionMode: "sequential" as const,
 
     async execute(_toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: ((update: any) => void) | undefined, ctx: ExtensionContext) {
       let p: any;
@@ -869,11 +867,15 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
         p = params;
       } catch (e: unknown) {
         const msg = e instanceof Error ? e.message : String(e);
-        return { content: [{ type: "text", text: `❌ Error: ${msg}` }], details: { phases: state.getPhases(), storage: "file", error: msg }, isError: true };
+        return { content: [{ type: "text", text: `❌ Error: ${msg}` }], details: { phases: state.getPhases(), storage: state.storageType, error: msg }, isError: true };
       }
 
       // Normalize - parse JSON strings
-p = normalizeParams(p);
+      try {
+        p = normalizeParams(p);
+      } catch (e: any) {
+        return { content: [{ type: "text", text: `❌ Error: ${e.message}` }], details: { phases: state.getPhases(), storage: state.storageType, error: e.message }, isError: true };
+      }
 
       const errors: string[] = [];
 
@@ -900,7 +902,13 @@ p = normalizeParams(p);
       state.nextPhaseId = newPid;
 
       if (errors.length === 0 && op !== "list") {
-        try { await state.saveToFile(); } catch (e: any) { errors.push(`Save failed: ${e.message}`); }
+        try {
+          await state.saveToFile();
+          state.setStorageType("file");
+        } catch (e: any) {
+          errors.push(`Save failed: ${e.message}`);
+          state.setStorageType("memory");
+        }
       }
 
       const resultPhases = state.getPhases();
@@ -909,35 +917,21 @@ p = normalizeParams(p);
       // System message
       if (op && op !== "list" && errors.length === 0) {
         try {
-          await api.sendMessage({ customType: "todo_update", content: `[System: Todo ${op}] ${summaryText.split("\n")[0]}`, display: false }, { triggerTurn: false });
+          await api.sendMessage({
+            customType: "todo_update",
+            content: `[System: Todo ${op}] ${summaryText.split("\n")[0]}`,
+            display: false
+          }, { triggerTurn: false });
         } catch {}
       }
 
-      // Auto-trigger: after successful update, automatically continue
-      if (op && op !== "list" && errors.length === 0 && !autoTriggering) {
-        autoTriggering = true;
-        try {
-          await api.sendMessage({
-            customType: "todo-auto-continue",
-            content: "Continue with the next task. If no tasks remain, validate the work and add new tasks.",
-            display: false,
-            details: { autoTrigger: true, timestamp: Date.now() }
-          }, { triggerTurn: true, deliverAs: "followUp" });
 
-          // Wait for agent to be idle, then continue processing
-          const agent = (ctx as any)?.agent || (ctx as any)?.session?.agent;
-          if (agent && typeof agent.waitForIdle === 'function') {
-            await agent.waitForIdle();
-            await agent.continue();
-          }
-        } catch (e) {
-          console.error("Auto-continue failed:", e);
-        } finally {
-          setTimeout(() => { autoTriggering = false; }, 500);
-        }
-      }
 
-      return { content: [{ type: "text", text: summaryText }], details: { phases: resultPhases, storage: "file", error: errors.length ? errors.join("; ") : undefined }, isError: errors.length > 0 };
+      return {
+        content: [{ type: "text", text: summaryText }],
+        details: { phases: resultPhases, storage: state.storageType, error: errors.length ? errors.join("; ") : undefined },
+        isError: errors.length > 0
+      };
     },
 
     renderCall: renderTodosCall,
@@ -952,3 +946,5 @@ p = normalizeParams(p);
 export function registerTodosTool(api: ExtensionAPI): void {
   api.registerTool(createTodoTool(api));
 }
+
+
