@@ -70,7 +70,7 @@ export class AgentTeam implements AgentTeamRuntime {
   private collaborativeWorkspace: CollaborativeWorkspace;
   
   // State
-  tasks: string[] = []
+  tasks: string[] = [];
   private taskStatuses: Map<number, any> = new Map();
   private agentStatuses: Map<string, any> = new Map();
   monitorInterval: any = null;
@@ -95,7 +95,7 @@ export class AgentTeam implements AgentTeamRuntime {
     this.messageBus = new TeamMessageBus();
     this.conflictManager = new ConflictResolutionManager();
     this.collaborativeWorkspace = new CollaborativeWorkspace(this.conflictManager);
-    this.context = new TeamContextManager("team-" + Date.now(), 0, "");
+    this.context = new TeamContextManager(`team-${  Date.now()}`, 0, "");
     this.dynamicManager = new DynamicTaskManager(this.context, 0);
   }
 
@@ -255,7 +255,7 @@ export class AgentTeam implements AgentTeamRuntime {
     const agentStatesSnapshot = new Map(this.agentStatuses);
     
     // Reset context (new team session)
-    this.context = new TeamContextManager("team-" + Date.now() + "-" + Date.now(), tasks.length, "");
+    this.context = new TeamContextManager(`team-${  Date.now()  }-${  Date.now()}`, tasks.length, "");
     
     // Restore agent states into new context
     for (const [agentId, status] of agentStatesSnapshot) {

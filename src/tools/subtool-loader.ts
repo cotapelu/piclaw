@@ -78,7 +78,7 @@ function addAuditEntry(entry: Omit<AuditEntry, "timestamp">): void {
   
   // Also append to file for persistence (async)
   try {
-    const logLine = JSON.stringify(fullEntry) + "\n";
+    const logLine = `${JSON.stringify(fullEntry)  }\n`;
     // Use async append but fire-and-forget
     fs.promises.appendFile(getAuditLogPath(), logLine).catch(() => {});
   } catch {

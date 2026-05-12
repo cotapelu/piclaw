@@ -70,7 +70,7 @@ export class CommandHistoryService {
 			const toSave = deduped.slice(0, MAX_ENTRIES);
 
 			// Atomic write: write to temp then rename
-			const tmpPath = historyPath + '.tmp';
+			const tmpPath = `${historyPath  }.tmp`;
 			fs.writeFileSync(tmpPath, JSON.stringify(toSave, null, 2), 'utf-8');
 			fs.renameSync(tmpPath, historyPath);
 		} catch (error) {
