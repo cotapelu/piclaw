@@ -21,7 +21,7 @@
     "check": "npm run typecheck",
     "test": "vitest run",
     "prepublishOnly": "npm run build && npm test",
-    "clean": "rm -rf dist"
+    "benchmark": "tsx src/benchmarks/team-performance.ts"
   },
   "dependencies": {
     "@mariozechner/pi-ai": "^0.73.1",

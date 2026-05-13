@@ -325,6 +325,10 @@ export const teamMetrics = {
     // Could track per-task start times if needed
   },
 
+  setTotalTasks: (count: number) => {
+    TeamMetricsCollector.getInstance().setTotalTasks(count);
+  },
+
   recordTaskEnd: (agentId: string, taskIndex: number, startTime: number, success: boolean) => {
     const collector = TeamMetricsCollector.getInstance();
     const duration = Date.now() - startTime;

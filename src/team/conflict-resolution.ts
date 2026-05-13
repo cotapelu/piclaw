@@ -68,12 +68,19 @@ export class ConflictResolutionManager {
   private artifacts: Map<string, SharedArtifact> = new Map();
   private conflicts: Conflict[] = [];
   private readonly DEFAULT_MAX_VERSIONS = 10;
-  private readonly DEFAULT_LOCK_TTL = 5 * 60 * 1000; // 5 minutes
+  private lockTtl: number;
 
   constructor(
     private strategy: Record<string, ConflictResolutionStrategy> = {},
-    private mergeFunctions: Record<string, (v1: any, v2: any) => any> = {}
-  ) {}
+    private mergeFunctions: Record<string, (v1: any, v2: any) => any> = {},
+    lockTtl?: number
+  ) {
+    this.lockTtl = lockTtl ?? 5 * 60 * 1000; // 5 minutes default
+  }
+
+  setStrategy(key: string, strategy: ConflictResolutionStrategy): void {
+    this.strategy[key] = strategy;
+  }
 
   /**
    * Register an artifact (if not exists)
@@ -134,12 +141,12 @@ export class ConflictResolutionManager {
     artifact.lock = {
       agentId,
       lockedAt: Date.now(),
-      ttl: ttl ?? this.DEFAULT_LOCK_TTL,
+      ttl: ttl ?? this.lockTtl,
     };
 
     artifact.metadata.accessCount++;
 
-    return { locked: true, lockToken };
+    return { locked: true, lockToken, owner: agentId };
   }
 
   /**
@@ -372,7 +379,7 @@ export class ConflictResolutionManager {
   /**
    * Get artifact info
    */
-  getArtifactInfo(key: string): { exists: boolean; lockedBy?: string; version: number } | null {
+  getArtifactInfo(key: string): { exists: boolean; lockedBy?: string; version: number; accessCount?: number } | null {
     const artifact = this.artifacts.get(key);
     if (!artifact) return { exists: false, version: 0 };
 
@@ -380,7 +387,16 @@ export class ConflictResolutionManager {
       exists: true,
       lockedBy: artifact.lock?.agentId,
       version: this.getCurrentVersion(artifact),
+      accessCount: artifact.metadata.accessCount,
     };
+  }
+
+  /**
+   * Get versions of an artifact
+   */
+  getVersions(key: string): ArtifactVersion[] | null {
+    const artifact = this.artifacts.get(key);
+    return artifact ? artifact.versions : null;
   }
 
   /**
@@ -526,7 +542,7 @@ export class CollaborativeWorkspace {
   /**
    * Get artifact info (exists, locked, version)
    */
-  getArtifactInfo(key: string): { exists: boolean; lockedBy?: string; version: number } {
+  getArtifactInfo(key: string): { exists: boolean; lockedBy?: string; version: number; accessCount?: number } {
     return this.conflictManager.getArtifactInfo(key) ?? { exists: false, version: 0 };
   }
 

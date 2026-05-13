@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { TeamMetricsCollector, teamMetrics } from '../../team/team-metrics.js';
+import { TeamMetricsCollector, teamMetrics } from '../../team/team-metrics';
 
 describe('TeamMetricsCollector', () => {
   let collector: TeamMetricsCollector;
@@ -66,8 +66,8 @@ describe('TeamMetricsCollector', () => {
       collector.recordTaskCompletion('agent-1', 3000);
       collector.recordTaskFailed('agent-1');
       collector.recordMessageSent('agent-1', 'team.chat');
-      collector.recordWorkspaceAccess('agent-1');
-      collector.recordHelp('agent-1');
+      collector.recordWorkspaceRead('agent-1');
+      collector.recordHelpRequest('agent-1');
 
       const snapshot = collector.getSnapshot();
       const agent1 = snapshot.agentStats.get('agent-1');
@@ -161,8 +161,8 @@ describe('TeamMetricsCollector', () => {
 
   describe('help metrics', () => {
     it('should track help requests and times helped', () => {
-      collector.recordHelp('agent-1'); // agent-1 requests help
-      collector.recordHelp('agent-2');
+      collector.recordHelpRequest('agent-1'); // agent-1 requests help
+      collector.recordHelpRequest('agent-2');
       collector.recordTimesHelped('agent-3'); // agent-3 helps someone
 
       const snapshot = collector.getSnapshot();
@@ -295,7 +295,7 @@ describe('teamMetrics convenience wrapper', () => {
     teamMetrics.recordTaskEnd('agent-1', 0, Date.now(), true);
     teamMetrics.recordMessage('sent', 'agent-1', 'team.chat');
     teamMetrics.recordWorkspaceOp('read', 'agent-1');
-    teamMetrics.recordSteal();
+    teamMetrics.recordSteal(false);
     teamMetrics.recordHelp('agent-1');
 
     const snapshot = teamMetrics.getJSON();

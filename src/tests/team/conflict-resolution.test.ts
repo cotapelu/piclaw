@@ -3,8 +3,8 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { ConflictResolutionManager } from '../conflict-resolution.js';
-import { CollaborativeWorkspace } from '../conflict-resolution.js';
+import { ConflictResolutionManager } from '../../team/conflict-resolution';
+import { CollaborativeWorkspace } from '../../team/conflict-resolution';
 
 describe('ConflictResolutionManager', () => {
   let manager: ConflictResolutionManager;
@@ -171,8 +171,8 @@ describe('ConflictResolutionManager', () => {
       const info = manager.getArtifactInfo('config');
       expect(info?.version).toBe(4);
 
-      const artifact = manager.artifacts.get('config');
-      expect(artifact!.versions.map(v => v.version)).toEqual([1, 2, 3, 4]);
+      const versions = manager.getVersions('config');
+      expect(versions?.map(v => v.version)).toEqual([1, 2, 3, 4]);
     });
 
     it('should trim versions exceeding max', () => {
@@ -181,10 +181,10 @@ describe('ConflictResolutionManager', () => {
       manager.write('config', { v: 2 }, 'agent-2');
       manager.write('config', { v: 3 }, 'agent-3');
 
-      const artifact = manager.artifacts.get('config');
-      expect(artifact!.versions.length).toBe(2);
-      expect(artifact!.versions[0].version).toBe(2); // Keeps recent
-      expect(artifact!.versions[1].version).toBe(3);
+      const versions = manager.getVersions('config');
+      expect(versions?.length).toBe(2);
+      expect(versions?.[0]?.version).toBe(2); // Keeps recent
+      expect(versions?.[1]?.version).toBe(3);
     });
 
     it('should fail if artifact not found', () => {
@@ -200,7 +200,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('last-writer-wins (default)', () => {
-      manager.strategy['config'] = 'last-writer-wins';
+      manager.setStrategy('config', 'last-writer-wins');
       manager.write('config', { v: 2 }, 'agent-2');
       manager.write('config', { v: 3 }, 'agent-3');
 
@@ -209,7 +209,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('first-writer-wins', () => {
-      manager.strategy['config'] = 'first-writer-wins';
+      manager.setStrategy('config', 'first-writer-wins');
       manager.tryLock('config', 'agent-2'); // Agent-2 holds lock
 
       const result = manager.write('config', { v: 2 }, 'agent-3');
@@ -217,7 +217,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('reject-concurrent', () => {
-      manager.strategy['config'] = 'reject-concurrent';
+      manager.setStrategy('config', 'reject-concurrent');
       manager.tryLock('config', 'agent-2');
 
       const result = manager.write('config', { v: 2 }, 'agent-3');
@@ -226,7 +226,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('versioned - creates conflict but succeeds', () => {
-      manager.strategy['config'] = 'versioned';
+      manager.setStrategy('config', 'versioned');
       manager.write('config', { v: 2 }, 'agent-2');
 
       const conflicts = manager.getConflicts();
@@ -237,7 +237,7 @@ describe('ConflictResolutionManager', () => {
 
   describe('getConflicts', () => {
     it('should return unresolved conflicts', () => {
-      manager.strategy['config'] = 'manual';
+      manager.setStrategy('config', 'manual');
       manager.registerArtifact('config', { v: 1 }, 'agent-1');
       manager.tryLock('config', 'agent-2');
       manager.write('config', { v: 2 }, 'agent-3'); // Creates conflict
@@ -249,7 +249,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('should filter resolved conflicts', () => {
-      manager.strategy['config'] = 'manual';
+      manager.setStrategy('config', 'manual');
       manager.registerArtifact('config', { v: 1 }, 'agent-1');
       manager.write('config', { v: 2 }, 'agent-2');
 
@@ -390,7 +390,7 @@ describe('CollaborativeWorkspace', () => {
 
   describe('getConflicts', () => {
     it('should retrieve conflict information', async () => {
-      manager.strategy['test'] = 'manual';
+      manager.setStrategy('test', 'manual');
       await workspace.set('key', 'value1', 'agent-1');
       await workspace.write('key', 'value2', 'agent-2'); // Creates conflict
 

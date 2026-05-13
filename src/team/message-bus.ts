@@ -53,16 +53,17 @@ export class TeamMessageBus {
     channel: string;
     from: string;
     content: string;
-    type?: TeamMessage["type"];
+    type?: TeamMessage['type'];
     replyTo?: string;
+    timestamp?: number;
   }): TeamMessage {
     const message: TeamMessage = {
       id: this.generateMessageId(),
       channel: params.channel,
       from: params.from,
       content: params.content,
-      type: params.type || "chat",
-      timestamp: Date.now(),
+      type: params.type || 'chat',
+      timestamp: params.timestamp || Date.now(),
       replyTo: params.replyTo,
     };
     

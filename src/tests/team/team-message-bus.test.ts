@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TeamMessageBus, CHANNELS } from '../message-bus.js';
+import { TeamMessageBus, CHANNELS } from '../../team/message-bus';
 
 describe('TeamMessageBus', () => {
   let bus: TeamMessageBus;
