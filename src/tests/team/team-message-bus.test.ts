@@ -43,7 +43,7 @@ describe('TeamMessageBus', () => {
     it('should trigger callbacks for matching subscriptions', () => {
       const receivedMessages: any[] = [];
       bus.subscribe('agent-2', 'team.chat', {
-        callback: (msg) => receivedMessages.push(msg)
+        callback: (msg: any) => receivedMessages.push(msg)
       });
 
       bus.publish({
@@ -59,7 +59,7 @@ describe('TeamMessageBus', () => {
     it('should not trigger callback for sender', () => {
       const receivedMessages: any[] = [];
       bus.subscribe('agent-1', 'team.chat', {
-        callback: (msg) => receivedMessages.push(msg)
+        callback: (msg: any) => receivedMessages.push(msg)
       });
 
       bus.publish({
@@ -155,7 +155,7 @@ describe('TeamMessageBus', () => {
     it('should register subscription for future messages', () => {
       const received: any[] = [];
       bus.subscribe('agent-2', 'team.chat', {
-        callback: (msg) => received.push(msg)
+        callback: (msg: any) => received.push(msg)
       });
 
       // Messages sent after subscription should trigger callback
@@ -433,10 +433,10 @@ describe('TeamMessageBus', () => {
     it('should handle multiple publishers and subscribers', () => {
       const received: string[] = [];
       bus.subscribe('subscriber-1', 'team.chat', {
-        callback: (msg) => received.push(msg.content)
+        callback: (msg: any) => received.push(msg.content)
       });
       bus.subscribe('subscriber-2', 'team.chat', {
-        callback: (msg) => received.push(msg.content)
+        callback: (msg: any) => received.push(msg.content)
       });
 
       bus.publish({

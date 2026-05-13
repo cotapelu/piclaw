@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { TeamMetricsCollector, teamMetrics } from '../team-metrics.js';
+import { TeamMetricsCollector, teamMetrics } from '../../team/team-metrics.js';
 
 describe('TeamMetricsCollector', () => {
   let collector: TeamMetricsCollector;

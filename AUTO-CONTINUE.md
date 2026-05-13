@@ -29,7 +29,7 @@ In: Security, Testing, Bug Fix, Code Quality, Performance, Scalability
 
 ## TARGETS
 - Coverage: ≥80%
-- Functions: ≤20 lines
+- Functions: ≤20 lines is best
 - Complexity: ≤10
 - Security: 100%
 - Self-Score: ≥90
