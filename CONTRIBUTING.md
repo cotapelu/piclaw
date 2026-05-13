@@ -300,3 +300,16 @@ Open an issue or check:
 - `llm-context/` - Upstream source for reference
 
 Happy coding! 🚀
+
+## Test Fixtures & Factories
+
+Reusable test utilities should be placed in `src/tests/team/fixtures/`:
+
+- `mock-runtime.ts`: Mock AgentSessionRuntime
+- `mock-context.ts`: Mock TeamContextManager  
+- `mock-message-bus.ts`: Mock TeamMessageBus
+- `createTestTeam()`: Factory for minimal team setup
+- `createMockAgent()`: Helper to create agent states
+
+This reduces duplication and ensures consistent test setup.
+
