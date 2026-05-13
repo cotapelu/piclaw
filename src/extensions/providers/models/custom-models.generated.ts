@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED
 // Source: https://models.dev/api.json
-// Generated: 2026-05-12T12:56:45.003Z
+// Generated: 2026-05-13T02:28:00.243Z
 // DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update
 
 import type { Model } from "@mariozechner/pi-ai";
@@ -1852,13 +1852,13 @@ export const CUSTOM_MODELS = {
       reasoning: true,
       input: ["text", "image"],
       cost: {
-        input: 0.95,
-        output: 4,
-        cacheRead: 0.16,
+        input: 0.75,
+        output: 3.5,
+        cacheRead: 0.375,
         cacheWrite: 0,
       },
       contextWindow: 262144,
-      maxTokens: 262144,
+      maxTokens: 65535,
     } satisfies Model<"openai-completions">,
     "nex-agi/deepseek-v3.1-nex-n1": {
       id: "nex-agi/deepseek-v3.1-nex-n1",

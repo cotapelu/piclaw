@@ -11,8 +11,6 @@
 import { existsSync, mkdirSync, promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ToolDefinition, ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Type } from "@mariozechner/pi-ai";
-import type { Static } from "typebox";
 import { Text } from "@mariozechner/pi-tui";
 
 // ============================================================================
@@ -87,63 +85,15 @@ export interface TodoToolDetails {
 }
 
 // ============================================================================
-// Schemas
+// Schemas - REMOVED: Using manual validation inside execute to reduce token size
 // ============================================================================
-
-const StatusEnum = Type.String();
-
-const InputTask = Type.Object({
-  content: Type.String(),
-  status: Type.Optional(StatusEnum),
-  notes: Type.Optional(Type.String()),
-  details: Type.Optional(Type.String()),
-});
-
-const InputPhase = Type.Object({
-  name: Type.String(),
-  tasks: Type.Optional(Type.Array(InputTask)),
-});
-
-const ReplaceOp = Type.Object({
-  phases: Type.Array(InputPhase),
-});
-
-const AddPhaseOp = Type.Object({
-  name: Type.String(),
-  tasks: Type.Optional(Type.Array(InputTask)),
-});
-
-const AddTaskOp = Type.Object({
-  phase: Type.String(),
-  content: Type.String(),
-  notes: Type.Optional(Type.String()),
-  details: Type.Optional(Type.String()),
-});
-
-const UpdateOp = Type.Object({
-  id: Type.String(),
-  status: Type.Optional(StatusEnum),
-  content: Type.Optional(Type.String()),
-  notes: Type.Optional(Type.String()),
-  details: Type.Optional(Type.String()),
-});
-
-const RemoveTaskOp = Type.Object({
-  id: Type.String(),
-});
-
-const ListOp = Type.Object({});
-
-const todoWriteSchema = Type.Object({
-  replace: Type.Optional(ReplaceOp),
-  add_phase: Type.Optional(AddPhaseOp),
-  add_task: Type.Optional(AddTaskOp),
-  update: Type.Optional(UpdateOp),
-  remove_task: Type.Optional(RemoveTaskOp),
-  list: Type.Optional(ListOp),
-});
-
-type TodoWriteParams = Static<typeof todoWriteSchema>;
+//
+// Previously we had complex TypeBox schemas:
+// const StatusEnum = Type.String();
+// const InputTask = Type.Object({ content: Type.String(), status: Type.Optional(StatusEnum), ... });
+// ... etc
+//
+// Now we use parameters: {} and validate manually in execute()
 
 // ============================================================================
 // File I/O - Project-based storage
@@ -257,7 +207,7 @@ function normalizeInProgress(phases: TodoPhase[]): void {
 // Input normalization (IDENTICAL to backup)
 // ============================================================================
 
-function normalizeParams(params: unknown): TodoWriteParams {
+function normalizeParams(params: unknown): any {
   if (typeof params === "string") {
     try {
       params = JSON.parse(params);
@@ -320,7 +270,20 @@ function normalizeParams(params: unknown): TodoWriteParams {
     }
   }
 
-  return normalized as TodoWriteParams;
+  // Auto-parse other ops if they are strings
+  ["add_task", "update", "remove_task"].forEach(op => {
+    if (normalized[op] && typeof normalized[op] === "string") {
+      try {
+        normalized[op] = JSON.parse(normalized[op]);
+      } catch (e) {
+        throw new Error(
+          `${op} must be an object, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
+        );
+      }
+    }
+  });
+
+  return normalized as any;
 }
 
 // ============================================================================
@@ -331,7 +294,7 @@ function makeEmptyFile(): TodoFile {
   return { phases: [], nextTaskId: 1, nextPhaseId: 1 };
 }
 
-function applySingleOp(file: TodoFile, params: TodoWriteParams): { file: TodoFile; errors: string[] } {
+function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: string[] } {
   const errors: string[] = [];
 
   if (params.replace) {
@@ -557,7 +520,7 @@ function applyOp(
   params: any
 ): { phases: TodoPhase[]; nextTaskId: number; nextPhaseId: number; errors: string[] } {
   const file: TodoFile = { phases, nextTaskId, nextPhaseId };
-  const { file: updated, errors } = applySingleOp(file, params as TodoWriteParams);
+  const { file: updated, errors } = applySingleOp(file, params as any);
   return {
     phases: updated.phases,
     nextTaskId: updated.nextTaskId,
@@ -763,7 +726,7 @@ function renderTodosResult(result: { details?: TodoToolDetails }, options: { exp
 // Tool Factory (with mergeCallAndResult support)
 // ============================================================================
 
-function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchema, TodoToolDetails> {
+function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails> {
   const state = new TodoState();
   let autoTriggering = false;
 
@@ -830,34 +793,24 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<typeof todoWriteSchem
   return {
     name: "todos",
     label: "Todo",
-    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. Supports session history reconstruction.",
-    promptSnippet: "todos({ add_phase: { name: 'Phase 1' } })",
+    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json.",
+    promptSnippet: "Complete todo management: 6 operations (add_phase, add_task, update, remove_task, replace, list). Form: todos({ OPERATION: { params } }). Params: flexible (auto-parsed).",
     promptGuidelines: [
-      "Format: todos({ OPERATION: { params } }) - EXACTLY ONE operation per call.",
-      "",
+      "todos({ OPERATION: { params } }) - ONE operation per call.",
       "Operations:",
-      "  add_phase: { name: string (required), tasks?: [{ content: string (required) }] }",
-      "  add_task:  { phase: 'phase-1' (required), content: string (required) }",
-      "  update:    { id: 'task-1' (required), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string, notes?: string, details?: string }",
-      "  remove_task: { id: 'task-1' (required) }",
-      "  replace:   { phases: [{ name: string (required), tasks?: [{ content: string }] }] (required) }",
-      "  list:      { } (view only)",
-      "",
-      "NOTES:",
-      "  - Values are objects, not strings. Do not JSON.stringify.",
-      "  - Auto-creates ONE 'in_progress' task if none exist.",
-      "  - Return: '✅ Updated: X remaining, Y completed.'",
-      "  - Storage: file (.piclaw/agent/todos.json), falls back to session memory.",
+      "• add_phase: { name: string (req), tasks?: [{ content: string }] }",
+      "• add_task:  { phase: 'phase-1' (req), content: string (req) }",
+      "• update:    { id: 'task-1' (req), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?, notes?, details? }",
+      "• remove_task: { id: 'task-1' (req) }",
+      "• replace:   { phases: [{ name: string (req), tasks?: [{ content: string }] }] }",
+      "• list:      { } (view only)",
       "",
       "Examples:",
       "  todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design' }, { content: 'Auth' }] } })",
       "  todos({ add_task: { phase: 'phase-1', content: 'Implement' } })",
       "  todos({ update: { id: 'task-1', status: 'completed' } })",
-      "  todos({ remove_task: { id: 'task-3' } })",
-      "  todos({ replace: { phases: [{ name: 'Phase 1', tasks: [{ content: 'Task 1' }] }] } })",
-      "  todos({ list: {} })",
     ],
-    parameters: todoWriteSchema,
+    parameters: {},
 
     async execute(_toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: ((update: any) => void) | undefined, ctx: ExtensionContext) {
       let p: any;

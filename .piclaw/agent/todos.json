@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Todos Tool Optimization",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Phân tích schema dài dòng của todos-tool gây tốn token",
+          "status": "completed"
+        },
+        {
+          "id": "task-2",
+          "content": "Refactor todos-tool: thay TypeBox schema bằng parameters: {}",
+          "status": "completed"
+        },
+        {
+          "id": "task-3",
+          "content": "Build và kiểm tra compilation",
+          "status": "completed"
+        },
+        {
+          "id": "task-4",
+          "content": "Test runtime: chạy thử và xem system prompt mới",
+          "status": "completed"
+        },
+        {
+          "id": "task-5",
+          "content": "Tối ưu promptSnippet: rõ ràng, ngắn gọn, show form + flexible params",
+          "status": "completed"
+        }
+      ]
+    }
+  ],
+  "nextTaskId": 6,
+  "nextPhaseId": 2,
+  "updatedAt": "2026-05-13T02:11:53.476Z"
+}
