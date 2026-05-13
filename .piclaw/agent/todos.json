@@ -31,9 +31,51 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Test Phase",
+      "tasks": [
+        {
+          "id": "task-6",
+          "content": "Task 1",
+          "status": "completed"
+        },
+        {
+          "id": "task-7",
+          "content": "Task 2",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "id": "phase-3",
+      "name": "Continued Testing",
+      "tasks": [
+        {
+          "id": "task-8",
+          "content": "Test memory tool operations",
+          "status": "completed"
+        },
+        {
+          "id": "task-9",
+          "content": "Test bash command execution",
+          "status": "completed"
+        },
+        {
+          "id": "task-10",
+          "content": "Test file editing capabilities",
+          "status": "completed"
+        },
+        {
+          "id": "task-11",
+          "content": "Explore additional pi features",
+          "status": "completed"
+        }
+      ]
     }
   ],
-  "nextTaskId": 6,
-  "nextPhaseId": 2,
-  "updatedAt": "2026-05-13T02:11:53.476Z"
+  "nextTaskId": 12,
+  "nextPhaseId": 4,
+  "updatedAt": "2026-05-13T02:45:35.899Z"
 }
