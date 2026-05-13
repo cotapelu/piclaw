@@ -206,3 +206,81 @@ See examples in `llm-context/packages/coding-agent/examples/extensions/`.
 ## License
 
 APACHE
+
+---
+
+## Team Collaboration
+
+PiClaw supports multi-agent team collaboration. Spawn multiple agents to work together on tasks with automatic work distribution, messaging, and conflict resolution.
+
+### Key Features
+
+- **Dynamic task assignment** with work stealing
+- **Message bus** for agent-to-agent communication
+- **Shared workspace** with optimistic locking & conflict resolution
+- **Team context** for shared awareness of progress, blockers, decisions
+- **Auto-continue** across team members
+
+### Usage
+
+Use the `spawn_team` tool to create and manage teams:
+
+```javascript
+spawn_team({ action: "create", tasks: ["Design API", "Implement backend", "Write tests"], size: 3 })
+```
+
+Child agents can use `team_ops` to coordinate:
+
+```javascript
+team_ops({ action: "claim_task" })  // Get next available task
+team_ops({ action: "workspace_write", key: "design", value: "{}" })  // Share data
+team_ops({ action: "send_message", channel: "team.chat", content: "Done with task 1" })
+```
+
+Events emitted: `team_created`, `team_progress`, `team_completed`, `team_disposed`.
+
+---
+
+## Custom Tools & Extensions
+
+PiClaw includes several built-in custom tools extending the base pi-coding-agent:
+
+- **todos** - Full-featured todo management with phases & tasks (persists to `.piclaw/agent/todos.json`)
+- **memory** - Store and retrieve arbitrary text snippets with tags (persists in session)
+- **echo** - Simple demonstration tool for custom tool registration
+- **system_info** - Get system diagnostics (OS, memory, CPU, uptime)
+- **team** / **team_ops** - Team collaboration tools
+
+Additionally, custom provider support allows adding new LLM providers (e.g., Kilo Gateway).
+
+---
+
+## Metrics & Observability
+
+Team collaboration includes optional metrics collection to monitor performance and diagnose issues.
+
+### Enabled Metrics
+
+- Task completion times & distribution
+- Agent workload & efficiency
+- Workspace conflicts & lock wait times
+- Message traffic & channel usage
+- Work stealing frequency & success rate
+- Help requests & assistance provided
+
+### Accessing Metrics
+
+```javascript
+// After team completion, get metrics summary
+const summary = teamMetrics.getSummary();
+console.log(summary);
+
+// Export to JSON for analysis
+await exportMetricsToFile(team, "./metrics.json");
+```
+
+Metrics are collected via `src/team/team-metrics.ts` and integrated via `src/team/team-metrics-integration.ts`. See [CONTRIBUTING.md](CONTRIBUTING.md) for integration details.
+
+---
+
+## Development

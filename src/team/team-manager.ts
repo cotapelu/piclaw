@@ -354,6 +354,7 @@ export class AgentTeam implements AgentTeamRuntime {
   }
 
   /** Wait until all tasks complete */
+   
   async waitForCompletion(): Promise<void> {
     // Poll context until all tasks are completed
     while (true) {
@@ -361,6 +362,7 @@ export class AgentTeam implements AgentTeamRuntime {
       if (summary.completedTasks === summary.totalTasks) {
         return;
       }
+    // eslint-disable-next-line no-await-in-loop
       await new Promise(resolve => setTimeout(resolve, 100)); // Poll every 100ms
     }
   }
@@ -407,6 +409,7 @@ export async function bootPiclawTeam(
   // Register parent runtime
   team.registerRuntime(parentRuntime, "parent");
 
+   
   for (let i = 0; i < teamSize; i++) {
     const factory: CreateAgentSessionRuntimeFactory = async ({
       cwd: sessionCwd,
@@ -445,6 +448,7 @@ export async function bootPiclawTeam(
       reason: "new"
     };
 
+  // eslint-disable-next-line no-await-in-loop
     const runtime = await createAgentSessionRuntime(factory, {
       cwd,
       agentDir,
@@ -532,6 +536,7 @@ Use team_ops to continue coordinating. If all tasks are done, say "All tasks com
   };
 
   // Function to run continuous loop for each child agent
+   
   async function runAgentLoop(runtime: AgentSessionRuntime, role: string, agentId: string): Promise<void> {
     // Emit agent_started
     messageBus.publish({
@@ -586,7 +591,9 @@ Use team_ops to continue coordinating. If all tasks are done, say "All tasks com
         const prompt = turnCount === 0 
           ? getBootstrapPrompt(role) 
           : getContinuationPrompt(turnCount);
+         
 
+        // eslint-disable-next-line no-await-in-loop
         await runtime.session.prompt(prompt);
         turnCount++;
 
