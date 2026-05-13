@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Full-Featured Todo Tool - Complete implementation with all backup features
- * - 6 ops: replace, add_phase, add_task, update, remove_task, list
+ * - 6 ops: delete, add_phase, add_task, update, remove_task, list
  * - Auto-normalize: one in_progress task
  * - File persistence: ./.piclaw/agent/todos.json
  * - System messages + auto-continue
@@ -257,21 +257,18 @@ function normalizeParams(params: unknown): any {
     }
   }
 
-  if (normalized.replace && typeof normalized.replace === "object") {
-    const replace = normalized.replace as Record<string, unknown>;
-    if (replace.phases && typeof replace.phases === "string") {
-      try {
-        replace.phases = JSON.parse(replace.phases);
-      } catch (e) {
-        throw new Error(
-          `replace.phases must be an array, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
-        );
-      }
+  if (normalized.delete !== undefined && typeof normalized.delete === "string") {
+    try {
+      normalized.delete = JSON.parse(normalized.delete);
+    } catch (e) {
+      throw new Error(
+        `delete must be an object, not a string. Error parsing: ${e instanceof Error ? e.message : String(e)}`,
+      );
     }
   }
 
   // Auto-parse other ops if they are strings
-  ["add_task", "update", "remove_task"].forEach(op => {
+  ["add_task", "update", "remove_task", "delete"].forEach(op => {
     if (normalized[op] && typeof normalized[op] === "string") {
       try {
         normalized[op] = JSON.parse(normalized[op]);
@@ -297,29 +294,8 @@ function makeEmptyFile(): TodoFile {
 function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: string[] } {
   const errors: string[] = [];
 
-  if (params.replace) {
-    const op = params.replace;
-    if (!Array.isArray(op.phases)) {
-      errors.push("replace.phases must be an array");
-      return { file, errors };
-    }
-    const next = makeEmptyFile();
-    for (const inputPhase of op.phases) {
-      if (!inputPhase || typeof inputPhase !== "object") {
-        errors.push("Each phase must be an object");
-        continue;
-      }
-      if (!inputPhase.name || typeof inputPhase.name !== "string") {
-        errors.push("Each phase must have a name (string)");
-        continue;
-      }
-      const phaseId = `phase-${next.nextPhaseId++}`;
-      const { phase, nextTaskId } = buildPhaseFromInput(inputPhase as any, phaseId, next.nextTaskId);
-      next.phases.push(phase);
-      next.nextTaskId = nextTaskId;
-    }
-    file = next;
-    normalizeInProgress(file.phases);
+  if (params.delete !== undefined) {
+    file = makeEmptyFile();
     return { file, errors };
   }
 
@@ -510,17 +486,17 @@ function formatSummary(phases: TodoPhase[], errors: string[]): string {
 
 function countOperations(params: any): number {
   let count = 0;
-  if (params.replace) count++;
   if (params.add_phase) count++;
   if (params.add_task) count++;
   if (params.update) count++;
   if (params.remove_task) count++;
+  if (params.delete !== undefined) count++;
   if (params.list !== undefined) count++;
   return count;
 }
 
 function getOperationName(params: any): string {
-  if (params.replace) return "replace";
+  if (params.delete !== undefined) return "delete";
   if (params.add_phase) return "add_phase";
   if (params.add_task) return "add_task";
   if (params.update) return "update";
@@ -701,7 +677,7 @@ function formatTodoLineExtension(item: TodoItem, theme: any, prefix: string): st
 }
 
 function renderTodosCall(args: any, theme: any): Text {
-  const op = args.replace ? "replace" : args.add_phase ? "add_phase" : args.add_task ? "add_task" : args.update ? "update" : args.remove_task ? "remove_task" : args.list ? "list" : "todo";
+  const op = args.delete !== undefined ? "delete" : args.add_phase ? "add_phase" : args.add_task ? "add_task" : args.update ? "update" : args.remove_task ? "remove_task" : args.list ? "list" : "todo";
   const text = `${theme.fg("toolTitle", theme.bold("todos"))} ${theme.fg("muted", op)}`;
   return new Text(text, 0, 0);
 }
@@ -810,8 +786,8 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
   return {
     name: "todos",
     label: "Todo",
-    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. add_task accepts phase name or ID. update supports batch update via ids array.",
-    promptSnippet: "Complete todo management with 6 operations. Call directly: todos({ add_phase: {...} }) or todos({ add_task: {...} }) etc. Operations: add_phase, add_task, update, remove_task, replace, list.",
+    description: "Complete todo management: add_phase, add_task, update, remove_task, delete, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. add_task accepts phase name or ID. update supports batch update via ids array.",
+    promptSnippet: "Complete todo management with 6 operations. Call directly: todos({ add_phase: {...} }) or todos({ add_task: {...} }) etc. Operations: add_phase, add_task, update, remove_task, delete, list.",
     promptGuidelines: [
       "IMPORTANT: The operation name is the KEY in the object, NOT nested under 'operation' or 'action'.",
       "Correct format: todos({ OPERATION_NAME: operation_params })",
@@ -822,7 +798,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
       "• add_task:  { phase: 'phase-1' or phase name (required), content: string (required), notes?: string, details?: string }",
       "• update:    { id: 'task-1' OR ids: ['task-1', ...] (required), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string, notes?: string, details?: string }",
       "• remove_task: { id: 'task-1' (required) }",
-      "• replace:   { phases: [{ name: string (required), tasks?: [{ content: string, status?: string, notes?: string, details?: string }] }] }",
+      "• delete:    { } (clear all todos)",
       "• list:      { } (view all tasks)",
       "",
       "Examples:",
@@ -856,7 +832,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
       const errors: string[] = [];
 
       const opCount = countOperations(p);
-      if (opCount === 0) errors.push("No operation specified. Use: add_phase, add_task, update, remove_task, replace, or list");
+      if (opCount === 0) errors.push("No operation specified. Use: add_phase, add_task, update, remove_task, delete, or list");
       if (opCount > 1) errors.push("Multiple operations detected. Use only ONE operation per call.");
 
       const opName = getOperationName(p);
