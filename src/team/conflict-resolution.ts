@@ -69,13 +69,15 @@ export class ConflictResolutionManager {
   private conflicts: Conflict[] = [];
   private readonly DEFAULT_MAX_VERSIONS = 10;
   private lockTtl: number;
+  private maxVersions: number;
 
   constructor(
     private strategy: Record<string, ConflictResolutionStrategy> = {},
     private mergeFunctions: Record<string, (v1: any, v2: any) => any> = {},
-    lockTtl?: number
+    options?: { lockTtl?: number; maxVersions?: number }
   ) {
-    this.lockTtl = lockTtl ?? 5 * 60 * 1000; // 5 minutes default
+    this.lockTtl = options?.lockTtl ?? 5 * 60 * 1000; // 5 minutes default
+    this.maxVersions = options?.maxVersions ?? this.DEFAULT_MAX_VERSIONS;
   }
 
   setStrategy(key: string, strategy: ConflictResolutionStrategy): void {
@@ -127,6 +129,10 @@ export class ConflictResolutionManager {
 
     // Check existing lock
     if (artifact.lock) {
+      // Allow same agent to re-lock (re-entrant)
+      if (artifact.lock.agentId === agentId) {
+        return { locked: true, lockToken: artifact.lock.agentId, owner: agentId };
+      }
       // Check if lock expired
       if (artifact.lock.ttl && Date.now() - artifact.lock.lockedAt > artifact.lock.ttl) {
         // Lock expired, release it
@@ -202,10 +208,15 @@ export class ConflictResolutionManager {
     // Check lock
     if (artifact.lock && artifact.lock.agentId !== agentId) {
       if (!options.force) {
+        const conflict = this.createConflictRecord(key, [agentId, artifact.lock.agentId]);
+        // If manual strategy, record the conflict for later resolution
+        if ((this.strategy[key] || this.strategy['*']) === 'manual') {
+          this.conflicts.push(conflict);
+        }
         return {
           success: false,
           message: `Artifact locked by ${artifact.lock.agentId}`,
-          conflict: this.createConflictRecord(key, [agentId, artifact.lock.agentId]),
+          conflict,
           version: this.getCurrentVersion(artifact)
         };
       }
@@ -247,8 +258,8 @@ export class ConflictResolutionManager {
 
     artifact.versions.push(versionEntry);
     // Trim versions if too many
-    if (artifact.versions.length > this.DEFAULT_MAX_VERSIONS) {
-      artifact.versions = artifact.versions.slice(-this.DEFAULT_MAX_VERSIONS);
+    if (artifact.versions.length > this.maxVersions) {
+      artifact.versions = artifact.versions.slice(-this.maxVersions);
     }
 
     artifact.value = versionEntry.value;

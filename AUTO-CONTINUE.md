@@ -34,3 +34,4 @@ In: Security, Testing, Bug Fix, Code Quality, Performance, Scalability
 - Security: 100%
 - Self-Score: ≥90
 
+CODE AT CURRENT DIRECTORY. GO.

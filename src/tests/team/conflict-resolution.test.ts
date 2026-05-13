@@ -64,7 +64,9 @@ describe('ConflictResolutionManager', () => {
 
     it('should auto-release expired locks', () => {
       // First lock with short TTL (1ms)
-      manager = new ConflictResolutionManager({}, {}, 1);
+      manager = new ConflictResolutionManager({}, {}, { lockTtl: 1 });
+      // Need to register artifact for this new manager
+      manager.registerArtifact('lockable', 'value', 'agent-1');
       const result1 = manager.tryLock('lockable', 'agent-2');
       expect(result1.locked).toBe(true);
 
@@ -176,7 +178,7 @@ describe('ConflictResolutionManager', () => {
     });
 
     it('should trim versions exceeding max', () => {
-      manager = new ConflictResolutionManager({}, {}, 2); // Max 2 versions
+      manager = new ConflictResolutionManager({}, {}, { maxVersions: 2 }); // Max 2 versions
       manager.registerArtifact('config', { v: 1 }, 'agent-1');
       manager.write('config', { v: 2 }, 'agent-2');
       manager.write('config', { v: 3 }, 'agent-3');
@@ -275,7 +277,7 @@ describe('ConflictResolutionManager', () => {
 
   describe('cleanupExpiredLocks', () => {
     it('should release expired locks', () => {
-      manager = new ConflictResolutionManager({}, {}, 1); // 1ms TTL
+      manager = new ConflictResolutionManager({}, {}, { lockTtl: 1 }); // 1ms TTL
       manager.registerArtifact('key', 'value', 'agent-1');
       manager.tryLock('key', 'agent-2');
 
@@ -292,9 +294,10 @@ describe('ConflictResolutionManager', () => {
 
 describe('CollaborativeWorkspace', () => {
   let workspace: CollaborativeWorkspace;
-  const manager = new ConflictResolutionManager();
+  let manager: ConflictResolutionManager;
 
   beforeEach(() => {
+    manager = new ConflictResolutionManager();
     workspace = new CollaborativeWorkspace(manager);
   });
 
@@ -307,7 +310,9 @@ describe('CollaborativeWorkspace', () => {
     });
 
     it('should handle conflicts during write', async () => {
-      // Agent 1 reads
+      // Register artifact first
+      await workspace.set('counter', 0, 'agent-1');
+      // Agent 1 reads with lock
       const read1 = workspace.readWithLock('counter', 'agent-1');
       expect(read1.locked).toBe(true);
 
@@ -340,6 +345,8 @@ describe('CollaborativeWorkspace', () => {
 
   describe('locking', () => {
     it('should acquire and release lock', async () => {
+      // Register artifact first
+      await workspace.set('resource', {}, 'agent-1');
       const lock1 = workspace.tryLock('resource', 'agent-1');
       expect(lock1.locked).toBe(true);
 
@@ -352,6 +359,8 @@ describe('CollaborativeWorkspace', () => {
     });
 
     it('should readWithLock acquire lock atomically', async () => {
+      // Register artifact first
+      await workspace.set('resource', {}, 'agent-1');
       const read = workspace.readWithLock('resource', 'agent-1');
       expect(read.locked).toBe(true);
       expect(read.lockToken).toBeDefined();
@@ -366,6 +375,7 @@ describe('CollaborativeWorkspace', () => {
 
       const info = workspace.getArtifactInfo('config');
       expect(info.exists).toBe(true);
+      // After set (which registers and writes same value), version remains 1
       expect(info.version).toBe(1);
       expect(info.lockedBy).toBeUndefined();
     });
@@ -390,7 +400,7 @@ describe('CollaborativeWorkspace', () => {
 
   describe('getConflicts', () => {
     it('should retrieve conflict information', async () => {
-      manager.setStrategy('test', 'manual');
+      manager.setStrategy('key', 'manual');
       await workspace.set('key', 'value1', 'agent-1');
       await workspace.write('key', 'value2', 'agent-2'); // Creates conflict
 

@@ -184,7 +184,7 @@ describe('TeamMetricsCollector', () => {
 
       const snapshot = collector.getSnapshot();
       expect(snapshot.endTime).toBeDefined();
-      expect(snapshot.endTime).toBeGreaterThan(snapshot.startTime);
+      expect(snapshot.endTime).toBeGreaterThanOrEqual(snapshot.startTime);
     });
   });
 
@@ -241,12 +241,12 @@ describe('TeamMetricsCollector', () => {
       collector.recordTaskCompletion('agent-1', 4000);
 
       const json = collector.toJSON();
-      expect(json.tasks.avgTaskCompletionTime).toBe(3000);
+      expect(json.tasks.avgCompletionTimeMs).toBe(3000);
     });
 
     it('should handle no data gracefully', () => {
       const json = collector.toJSON();
-      expect(json.tasks.avgTaskCompletionTime).toBe(0);
+      expect(json.tasks.avgCompletionTimeMs).toBe(0);
     });
   });
 

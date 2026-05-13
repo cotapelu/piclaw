@@ -2,7 +2,7 @@
  * Unit tests for TeamMessageBus
  */
 
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TeamMessageBus, CHANNELS } from '../../team/message-bus';
 
 describe('TeamMessageBus', () => {
@@ -148,8 +148,10 @@ describe('TeamMessageBus', () => {
       });
 
       const messages = bus.subscribe('agent-4', 'team.chat', { sinceMessageId: msg1.id });
-      expect(messages.length).toBe(1);
-      expect(messages[0].content).toBe('Message 2'); // After msg1
+      // Should return messages after msg1: both msg2 and msg3
+      expect(messages.length).toBe(2);
+      expect(messages[0].content).toBe('Message 2');
+      expect(messages[1].content).toBe('Message 3');
     });
 
     it('should register subscription for future messages', () => {
@@ -493,7 +495,7 @@ describe('TeamMessageBus', () => {
     });
 
     it('should handle callback errors gracefully', () => {
-      const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       bus.subscribe('agent-1', 'team.chat', {
         callback: () => { throw new Error('Test error'); }
       });

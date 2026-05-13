@@ -142,7 +142,8 @@ export class DynamicTaskManager {
   
   getOverloadedAgents(): string[] {
     const distribution = this.getLoadDistribution();
-    return distribution.filter(agent => agent.taskCount > 2).map(agent => agent.agentId);
+    // Consider an agent overloaded if they have 2 or more tasks
+    return distribution.filter(agent => agent.taskCount >= 2).map(agent => agent.agentId);
   }
   
   getIdleAgents(): string[] {

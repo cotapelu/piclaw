@@ -57,7 +57,7 @@ class BenchmarkRunner {
   }
 
   printSummary(): void {
-    console.log('\n' + '═'.repeat(60));
+    console.log(`\n${  '═'.repeat(60)}`);
     console.log('📊 BENCHMARK SUMMARY');
     console.log('═'.repeat(60));
     for (const r of this.results) {

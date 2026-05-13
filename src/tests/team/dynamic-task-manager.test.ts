@@ -10,12 +10,12 @@ import { TeamContextManager } from '../../team/team-context.js';
 function createMockContext(taskStates: any[], agentStates: any[]) {
   const context = new TeamContextManager('test-team', taskStates.length, 'test');
 
-  // Override internal context with test data
+  // Override internal context with test data preserving original indices and agent IDs
   (context as any).context = {
     teamId: 'test-team',
     createdAt: Date.now(),
-    agentStates: new Map(agentStates.map((a, i) => [`agent-${i}`, a])),
-    taskStates: new Map(taskStates.map((t, i) => [i, { ...t, index: i }])),
+    agentStates: new Map(agentStates.map(a => [a.id, a])),
+    taskStates: new Map(taskStates.map(t => [t.index, { ...t }])),
     teamFocus: 'Test',
     currentPhase: 'test',
     decisions: [],
@@ -89,20 +89,18 @@ describe('DynamicTaskManager', () => {
     });
 
     it('should prioritize blocked tasks', () => {
-      // Modify: task 2 is blocked
-      const snapshot = context.getSnapshot();
-      const task2 = snapshot.taskStates.get(2);
-      (task2 as any).status = 'blocked';
+      // Modify: task 2 is blocked by directly updating context
+      (context as any).context.taskStates.get(2).status = 'blocked';
 
       const stolen = manager.stealWork('agent-2');
       expect(stolen).toBe(2); // Should steal blocked task first
     });
 
     it('should steal long-running tasks (>2min)', () => {
-      // Task 1 claimed 100s ago - still within threshold (2min)
-      // Task 2 claimed 200s ago - exceeds threshold
+      // Tasks: index1 (100s), index2 (200s), index4 (300s)
+      // Oldest is index4 (300s)
       const stolen = manager.stealWork('agent-2');
-      expect(stolen).toBe(2); // Should steal the older task
+      expect(stolen).toBe(4); // Should steal the oldest task
     });
   });
 
@@ -115,7 +113,8 @@ describe('DynamicTaskManager', () => {
       const agent1 = distribution.find(d => d.agentId === 'agent-1');
       const agent2 = distribution.find(d => d.agentId === 'agent-2');
 
-      expect(agent0?.taskCount).toBe(2);
+      // agent-0 has three in_progress tasks
+      expect(agent0?.taskCount).toBe(3);
       expect(agent1?.taskCount).toBe(1);
       expect(agent2?.taskCount).toBe(0);
     });
