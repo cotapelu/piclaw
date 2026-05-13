@@ -197,7 +197,7 @@ describe('TeamMetricsCollector', () => {
       collector.setTotalTasks(10);
 
       const snapshot2 = collector.getSnapshot();
-      expect(snapshot1 totalTasks).toBe(5);
+      expect(snapshot1.totalTasks).toBe(5);
       expect(snapshot2.totalTasks).toBe(10);
     });
 

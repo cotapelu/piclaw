@@ -1,1 +1,36 @@
-App đỉnh nhất thế giới. No devops. No infra. No CI/CD. No deployment. No cloud. No server. No ops. No meetings. Security: có. Testing: có. Bug fix: triệt để. Code quality: sạch. Performance: nhanh. Scalability: mở rộng. Business logic: hoàn hảo. User experience: tuyệt vời. Features: đột phá. UI: đẹp. UX: mượt. Speed: nhanh. Reliability: 100%. App chạy 24/7. App chạy ổn định. App không lỗi. User yêu app. App đỉnh nhất. Nhiệm vụ: viết code.
+# AUTO-CONTINUE.md - Optimized Agent Workflow
+*Version: v3 (AGENTS.md compliant)*
+
+## WORKFLOW (MANDATORY)
+Analyze → Clarify → Plan → Test(fail) → Implement → Refactor → Optimize → Verify
+
+## LOOP
+while failed || improvable || not_minimal: detect → improve → test → verify
+
+## PRINCIPLES
+- Simplicity-first (200→50 lines)
+- No over-engineering
+- Declarative > Imperative
+- Readable > Clever
+
+## DONE
+- Requirements met
+- Tests 100% pass
+- Minimal & clear code
+- No hidden assumptions
+- No regression
+
+## ANTI-SLOP (STRICT)
+Bloat, abstraction, side effects, duplication, premature optimization = FORBIDDEN
+
+## SCOPE
+Out: DevOps, Infra, CI/CD, Deployment, Cloud, Server, Ops, Meetings
+In: Security, Testing, Bug Fix, Code Quality, Performance, Scalability
+
+## TARGETS
+- Coverage: ≥80%
+- Functions: ≤20 lines
+- Complexity: ≤10
+- Security: 100%
+- Self-Score: ≥90
+
