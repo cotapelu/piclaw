@@ -352,14 +352,15 @@ function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: s
       return { file, errors };
     }
     if (!op.phase || typeof op.phase !== "string") {
-      errors.push("add_task.phase must be a string (e.g., 'phase-1')");
+      errors.push("add_task.phase must be a string (e.g., 'phase-1' or phase name)");
       return { file, errors };
     }
     if (!op.content || typeof op.content !== "string") {
       errors.push("add_task.content must be a string");
       return { file, errors };
     }
-    const target = file.phases.find((p) => p.id === op.phase);
+    // Support lookup by phase name OR phase ID
+    const target = file.phases.find((p) => p.id === op.phase || p.name === op.phase);
     if (!target) {
       errors.push(`Phase "${op.phase}" not found`);
     } else {
@@ -381,14 +382,26 @@ function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: s
       errors.push("update must be an object");
       return { file, errors };
     }
-    if (!op.id || typeof op.id !== "string") {
-      errors.push("update.id must be a string (e.g., 'task-1')");
+
+    // Support batch update with ids array OR single id
+    let taskIds: string[];
+    if (op.ids && Array.isArray(op.ids)) {
+      taskIds = op.ids;
+    } else if (op.id && typeof op.id === "string") {
+      taskIds = [op.id];
+    } else {
+      errors.push("update must have either 'id' (string) or 'ids' (array of strings)");
       return { file, errors };
     }
-    const task = findTask(file.phases, op.id);
-    if (!task) {
-      errors.push(`Task "${op.id}" not found`);
-    } else {
+
+    let hasValidUpdates = false;
+    for (const taskId of taskIds) {
+      const task = findTask(file.phases, taskId);
+      if (!task) {
+        errors.push(`Task "${taskId}" not found`);
+        continue;
+      }
+      hasValidUpdates = true;
       if (op.status !== undefined) {
         if (typeof op.status === "string" && ["pending", "in_progress", "completed", "abandoned"].includes(op.status)) {
           task.status = op.status as TodoStatus;
@@ -399,6 +412,10 @@ function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: s
       if (op.content !== undefined) task.content = op.content;
       if (op.notes !== undefined) task.notes = op.notes;
       if (op.details !== undefined) task.details = op.details;
+    }
+
+    if (!hasValidUpdates && taskIds.length > 0) {
+      errors.push("No valid tasks found to update");
     }
     normalizeInProgress(file.phases);
     return { file, errors };
@@ -793,22 +810,24 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
   return {
     name: "todos",
     label: "Todo",
-    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json.",
+    description: "Complete todo management: add_phase, add_task, update, remove_task, replace, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. add_task accepts phase name or ID. update supports batch update via ids array.",
     promptSnippet: "Complete todo management: 6 operations. Form: todos({ OPERATION: { params } }) where OPERATION is the operation name itself (add_phase, add_task, update, remove_task, replace, list). Params: flexible (auto-parsed).",
     promptGuidelines: [
       "todos({ OPERATION: { params } }) - ONE operation per call (not nested under 'operation' key).",
       "Operations (each is a direct key in the params object):",
       "• add_phase: { name: string (req), tasks?: [{ content: string, status?: string, notes?: string, details?: string }] }",
-      "• add_task:  { phase: 'phase-1' (req), content: string (req), notes?: string, details?: string }",
-      "• update:    { id: 'task-1' (req), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string, notes?: string, details?: string }",
+      "• add_task:  { phase: 'phase-1' or phase name (req), content: string (req), notes?: string, details?: string }",
+      "             Note: phase can be either phase ID (e.g., 'phase-1') or phase name (e.g., 'Development')",
+      "• update:    { id: 'task-1' (req) OR ids: ['task-1', 'task-2'] (req), status?: 'pending'|'in_progress'|'completed'|'abandoned', content?: string, notes?: string, details?: string }",
+      "             Note: Use 'id' for single task, 'ids' for batch update. All tasks get same updates.",
       "• remove_task: { id: 'task-1' (req) }",
       "• replace:   { phases: [{ name: string (req), tasks?: [{ content: string, status?: string, notes?: string, details?: string }] }] }",
       "• list:      { } (view only, empty object)",
       "",
       "Examples:",
       "  todos({ add_phase: { name: 'Build API', tasks: [{ content: 'Design' }, { content: 'Auth' }] } })",
-      "  todos({ add_task: { phase: 'phase-1', content: 'Implement' } })",
-      "  todos({ update: { id: 'task-1', status: 'completed' } })",
+      "  todos({ add_task: { phase: 'Development', content: 'Write tests' } })",
+      "  todos({ update: { ids: ['task-1', 'task-2'], status: 'completed' } })",
       "  todos({ list: {} })",
     ],
     parameters: {},

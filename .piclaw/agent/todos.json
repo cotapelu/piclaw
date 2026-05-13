@@ -73,9 +73,36 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Demo Phase",
+      "tasks": [
+        {
+          "id": "task-12",
+          "content": "Task 1: Learn todos tool",
+          "status": "completed"
+        },
+        {
+          "id": "task-13",
+          "content": "Task 2: Practice add_task",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-14",
+          "content": "Task 3: Test update",
+          "status": "pending"
+        },
+        {
+          "id": "task-15",
+          "content": "Task 4: Try remove",
+          "status": "pending",
+          "notes": "Added notes for testing"
+        }
+      ]
     }
   ],
-  "nextTaskId": 12,
-  "nextPhaseId": 4,
-  "updatedAt": "2026-05-13T02:45:35.899Z"
+  "nextTaskId": 16,
+  "nextPhaseId": 5,
+  "updatedAt": "2026-05-13T02:53:06.769Z"
 }
