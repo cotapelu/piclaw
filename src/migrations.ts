@@ -10,7 +10,7 @@
 import chalk from "chalk";
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "fs";
 import { dirname, join } from "path";
-import { getAgentDir, getBinDir } from "./config/config.js";
+import { getAgentDir, getBinDir } from "./config/config-manager.js";
 
 const MIGRATION_GUIDE_URL = "https://github.com/mariozechner/pi-coding-agent/blob/main/CHANGELOG.md#extensions-migration";
 const EXTENSIONS_DOC_URL = "https://github.com/mariozechner/pi-coding-agent/blob/main/docs/extensions.md";

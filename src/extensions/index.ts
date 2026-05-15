@@ -10,7 +10,6 @@ import { registerKiloProvider } from "./providers/kilo-provider.js";
 import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./tools/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader";
 import autoContinueExtension from "./hooks/auto-continue.js";
-import { registerTeamTool } from "./tools/team-tool.js";
 
 import piclawHeader from "./piclaw-header.js";
 
@@ -25,9 +24,6 @@ export default function (api: import("@mariozechner/pi-coding-agent").ExtensionA
   // Register universal tool (replaces echo and system_info)
   registerUniversalTool(api);
   registerSubToolLoaderExtension(api);
-
-  // Register Team Tool
-  registerTeamTool(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);

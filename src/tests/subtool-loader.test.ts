@@ -43,12 +43,6 @@ describe('subtool_loader', () => {
       // just verify it exists
       expect(parameters.properties.args).toBeDefined();
     });
-
-    it('should have renderCall and renderResult defined', () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      expect(tool.renderCall).toBeDefined();
-      expect(tool.renderResult).toBeDefined();
-    });
   });
 
   describe('execute get_schema', () => {

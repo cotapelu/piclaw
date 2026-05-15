@@ -8,62 +8,14 @@ import { subToolNames, type SubToolMap, type SubToolName } from "./types.js";
 // Core tools from @mariozechner/pi-coding-agent
 const coreToolNames = new Set<string>(["bash", "ls", "find", "grep", "read", "edit", "write", "get_schema"]);
 
-// List of dangerous tools that can execute arbitrary commands or access sensitive resources
-// These tools can affect system state, execute code, or access sensitive data.
-// They can be disabled via SubToolLoader config (allowDangerousTools: false).
+// Dangerous tools that can execute arbitrary commands or access sensitive resources
+// Only includes tools we actually have in subToolNames
 export const DANGEROUS_TOOLS = new Set<string>([
-  // Shell & remote execution (arbitrary command execution)
-  "bash", "sh", "zsh", "fish",
-  "ssh", "scp", "sftp", "ftp", "smbclient", "netcat", "socat",
-
-  // Container/Orchestration (execute in containers, change infra)
-  "docker", "docker-compose", "podman",
-  "kubectl", "kubectl-apply", "k8s", "helm", "oc", "nomad",
-
-  // Virtualization/System isolation
-  "virsh", "qemu", "lxc", "chroot", "systemd-nspawn", "vagrant",
-
-  // System management (modify system state)
-  "systemctl", "sysctl", "iptables", "nft", "lvm", "mount", "umount",
-  "crontab", "at", "systemd",
-
-  // Process management (kill, manage processes)
-  "kill", "pkill", "pkexec", "sudo", "su", "ps", "pstree", "killall",
-
-  // Databases (direct access, can read/write/modify data)
-  "mysql", "psql", "sqlite3", "mongodb", "redis", "mongo",
-
-  // Package managers (install/remove software, can modify system)
-  "apt", "yum", "dnf", "zypper", "pacman", "emerge", "apk", "pkg",
-  "nix-env", "guix", "spack", "pkgsrc", "npm", "yarn", "pnpm", "bun",
-
-  // Build/Compile (can execute arbitrary build scripts)
-  "make", "cmake", "ninja", "maven", "gradle", "ant", "dotnet", "msbuild",
-  "cargo", "go", "make", "terraform",
-
-  // Network diagnostics (can probe networks, potentially exploit)
-  "ping", "traceroute", "nslookup", "dig", "whois", "tcpdump", "wireshark",
-
-  // File operations (could overwrite/delete sensitive files if misused)
-  "rm", "cp", "mv", "ln", "rsync", "scp", "dd", "wipe", "shred",
-
-  // Cloud/Infrastructure (modify cloud resources)
-  "aws", "terraform", "gcloud", "az", "doctl",
-
+  // Shell & remote execution
+  "bash",
+  "ssh",
   // Version control (can access private repos, execute hooks)
-  "git", "svn", "hg", "fossil", "bzr", "cvs", "darcs",
-
-  // Scripting languages (can execute arbitrary code)
-  "python", "perl", "ruby", "php", "lua", "r", "julia", "node", "deno", "bun",
-
-  // Potentially destructive operations
-  "update", "backup", "restore", "format", "fdisk", "parted",
-
-  // Security tools (can affect system security)
-  "ufw", "firewall-cmd", "iptables", "nft", "selinux", "apparmor",
-
-  // Other elevated privileges
-  "sudo", "su", "doas", "pfexec",
+  "git",
 ]);
 
 /**
@@ -81,7 +33,7 @@ export function getToolMap(cwd: string): SubToolMap {
   const tools: SubToolMap = {};
 
   for (const name of subToolNames) {
-    if (coreToolNames.has(name)) continue; // Skip core tools
+    if (coreToolNames.has(name)) continue; // Skip core tools (handled separately)
 
     const schemaKey = `${name}Schema`;
     const executeKey = `execute${name.charAt(0).toUpperCase()}${name.slice(1)}`;
@@ -97,7 +49,6 @@ export function getToolMap(cwd: string): SubToolMap {
         execute,
         // Mark as dangerous if it's in the dangerous list
         dangerous: DANGEROUS_TOOLS.has(name),
-        // Default safeExecute to false (most tools use bash -c currently)
         safeExecute: false,
       };
     }

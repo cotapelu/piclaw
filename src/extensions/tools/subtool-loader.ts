@@ -1,16 +1,15 @@
 /**
- * SubTool Loader - Main entry point
+ * SubTool Loader - Unified tool for system operations
  *
- * Unified tool for system operations combining:
- * - Core Computer Use tools from @mariozechner/pi-coding-agent
- * - Extended sub-tools from src/extensions/tools/sub-tools/
+ * Exposes a single tool that can execute multiple system commands.
+ * Combines core tools (bash, ls, find, grep, read, edit, write) from pi-coding-agent
+ * with extended sub-tools (git, ssh, http, jq, yq, tail).
  */
 
 import { Type } from "typebox";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Text } from "@mariozechner/pi-tui";
-import { getAgentDir } from "../../config/config.js";  // path: extensions/tools/subtool-loader.ts -> ../../config
+import { getAgentDir } from "../../config/config-manager.js";
 import {
   createBashToolDefinition,
   createLsToolDefinition,
@@ -24,7 +23,6 @@ import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 import { subToolNames, type SubToolName } from "./sub-tools/types.js";
 import { getToolMap, DANGEROUS_TOOLS } from "./sub-tools/helpers.js";
-import { renderSubtoolLoaderCall, renderSubtoolLoaderResult } from "./sub-tools/render.js";
 
 // ============================================================================
 // Core tools from @mariozechner/pi-coding-agent
@@ -43,24 +41,25 @@ function getCoreToolMap(cwd: string) {
 }
 
 // ============================================================================
-// Extension Registration
+// Tool cache
 // ============================================================================
 
-/**
- * Register subtool_loader as an extension.
- * This allows it to be loaded via the extension system.
- */
-export function registerSubToolLoaderExtension(api: ExtensionAPI) {
-  const tool = createSubLoaderToolDefinition(); // cwd will be resolved from context
-  api.registerTool(tool);
+const toolCache = new Map<string, Record<string, any>>();
+
+function getAllTools(cwd: string): Record<string, any> {
+  if (toolCache.has(cwd)) return toolCache.get(cwd)!;
+
+  const tools = {
+    ...getCoreToolMap(cwd),
+    ...getToolMap(cwd), // custom sub-tools from sub-tools/index
+  };
+
+  toolCache.set(cwd, tools);
+  return tools;
 }
 
 // ============================================================================
-// Combined tool map (core + custom sub-tools)
-// ============================================================================
-
-// ============================================================================
-// Audit Trail - Logging for all sub-tool executions
+// Audit Trail
 // ============================================================================
 
 interface AuditEntry {
@@ -90,45 +89,28 @@ function addAuditEntry(entry: Omit<AuditEntry, "timestamp">): void {
   };
   auditLog.push(fullEntry);
 
-  // Also append to file for persistence (async)
   try {
-    const logLine = `${JSON.stringify(fullEntry)  }\n`;
-    // Use async append but fire-and-forget
+    const logLine = `${JSON.stringify(fullEntry)}\n`;
     fs.promises.appendFile(getAuditLogPath(), logLine).catch(() => {});
   } catch {
-    // Silently fail if can't write - don't block execution
+    // Silently fail
   }
 }
 
-/**
- * Get all audit entries (for debugging/testing)
- */
 export function getAuditLog(): readonly AuditEntry[] {
   return auditLog;
 }
 
-/**
- * Clear audit log (for testing)
- */
 export function clearAuditLog(): void {
   auditLog.length = 0;
 }
 
 // ============================================================================
-// Dangerous Tools Configuration
+// Configuration
 // ============================================================================
 
-/**
- * Default list of dangerous sub-tools that can be disabled
- * These tools can execute arbitrary commands or access sensitive resources
- */
-/**
- * Configuration for sub-tool loader
- */
 export interface SubToolLoaderConfig {
-  /** Set of tool names to disable */
   disabledTools?: Set<string>;
-  /** Whether to allow dangerous tools by default (default: true) */
   allowDangerousTools?: boolean;
 }
 
@@ -136,53 +118,20 @@ let config: SubToolLoaderConfig = {
   allowDangerousTools: true,
 };
 
-/**
- * Configure the sub-tool loader
- */
 export function configureSubToolLoader(newConfig: Partial<SubToolLoaderConfig>): void {
   config = { ...config, ...newConfig };
-  // Clear tool cache when config changes
   toolCache.clear();
 }
 
-/**
- * Get current configuration
- */
 export function getSubToolLoaderConfig(): Readonly<SubToolLoaderConfig> {
   return config;
 }
 
-/**
- * Check if a tool is allowed to execute
- */
 function isToolAllowed(toolName: string, toolDef?: any): boolean {
-  if (config.disabledTools?.has(toolName)) {
-    return false;
-  }
-  // Check if it's a dangerous tool and we're configured to disallow them
+  if (config.disabledTools?.has(toolName)) return false;
   const isDangerous = toolDef?.dangerous || DANGEROUS_TOOLS.has(toolName as any);
-  if (!config.allowDangerousTools && isDangerous) {
-    return false;
-  }
+  if (!config.allowDangerousTools && isDangerous) return false;
   return true;
-}
-
-// ============================================================================
-// Tool Cache
-// ============================================================================
-
-const toolCache = new Map<string, any>();
-
-function getAllTools(cwd: string): Record<string, any> {
-  if (toolCache.has(cwd)) return toolCache.get(cwd)!;
-
-  const tools = {
-    ...getCoreToolMap(cwd),
-    ...getToolMap(cwd),  // Add custom sub-tools from sub-tools/index
-  };
-
-  toolCache.set(cwd, tools);
-  return tools;
 }
 
 // ============================================================================
@@ -237,27 +186,20 @@ async function executeGetSchema(args: any, _signal?: AbortSignal, ctx?: any) {
 }
 
 // ============================================================================
-// Tool definition factory
+// Tool Definition
 // ============================================================================
 
 /**
  * Creates the subtool_loader tool definition.
- *
- * OPTIMIZATION: Use Union of Literal strings instead of Union of Objects.
- * This reduces the JSON Schema from ~4000+ lines to ~15 lines.
+ * Unified interface for system operations.
  */
 export function createSubLoaderToolDefinition(cwd?: string) {
-  // Schema: { subtool: string, args: any }
-  // Using Type.String() instead of Type.Union(Type.Literal(...))
-  // to avoid generating huge JSON Schema (~4000 lines)
-  // LLM can still find valid tool names in the description below.
   const schema = Type.Object({
     subtool: Type.String(),
     args: Type.Any(),
   });
 
   const description = `Unified tool for system operations via "subtool" parameter. Use get_schema for details. WARNING: executes arbitrary commands.`;
-
 
   return {
     name: "subtool_loader",
@@ -269,24 +211,19 @@ export function createSubLoaderToolDefinition(cwd?: string) {
       'Use the "subtool" parameter to select the operation, and "args" for that operation.',
       '',
       'Common subtools:',
-      '• bash: Execute shell commands - { subtool: "bash", args: { command: "..." } }',
-      '• ls: List files - { subtool: "ls", args: { path: "." } }',
-      '• find: Find files - { subtool: "find", args: { pattern: "*.ts" } }',
-      '• grep: Search text - { subtool: "grep", args: { pattern: "TODO", path: "." } }',
-      '• read: Read file - { subtool: "read", args: { path: "./file.ts" } }',
-      '• edit: Edit file - { subtool: "edit", args: { path: "./file.ts", oldText: "...", newText: "..." } }',
-      '• write: Write file - { subtool: "write", args: { path: "./file.ts", content: "..." } }',
+      '• bash: Execute shell commands',
+      '• ls: List files',
+      '• find: Find files',
+      '• grep: Search text',
+      '• read: Read file',
+      '• git: Git operations',
+      '• ssh: Remote execution',
+      '• http: Web requests',
+      '• jq: JSON processing',
+      '• yq: YAML processing',
+      '• tail: Log monitoring',
       '',
-      'Extended sub-tools include: git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis,',
-      'make, npm, systemctl, journalctl, ps, kill, crontab, apt, yum, df, du, ping, traceroute,',
-      'nslookup, dig, wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg, update, backup, password,',
-      'weather, time, ufw, at, quota, iso, free, iostat, netstat, ss, pandoc, wkhtmltopdf,',
-      'pdftk, ps2pdf, enscript, graphviz, xmlstarlet, json_pp, yamllint, tomlq, hjson,',
-      'archive, zip, 7z, xz, svn, hg, darcs, fossil, bzr, cvs, pacman, dnf, zypper,',
-      'emerge, apk, pkg, nix-env, guix, spack, pkgsrc.',
-      '',
-      'Use subtool_loader({ subtool: "get_schema", args: { name: "bash" } }) to see',
-      'detailed parameters for any sub-tool.',
+      'Use subtool_loader({ subtool: "get_schema", args: { name: "bash" } }) for detailed parameters.',
       '',
       '⚠️ WARNING: Sub-tools execute arbitrary shell commands. Only use in trusted environments.'
     ],
@@ -313,8 +250,7 @@ export function createSubLoaderToolDefinition(cwd?: string) {
         }
 
         const effectiveCwd = ctx?.cwd || cwd || process.cwd();
-        const toolMap = getAllTools(effectiveCwd);
-        const toolDef = toolMap[subtool];
+        const toolDef = getAllTools(effectiveCwd)[subtool];
 
         if (!toolDef) {
           return {
@@ -324,10 +260,9 @@ export function createSubLoaderToolDefinition(cwd?: string) {
           } as const;
         }
 
-        // Check if tool is allowed (considering dangerous flag)
         if (!isToolAllowed(subtool, toolDef)) {
           const reason = toolDef.dangerous
-            ? `Tool '${subtool}' is dangerous and disabled. Set allowDangerousTools=true in SubToolLoader config to enable.`
+            ? `Tool '${subtool}' is dangerous and disabled. Set allowDangerousTools=true to enable.`
             : `Tool '${subtool}' is disabled.`;
           return {
             content: [{ type: "text", text: reason }],
@@ -336,16 +271,13 @@ export function createSubLoaderToolDefinition(cwd?: string) {
           } as const;
         }
 
-        // Execute and log result
         const startTime = Date.now();
-        const delegatedToolCallId = `subtool-${subtool}-${Date.now()}`;
-        const result = await toolDef.execute(delegatedToolCallId, parsedArgs, signal, undefined, ctx);
+        const result = await toolDef.execute(toolCallId, parsedArgs, signal, undefined, ctx);
         const duration = Date.now() - startTime;
         const success = !result.isError;
         addAuditEntry({ tool: subtool, args: parsedArgs, success, duration });
         return result;
       } catch (error: any) {
-        // Log failure
         addAuditEntry({ tool: subtool, args: parsedArgs, success: false, error: error.message });
         return {
           content: [{ type: "text", text: `Error: ${error.message}` }],
@@ -354,7 +286,13 @@ export function createSubLoaderToolDefinition(cwd?: string) {
         } as const;
       }
     },
-    renderCall: renderSubtoolLoaderCall,
-    renderResult: renderSubtoolLoaderResult,
   };
+}
+
+/**
+ * Register subtool_loader as an extension.
+ */
+export function registerSubToolLoaderExtension(api: ExtensionAPI) {
+  const tool = createSubLoaderToolDefinition();
+  api.registerTool(tool);
 }

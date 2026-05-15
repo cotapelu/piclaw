@@ -3,11 +3,43 @@
 /**
  * Piclaw Configuration Manager
  * Handles persistent user configuration (~/.piclaw/config.json)
+ * And essential path helpers.
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+export const CONFIG_DIR_NAME = ".piclaw";
+
+// ============================================================================
+// Path Helpers
+// ============================================================================
+
+/**
+ * Get the agent config directory (~/.piclaw/agent)
+ */
+export function getAgentDir(): string {
+	const envDir = process.env.PICLAW_AGENT_DIR;
+	if (envDir) {
+		if (envDir === "~") return homedir();
+		if (envDir.startsWith("~/") || envDir.startsWith("~\\")) return join(homedir(), envDir.slice(2));
+		return envDir;
+	}
+	return join(homedir(), CONFIG_DIR_NAME, "agent");
+}
+
+/**
+ * Get path to managed binaries directory
+ */
+export function getBinDir(): string {
+	return join(getAgentDir(), "bin");
+}
+
 
 export interface PiclawConfig {
 	/** Default model to use (e.g., "anthropic:claude-opus-4-5") */
@@ -25,7 +57,7 @@ export interface PiclawConfig {
 }
 
 function getConfigDir(): string {
-  return join(homedir(), ".piclaw");
+  return join(homedir(), CONFIG_DIR_NAME);
 }
 
 export function getDefaultContextLogFile(cwd: string): string {

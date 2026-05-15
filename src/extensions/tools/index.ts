@@ -5,4 +5,3 @@
 export { registerTodosTool } from "./todos-tool.js";
 export { registerMemoryTool } from "./memory-tool.js";
 export { registerUniversalTool } from "./universal-tool.js";
-export { registerTeamTool } from "./team-tool.js";
