@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createSubLoaderToolDefinition } from '../tools/subtool-loader.js';
+import { createSubLoaderToolDefinition } from '../extensions/tools/subtool-loader';
 
 // Mock context
 const createMockContext = (cwd: string = "/tmp") => ({

@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeApt, aptSchema } from '../tools/sub-tools/apt.js';
+import { executeApt, aptSchema } from '../extensions/tools/sub-tools/apt';
 
 describe('apt tool', () => {
   let mockCtx: any;

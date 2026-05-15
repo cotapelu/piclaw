@@ -15,8 +15,7 @@ vi.mock('../extensions/providers/kilo-provider.js', () => ({
 vi.mock('../extensions/tools/index.js', () => ({
   registerTodosTool: vi.fn(),
   registerMemoryTool: vi.fn(),
-  registerEchoTool: vi.fn(),
-  registerSystemInfoTool: vi.fn(),
+  registerUniversalTool: vi.fn(),
 }));
 
 vi.mock('../extensions/auto-memory.js', () => ({
@@ -27,14 +26,16 @@ vi.mock('../extensions/hooks/auto-continue.js', () => ({
   default: vi.fn(),
 }));
 
-vi.mock('../tools/subtool-loader.js', () => ({
+vi.mock('../extensions/tools/subtool-loader', () => ({
   createSubLoaderToolDefinition: vi.fn().mockReturnValue({ name: 'mock-tool' }),
+  registerSubToolLoaderExtension: vi.fn(),
 }));
 
 // Now import the module after mocks are set up
 import extensionIndex from '../extensions/index.js';
 import { registerKiloProvider } from '../extensions/providers/kilo-provider.js';
-import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from '../extensions/tools/index.js';
+import { registerTodosTool, registerMemoryTool, registerUniversalTool } from '../extensions/tools/index.js';
+import { registerSubToolLoaderExtension } from '../extensions/tools/subtool-loader';
 import autoContinueExtension from '../extensions/hooks/auto-continue.js';
 
 describe('extensions/index', () => {
@@ -72,16 +73,16 @@ describe('extensions/index', () => {
     expect(registerMemoryTool).toHaveBeenCalledWith(mockApi);
   });
 
-  it('should register echo tool', () => {
+  it('should register universal tool', () => {
     const mockApi = createMockApi();
     extensionIndex(mockApi);
-    expect(registerEchoTool).toHaveBeenCalledWith(mockApi);
+    expect(registerUniversalTool).toHaveBeenCalledWith(mockApi);
   });
 
-  it('should register system info tool', () => {
+  it('should register subtool loader extension', () => {
     const mockApi = createMockApi();
     extensionIndex(mockApi);
-    expect(registerSystemInfoTool).toHaveBeenCalledWith(mockApi);
+    expect(registerSubToolLoaderExtension).toHaveBeenCalledWith(mockApi);
   });
 
   it('should call all registrations in correct order (not guaranteed but all called)', () => {
@@ -91,7 +92,7 @@ describe('extensions/index', () => {
     expect(registerKiloProvider).toHaveBeenCalledTimes(1);
     expect(registerTodosTool).toHaveBeenCalledTimes(1);
     expect(registerMemoryTool).toHaveBeenCalledTimes(1);
-    expect(registerEchoTool).toHaveBeenCalledTimes(1);
-    expect(registerSystemInfoTool).toHaveBeenCalledTimes(1);
+    expect(registerUniversalTool).toHaveBeenCalledTimes(1);
+    expect(registerSubToolLoaderExtension).toHaveBeenCalledTimes(1);
   });
 });

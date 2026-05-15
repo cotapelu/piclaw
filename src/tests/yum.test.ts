@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeYum, yumSchema } from '../tools/sub-tools/yum.js';
+import { executeYum, yumSchema } from '../extensions/tools/sub-tools/yum';
 
 describe('yum tool', () => {
   let mockCtx: any;

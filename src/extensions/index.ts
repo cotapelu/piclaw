@@ -7,7 +7,8 @@
  */
 
 import { registerKiloProvider } from "./providers/kilo-provider.js";
-import { registerTodosTool, registerMemoryTool, registerEchoTool, registerSystemInfoTool } from "./tools/index.js";
+import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./tools/index.js";
+import { registerSubToolLoaderExtension } from "./tools/subtool-loader";
 import autoContinueExtension from "./hooks/auto-continue.js";
 import { registerTeamTool } from "./tools/team-tool.js";
 
@@ -21,9 +22,9 @@ export default function (api: import("@mariozechner/pi-coding-agent").ExtensionA
   registerTodosTool(api);
   registerMemoryTool(api);
 
-  // Register additional tools
-  registerEchoTool(api);
-  registerSystemInfoTool(api);
+  // Register universal tool (replaces echo and system_info)
+  registerUniversalTool(api);
+  registerSubToolLoaderExtension(api);
 
   // Register Team Tool
   registerTeamTool(api);

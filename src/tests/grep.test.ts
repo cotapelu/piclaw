@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { executeGrep, grepSchema } from '../tools/sub-tools/computer-use.js';
+import { executeGrep, grepSchema } from '../extensions/tools/sub-tools/computer-use';
 
 describe('grep tool', () => {
   let mockCtx: any;

@@ -20,7 +20,7 @@ import {
 } from "@mariozechner/pi-coding-agent";
 import { getAgentDir } from "./config/config.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
-import { createSubLoaderToolDefinition } from "./tools/subtool-loader.js";
+
 import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
 import { createContextLoggingStreamFn } from "./context-logger.js";
 
@@ -33,8 +33,6 @@ export interface PiclawCoreOptions {
   sessionDir?: string;
   /** Tool allowlist (default: from settings or built-in) */
   tools?: string[];
-  /** Additional custom tools to register */
-  customTools?: ToolDefinition[];
   /** Model to use (provider:modelId) */
   model?: string;
   /** Thinking level */
@@ -75,14 +73,11 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
       agentDir,
     });
 
-    const customTools = options.customTools ?? [createSubLoaderToolDefinition(cwd)];
-    
     const result = await createAgentSessionFromServices({
       services: newServices,
       sessionManager,
       sessionStartEvent,
       tools: options.tools,
-      customTools,
     });
 
     return {

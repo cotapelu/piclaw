@@ -1,16 +1,16 @@
 /**
  * SubTool Loader - Main entry point
- * 
+ *
  * Unified tool for system operations combining:
  * - Core Computer Use tools from @mariozechner/pi-coding-agent
- * - Extended sub-tools from src/tools/sub-tools/
+ * - Extended sub-tools from src/extensions/tools/sub-tools/
  */
 
 import { Type } from "typebox";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { Text } from "@mariozechner/pi-tui";
-import { getAgentDir } from "../config/config.js";
+import { getAgentDir } from "../../config/config.js";  // path: extensions/tools/subtool-loader.ts -> ../../config
 import {
   createBashToolDefinition,
   createLsToolDefinition,
@@ -20,6 +20,7 @@ import {
   createEditToolDefinition,
   createWriteToolDefinition,
 } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
 
 import { subToolNames, type SubToolName } from "./sub-tools/types.js";
 import { getToolMap, DANGEROUS_TOOLS } from "./sub-tools/helpers.js";
@@ -39,6 +40,19 @@ function getCoreToolMap(cwd: string) {
     edit: createEditToolDefinition(cwd),
     write: createWriteToolDefinition(cwd),
   };
+}
+
+// ============================================================================
+// Extension Registration
+// ============================================================================
+
+/**
+ * Register subtool_loader as an extension.
+ * This allows it to be loaded via the extension system.
+ */
+export function registerSubToolLoaderExtension(api: ExtensionAPI) {
+  const tool = createSubLoaderToolDefinition(); // cwd will be resolved from context
+  api.registerTool(tool);
 }
 
 // ============================================================================
@@ -75,7 +89,7 @@ function addAuditEntry(entry: Omit<AuditEntry, "timestamp">): void {
     timestamp: new Date().toISOString(),
   };
   auditLog.push(fullEntry);
-  
+
   // Also append to file for persistence (async)
   try {
     const logLine = `${JSON.stringify(fullEntry)  }\n`;
@@ -175,9 +189,9 @@ function getAllTools(cwd: string): Record<string, any> {
 // Execute: get_schema
 // ============================================================================
 
-async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, ctx?: any) {
+async function executeGetSchema(args: any, _signal?: AbortSignal, ctx?: any) {
   const { name } = args as { name: string };
-  const effectiveCwd = ctx?.cwd || cwd;
+  const effectiveCwd = ctx?.cwd || process.cwd();
 
   if (!name) {
     return {
@@ -199,7 +213,7 @@ async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, c
 
   const schema = toolDef.parameters as any;
   let output = `Schema for sub-tool "${name}":\n\n`;
-  
+
   if (schema?.properties) {
     output += "Properties:\n";
     for (const [key, propSchema] of Object.entries(schema.properties)) {
@@ -232,7 +246,7 @@ async function executeGetSchema(args: any, cwd: string, _signal?: AbortSignal, c
  * OPTIMIZATION: Use Union of Literal strings instead of Union of Objects.
  * This reduces the JSON Schema from ~4000+ lines to ~15 lines.
  */
-export function createSubLoaderToolDefinition(cwd: string) {
+export function createSubLoaderToolDefinition(cwd?: string) {
   // Schema: { subtool: string, args: any }
   // Using Type.String() instead of Type.Union(Type.Literal(...))
   // to avoid generating huge JSON Schema (~4000 lines)
@@ -246,7 +260,7 @@ export function createSubLoaderToolDefinition(cwd: string) {
     `Unified tool for system operations.\n\n` +
     `Core Computer Use tools (from @mariozechner/pi-coding-agent):\n` +
     `- get_schema, bash, ls, find, grep, read, edit, write\n\n` +
-    `Extended sub-tools (custom in src/tools/sub-tools/):\n` +
+    `Extended sub-tools (custom in src/extensions/tools/sub-tools/):\n` +
     `- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis\n` +
     `- make, npm, systemctl, journalctl, ps, kill, crontab\n` +
     `- apt, yum, df, du, ping, traceroute, nslookup, dig\n` +
@@ -268,7 +282,7 @@ export function createSubLoaderToolDefinition(cwd: string) {
     parameters: schema,
     async execute(toolCallId: string, params: any, signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
       const { subtool, args } = params as { subtool: string; args: any };
-      
+
       let parsedArgs: any = args;
       if (typeof args === 'string') {
         try {
@@ -284,12 +298,13 @@ export function createSubLoaderToolDefinition(cwd: string) {
 
       try {
         if (subtool === "get_schema") {
-          return await executeGetSchema(parsedArgs, cwd, signal, ctx);
+          return await executeGetSchema(parsedArgs, signal, ctx);
         }
 
-        const toolMap = getAllTools(ctx?.cwd || cwd);
+        const effectiveCwd = ctx?.cwd || cwd || process.cwd();
+        const toolMap = getAllTools(effectiveCwd);
         const toolDef = toolMap[subtool];
-        
+
         if (!toolDef) {
           return {
             content: [{ type: "text", text: `Unknown subtool: ${subtool}. Available: ${subToolNames.join(", ")}` }],

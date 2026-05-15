@@ -20,7 +20,7 @@ import {
   type ToolDefinition,
 } from "@mariozechner/pi-coding-agent";
 import { getAgentDir } from "../config/config.js";
-import { createSubLoaderToolDefinition } from "../tools/subtool-loader.js";
+
 import { SharedWorkspace } from "./workspace.js";
 import { TeamContextManager } from "./team-context.js";
 import { TeamMessageBus, CHANNELS } from "./message-bus.js";
@@ -431,7 +431,6 @@ export async function bootPiclawTeam(
         sessionStartEvent,
         tools: options.tools,
         customTools: [
-          createSubLoaderToolDefinition(cwd),
           createTeamOpsTool(team)
         ],
       });

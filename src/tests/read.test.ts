@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { executeRead, readSchema } from '../tools/sub-tools/computer-use.js';
+import { executeRead, readSchema } from '../extensions/tools/sub-tools/computer-use';
 import { mkdirSync, rmSync, existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
