@@ -256,29 +256,40 @@ export function createSubLoaderToolDefinition(cwd?: string) {
     args: Type.Any(),
   });
 
-  const description = `⚠️ SECURITY WARNING: Sub-tools execute arbitrary shell commands.\nOnly use in trusted environments with controlled inputs.\n\n` +
-    `Unified tool for system operations.\n\n` +
-    `Core Computer Use tools (from @mariozechner/pi-coding-agent):\n` +
-    `- get_schema, bash, ls, find, grep, read, edit, write\n\n` +
-    `Extended sub-tools (custom in src/extensions/tools/sub-tools/):\n` +
-    `- git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis\n` +
-    `- make, npm, systemctl, journalctl, ps, kill, crontab\n` +
-    `- apt, yum, df, du, ping, traceroute, nslookup, dig\n` +
-    `- wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg\n` +
-    `- update, backup, password, weather, time, ufw, at, quota\n` +
-    `- iso, free, iostat, netstat, ss\n` +
-    `- pandoc, wkhtmltopdf, pdftk, ps2pdf, enscript, graphviz\n` +
-    `- xmlstarlet, json_pp, yamllint, tomlq, hjson\n` +
-    `- archive, zip, 7z, xz\n` +
-    `- svn, hg, darcs, fossil, bzr, cvs\n` +
-    `- pacman, dnf, zypper, emerge, apk, pkg, nix-env, guix, spack, pkgsrc\n\n` +
-    `Use "get_schema" to see argument details for any sub-tool.\n\n` +
-    `Example: {"subtool":"bash","args":{"command":"echo hello"}}`;
+  const description = `Unified tool for system operations via "subtool" parameter. Use get_schema for details. WARNING: executes arbitrary commands.`;
+
 
   return {
     name: "subtool_loader",
     label: "SubTool Loader",
     description,
+    promptSnippet: 'subtool_loader({ subtool: "bash", args: { command: "echo hello" } })',
+    promptGuidelines: [
+      'subtool_loader is a unified tool for system operations.',
+      'Use the "subtool" parameter to select the operation, and "args" for that operation.',
+      '',
+      'Common subtools:',
+      '• bash: Execute shell commands - { subtool: "bash", args: { command: "..." } }',
+      '• ls: List files - { subtool: "ls", args: { path: "." } }',
+      '• find: Find files - { subtool: "find", args: { pattern: "*.ts" } }',
+      '• grep: Search text - { subtool: "grep", args: { pattern: "TODO", path: "." } }',
+      '• read: Read file - { subtool: "read", args: { path: "./file.ts" } }',
+      '• edit: Edit file - { subtool: "edit", args: { path: "./file.ts", oldText: "...", newText: "..." } }',
+      '• write: Write file - { subtool: "write", args: { path: "./file.ts", content: "..." } }',
+      '',
+      'Extended sub-tools include: git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis,',
+      'make, npm, systemctl, journalctl, ps, kill, crontab, apt, yum, df, du, ping, traceroute,',
+      'nslookup, dig, wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg, update, backup, password,',
+      'weather, time, ufw, at, quota, iso, free, iostat, netstat, ss, pandoc, wkhtmltopdf,',
+      'pdftk, ps2pdf, enscript, graphviz, xmlstarlet, json_pp, yamllint, tomlq, hjson,',
+      'archive, zip, 7z, xz, svn, hg, darcs, fossil, bzr, cvs, pacman, dnf, zypper,',
+      'emerge, apk, pkg, nix-env, guix, spack, pkgsrc.',
+      '',
+      'Use subtool_loader({ subtool: "get_schema", args: { name: "bash" } }) to see',
+      'detailed parameters for any sub-tool.',
+      '',
+      '⚠️ WARNING: Sub-tools execute arbitrary shell commands. Only use in trusted environments.'
+    ],
     parameters: schema,
     async execute(toolCallId: string, params: any, signal?: AbortSignal, _onUpdate?: any, ctx?: any) {
       const { subtool, args } = params as { subtool: string; args: any };
