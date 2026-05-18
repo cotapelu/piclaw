@@ -37,7 +37,7 @@ describe("ConfigManager", () => {
       expect(config).toEqual({
         model: undefined,
         thinking: "medium",
-        tools: ["read", "bash", "edit", "write", "subtool_loader", "todos", "memory", "echo", "system-info"],
+        tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
         verbose: false,
       });
@@ -107,7 +107,7 @@ describe("ConfigManager", () => {
       expect(config).toEqual({
         model: undefined,
         thinking: "medium",
-        tools: ["read", "bash", "edit", "write", "subtool_loader", "todos", "memory", "echo", "system-info"],
+        tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
         verbose: false,
       });

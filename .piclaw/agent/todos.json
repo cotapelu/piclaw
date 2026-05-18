@@ -130,9 +130,61 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Phase 5: Increase Test Coverage to 80%+",
+      "tasks": [
+        {
+          "id": "task-21",
+          "content": "Analyze coverage gaps (done)",
+          "status": "completed"
+        },
+        {
+          "id": "task-22",
+          "content": "Write tests for team-ops-tool.ts (currently 2%)",
+          "status": "completed"
+        },
+        {
+          "id": "task-23",
+          "content": "Write tests for sub-tools: git, http, jq, ssh, tail, yq",
+          "status": "completed",
+          "notes": "Keep only computer-use (ls/find/grep/read) + http. Removed git, jq, ssh, tail, yq, bash. Sub-tool loader retained."
+        },
+        {
+          "id": "task-24",
+          "content": "Write tests for context-logger.ts",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-25",
+          "content": "Write tests for cli.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-26",
+          "content": "Write tests for extensions/piclaw-header.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-27",
+          "content": "Write tests for auto-continue.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-28",
+          "content": "Write tests for migrations.ts",
+          "status": "pending"
+        },
+        {
+          "id": "task-29",
+          "content": "Run coverage and verify ≥80%",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 21,
-  "nextPhaseId": 5,
-  "updatedAt": "2026-05-15T04:33:39.788Z"
+  "nextTaskId": 30,
+  "nextPhaseId": 6,
+  "updatedAt": "2026-05-17T02:56:20.799Z"
 }

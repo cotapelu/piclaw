@@ -16,7 +16,7 @@ vi.mock('../config/config-manager.js', () => {
   const mockLoadConfig = vi.fn((overrides = {}) => ({
     model: overrides.model,
     thinking: overrides.thinking ?? 'medium',
-    tools: overrides.tools ?? ['read', 'bash', 'edit', 'write', 'subtool_loader', 'todos', 'memory', 'echo', 'system-info'],
+    tools: overrides.tools ?? ['read', 'bash', 'edit', 'write', 'todos', 'memory', 'echo', 'system-info', 'http'],
     sessionDir: overrides.sessionDir,
     verbose: overrides.verbose ?? false,
     contextLogFile: overrides.contextLogFile,

@@ -1,24 +1,23 @@
-// Computer Use (core file operations)
-export { bashSchema, executeBash } from "./computer-use.js";
+#!/usr/bin/env node
+
+/**
+ * Sub-Tools Index
+ * Minimal tools that provide value over raw bash.
+ *
+ * Philosophy:
+ * - Keep only tools with structured schemas and cleaner error handling
+ * - Everything else: use built-in 'bash' tool
+ *
+ * Current tools:
+ * - computer-use: ls, find, grep, read (file operations)
+ * - http: Web requests (better than curl flags)
+ */
+
+// File operations
 export { lsSchema, executeLs } from "./computer-use.js";
 export { findSchema, executeFind } from "./computer-use.js";
 export { grepSchema, executeGrep } from "./computer-use.js";
 export { readSchema, executeRead } from "./computer-use.js";
 
-// Git - version control
-export { gitSchema, executeGit } from "./git.js";
-
-// SSH - secure remote access
-export { sshSchema, executeSsh } from "./ssh.js";
-
-// HTTP - web requests
+// HTTP - Web requests
 export { httpSchema, executeHttp } from "./http.js";
-
-// JSON processing
-export { jqSchema, executeJq } from "./jq.js";
-
-// YAML processing
-export { yqSchema, executeYq } from "./yq.js";
-
-// Log monitoring
-export { tailSchema, executeTail } from "./tail.js";

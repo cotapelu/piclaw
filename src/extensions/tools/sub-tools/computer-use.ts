@@ -1,182 +1,162 @@
+#!/usr/bin/env node
+
+/**
+ * File System Operations
+ * Convenience wrappers for common file operations.
+ *
+ * These provide typed schemas and cleaner error handling vs raw bash.
+ * For general command execution, use the built-in 'bash' tool.
+ */
+
 import { Type } from "typebox";
 
 // ============================================================================
 // Schemas
 // ============================================================================
 
-export const bashSchema = Type.Object({
-  command: Type.String({ description: "Bash command to execute" }),
-  timeout: Type.Optional(Type.Number({ description: "Timeout in seconds" })),
-});
-
 export const lsSchema = Type.Object({
-  path: Type.Optional(Type.String({ description: "Directory to list (default: cwd)" })),
+  path: Type.Optional(Type.String()),
+  recursive: Type.Optional(Type.Boolean()),
+  all: Type.Optional(Type.Boolean()), // Show hidden files (-la)
 });
 
 export const findSchema = Type.Object({
-  pattern: Type.String({ description: "Glob pattern, e.g. '*.ts', '**/*.json'" }),
-  path: Type.Optional(Type.String({ description: "Directory to search (default: cwd)" })),
-  limit: Type.Optional(Type.Number({ description: "Max results (default: 1000)" })),
+  path: Type.Optional(Type.String()),
+  pattern: Type.String({ description: "Glob pattern (e.g., '*.ts', '**/*.js')" }),
+  maxDepth: Type.Optional(Type.Number()),
 });
 
 export const grepSchema = Type.Object({
-  pattern: Type.String({ description: "Search pattern (regex or literal)" }),
-  path: Type.Optional(Type.String({ description: "Directory/file to search (default: cwd)" })),
-  ignoreCase: Type.Optional(Type.Boolean({ description: "Case-insensitive search" })),
-  limit: Type.Optional(Type.Number({ description: "Max matches (default: 100)" })),
+  pattern: Type.String({ description: "Search pattern (regex)" }),
+  path: Type.Optional(Type.String()),
+  include: Type.Optional(Type.String()), // File glob (--include)
+  exclude: Type.Optional(Type.String()), // File/dir to exclude (--exclude)
+  ignoreCase: Type.Optional(Type.Boolean()),
 });
 
 export const readSchema = Type.Object({
   path: Type.String({ description: "File path to read" }),
-  offset: Type.Optional(Type.Number({ description: "Start line (1-indexed)" })),
-  limit: Type.Optional(Type.Number({ description: "Max lines" })),
+  offset: Type.Optional(Type.Number()), // Skip first N lines (1-indexed)
+  limit: Type.Optional(Type.Number()),  // Read only N lines
 });
 
 // ============================================================================
-// Execute functions
+// Executors
 // ============================================================================
 
-// Helper: run bash command via ctx.exec
-async function runBash(
-  command: string,
-  cwd: string,
-  signal?: AbortSignal,
-  timeout?: number,
-  ctx?: any, // ExtensionContext with exec()
-) {
-  if (!ctx?.exec) throw new Error("ctx.exec not available");
-  return await ctx.exec("bash", ["-c", command], { cwd, signal, timeout });
-}
-
-export async function executeBash(
-  args: any,
-  cwd: string,
-  signal?: AbortSignal,
-  ctx?: any,
-) {
-  const { command, timeout } = args as { command: string; timeout?: number };
-  try {
-    const result = await runBash(command, cwd, signal, timeout, ctx);
-    return {
-      content: [{ type: "text", text: result.stdout || result.stderr }],
-      details: { exitCode: result.code, killed: result.killed },
-      isError: result.code !== 0,
-    } as const;
-  } catch (error: any) {
-    return { content: [{ type: "text", text: `Error: ${error.message}` }], details: undefined, isError: true } as const;
-  }
-}
-
+/**
+ * List directory contents (ls)
+ */
 export async function executeLs(
   args: any,
   cwd: string,
   signal?: AbortSignal,
   ctx?: any,
 ) {
-  const { path } = args as { path?: string };
-  const targetPath = path || cwd;
+  const { path, recursive = false, all = false } = args as { path?: string; recursive?: boolean; all?: boolean };
   try {
-    const result = await ctx!.exec("ls", ["-la", targetPath], { signal });
+    const lsArgs: string[] = [];
+    if (all) lsArgs.push("-la");
+    else if (recursive) lsArgs.push("-lR");
+    else if (path) lsArgs.push("-l", path);
+    else lsArgs.push("-l");
+
+    const targetPath = path || cwd;
+    const result = await ctx!.exec("ls", lsArgs, { cwd: targetPath, signal });
     return {
       content: [{ type: "text", text: result.stdout || result.stderr }],
-      details: { exitCode: result.code, killed: result.killed },
+      details: { exitCode: result.code, killed: result.killed, path: targetPath },
       isError: result.code !== 0,
     } as const;
   } catch (error: any) {
-    return { content: [{ type: "text", text: `Error: ${error.message}` }], details: undefined, isError: true } as const;
+    return { content: [{ type: "text", text: `ls error: ${error.message}` }], details: undefined, isError: true } as const;
   }
 }
 
+/**
+ * Find files by pattern (find)
+ */
 export async function executeFind(
   args: any,
   cwd: string,
   signal?: AbortSignal,
   ctx?: any,
 ) {
-  const { pattern, path: searchPath, limit } = args as { pattern: string; path?: string; limit?: number };
-  const targetPath = searchPath || cwd;
-  const maxResults = limit || 1000;
+  const { pattern, path = cwd, maxDepth } = args as { pattern: string; path?: string; maxDepth?: number };
   try {
-    const result = await ctx!.exec("find", [targetPath, "-name", pattern], { signal });
-    if (result.code !== 0) {
-      return { content: [{ type: "text", text: result.stderr || `find error ${result.code}` }], details: undefined, isError: true } as const;
-    }
-    const lines = result.stdout.split("\n").filter((l: string) => l.trim() !== "");
-    const truncated = lines.length > maxResults;
-    const limited = truncated ? lines.slice(0, maxResults) : lines;
-    let output = limited.join("\n");
-    if (truncated) output += `\n\n[Truncated: ${maxResults}/${lines.length}]`;
+    const findArgs: string[] = [path];
+    if (maxDepth) findArgs.push("-maxdepth", String(maxDepth));
+    findArgs.push("-name", pattern);
+
+    const result = await ctx!.exec("find", findArgs, { cwd, signal });
     return {
-      content: [{ type: "text", text: output }],
-      details: { total: lines.length, returned: limited.length, truncated },
-      isError: false,
+      content: [{ type: "text", text: result.stdout || result.stderr }],
+      details: { exitCode: result.code, killed: result.killed, pattern, path },
+      isError: result.code !== 0,
     } as const;
   } catch (error: any) {
-    return { content: [{ type: "text", text: `Error: ${error.message}` }], details: undefined, isError: true } as const;
+    return { content: [{ type: "text", text: `find error: ${error.message}` }], details: undefined, isError: true } as const;
   }
 }
 
+/**
+ * Search file contents (grep)
+ */
 export async function executeGrep(
   args: any,
   cwd: string,
   signal?: AbortSignal,
   ctx?: any,
 ) {
-  const { pattern, path: searchPath, ignoreCase, limit } = args as {
+  const { pattern, path = cwd, include, exclude, ignoreCase = false } = args as {
     pattern: string;
     path?: string;
+    include?: string;
+    exclude?: string;
     ignoreCase?: boolean;
-    limit?: number;
   };
-  const targetPath = searchPath || cwd;
-  const maxMatches = limit || 100;
   try {
-    const grepArgs = ["-r", pattern, targetPath];
-    if (ignoreCase) grepArgs.splice(1, 0, "-i");
-    const result = await ctx!.exec("grep", grepArgs, { signal });
-    if (result.code !== 0 && result.code !== 1) {
-      return { content: [{ type: "text", text: result.stderr || `grep error ${result.code}` }], details: undefined, isError: true } as const;
-    }
-    const lines = result.stdout.split("\n").filter((l: string) => l.trim() !== "");
-    const truncated = lines.length > maxMatches;
-    const limited = truncated ? lines.slice(0, maxMatches) : lines;
-    let output = limited.join("\n");
-    if (truncated) output += `\n\n[Truncated: ${maxMatches}/${lines.length}]`;
-    if (lines.length === 0) output = "(no matches)";
+    const grepArgs: string[] = [];
+    if (ignoreCase) grepArgs.push("-i");
+    if (include) grepArgs.push("--include", include);
+    if (exclude) grepArgs.push("--exclude", exclude);
+    grepArgs.push("-r"); // recursive
+    grepArgs.push(pattern);
+
+    const result = await ctx!.exec("grep", grepArgs, { cwd: path || cwd, signal });
     return {
-      content: [{ type: "text", text: output }],
-      details: { total: lines.length, returned: limited.length, truncated },
-      isError: false,
+      content: [{ type: "text", text: result.stdout || result.stderr }],
+      details: { exitCode: result.code, killed: result.killed, pattern, path: path || cwd },
+      isError: result.code !== 0,
     } as const;
   } catch (error: any) {
-    return { content: [{ type: "text", text: `Error: ${error.message}` }], details: undefined, isError: true } as const;
+    return { content: [{ type: "text", text: `grep error: ${error.message}` }], details: undefined, isError: true } as const;
   }
 }
 
+/**
+ * Read file contents with optional offset/limit
+ */
 export async function executeRead(
   args: any,
   cwd: string,
   signal?: AbortSignal,
   ctx?: any,
 ) {
-  const { path: filePath, offset, limit } = args as { path: string; offset?: number; limit?: number };
-  const MAX_LINES = 1000;
+  const { path, offset, limit } = args as { path: string; offset?: number; limit?: number };
   try {
-    const fs = await import("node:fs/promises");
-    const content = await fs.readFile(filePath, "utf-8");
-    const allLines = content.split("\n");
-    const start = offset && offset > 1 ? offset - 1 : 0;
-    const end = limit ? start + limit : undefined;
-    const selected = allLines.slice(start, end);
-    let output = selected.join("\n");
-    const truncated = end && allLines.length > end;
-    if (truncated) output += `\n\n[Truncated: ${selected.length}/${allLines.length} lines]`;
+    // Use bash + cat + tail/head for streaming
+    let cmd = `cat '${path}'`;
+    if (offset && offset > 0) cmd += ` | tail -n +${offset}`;
+    if (limit !== undefined) cmd += ` | head -n ${limit}`;
+
+    const result = await ctx!.exec("bash", ["-c", cmd], { cwd, signal });
     return {
-      content: [{ type: "text", text: output }],
-      details: { totalLines: allLines.length, returnedLines: selected.length, truncated },
-      isError: false,
+      content: [{ type: "text", text: result.stdout || result.stderr }],
+      details: { exitCode: result.code, killed: result.killed, path, offset, limit },
+      isError: result.code !== 0,
     } as const;
   } catch (error: any) {
-    return { content: [{ type: "text", text: `Error: ${error.message}` }], details: undefined, isError: true } as const;
+    return { content: [{ type: "text", text: `read error: ${error.message}` }], details: undefined, isError: true } as const;
   }
 }

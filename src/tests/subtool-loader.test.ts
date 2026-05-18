@@ -8,140 +8,101 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createSubLoaderToolDefinition } from '../extensions/tools/subtool-loader';
 
 // Mock context
-const createMockContext = (cwd: string = "/tmp") => ({
-  cwd,
-  exec: vi.fn(), // not used by create*ToolDefinition but kept for compatibility
+const createMockContext = (cwd = '/tmp') => ({
+  session: { cwd },
+  exec: vi.fn(),
 });
 
 describe('subtool_loader', () => {
-  let mockCtx: any;
-  const cwd = "/test/cwd";
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    mockCtx = createMockContext(cwd);
-  });
-
   describe('tool definition', () => {
-    it('should create a tool with name "subtool_loader"', () => {
-      const tool = createSubLoaderToolDefinition(cwd);
+    it('should create a tool with correct metadata', () => {
+      const tool = createSubLoaderToolDefinition();
       expect(tool.name).toBe('subtool_loader');
       expect(tool.label).toBe('SubTool Loader');
-      expect(tool.description).toContain('Unified tool for system operations');
+      expect(tool.description).toContain('convenience sub-tools');
     });
 
-    it('should have valid schema with available subtools', () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const parameters = tool.parameters as any;
-      expect(parameters).toBeDefined();
-
-      // Schema uses Type.String() instead of union of literals for optimization
-      // (avoids ~4000 line JSON Schema, reduces to ~15 lines)
-      expect(parameters.type).toBe('object');
-      expect(parameters.properties.subtool.type).toBe('string');
-      // args uses Type.Any() which doesn't have a 'type' property in JSON Schema
-      // just verify it exists
-      expect(parameters.properties.args).toBeDefined();
+    it('should have valid schema', () => {
+      const tool = createSubLoaderToolDefinition();
+      const params = tool.parameters as any;
+      expect(params.type).toBe('object');
+      expect(params.properties.subtool).toBeDefined();
+      expect(params.properties.args).toBeDefined();
+      expect(params.required).toContain('subtool');
+      expect(params.required).toContain('args');
+      expect(params.properties.subtool.enum).toEqual(['http', 'ls', 'find', 'grep', 'read']);
     });
   });
 
-  describe('execute get_schema', () => {
-    it('should return schema for bash', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-schema', {
-        subtool: 'get_schema',
-        args: { name: 'bash' }
-      }, undefined, undefined, mockCtx);
+  describe('execute delegation', () => {
+    let mockCtx: any;
 
-      expect(result.isError).toBe(false);
-      const text = result.content[0].text;
-      expect(text).toContain('Schema for sub-tool "bash"');
-      expect(text).toContain('command');
+    beforeEach(() => {
+      mockCtx = createMockContext('/cwd');
+      mockCtx.exec = vi.fn().mockResolvedValue({ stdout: 'ok', code: 0 });
     });
 
-    it('should return schema for ls', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-schema', {
-        subtool: 'get_schema',
-        args: { name: 'ls' }
-      }, undefined, undefined, mockCtx);
+    it('should delegate http calls to http sub-tool', async () => {
+      const tool = createSubLoaderToolDefinition();
+      const result = await tool.execute(
+        { subtool: 'http', args: { url: 'https://example.com', method: 'GET' } },
+        mockCtx
+      );
 
       expect(result.isError).toBe(false);
-      expect(result.content[0].text).toContain('Schema for sub-tool "ls"');
-      expect(result.content[0].text).toContain('path');
+      expect(mockCtx.exec).toHaveBeenCalledWith('curl', expect.anything(), expect.anything());
     });
 
-    it('should return schema for read', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-schema', {
-        subtool: 'get_schema',
-        args: { name: 'read' }
-      }, undefined, undefined, mockCtx);
+    it('should delegate ls calls to ls sub-tool', async () => {
+      const tool = createSubLoaderToolDefinition();
+      const result = await tool.execute(
+        { subtool: 'ls', args: { all: true } },
+        mockCtx
+      );
 
       expect(result.isError).toBe(false);
-      expect(result.content[0].text).toContain('Schema for sub-tool "read"');
-      expect(result.content[0].text).toContain('path');
+      expect(mockCtx.exec).toHaveBeenCalledWith('ls', expect.arrayContaining(['-la']), expect.anything());
+    });
+
+    it('should delegate find calls to find sub-tool', async () => {
+      const tool = createSubLoaderToolDefinition();
+      await tool.execute(
+        { subtool: 'find', args: { pattern: '*.ts' } },
+        mockCtx
+      );
+
+      expect(mockCtx.exec).toHaveBeenCalledWith('find', expect.arrayContaining(['-name', '*.ts']), expect.anything());
+    });
+
+    it('should delegate grep calls to grep sub-tool', async () => {
+      const tool = createSubLoaderToolDefinition();
+      await tool.execute(
+        { subtool: 'grep', args: { pattern: 'test' } },
+        mockCtx
+      );
+
+      expect(mockCtx.exec).toHaveBeenCalledWith('grep', expect.arrayContaining(['-r', 'test']), expect.anything());
+    });
+
+    it('should delegate read calls to read sub-tool', async () => {
+      const tool = createSubLoaderToolDefinition();
+      await tool.execute(
+        { subtool: 'read', args: { path: 'file.txt' } },
+        mockCtx
+      );
+
+      expect(mockCtx.exec).toHaveBeenCalledWith('bash', expect.arrayContaining(['-c', expect.stringMatching(/cat 'file.txt'/)]), expect.anything());
     });
 
     it('should return error for unknown sub-tool', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-unknown', {
-        subtool: 'get_schema',
-        args: { name: 'unknown' }
-      }, undefined, undefined, mockCtx);
+      const tool = createSubLoaderToolDefinition();
+      const result = await tool.execute(
+        { subtool: 'unknown', args: {} },
+        mockCtx
+      );
 
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('Unknown sub-tool');
-    });
-
-    it('should return error when name is missing', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-missing', {
-        subtool: 'get_schema',
-        args: {}
-      }, undefined, undefined, mockCtx);
-
-      expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('Missing');
-    });
-  });
-
-  describe('execute other subtools (basic delegation)', () => {
-    it('should be able to call bash (does not throw)', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      // This will actually run a bash command, but that's ok in test environment
-      // We're just checking that the delegation works without errors in signature
-      // Note: This test runs a real bash command, so we keep it simple
-      const result = await tool.execute('test-bash', {
-        subtool: 'bash',
-        args: { command: 'echo test' }
-      }, undefined, undefined, mockCtx);
-
-      // The real bash tool will execute; we check it returns something valid
-      expect(result).toHaveProperty('content');
-      expect(result).toHaveProperty('isError');
-    });
-
-    it('should be able to call ls', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-ls', {
-        subtool: 'ls',
-        args: { path: cwd }
-      }, undefined, undefined, mockCtx);
-
-      expect(result).toHaveProperty('content');
-      expect(result).toHaveProperty('isError');
-    });
-
-    it('should be able to call find', async () => {
-      const tool = createSubLoaderToolDefinition(cwd);
-      const result = await tool.execute('test-find', {
-        subtool: 'find',
-        args: { pattern: '*.ts' }
-      }, undefined, undefined, mockCtx);
-
-      expect(result).toHaveProperty('content');
-      expect(result).toHaveProperty('isError');
     });
   });
 });

@@ -76,11 +76,12 @@ const DEFAULT_CONFIG: PiclawConfig = {
 		// Built-in tools
 		"read", "bash", "edit", "write",
 		// Piclaw custom tools
-		"subtool_loader",
+
 		"todos",
 		"memory",
 		"echo",
 		"system-info",
+		"http",
 	],
 	sessionDir: undefined,
 	verbose: false,

@@ -1,3 +1,10 @@
+#!/usr/bin/env node
+
+/**
+ * HTTP Sub-Tool
+ * Web requests with structured API (cleaner than raw curl)
+ */
+
 import { Type } from "typebox";
 import * as fs from "fs/promises";
 import { tmpdir } from "os";
