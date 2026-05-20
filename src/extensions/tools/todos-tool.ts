@@ -10,8 +10,8 @@
 
 import { existsSync, mkdirSync, promises as fs } from "node:fs";
 import { dirname, join } from "node:path";
-import type { ToolDefinition, ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
+import type { ToolDefinition, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 
 // ============================================================================
 // Simple async mutex to prevent race conditions

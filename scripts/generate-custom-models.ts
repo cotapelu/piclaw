@@ -138,7 +138,7 @@ async function generate(): Promise<void> {
       `// Generated: ${new Date().toISOString()}`,
       "// DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update",
       "",
-      "import type { Model } from \"@mariozechner/pi-ai\";",
+      "import type { Model } from \"@earendil-works/pi-ai\";",
       "",
       "export const CUSTOM_MODELS = {",
     ];

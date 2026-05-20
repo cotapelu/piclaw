@@ -26,6 +26,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     hookTimeout: 10000,
-    testTimeout: 30000,
+    testTimeout: 15000,
+    forceExit: true,
   },
 });

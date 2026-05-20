@@ -13,7 +13,7 @@ import autoContinueExtension from "./hooks/auto-continue.js";
 
 import piclawHeader from "./piclaw-header.js";
 
-export default function (api: import("@mariozechner/pi-coding-agent").ExtensionAPI) {
+export default function (api: import("@earendil-works/pi-coding-agent").ExtensionAPI) {
   // Register providers
   registerKiloProvider(api);
 

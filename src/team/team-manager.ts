@@ -13,7 +13,7 @@ import {
   type CreateAgentSessionRuntimeResult,
   type SessionStartEvent,
   type ToolDefinition,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { getAgentDir } from "../config/config-manager.js";
 import { SharedWorkspace } from "./workspace.js";
 import { createTeamOpsTool } from "./team-ops-tool.js";

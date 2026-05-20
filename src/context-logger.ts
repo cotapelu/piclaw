@@ -10,8 +10,8 @@
 
 import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
 import { dirname, join } from "node:path";
-import type { Message } from "@mariozechner/pi-ai";
-import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import type { Message } from "@earendil-works/pi-ai";
+import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
 
 /**
  * Configuration for context logging.

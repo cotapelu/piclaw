@@ -9,7 +9,7 @@
  * Currently supports: echo, system_info, date, uuid, random, calc
  */
 
-import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { actions } from "./actions/index.js";
 
 // ==================== TOOL DEFINITION ====================

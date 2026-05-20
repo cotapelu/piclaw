@@ -17,11 +17,11 @@ import {
   type CreateAgentSessionRuntimeResult,
   type AgentSessionServices,
   type AgentSessionRuntimeDiagnostic,
-} from "@mariozechner/pi-coding-agent";
+} from "@earendil-works/pi-coding-agent";
 import { getAgentDir } from "./config/config-manager.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
 
-import type { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
 import { createContextLoggingStreamFn } from "./context-logger.js";
 
 export interface PiclawCoreOptions {

@@ -9,7 +9,7 @@
  * - http: Web requests
  */
 
-import { ToolDefinition } from "@mariozechner/pi-coding-agent";
+import { ToolDefinition } from "@earendil-works/pi-coding-agent";
 import * as subTools from "./sub-tools/index.js";
 
 /**
@@ -76,6 +76,6 @@ export function createSubLoaderToolDefinition(): ToolDefinition {
 /**
  * Register the subtool_loader tool with the extension API
  */
-export function registerSubToolLoaderExtension(api: import("@mariozechner/pi-coding-agent").ExtensionAPI): void {
+export function registerSubToolLoaderExtension(api: import("@earendil-works/pi-coding-agent").ExtensionAPI): void {
   api.registerTool(createSubLoaderToolDefinition());
 }

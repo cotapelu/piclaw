@@ -1,8 +1,8 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
-import type { ExtensionAPI, Theme } from "@mariozechner/pi-coding-agent";
-import { Text } from "@mariozechner/pi-tui";
-import { VERSION as PI_VERSION } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
+import { VERSION as PI_VERSION } from "@earendil-works/pi-coding-agent";
 
 // Default values (fallback)
 let PICLAW_APP_NAME = "piclaw";
@@ -36,7 +36,7 @@ async function checkForUpdate(): Promise<string | undefined> {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 10000);
-        const response = await fetch("https://registry.npmjs.org/@mariozechner/pi-coding-agent/latest", {
+        const response = await fetch("https://registry.npmjs.org/@earendil-works/pi-coding-agent/latest", {
             signal: controller.signal,
         });
         clearTimeout(timeoutId);

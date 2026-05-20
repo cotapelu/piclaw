@@ -6,7 +6,7 @@
  * Dùng /gnp để bật/tắt, và có thể set timeout: /gnp on 30 (30 giây) hoặc /gnp off.
  */
 
-import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 

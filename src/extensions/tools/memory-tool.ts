@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
-import type { ExtensionAPI, ExtensionContext, Theme } from "@mariozechner/pi-coding-agent";
-import { Type, StringEnum } from "@mariozechner/pi-ai";
-import { matchesKey, Text } from "@mariozechner/pi-tui";
+import type { ExtensionAPI, ExtensionContext, Theme } from "@earendil-works/pi-coding-agent";
+import { Type, StringEnum } from "@earendil-works/pi-ai";
+import { matchesKey, Text } from "@earendil-works/pi-tui";
 
 // Simple async mutex to prevent race conditions
 class Mutex {

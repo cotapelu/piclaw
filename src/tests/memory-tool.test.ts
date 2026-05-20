@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { registerMemoryTool } from '../extensions/tools/memory-tool.js';
 import type { Memory } from '../extensions/tools/memory-tool.js';
-import { Text } from '@mariozechner/pi-tui';
+import { Text } from '@earendil-works/pi-tui';
 
 const createMockApi = () => ({
   registerTool: vi.fn(),

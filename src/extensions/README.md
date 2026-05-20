@@ -20,7 +20,7 @@ extensions/
 1. Tạo file providers/<provider-name>-provider.ts:
 
 ```typescript
-import type { ExtensionAPI, ProviderConfig } from "@mariozechner/pi-coding-agent";
+import type { ExtensionAPI, ProviderConfig } from "@earendil-works/pi-coding-agent";
 
 export function registerMyProvider(api: ExtensionAPI): void {
   const config: ProviderConfig = {
