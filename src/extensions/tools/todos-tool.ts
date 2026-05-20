@@ -787,7 +787,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
     name: "todos",
     label: "Todo",
     description: "Complete todo management: add_phase, add_task, update, remove_task, delete, list. Auto-normalizes ONE in_progress task. Persists to .piclaw/agent/todos.json. add_task accepts phase name or ID. update supports batch update via ids array.",
-    promptSnippet: "todos({ OPERATION: params }). 6 ops: add_phase, add_task, update, remove_task, delete, list. Operation is object KEY, not value.",
+    promptSnippet: "todos({ OPERATION: {...} }). All params are OBJECTS (not JSON strings). Ops: add_phase, add_task, update, remove_task, delete, list.",
     promptGuidelines: [
       "RULE: Operation is the KEY. todos({ OPERATION: params }), NOT { operation: name, params: {...} }",
       "",
