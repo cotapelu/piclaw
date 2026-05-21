@@ -5,7 +5,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateApiKeys, ensurePiclawExtensionRegistered } from '../helpers.js';
+import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
 import * as fs from 'node:fs';
 import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';

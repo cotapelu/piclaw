@@ -2,7 +2,7 @@
  * Tests for AgentSession Team functionality
  */
 import { describe, it, expect } from "vitest";
-import { bootPiclawTeam, executeTeamTasks } from "../team/team-manager.js";
+import { bootPiclawTeam, executeTeamTasks } from "../extensions/team/team-manager.js";
 import { bootPiclaw } from "../piclaw-core.js";
 
 describe("AgentSession Team", () => {
@@ -48,9 +48,9 @@ describe("AgentTeam coordination", () => {
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
     team.initialize(["Task A", "Task B", "Task C"]);
 
-    const task1 = team.claimTask("agent-1");
-    const task2 = team.claimTask("agent-1");
-    const task3 = team.claimTask("agent-2");
+    const task1 = await team.claimTask("agent-1");
+    const task2 = await team.claimTask("agent-1");
+    const task3 = await team.claimTask("agent-2");
 
     expect(task1).toBe(0);
     expect(task2).toBe(1);
@@ -65,9 +65,9 @@ describe("AgentTeam coordination", () => {
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
     team.initialize(["Task A", "Task B"]);
 
-    const task1 = team.claimTask("agent-1");
-    const task2 = team.claimTask("agent-2");
-    const task3 = team.claimTask("agent-1"); // no more tasks
+    const task1 = await team.claimTask("agent-1");
+    const task2 = await team.claimTask("agent-2");
+    const task3 = await team.claimTask("agent-1"); // no more tasks
 
     expect(task1).toBe(0);
     expect(task2).toBe(1);
@@ -82,10 +82,10 @@ describe("AgentTeam coordination", () => {
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
     team.initialize(["Task A", "Task B"]);
 
-    team.reportResult(0, "Result A");
-    team.reportResult(1, "Result B");
+    await team.reportResult(0, "Result A");
+    await team.reportResult(1, "Result B");
 
-    const results = team.getResults();
+    const results = await team.getResults();
     expect(results).toEqual(["Result A", "Result B"]);
 
     await team.dispose();

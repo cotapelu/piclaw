@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { describe, it, expect, vi } from 'vitest';
-import { formatContext, createContextLoggingStreamFn } from '../context-logger.js';
+import { formatContext, createContextLoggingStreamFn } from '../utils/context-logger.js';
 
 describe('context-logger', () => {
   it('formatContext includes system prompt and tools', () => {

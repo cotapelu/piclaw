@@ -12,7 +12,7 @@
 
 import { parseOptions } from "./cli/args.js";
 import { loadConfig } from "./config/config-manager.js";
-import { validateApiKeys, ensurePiclawExtensionRegistered } from "./helpers.js";
+import { validateApiKeys, ensurePiclawExtensionRegistered } from "./utils/helpers.js";
 import { getAgentDir } from "./config/config-manager.js";
 import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";

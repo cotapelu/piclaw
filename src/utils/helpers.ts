@@ -7,7 +7,7 @@
 import chalk from "chalk";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { join, dirname } from "node:path";
-import type { PiclawConfig } from "./config/config-manager.js";
+import type { PiclawConfig } from "../config/config-manager.js";
 
 /**
  * Ensure piclaw extension is registered in global settings.

@@ -22,7 +22,7 @@ import { getAgentDir } from "./config/config-manager.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
 
 import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
-import { createContextLoggingStreamFn } from "./context-logger.js";
+import { createContextLoggingStreamFn } from "./utils/context-logger.js";
 
 export interface PiclawCoreOptions {
   /** Working directory (default: process.cwd()) */
@@ -142,4 +142,4 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
 }
 
 // Team functions are in src/team/team-manager.ts
-export { bootPiclawTeam, executeTeamTasks, type AgentTeam } from "./team/team-manager.js";
+export { bootPiclawTeam, executeTeamTasks, type AgentTeam } from "./extensions/team/team-manager.js";

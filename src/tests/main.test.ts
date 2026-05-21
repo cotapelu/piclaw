@@ -7,7 +7,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 // Mock modules to avoid actually launching the app
-vi.mock('../helpers.js', () => ({
+vi.mock('../utils/helpers.js', () => ({
   validateApiKeys: vi.fn(),
   ensurePiclawExtensionRegistered: vi.fn(() => Promise.resolve()),
 }));
@@ -43,7 +43,7 @@ import { main } from '../main';
 import { loadConfig } from '../config/config-manager.js';
 import { bootPiclaw } from '../piclaw-core.js';
 import { runInteractive } from '../interactive-runner.js';
-import { validateApiKeys, ensurePiclawExtensionRegistered } from '../helpers.js';
+import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
 
 describe('main()', () => {
   let origArgv: string[];

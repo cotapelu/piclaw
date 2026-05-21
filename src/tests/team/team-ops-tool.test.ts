@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createTeamOpsTool } from '../../team/team-ops-tool.js';
-import { AgentTeam } from '../../team/team-manager.js';
+import { createTeamOpsTool } from '../../extensions/team/team-ops-tool.js';
+import { AgentTeam } from '../../extensions/team/team-manager.js';
 
 function createMockContext(sessionId: string) {
   return { session: { id: sessionId } };
@@ -19,36 +19,37 @@ describe('team-ops-tool', () => {
   });
 
   describe('task management', () => {
-    it('should initialize team with tasks', () => {
-      team.initialize(['Task 1', 'Task 2', 'Task 3']);
+    it('should initialize team with tasks', async () => {
+      await team.initialize(['Task 1', 'Task 2', 'Task 3']);
       expect(team.tasks).toHaveLength(3);
     });
 
     it('claim_task should assign pending task to agent', async () => {
-      team.initialize(['Task 1', 'Task 2']);
+      await team.initialize(['Task 1', 'Task 2']);
       const ctx = createMockContext('agent-1');
       const result = await tool.execute({ action: 'claim_task' }, ctx);
       expect(result.isError).toBe(false);
       expect(result.details?.taskIndex).toBe(0);
-      expect(team.getMyCurrentTask('agent-1')).toBe(0);
+      expect(await team.getMyCurrentTask('agent-1')).toBe(0);
     });
 
     it('release_task should free assigned task', async () => {
-      team.initialize(['Task 1']);
+      await team.initialize(['Task 1']);
       const ctx = createMockContext('agent-1');
       await tool.execute({ action: 'claim_task' }, ctx);
       const result = await tool.execute({ action: 'release_task' }, ctx);
       expect(result.isError).toBe(false);
-      expect(team.getMyCurrentTask('agent-1')).toBeNull();
+      expect(await team.getMyCurrentTask('agent-1')).toBeNull();
     });
 
     it('complete_task should mark task as completed', async () => {
-      team.initialize(['Task 1']);
+      await team.initialize(['Task 1']);
       const ctx = createMockContext('agent-1');
       await tool.execute({ action: 'claim_task' }, ctx);
       const result = await tool.execute({ action: 'complete_task', taskIndex: 0, result: 'All done' }, ctx);
       expect(result.isError).toBe(false);
-      expect(team.getTeamStatus().tasks[0].status).toBe('completed');
+      const status = await team.getTeamStatus();
+      expect(status.tasks[0].status).toBe('completed');
     });
   });
 
@@ -72,13 +73,13 @@ describe('team-ops-tool', () => {
     it('send_message should publish to channel', async () => {
       const ctx = createMockContext('agent-1');
       await tool.execute({ action: 'send_message', channel: 'team.chat', content: 'Hello' }, ctx);
-      const messages = team.getMessages('team.chat');
+      const messages = await team.getMessages('team.chat');
       expect(messages).toHaveLength(1);
     });
 
     it('get_messages should return messages', async () => {
-      team.publishMessage('team.chat', 'agent-1', 'A');
-      team.publishMessage('team.chat', 'agent-2', 'B');
+      await team.publishMessage('team.chat', 'agent-1', 'A');
+      await team.publishMessage('team.chat', 'agent-2', 'B');
       const ctx = createMockContext('agent-1');
       const result = await tool.execute({ action: 'get_messages' }, ctx);
       expect(result.isError).toBe(false);
@@ -94,8 +95,8 @@ describe('team-ops-tool', () => {
     });
 
     it('get_team_status should return status', async () => {
-      team.initialize(['T1']);
-      team.registerRuntime({} as any, 'agent-1');
+      await team.initialize(['T1']);
+      team.registerRuntime({ session: { id: 'agent-1' } } as any, 'agent-1');
       const ctx = createMockContext('agent-1');
       const result = await tool.execute({ action: 'get_team_status' }, ctx);
       expect(result.isError).toBe(false);

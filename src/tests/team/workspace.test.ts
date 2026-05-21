@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { describe, it, expect, beforeEach } from 'vitest';
-import { SharedWorkspace } from '../../team/workspace.js';
+import { SharedWorkspace } from '../../extensions/team/workspace.js';
 
 describe('SharedWorkspace', () => {
   let workspace: SharedWorkspace;
