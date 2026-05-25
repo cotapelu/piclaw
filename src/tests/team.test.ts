@@ -46,7 +46,7 @@ describe("AgentTeam coordination", () => {
   it("should claim tasks correctly", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
-    team.initialize(["Task A", "Task B", "Task C"]);
+    await team.initialize(["Task A", "Task B", "Task C"]);
 
     const task1 = await team.claimTask("agent-1");
     const task2 = await team.claimTask("agent-1");
@@ -63,7 +63,7 @@ describe("AgentTeam coordination", () => {
   it("should not reassign claimed tasks", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
-    team.initialize(["Task A", "Task B"]);
+    await team.initialize(["Task A", "Task B"]);
 
     const task1 = await team.claimTask("agent-1");
     const task2 = await team.claimTask("agent-2");
@@ -80,7 +80,7 @@ describe("AgentTeam coordination", () => {
   it("should report results and complete", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
-    team.initialize(["Task A", "Task B"]);
+    await team.initialize(["Task A", "Task B"]);
 
     await team.reportResult(0, "Result A");
     await team.reportResult(1, "Result B");
@@ -95,6 +95,7 @@ describe("AgentTeam coordination", () => {
   it("workspace should store and retrieve values", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
+    await team.initialize([]); // Ensure team is initialized (maybe not needed but safe)
 
     team.getWorkspace().set("key1", "value1", "agent-1");
     team.getWorkspace().set("key2", { obj: "value" }, "agent-2");
@@ -110,13 +111,13 @@ describe("AgentTeam coordination", () => {
   it("should wait for completion when all tasks reported", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 1 });
-    team.initialize(["Task A"]);
+    await team.initialize(["Task A"]);
 
     // Simulate task being claimed and completed by an agent
-    team.claimTask("agent-1"); // Must claim first
+    await team.claimTask("agent-1"); // Must claim first
     
     // Simulate async completion
-    setTimeout(() => team.reportResult(0, "Done"), 100);
+    setTimeout(() => { void team.reportResult(0, "Done"); }, 100);
 
     await expect(team.waitForCompletion()).resolves.toBeUndefined();
 

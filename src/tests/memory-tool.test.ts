@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { registerMemoryTool } from '../extensions/tools/memory-tool.js';
+import { registerMemoryTool, MemoryListComponent } from '../extensions/tools/memory-tool.js';
 import type { Memory } from '../extensions/tools/memory-tool.js';
 import { Text } from '@earendil-works/pi-tui';
 
@@ -161,5 +161,150 @@ describe('memory tool', () => {
     registerMemoryTool(mockApi);
     expect(typeof capturedTool.renderCall).toBe('function');
     expect(typeof capturedTool.renderResult).toBe('function');
+  });
+
+  // -- Additional tests for coverage --
+
+  it('should reconstruct state from session_start event', async () => {
+    registerMemoryTool(mockApi);
+    // Get the session_start handler
+    const startCalls = mockApi.on.mock.calls.filter(c => c[0] === 'session_start');
+    expect(startCalls).toHaveLength(1);
+    const handler = startCalls[0][1] as Function;
+
+    const entries = [
+      { type: 'message', message: { role: 'toolResult', toolName: 'memory', details: { memories: [{ id: 5, text: 'Reconstructed', tags: ['test'] }], nextId: 10 } } }
+    ] as any[];
+    const ctx = createMockCtx(entries);
+    await handler('session_start', ctx);
+
+    // Verify state by listing
+    const result = await capturedTool.execute('list', { action: 'list' }, undefined, undefined, mockCtx);
+    expect(result.content[0].text).toContain('#5');
+    expect(result.details.nextId).toBe(10);
+  });
+
+  it('should accept JSON string parameters', async () => {
+    registerMemoryTool(mockApi);
+    const result = await capturedTool.execute('add', '{"action":"add","text":"From JSON"}', undefined, undefined, mockCtx);
+    expect(result.content[0].text).toContain('Stored memory #1');
+    expect(mockApi.appendEntry).toHaveBeenCalledWith('memory', expect.objectContaining({ text: 'From JSON' }));
+  });
+
+  it('should handle unknown action', async () => {
+    registerMemoryTool(mockApi);
+    const result = await capturedTool.execute('unknown', { action: 'foo' }, undefined, undefined, mockCtx);
+    expect(result.content[0].text).toBe('Unknown action: foo');
+  });
+
+  it('should search with no results', async () => {
+    registerMemoryTool(mockApi);
+    await capturedTool.execute('a1', { action: 'add', text: 'Alpha' }, undefined, undefined, mockCtx);
+    const result = await capturedTool.execute('search', { action: 'search', query: 'beta' }, undefined, undefined, mockCtx);
+    expect(result.content[0].text).toContain('Found 0 of 1 memories');
+  });
+
+  describe('MemoryListComponent', () => {
+    let theme: any;
+    let onClose: any;
+
+    beforeEach(() => {
+      onClose = vi.fn();
+      theme = {
+        fg: (color: string, text: string) => text, // ignore color
+        dim: (text: string) => `dim:${text}`,
+        accent: 'accent', // not used directly
+        muted: 'muted',
+        text: 'text',
+        warning: 'warning',
+        success: 'success',
+      };
+    });
+
+    it('should render empty list', () => {
+      const comp = new MemoryListComponent([], theme, onClose);
+      const lines = comp.render(80);
+      expect(lines.some(l => l.includes('No memories stored.'))).toBe(true);
+    });
+
+    it('should render memories with truncation', () => {
+      const longText = 'A very long text that exceeds the preview limit and should be truncated appropriately.';
+      const memories: Memory[] = [
+        { id: 1, text: 'Short' },
+        { id: 2, text: longText },
+      ];
+      const comp = new MemoryListComponent(memories, theme, onClose);
+      const lines = comp.render(80);
+      const joined = lines.join('');
+      expect(joined).toContain('#1');
+      expect(joined).toContain('Short');
+      // The long text should be truncated to 60 chars + '...'
+      const truncated = `${longText.substring(0, 60)  }...`;
+      expect(joined).toContain(truncated);
+    });
+
+    it('should render tags', () => {
+      const memories: Memory[] = [
+        { id: 1, text: 'Tagged', tags: ['project', 'important'] },
+      ];
+      const comp = new MemoryListComponent(memories, theme, onClose);
+      const lines = comp.render(80);
+      expect(lines.join('')).toContain('[project, important]');
+    });
+
+    it('should limit to maxShow (50)', () => {
+      const memories: Memory[] = Array.from({ length: 60 }, (_, i) => ({ id: i + 1, text: `Mem ${i}` }));
+      const comp = new MemoryListComponent(memories, theme, onClose);
+      const lines = comp.render(80);
+      expect(lines.join('')).toContain('...and 10 more');
+    });
+
+    it('should cache renders', () => {
+      const comp = new MemoryListComponent([{ id: 1, text: 'Test' }], theme, onClose);
+      const lines1 = comp.render(80);
+      const lines2 = comp.render(80);
+      expect(lines1).toBe(lines2); // same reference
+    });
+
+    it('invalidate should clear cache', () => {
+      const comp = new MemoryListComponent([{ id: 1, text: 'Test' }], theme, onClose);
+      const lines1 = comp.render(80);
+      expect(comp['cachedLines']).toBe(lines1);
+      comp.invalidate();
+      expect(comp['cachedLines']).toBeUndefined();
+      const lines2 = comp.render(80);
+      expect(comp['cachedLines']).toBe(lines2);
+      expect(lines2).not.toBe(lines1); // new render produced new array
+    });
+
+    // To access private fields for check, we can use bracket notation
+  });
+
+  // Additional tool render tests to increase coverage
+  describe('tool renderResult coverage', () => {
+    let mockApi: any;
+    let capturedTool: any;
+    let mockCtx: any;
+
+    beforeEach(() => {
+      mockApi = {
+        registerTool: vi.fn((tool: any) => { capturedTool = tool; }),
+        sendMessage: vi.fn(),
+        on: vi.fn(),
+      };
+      mockCtx = { sessionManager: { getBranch: () => [] }, hasUI: true } as any;
+      registerMemoryTool(mockApi);
+    });
+
+    it('renderResult covers partial and error branches', () => {
+      const theme = { fg: () => '' } as any;
+      const resultPartial = { content: [{ type: 'text', text: '' }], details: {} } as any;
+      const renderedPartial = capturedTool.renderResult(resultPartial, { expanded: false, isPartial: true }, theme, mockCtx);
+      expect(renderedPartial).toBeDefined();
+
+      const resultError = { content: [{ type: 'text', text: '' }], details: { error: 'err' } } as any;
+      const renderedError = capturedTool.renderResult(resultError, { expanded: false, isPartial: false }, theme, mockCtx);
+      expect(renderedError).toBeDefined();
+    });
   });
 });

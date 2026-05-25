@@ -13,10 +13,18 @@ function createMockCtx() {
 }
 
 describe('computer-use sub-tools', () => {
-  describe('lsSchema', () => expect(lsSchema.type).toBe('object'));
-  describe('findSchema', () => expect(findSchema.type).toBe('object'));
-  describe('grepSchema', () => expect(grepSchema.type).toBe('object'));
-  describe('readSchema', () => expect(readSchema.type).toBe('object'));
+  describe('lsSchema', () => {
+    it('should be an object', () => expect(lsSchema.type).toBe('object'));
+  });
+  describe('findSchema', () => {
+    it('should be an object', () => expect(findSchema.type).toBe('object'));
+  });
+  describe('grepSchema', () => {
+    it('should be an object', () => expect(grepSchema.type).toBe('object'));
+  });
+  describe('readSchema', () => {
+    it('should be an object', () => expect(readSchema.type).toBe('object'));
+  });
 
   describe('executeLs', () => {
     let ctx: any;

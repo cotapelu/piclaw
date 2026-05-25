@@ -114,6 +114,46 @@ describe('main()', () => {
 
     await expect(main([])).rejects.toThrow('process.exit called with 1');
   });
+
+  // Additional error branch tests for coverage
+  it('handles ENOENT error', async () => {
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('ENOENT: /missing'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
+
+  it('handles EACCES error', async () => {
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('EACCES permission denied'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
+
+  it('handles API key error', async () => {
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('Invalid API key'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
+
+  it('handles network error', async () => {
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('ECONNREFUSED connection refused'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
+
+  it('handles timeout error', async () => {
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('request timeout'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
+
+  it('logs full error when verbose is true', async () => {
+    // Override config to enable verbose
+    loadConfig.mockImplementation((overrides = {}) => ({
+      model: overrides.model,
+      thinking: overrides.thinking ?? 'medium',
+      tools: overrides.tools ?? ['read', 'bash', 'edit', 'write', 'todos', 'memory', 'echo', 'system-info', 'http'],
+      sessionDir: overrides.sessionDir,
+      verbose: true,
+      contextLogFile: overrides.contextLogFile,
+    }));
+    (bootPiclaw as any).mockRejectedValueOnce(new Error('test error'));
+    await expect(main([])).rejects.toThrow('process.exit');
+  });
 });
 
 // Direct unit test for parseOptions (real function)

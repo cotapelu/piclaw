@@ -207,7 +207,7 @@ function normalizeInProgress(phases: TodoPhase[]): void {
 // Input normalization (IDENTICAL to backup)
 // ============================================================================
 
-function normalizeParams(params: unknown): any {
+export function normalizeParams(params: unknown): any {
   if (typeof params === "string") {
     try {
       params = JSON.parse(params);
@@ -432,7 +432,7 @@ function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: s
   return { file, errors };
 }
 
-function formatSummary(phases: TodoPhase[], errors: string[]): string {
+export function formatSummary(phases: TodoPhase[], errors: string[]): string {
   const tasks = phases.flatMap((p) => p.tasks);
   if (tasks.length === 0) return errors.length > 0 ? `Errors: ${errors.join("; ")}` : "Todo list cleared.";
 
@@ -506,7 +506,7 @@ function getOperationName(params: any): string {
 }
 
 
-function applyOp(
+export function applyOp(
   phases: TodoPhase[],
   nextTaskId: number,
   nextPhaseId: number,
@@ -544,7 +544,7 @@ export function getLatestTodoPhasesFromEntries(entries: any[]): TodoPhase[] {
 // State (Enhanced with session-based detection)
 // ============================================================================
 
-class TodoState {
+export class TodoState {
   phases: TodoPhase[] = [];
   nextTaskId: number = 1;
   nextPhaseId: number = 1;

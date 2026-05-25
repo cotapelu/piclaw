@@ -38,7 +38,7 @@ export interface Memory {
   created: number;
 }
 
-class MemoryListComponent {
+export class MemoryListComponent {
   private memories: Memory[];
   private theme: Theme;
   private onClose: () => void;

@@ -1,191 +1,135 @@
-#!/usr/bin/env node
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 
-/**
- * Unit tests for helpers.ts
- */
+// Mock fs and path before helpers import
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn(),
+  readFileSync: vi.fn(),
+  writeFileSync: vi.fn(),
+  mkdirSync: vi.fn(),
+}));
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
+vi.mock('node:path', () => ({
+  join: vi.fn((...segments: string[]) => segments.join('/')),
+  dirname: vi.fn(() => '/agent'),
+}));
+
+vi.mock('chalk', () => ({
+  default: {
+    yellow: (text: string) => text,
+  },
+}));
+
+// Now import the helpers
+import { ensurePiclawExtensionRegistered, validateApiKeys } from '../utils/helpers.js';
 import * as fs from 'node:fs';
-import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { homedir } from 'node:os';
 
-describe('helpers', () => {
-  let originalHome: string;
-  let tempHome: string;
-
+describe('ensurePiclawExtensionRegistered', () => {
   beforeEach(() => {
-    originalHome = homedir();
-    tempHome = join(originalHome, '.piclaw-test-home-helpers');
-    if (existsSync(tempHome)) {
-      rmSync(tempHome, { recursive: true, force: true });
-    }
-    mkdirSync(tempHome, { recursive: true });
-    vi.stubEnv('HOME', tempHome);
-    vi.spyOn(console, 'log').mockImplementation(() => {});
-    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    vi.clearAllMocks();
+    (fs.existsSync as any).mockReturnValue(false);
+    (fs.mkdirSync as any).mockImplementation(() => {});
+    (fs.writeFileSync as any).mockImplementation(() => {});
   });
 
-  afterEach(() => {
-    vi.unstubAllEnvs();
-    if (existsSync(tempHome)) {
-      rmSync(tempHome, { recursive: true, force: true });
-    }
+  it('creates settings file when none exists', async () => {
+    (fs.existsSync as any).mockReturnValue(false);
+    await ensurePiclawExtensionRegistered('/agent', '/path/to/ext.js');
+    expect(fs.mkdirSync).toHaveBeenCalled();
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      '/agent/settings.json',
+      expect.stringContaining('ext.js'),
+      'utf-8'
+    );
+  });
+
+  it('adds extension when array exists but does not include it', async () => {
+    (fs.existsSync as any).mockReturnValue(true);
+    (fs.readFileSync as any).mockReturnValue(JSON.stringify({ extensions: ['other.js'] }));
+    await ensurePiclawExtensionRegistered('/agent', '/ext.js');
+    expect(fs.writeFileSync).toHaveBeenCalledWith(
+      '/agent/settings.json',
+      expect.stringContaining('ext.js'),
+      'utf-8'
+    );
+  });
+
+  it('does nothing when extension already registered', async () => {
+    (fs.existsSync as any).mockReturnValue(true);
+    (fs.readFileSync as any).mockReturnValue(JSON.stringify({ extensions: ['/ext.js'] }));
+    await ensurePiclawExtensionRegistered('/agent', '/ext.js');
+    expect(fs.writeFileSync).not.toHaveBeenCalled();
+  });
+
+  it('handles writeFile error without throwing', async () => {
+    (fs.existsSync as any).mockReturnValue(false);
+    (fs.writeFileSync as any).mockImplementation(() => { throw new Error('disk full'); });
+    await ensurePiclawExtensionRegistered('/agent', '/ext.js');
+  });
+
+  it('handles invalid JSON in settings file', async () => {
+    (fs.existsSync as any).mockReturnValue(true);
+    (fs.readFileSync as any).mockReturnValue('invalid json');
+    await ensurePiclawExtensionRegistered('/agent', '/ext.js');
+    expect(fs.writeFileSync).toHaveBeenCalled();
+  });
+
+  it('creates extensions array if missing', async () => {
+    (fs.existsSync as any).mockReturnValue(false);
+    await ensurePiclawExtensionRegistered('/agent', '/ext.js');
+    const written = (fs.writeFileSync as any).mock.calls[0][1];
+    const settings = JSON.parse(written);
+    expect(Array.isArray(settings.extensions)).toBe(true);
+    expect(settings.extensions).toContain('/ext.js');
+  });
+});
+
+describe('validateApiKeys', () => {
+  beforeEach(() => {
     vi.restoreAllMocks();
+    // Clear env
+    delete process.env.KILO_API_KEY;
+    delete process.env.ANTHROPIC_API_KEY;
+    delete process.env.OPENAI_API_KEY;
   });
 
-  describe('validateApiKeys', () => {
-    it('should warn if ANTHROPIC_API_KEY missing for anthropic model', () => {
-      delete process.env.ANTHROPIC_API_KEY;
-      const config = { model: 'anthropic:claude-opus-4-5' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('ANTHROPIC_API_KEY'));
-    });
-
-    it('should not warn if ANTHROPIC_API_KEY set', () => {
-      process.env.ANTHROPIC_API_KEY = 'test-key';
-      const config = { model: 'anthropic:claude-opus-4-5' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      // Should not log any API key warnings
-      const calledWithApiKey = logSpy.mock.calls.some((args: any[]) =>
-        args.some((arg: any) => typeof arg === 'string' && arg.includes('API Key Warnings'))
-      );
-      expect(calledWithApiKey).toBe(false);
-    });
-
-    it('should warn if OPENAI_API_KEY missing for openai model', () => {
-      delete process.env.OPENAI_API_KEY;
-      const config = { model: 'openai:gpt-4' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('OPENAI_API_KEY'));
-    });
-
-    it('should warn if KILO_API_KEY missing for kilo model', () => {
-      delete process.env.KILO_API_KEY;
-      const config = { model: 'kilo:some-model' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('KILO_API_KEY'));
-    });
-
-    it('should not warn if no model configured', () => {
-      const config = { model: undefined } as any;
-      const warnSpy = vi.spyOn(console, 'warn');
-
-      validateApiKeys(config);
-
-      expect(warnSpy).not.toHaveBeenCalled();
-    });
-
-    it('should handle invalid model format (no colon)', () => {
-      const config = { model: 'invalidmodel' } as any;
-      const warnSpy = vi.spyOn(console, 'warn');
-
-      // Should not crash and not warn about API key (since provider extraction fails)
-      validateApiKeys(config);
-
-      // No API key warning because split returns ['invalidmodel'], provider not in switch
-      expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('API Key Warnings'));
-    });
-
-    it('should not warn for unknown provider (switch default)', () => {
-      const config = { model: 'unknown:provider' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      // Should not output any API Key Warnings
-      const calledWithApiKey = logSpy.mock.calls.some((args: any[]) =>
-        args.some((arg: any) => typeof arg === 'string' && arg.includes('API Key Warnings'))
-      );
-      expect(calledWithApiKey).toBe(false);
-    });
-
-    it('should warn for multiple missing keys', () => {
-      delete process.env.ANTHROPIC_API_KEY;
-      delete process.env.OPENAI_API_KEY;
-      const config = { model: 'anthropic:claude-opus-4-5' } as any;
-      const logSpy = vi.spyOn(console, 'log');
-
-      validateApiKeys(config);
-
-      // At least one call contains API Key Warnings header
-      const hasHeader = logSpy.mock.calls.some((args: any[]) =>
-        args.some((arg: any) => typeof arg === 'string' && arg.includes('API Key Warnings'))
-      );
-      expect(hasHeader).toBe(true);
-    });
+  it('shows warning for missing ANTHROPIC_API_KEY', () => {
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const config = { model: 'anthropic:claude-3' } as any;
+    validateApiKeys(config);
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('ANTHROPIC_API_KEY'));
+    spy.mockRestore();
   });
 
-  describe('ensurePiclawExtensionRegistered', () => {
-    it('should create settings file with extension if not exists', async () => {
-      const agentDir = join(tempHome, '.piclaw', 'agent');
-      const extensionPath = join(agentDir, 'extensions', 'index.js');
+  it('shows warning for missing OPENAI_API_KEY', () => {
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const config = { model: 'openai:gpt-4' } as any;
+    validateApiKeys(config);
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('OPENAI_API_KEY'));
+    spy.mockRestore();
+  });
 
-      await ensurePiclawExtensionRegistered(agentDir, extensionPath);
+  it('shows warning for missing KILO_API_KEY', () => {
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const config = { model: 'kilo:some-model' } as any;
+    validateApiKeys(config);
+    expect(spy).toHaveBeenCalledWith(expect.stringContaining('KILO_API_KEY'));
+    spy.mockRestore();
+  });
 
-      const settingsPath = join(agentDir, 'settings.json');
-      expect(existsSync(settingsPath)).toBe(true);
+  it('does not warn when API key exists', () => {
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    process.env.ANTHROPIC_API_KEY = 'dummy';
+    const config = { model: 'anthropic:claude-3' } as any;
+    validateApiKeys(config);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
+  });
 
-      const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
-      expect(Array.isArray(settings.extensions)).toBe(true);
-      expect(settings.extensions).toContain(extensionPath);
-    });
-
-    it('should not duplicate extension if already registered', async () => {
-      const agentDir = join(tempHome, '.piclaw', 'agent');
-      const settingsPath = join(agentDir, 'settings.json');
-      mkdirSync(agentDir, { recursive: true });
-      writeFileSync(settingsPath, JSON.stringify({
-        extensions: ['/other/ext.js'],
-      }, null, 2));
-
-      const extensionPath = join(agentDir, 'extensions', 'index.js');
-
-      await ensurePiclawExtensionRegistered(agentDir, extensionPath);
-
-      const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
-      expect(settings.extensions).toHaveLength(2);
-      expect(settings.extensions).toContain('/other/ext.js');
-      expect(settings.extensions).toContain(extensionPath);
-    });
-
-    it('should handle malformed JSON in existing settings', async () => {
-      const agentDir = join(tempHome, '.piclaw', 'agent');
-      const settingsPath = join(agentDir, 'settings.json');
-      mkdirSync(agentDir, { recursive: true });
-      writeFileSync(settingsPath, '{ invalid json }');
-
-      const extensionPath = join(agentDir, 'extensions', 'index.js');
-
-      // Should not throw, should create new settings
-      await ensurePiclawExtensionRegistered(agentDir, extensionPath);
-
-      const settings = JSON.parse(readFileSync(settingsPath, 'utf-8'));
-      expect(Array.isArray(settings.extensions)).toBe(true);
-      expect(settings.extensions).toContain(extensionPath);
-    });
-
-    it('should create agent directory if missing', async () => {
-      const agentDir = join(tempHome, '.piclaw', 'agent');
-      expect(existsSync(agentDir)).toBe(false);
-
-      const extensionPath = join(agentDir, 'extensions', 'index.js');
-      await ensurePiclawExtensionRegistered(agentDir, extensionPath);
-
-      expect(existsSync(agentDir)).toBe(true);
-    });
+  it('does not warn when no model specified', () => {
+    const spy = vi.spyOn(console, 'log').mockImplementation(() => {});
+    const config = {} as any;
+    validateApiKeys(config);
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
   });
 });

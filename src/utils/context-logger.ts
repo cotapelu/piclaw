@@ -85,7 +85,7 @@ export function formatContext(
 	const messagesToLog = context.messages.slice(0, opts.maxMessages);
 	output += `--- CONVERSATION (${messagesToLog.length} messages) ---\n`;
 	for (let i = 0; i < messagesToLog.length; i++) {
-		output += formatAgentMessage(messagesToLog[i], i) + "\n";
+		output += `${formatAgentMessage(messagesToLog[i], i)  }\n`;
 	}
 
 	// Tools
