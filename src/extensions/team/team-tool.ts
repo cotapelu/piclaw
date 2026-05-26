@@ -6,7 +6,7 @@
  * Just provide tasks, team size, roles -> team auto-completes
  */
 
-import { bootPiclawTeam, executeTeamTasks } from "./team-manager.js";
+import { bootPiclawTeam, executeTeamTasks, TeamRegistry } from "./team-manager.js";
 import type { ToolDefinition, ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 export function registerTeamTool(api: ExtensionAPI): void {
@@ -20,23 +20,28 @@ export function createTeamTool(): ToolDefinition {
     description: "Create a team and automatically execute tasks. The team will self-organize and complete all tasks without further intervention.",
     promptSnippet: "Delegates tasks to a self-organizing multi-agent team",
     promptGuidelines: [
-      "Use team_run when you need to parallelize work across multiple specialized agents.",
-      "Provide an array of clear, independent tasks as strings.",
-      "Specify teamSize (1-4) based on task complexity. Default is 2.",
-      "Optionally provide teamRoles (e.g., ['planner', 'coder', 'reviewer']) to specialize agents.",
-      "The team works autonomously - no need to monitor. Results returned after completion.",
-      "Tasks should be self-contained and not require heavy coordination between agents.",
-      "team_run is blocking - it does not return until all tasks are finished.",
-      "Results are returned in the same order as the tasks array.",
-      "Note: team_run is called by the main agent to spawn a team of child agents."
+      "Use team_run to create and manage agent teams.",
+      "To create a new team: provide tasks array, and optionally teamSize and teamRoles. Teams always run non-blocking in background.",
+      // Removed: wait concept - teams always non-blocking
+      "To check status: provide teamId. (Teams always run non-blocking in background.)",
+      "Tips:",
+      "  - Create first: team_run({tasks: [...]}) → returns teamId.",
+      "  - Do other work...",
+      "  - Then check status: team_run({teamId: '...'}).",
+      "  - Progress updates are automatically sent during execution.",
+      "  - Teams run in background until all tasks complete."
     ],
     parameters: {
       type: "object",
       properties: {
+        teamId: {
+          type: "string",
+          description: "ID of an existing team to query (optional)"
+        },
         tasks: {
           type: "array",
           items: { type: "string" },
-          description: "List of tasks to be completed by the team"
+          description: "List of tasks to be completed by the team (required for new team)"
         },
         teamSize: {
           type: "number",
@@ -46,9 +51,10 @@ export function createTeamTool(): ToolDefinition {
           type: "array",
           items: { type: "string" },
           description: "Optional roles for each agent (e.g., ['planner', 'coder', 'reviewer'])"
-        }
+        },
+        // 'wait' parameter removed - teams always run non-blocking in background
       },
-      required: ["tasks"]
+      required: []
     },
     async execute(toolCallId: string, params: any, signal: any, onUpdate: any, ctx: any) {
       // Support LLM outputting JSON string or handle call references
@@ -72,22 +78,99 @@ export function createTeamTool(): ToolDefinition {
         }
       }
 
-      const { tasks, teamSize, teamRoles } = params as { tasks: any; teamSize?: number; teamRoles?: string[] };
+      const { teamId, tasks, teamSize, teamRoles } = params as {
+        teamId?: string;
+        tasks?: any;
+        teamSize?: number;
+        teamRoles?: string[];
+      };
 
-      if (!Array.isArray(tasks) || tasks.length === 0) {
+      // Prepare onUpdate wrapper for message accumulation (used for both new team and query)
+      let wrappedOnUpdate: ((update: any) => void) | undefined;
+      if (onUpdate) {
+        // Accumulate all text messages across updates for complete history
+        const messageHistory: Array<{ type: string; text: string }> = [];
+        wrappedOnUpdate = (update: any) => {
+          if (update.content && Array.isArray(update.content)) {
+            for (const block of update.content) {
+              if (block.type === 'text') {
+                messageHistory.push({ type: 'text', text: block.text });
+              }
+            }
+            onUpdate({
+              content: [...messageHistory],
+              details: update.details,
+              isError: update.isError || false
+            });
+          }
+        };
+      } else {
+        wrappedOnUpdate = undefined;
+      }
+
+            // If teamId is provided, query existing team status (always non-blocking)
+      if (teamId) {
+        const registry = TeamRegistry.getInstance();
+        const team = registry.get(teamId);
+        if (!team) {
+          return {
+            content: [{ type: "text", text: `Error: Team with ID ${teamId} not found` }],
+            isError: true,
+            details: { error: "Team not found" }
+          };
+        }
+
+        // Reset auto-dispose timer on query
+        registry.resetAutoDisposeTimer(teamId);
+
+        // Always non-blocking: return current status immediately
+        const status = await team.getTeamStatus();
         return {
-          content: [{ type: "text", text: "Error: tasks must be a non-empty array of strings" }],
+          content: [{ type: "text", text: `📊 Team ${teamId} status: ${status.completedTasks}/${status.totalTasks} tasks completed, ${status.agents.length} agents` }],
+          details: { teamId, status, running: status.completedTasks < status.totalTasks },
+          isError: false
+        };
+      }
+      // New team creation
+      if (!tasks || !Array.isArray(tasks) || tasks.length === 0) {
+        return {
+          content: [{ type: "text", text: "Error: tasks must be a non-empty array of strings when creating a new team" }],
           isError: true,
           details: { error: "Invalid tasks parameter" }
         };
       }
 
       try {
-        // Get parent runtime from sessionManager (set by piclaw-core.ts)
-        const parentRuntime = ctx.sessionManager.parentRuntime as any;
+        // Get parent runtime from tool context (passed by bootPiclaw)
+        const parentRuntime = ctx?.runtime || ((ctx as any)?.sessionManager?.parentRuntime as any);
         if (!parentRuntime) {
-          throw new Error("No parent runtime available. Ensure bootPiclaw sets sessionManager.parentRuntime");
+          throw new Error("No runtime context available. Team tool must be called from an active session (InteractiveMode not running?)");
         }
+
+        // For new team, we want to accumulate onUpdate messages
+        if (onUpdate && !wrappedOnUpdate) {
+          const messageHistory: Array<{ type: string; text: string }> = [];
+          wrappedOnUpdate = ((update: any) => {
+            if (update.content && Array.isArray(update.content)) {
+              for (const block of update.content) {
+                if (block.type === 'text') {
+                  messageHistory.push({ type: 'text', text: block.text });
+                }
+              }
+            }
+            onUpdate({
+              content: [...messageHistory],
+              details: update.details,
+              isError: update.isError || false
+            });
+          }) as typeof onUpdate;
+        }
+
+        // Send initial update (will be accumulated)
+        wrappedOnUpdate?.({
+          content: [{ type: "text", text: `🚀 Starting team with ${teamSize || 2} agents for ${tasks.length} tasks` }],
+          details: { teamSize, teamRoles, taskCount: tasks.length }
+        });
 
         // Boot team
         const team = await bootPiclawTeam(parentRuntime, {
@@ -95,31 +178,33 @@ export function createTeamTool(): ToolDefinition {
           teamRoles
         });
 
-        // Execute tasks (this blocks until all tasks done)
-        await executeTeamTasks(team, tasks);
+        wrappedOnUpdate?.({
+          content: [{ type: "text", text: `✅ Team booted: ${team.roles.join(", ")}` }],
+          details: { roles: team.roles, teamId: team.id }
+        });
 
-        // Get results
-        const results = await team.getResults();
+        // Execute tasks in background (non-blocking)
+        await executeTeamTasks(team, tasks, wrappedOnUpdate, {});
 
-        // Dispose team
-        await team.dispose();
-
-        // Format output
-        const output = results.map((result, idx) => {
-          const taskPreview = tasks[idx].length > 50 ? tasks[idx].substring(0, 50) + "..." : tasks[idx];
-          const resultPreview = result.length > 100 ? result.substring(0, 100) + "..." : result;
-          return `Task ${idx}: ${taskPreview}\nResult: ${resultPreview || "(empty)"}`;
-        }).join("\n\n");
-
+        // Return immediately with teamId (non-blocking)
         return {
-          content: [{ type: "text", text: `✅ Team completed ${tasks.length} tasks.\n\n${output}` }],
+          content: [{ type: "text", text: `✅ Team started: ${team.id}\nAgents: ${team.roles.join(", ")}\nTasks: ${tasks.length}\n\nProgress updates will be shown automatically.\nTo check status, call team_run({teamId: "${team.id}").` }],
           details: {
+            teamId: team.id,
+            agentCount: team.roles.length,
             totalTasks: tasks.length,
-            results: results.map((r, i) => ({ task: tasks[i], result: r }))
+            status: 'running'
           },
           isError: false
         };
       } catch (error: any) {
+        // Send error update before returning (use wrappedOnUpdate if available to preserve history)
+        const notify = wrappedOnUpdate || onUpdate;
+        notify?.({
+          content: [{ type: "text", text: `❌ Team execution failed: ${error.message}` }],
+          details: { error: error.message, stack: error.stack },
+          isError: true
+        });
         return {
           content: [{ type: "text", text: `❌ Team execution failed: ${error.message}` }],
           details: { error: error.message, stack: error.stack },
