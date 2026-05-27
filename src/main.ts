@@ -16,6 +16,7 @@ import { validateApiKeys, ensurePiclawExtensionRegistered } from "./utils/helper
 import { getAgentDir } from "./config/config-manager.js";
 import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";
+import { handlePackageCommand } from "./package-commands.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "url";
 
@@ -26,6 +27,11 @@ const __dirname = dirname(__filename);
 async function main(args: string[] = process.argv.slice(2)): Promise<void> {
   let config: any = undefined;
   try {
+    // Handle package commands first (install, remove, list)
+    if (await handlePackageCommand(args)) {
+      return;
+    }
+
     // 1. Parse CLI arguments
     const { opts, cliOverrides } = parseOptions(args);
     const cwd = opts.cwd ?? process.cwd();

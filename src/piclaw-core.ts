@@ -2,9 +2,6 @@
 
 /**
  * Piclaw Core Bootstrapping
- *
- * Core logic for creating and configuring the agent runtime.
- * Separated from UI concerns for testability and reusability.
  */
 
 import {
@@ -14,63 +11,62 @@ import {
   AgentSessionRuntime,
   createAgentSessionRuntime,
   type CreateAgentSessionRuntimeFactory,
-  type CreateAgentSessionRuntimeResult,
-  type AgentSessionServices,
-  type AgentSessionRuntimeDiagnostic,
+  SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 import { getAgentDir } from "./config/config-manager.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
-
-import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { dirname, join } from "node:path";
+import { PiclawPackageManager } from "./piclaw-package-manager.js";
 import { createContextLoggingStreamFn } from "./utils/context-logger.js";
 
 export interface PiclawCoreOptions {
-  /** Working directory (default: process.cwd()) */
   cwd?: string;
-  /** Agent directory (default: ~/.piclaw/agent) */
   agentDir?: string;
-  /** Custom session directory */
   sessionDir?: string;
-  /** Tool allowlist (default: from settings or built-in) */
   tools?: string[];
-  /** Model to use (provider:modelId) */
   model?: string;
-  /** Thinking level */
   thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
-  /** Verbose logging */
   verbose?: boolean;
-  /** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
   contextLogFile?: string;
 }
 
-/**
- * Create the agent runtime without starting the UI.
- *
- * This function handles:
- * - Services creation (auth, models, settings, resource loader)
- * - Session creation using factory system
- * - Initial model and thinking level configuration
- *
- * @param options - Configuration options
- * @returns AgentSessionRuntime ready to run
- */
 export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
   const cwd = options.cwd ?? process.cwd();
   const agentDir = options.agentDir ?? getAgentDir();
-
-  // Context log file if logging is enabled
   const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
 
-  // Create factory for session switching
   const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async ({
     cwd,
     agentDir,
     sessionManager,
     sessionStartEvent,
   }) => {
+    // Custom storage using .piclaw
+    const storage = {
+      withLock(scope: "global" | "project", fn: (current: string | undefined) => string | undefined): void {
+        const path = scope === "global"
+          ? join(agentDir, "settings.json")
+          : join(cwd, ".piclaw", "settings.json");
+        const dir = dirname(path);
+        if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+        const current = existsSync(path) ? readFileSync(path, "utf-8") : undefined;
+        const next = fn(current);
+        if (next !== undefined) writeFileSync(path, next, "utf-8");
+      },
+    } as any;
+
+    const SettingsManagerCtor = SettingsManager as any;
+    const settingsManager = new SettingsManagerCtor(storage, cwd, agentDir);
+
+    // Custom package manager
+    const packageManager = new PiclawPackageManager({ cwd, agentDir });
+
     const newServices = await createAgentSessionServices({
       cwd,
       agentDir,
+      settingsManager,
+      resourceLoaderOptions: { packageManager } as any,
     });
 
     const result = await createAgentSessionFromServices({
@@ -87,10 +83,7 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     };
   };
 
-  // Create initial session manager
   const sessionManager = SessionManager.create(cwd, options.sessionDir);
-
-  // Create runtime using factory system
   const runtime = await createAgentSessionRuntime(createRuntimeFactory, {
     cwd,
     agentDir,
@@ -98,23 +91,17 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     sessionStartEvent: { type: "session_start", reason: "startup" },
   });
 
-  // Wrap streamFn with context logging if enabled
   if (contextLogFile && runtime.session?.agent?.streamFn) {
     const originalStreamFn = runtime.session.agent.streamFn;
     runtime.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
   }
 
-  // Expose the parent runtime via sessionManager for team operations
-  // This allows the spawn_team tool to access the parent runtime via ctx.sessionManager.parentRuntime
   (runtime.session.sessionManager as any).parentRuntime = runtime;
-
-  // Also expose on extension runner's runtime object for backward compatibility
   const extensionRunner = runtime.session.extensionRunner as any;
   if (extensionRunner.runtime) {
     extensionRunner.runtime.sessionRuntime = runtime;
   }
 
-  // Apply initial model if configured
   if (options.model && runtime.session?.model) {
     try {
       const [provider, modelId] = options.model.split(":");
@@ -133,7 +120,6 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     }
   }
 
-  // Apply initial thinking level if configured
   if (options.thinking && runtime.session) {
     runtime.session.setThinkingLevel(options.thinking);
   }
@@ -141,5 +127,4 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
   return runtime;
 }
 
-// Team functions are in src/team/team-manager.ts
 export { bootPiclawTeam, executeTeamTasks, type AgentTeam } from "./extensions/team/team-manager.js";
