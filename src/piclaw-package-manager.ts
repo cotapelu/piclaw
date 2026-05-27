@@ -8,7 +8,7 @@
  */
 
 import { spawn, spawnSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, rmSync } from "fs";
 import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 
@@ -22,6 +22,11 @@ interface PathMetadata {
   origin: "package";
   baseDir?: string;
 }
+
+type ParsedSource =
+  | { type: "npm"; name: string; pinned: boolean }
+  | { type: "git"; host: string; path: string; ref?: string }
+  | { type: "local"; path: string };
 
 interface ResolvedResource {
   path: string;
@@ -176,6 +181,10 @@ export class PiclawPackageManager {
       const path = this.getNpmInstallPath(parsed, scope);
       return existsSync(path) ? path : undefined;
     }
+    if (parsed.type === "git") {
+      const path = this.getGitInstallPath(parsed, scope);
+      return existsSync(path) ? path : undefined;
+    }
     if (parsed.type === "local") {
       const baseDir = scope === "project" ? this.cwd : this.agentDir;
       const path = resolve(baseDir, parsed.path);
@@ -190,6 +199,10 @@ export class PiclawPackageManager {
       const parsed = this.parseSource(source);
       if (parsed.type === "npm") {
         await this.installNpm(parsed, scope);
+        return;
+      }
+      if (parsed.type === "git") {
+        await this.installGit(parsed, scope);
         return;
       }
       if (parsed.type === "local") {
@@ -211,6 +224,10 @@ export class PiclawPackageManager {
       const parsed = this.parseSource(source);
       if (parsed.type === "npm") {
         await this.uninstallNpm(parsed, options?.local ? "project" : "user");
+        return;
+      }
+      if (parsed.type === "git") {
+        await this.uninstallGit(parsed, options?.local ? "project" : "user");
         return;
       }
     });
@@ -260,6 +277,16 @@ export class PiclawPackageManager {
             baseDir: installedPath,
           });
         }
+      } else if (parsed.type === "git") {
+        const installedPath = this.getGitInstallPath(parsed, scope);
+        if (existsSync(installedPath)) {
+          this.collectPackageResources(installedPath, accumulator, undefined, {
+            source,
+            scope,
+            origin: "package",
+            baseDir: installedPath,
+          });
+        }
       } else if (parsed.type === "local") {
         const baseDir = scope === "project" ? this.cwd : this.agentDir;
         const resolved = resolve(baseDir, parsed.path);
@@ -293,12 +320,57 @@ export class PiclawPackageManager {
   // Private Implementation
   // ============================================================================
 
-  private parseSource(source: string): { type: "npm"; name: string; pinned: boolean } | { type: "local"; path: string } {
+  private parseSource(source: string): ParsedSource {
     if (source.startsWith("npm:")) {
       const spec = source.slice(4);
       const match = spec.match(/^(@?[^@]+(?:\/[^@]+)?)(?:@(.+))?$/);
       const name = match ? match[1] : spec;
       return { type: "npm", name, pinned: !!match?.[2] };
+    }
+    if (source.startsWith("git:")) {
+      const rest = source.slice(4);
+      let host: string;
+      let path: string;
+      let ref: string | undefined;
+
+      // git:github.com/user/repo
+      // git:git@github.com:user/repo
+      // git:https://github.com/user/repo
+      if (rest.startsWith("git@")) {
+        const atIdx = rest.indexOf("@");
+        const colonIdx = rest.indexOf(":", atIdx);
+        if (colonIdx !== -1) {
+          host = rest.slice(atIdx + 1, colonIdx);
+          path = rest.slice(colonIdx + 1);
+        } else {
+          host = "";
+          path = rest;
+        }
+      } else if (rest.startsWith("https://")) {
+        try {
+          const url = new URL(rest);
+          host = url.hostname;
+          path = url.pathname.replace(/^\//, "");
+          if (url.hash) {
+            ref = url.hash.slice(1);
+          }
+        } catch {
+          host = "";
+          path = rest;
+        }
+      } else {
+        // github.com/user/repo
+        const slashIdx = rest.indexOf("/");
+        if (slashIdx !== -1) {
+          host = rest.slice(0, slashIdx);
+          path = rest.slice(slashIdx + 1);
+        } else {
+          host = "";
+          path = rest;
+        }
+      }
+
+      return { type: "git", host, path, ref };
     }
     return { type: "local", path: source };
   }
@@ -309,6 +381,62 @@ export class PiclawPackageManager {
     }
     const root = this.getGlobalNpmRoot();
     return join(root, source.name);
+  }
+
+  private getGitInstallRoot(scope: "user" | "project"): string {
+    if (scope === "project") {
+      return join(this.cwd, ".piclaw", "git");
+    }
+    return join(this.agentDir, "git");
+  }
+
+  private getGitInstallPath(source: { type: "git"; host: string; path: string; ref?: string }, scope: "user" | "project"): string {
+    const root = this.getGitInstallRoot(scope);
+    return join(root, source.host, source.path);
+  }
+
+  private async installGit(source: { type: "git"; host: string; path: string; ref?: string }, scope: "user" | "project"): Promise<void> {
+    const targetDir = this.getGitInstallPath(source, scope);
+    if (existsSync(targetDir)) return;
+    const gitRoot = this.getGitInstallRoot(scope);
+    if (!existsSync(gitRoot)) mkdirSync(gitRoot, { recursive: true });
+    mkdirSync(dirname(targetDir), { recursive: true });
+
+    const repo = `https://${source.host}/${source.path}.git`;
+    await this.runCommand("git", ["clone", repo, targetDir]);
+    if (source.ref) {
+      await this.runCommand("git", ["checkout", source.ref], { cwd: targetDir });
+    }
+    // Install dependencies if package.json exists
+    const packageJsonPath = join(targetDir, "package.json");
+    if (existsSync(packageJsonPath)) {
+      await this.runNpmCommand(["install", "--prefix", targetDir]);
+    }
+  }
+
+  private async uninstallGit(source: { type: "git"; host: string; path: string }, scope: "user" | "project"): Promise<void> {
+    const targetDir = this.getGitInstallPath(source, scope);
+    if (!existsSync(targetDir)) return;
+    rmSync(targetDir, { recursive: true, force: true });
+    this.pruneEmptyParents(dirname(targetDir), this.getGitInstallRoot(scope));
+  }
+
+  private pruneEmptyParents(dir: string, root?: string): void {
+    if (!root) return;
+    const resolvedRoot = resolve(root);
+    let current = dir;
+    while (current.startsWith(resolvedRoot) && current !== resolvedRoot) {
+      if (!existsSync(current)) {
+        current = dirname(current);
+        continue;
+      }
+      const entries = readdirSync(current);
+      if (entries.length > 0) break;
+      try {
+        rmSync(current, { recursive: true, force: true });
+      } catch { break; }
+      current = dirname(current);
+    }
   }
 
   private async installNpm(source: { type: "npm"; name: string; pinned: boolean }, scope: "user" | "project"): Promise<void> {
@@ -352,9 +480,20 @@ export class PiclawPackageManager {
   }
 
   private runNpmCommand(args: string[], cwd?: string): Promise<void> {
+    return this.runCommand("npm", args, { cwd });
+  }
+
+  private async runCommand(command: string, args: string[], options?: { cwd?: string }): Promise<void> {
     return new Promise((resolve, reject) => {
-      const child = spawn("npm", args, { cwd, stdio: "inherit", shell: process.platform === "win32" });
-      child.on("close", (code) => (code === 0 ? resolve() : reject(new Error(`npm exit ${code}`))));
+      const child = spawn(command, args, {
+        cwd: options?.cwd,
+        stdio: "inherit",
+        shell: process.platform === "win32",
+      });
+      child.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`${command} exited with code ${code}`));
+      });
       child.on("error", reject);
     });
   }

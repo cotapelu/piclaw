@@ -3,92 +3,12 @@
 /**
  * Piclaw Package Commands
  *
- * Simple package manager using .piclaw directory.
- * Supports: install, remove, list
+ * CLI for package management using PiclawPackageManager.
  */
 
 import chalk from "chalk";
-import { spawn, spawnSync } from "child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
-import { homedir } from "os";
-import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-// Config paths for piclaw
-function getConfigDir(): string {
-  return join(homedir(), ".piclaw");
-}
-
-function getGlobalSettingsPath(): string {
-  return join(getConfigDir(), "settings.json");
-}
-
-function getProjectSettingsPath(cwd: string): string {
-  return join(cwd, ".piclaw", "settings.json");
-}
-
-function getProjectNpmRoot(cwd: string): string {
-  return join(cwd, ".piclaw", "npm");
-}
-
-function getGlobalNpmRoot(): string {
-  // Use npm's global root
-  try {
-    const result = spawnSync("npm", ["root", "-g"], { encoding: "utf-8" });
-    if (result.status === 0) {
-      return result.stdout.trim();
-    }
-  } catch (err: any) {
-    // ignore
-  }
-  // Fallback
-  return join(homedir(), ".npm", "global", "node_modules");
-}
-
-interface PiclawSettings {
-  packages?: string[];
-}
-
-function loadSettings(path: string): PiclawSettings {
-  if (existsSync(path)) {
-    try {
-      const content = readFileSync(path, "utf-8");
-      return JSON.parse(content);
-    } catch (err: any) {
-      console.warn(chalk.yellow(`Failed to parse settings at ${path}: ${err.message}`));
-    }
-  }
-  return {};
-}
-
-function saveSettings(path: string, settings: PiclawSettings): void {
-  const dir = dirname(path);
-  if (!existsSync(dir)) {
-    mkdirSync(dir, { recursive: true });
-  }
-  writeFileSync(path, JSON.stringify(settings, null, 2), "utf-8");
-}
-
-function runNpmCommand(args: string[], cwd?: string): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const child = spawn("npm", args, {
-      cwd,
-      stdio: "inherit",
-      shell: process.platform === "win32",
-    });
-    child.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-      } else {
-        reject(new Error(`npm exited with code ${code}`));
-      }
-    });
-    child.on("error", (err: any) => reject(err));
-  });
-}
+import { join, resolve } from "node:path";
+import { PiclawPackageManager } from "./piclaw-package-manager.js";
 
 /**
  * Handle package install command
@@ -128,7 +48,7 @@ Install a pi package and add it to settings.
 
 Sources:
   npm:<package>      Install from npm (e.g., npm:foo/bar, npm:@scope/bar@1.2.3)
-  git:<repo>         Install from git (e.g., git:github.com/user/repo)
+  git:<repo>         Install from git (e.g., git:github.com/user/repo, git:https://...)
   <path>             Install from local path (absolute or relative)
 
 Options:
@@ -151,66 +71,11 @@ Examples:
   }
 
   const cwd = process.cwd();
+  const agentDir = join(resolve(cwd), ".piclaw", "agent"); // fallback for global paths
 
   try {
-    // Parse source spec
-    let npmSpec: string | null = null;
-    if (source.startsWith("npm:")) {
-      npmSpec = source.slice(4);
-    } else if (source.startsWith("git:") || source.startsWith("https:") || source.startsWith("ssh:") || source.startsWith("git@")) {
-      console.error(chalk.red("Git sources not yet supported in simple manager"));
-      process.exit(1);
-    } else if (!source.includes("/") && !source.startsWith(".") && !source.startsWith("/")) {
-      // Assume npm package without prefix
-      npmSpec = source;
-    } else {
-      // Local path - just ensure it exists and add to settings
-      const resolved = resolve(cwd, source);
-      if (!existsSync(resolved)) {
-        console.error(chalk.red(`Path does not exist: ${resolved}`));
-        process.exit(1);
-      }
-      // Add to settings without npm install
-      const settingsPath = local ? getProjectSettingsPath(cwd) : getGlobalSettingsPath();
-      const settings = loadSettings(settingsPath);
-      if (!settings.packages) settings.packages = [];
-      const normalized = local ? source : resolve(source);
-      if (!settings.packages.includes(normalized)) {
-        settings.packages.push(normalized);
-        saveSettings(settingsPath, settings);
-      }
-      console.log(chalk.green(`✓ Added ${normalized}`));
-      return true;
-    }
-
-    if (!npmSpec) {
-      console.error(chalk.red("Invalid source format"));
-      process.exit(1);
-    }
-
-    // Ensure npm root exists for local installs
-    if (local) {
-      const npmRoot = getProjectNpmRoot(cwd);
-      if (!existsSync(npmRoot)) {
-        mkdirSync(npmRoot, { recursive: true });
-      }
-      // Run npm install into .piclaw/npm
-      await runNpmCommand(["install", npmSpec, "--prefix", npmRoot, "--no-audit", "--no-fund"]);
-    } else {
-      // Global install (uses npm's global node_modules)
-      await runNpmCommand(["install", "-g", npmSpec, "--no-audit", "--no-fund"]);
-    }
-
-    // Add to settings
-    const settingsPath = local ? getProjectSettingsPath(cwd) : getGlobalSettingsPath();
-    const settings = loadSettings(settingsPath);
-    if (!settings.packages) settings.packages = [];
-    const entry = source.startsWith("npm:") ? source : `npm:${source}`;
-    if (!settings.packages.includes(entry)) {
-      settings.packages.push(entry);
-      saveSettings(settingsPath, settings);
-    }
-
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    await pm.installAndPersist(source, { local });
     console.log(chalk.green(`✓ Installed ${source}`));
     return true;
   } catch (err: any) {
@@ -273,37 +138,12 @@ Examples:
   }
 
   const cwd = process.cwd();
+  const agentDir = join(resolve(cwd), ".piclaw", "agent");
 
   try {
-    // Normalize source entry
-    const entry = source.startsWith("npm:") || source.startsWith("git:") || source.startsWith("https:") ? source : `npm:${source}`;
-
-    // Remove from settings first
-    const settingsPath = local ? getProjectSettingsPath(cwd) : getGlobalSettingsPath();
-    if (!existsSync(settingsPath)) {
-      console.error(chalk.red(`Settings not found: ${settingsPath}`));
-      process.exit(1);
-    }
-    const settings = loadSettings(settingsPath);
-    if (!settings.packages || !settings.packages.includes(entry)) {
-      console.error(chalk.red(`Package not found in settings: ${entry}`));
-      process.exit(1);
-    }
-    settings.packages = settings.packages.filter((p) => p !== entry);
-    saveSettings(settingsPath, settings);
-
-    // Uninstall npm package if it's npm
-    if (entry.startsWith("npm:")) {
-      const npmSpec = entry.slice(4);
-      if (local) {
-        const npmRoot = getProjectNpmRoot(cwd);
-        await runNpmCommand(["uninstall", npmSpec, "--prefix", npmRoot]);
-      } else {
-        await runNpmCommand(["uninstall", "-g", npmSpec]);
-      }
-    }
-
-    console.log(chalk.green(`✓ Removed ${entry}`));
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    await pm.removeAndPersist(source, { local });
+    console.log(chalk.green(`✓ Removed ${source}`));
     return true;
   } catch (err: any) {
     console.error(chalk.red(`✗ Failed: ${err.message}`));
@@ -334,36 +174,48 @@ List installed packages from user and project settings.
   }
 
   const cwd = process.cwd();
-  const globalPath = getGlobalSettingsPath();
-  const projectPath = getProjectSettingsPath(cwd);
+  const agentDir = join(resolve(cwd), ".piclaw", "agent");
 
-  const globalSettings = existsSync(globalPath) ? loadSettings(globalPath) : {};
-  const projectSettings = existsSync(projectPath) ? loadSettings(projectPath) : {};
+  try {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    const configuredPackages = pm.listConfiguredPackages();
 
-  const globalPkgs = globalSettings.packages || [];
-  const projectPkgs = projectSettings.packages || [];
+    const globalPkgs = configuredPackages.filter((p) => p.scope === "user");
+    const projectPkgs = configuredPackages.filter((p) => p.scope === "project");
 
-  if (globalPkgs.length === 0 && projectPkgs.length === 0) {
-    console.log(chalk.dim("No packages installed."));
+    if (configuredPackages.length === 0) {
+      console.log(chalk.dim("No packages installed."));
+      return true;
+    }
+
+    if (globalPkgs.length > 0) {
+      console.log(chalk.bold("Global packages:"));
+      for (const pkg of globalPkgs) {
+        const display = pkg.filtered ? `${pkg.source} (filtered)` : pkg.source;
+        console.log(`  ${display}`);
+        if (pkg.installedPath) {
+          console.log(chalk.dim(`    ${pkg.installedPath}`));
+        }
+      }
+    }
+
+    if (projectPkgs.length > 0) {
+      if (globalPkgs.length > 0) console.log();
+      console.log(chalk.bold("Project packages:"));
+      for (const pkg of projectPkgs) {
+        const display = pkg.filtered ? `${pkg.source} (filtered)` : pkg.source;
+        console.log(`  ${display}`);
+        if (pkg.installedPath) {
+          console.log(chalk.dim(`    ${pkg.installedPath}`));
+        }
+      }
+    }
+
     return true;
+  } catch (err: any) {
+    console.error(chalk.red(`Error: ${err.message}`));
+    process.exit(1);
   }
-
-  if (globalPkgs.length > 0) {
-    console.log(chalk.bold("Global packages:"));
-    for (const pkg of globalPkgs) {
-      console.log(`  ${pkg}`);
-    }
-  }
-
-  if (projectPkgs.length > 0) {
-    if (globalPkgs.length > 0) console.log();
-    console.log(chalk.bold("Project packages:"));
-    for (const pkg of projectPkgs) {
-      console.log(`  ${pkg}`);
-    }
-  }
-
-  return true;
 }
 
 /**
