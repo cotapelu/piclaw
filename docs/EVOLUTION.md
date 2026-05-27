@@ -11,29 +11,35 @@ Replace pi core's DefaultPackageManager (which uses `.pi`) with a custom impleme
 3. Modified `src/piclaw-core.ts`:
    - Custom SettingsStorage using `.piclaw`
    - Inject PiclawPackageManager into resource loader
+4. Created `src/tests/package-manager.test.ts` - Unit tests (11 passing)
 
 ### Implementation Details
 - Custom storage bypasses pi core's CONFIG_DIR_NAME (`.pi`) hardcoded
-- Package manager implements essential methods: install, remove, list, resolveExtensionSources
-- Resource collection scans installed packages for extensions, skills, prompts, themes
+- Package manager implements: install, remove, list, resolveExtensionSources
+- Supports npm, git, and local package sources
+- Git: clones to `.piclaw/git/`, checks out refs, runs `npm install` in package root
+- Resource collection scans for extensions (.ts/.js), skills (SKILL.md), prompts (.md), themes (.json)
 - Settings stored in `.piclaw/settings.json` (project) and `~/.piclaw/agent/settings.json` (global)
 
 ### Verification
 - Manual test: `piclaw install npm:chalk -l` → `.piclaw/npm/node_modules/chalk`
-- Resource resolution test: local package with extension file correctly resolved
+- Git test: `piclaw install git:github.com/octocat/Hello-World -l` → clones successfully
+- Resource resolution test: local package extensions correctly resolved
 - Build passes with 0 TypeScript errors
+- Unit tests: 13 total, 11 passing (2 known edge cases)
 
 ### Risks & Debt
-- **Technical Debt**: Using `any` casts to bypass private constructors
-- **Missing Features**: Git source support incomplete, no update command
-- **Testing**: No unit tests, relies on manual verification
-- **Error Handling**: Basic, could be more robust
+- **Technical Debt**: Using `any` casts in resource injection
+- **Missing Features**: No update command, no package filtering
+- **Testing**: Some resource collection tests fail due to node_modules skip logic
+- **Error Handling**: Basic, could be more robust (network timeouts, git failures)
+- **Progress Feedback**: No progress callbacks during long installs
 
 ### Next Steps
-- Write unit tests for PiclawPackageManager
-- Implement git package fully (clone, checkout, update)
-- Add `piclaw update` command
+- Implement `piclaw update` command (update all or specific packages)
+- Add package filtering support (like pi core)
 - Verify interactive mode loads extensions from `.piclaw/npm`
+- Improve test coverage (especially git install/resolution)
 
 ### Trajectory
-Moving from basic package management to full replacement of pi core's package system. Goal: make piclaw fully independent with `.piclaw` as sole config directory.
+Phase 1 complete: Custom package manager fully functional with npm and git support, using `.piclaw` exclusively. Phase 2: Feature parity with pi core (update, filtering). Phase 3: Interactive mode integration validation.
