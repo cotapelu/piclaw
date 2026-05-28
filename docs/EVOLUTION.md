@@ -140,3 +140,43 @@ Implement package-level filtering to allow users to include/exclude specific res
 
 ### Trajectory
 Phase 3 complete: Package filtering implemented and tested. Feature parity with pi core achieved. Phase 4: UX improvements (dry-run, progress, filtering CLI).
+
+---
+
+## 2025-05-28 - Phase 4: Source Validation
+
+### Objective
+Add input validation for package sources to catch errors early and provide user-friendly feedback.
+
+### Changes Made
+1. Added `validateParsed()` method in `PiclawPackageManager`
+   - Validates npm source has non-empty package name
+   - Validates git source has host and path with slash (host/path)
+   - Throws descriptive `Error` on invalid format
+2. Called `validateParsed()` in `install()` after parsing source, before any operations
+3. Added 3 unit tests for invalid sources (npm empty, git missing components, git no slash)
+
+### Implementation Details
+- Validation occurs before any filesystem or network operations
+- Errors are propagated to CLI, which exits with code 1 and displays message
+- Local source validation relies on existence check already present
+- No impact on performance (simple string checks)
+
+### Verification
+- All 18 package-manager tests pass (including 3 new validation tests)
+- Manual test: `piclaw install npm:` → Error: Invalid npm source
+- Manual test: `piclaw install git:` → Error: Invalid git source
+- Manual test: `piclaw install git:github.com` → Error: Invalid git source
+
+### Risks & Debt
+- Validation is basic; could be more thorough (npm naming rules, git URL formats)
+- No validation for `update` command (not needed as sources come from settings)
+- Could centralize validation in CLI layer but currently in package manager for reusability
+
+### Next Steps (Phase 4)
+- Add more robust npm package name validation (scope, characters)
+- Add git URL parsing using pi core's `parseGitUrl` for consistency
+- Consider validating package sources in `addSourceToSettings` as well
+
+### Trajectory
+Phase 4 complete: Source validation implemented and tested. Next: UX improvements (progress callbacks, dry-run, package info).

@@ -23,7 +23,9 @@ None observed in recent iterations.
 - Fixed package manager unit tests (2 failing tests resolved)
 - Implemented full `update` command with npm/git version checking
 - Implemented pattern-based package filtering (like pi core)
-- Added 11 new tests (9 CLI + 2 filter) all passing
+- Implemented source validation for npm/git sources with user-friendly errors
+- Fixed global install to use correct global agent directory
+- Added 14 new tests (9 CLI + 2 filter + 3 validation) - 100% pass
 - Added `minimatch` dependency for glob pattern matching
 - Backward compatible settings format (string entries still work)
 

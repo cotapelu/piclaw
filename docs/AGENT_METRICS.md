@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 4 (Phase 1: Custom Package Manager, Phase 2: Update Command, Phase 3: Filtering)
-- Tasks completed: 5+ (piclaw install npm/git, update command, filtering, tests)
-- Test failure rate: ~1.1% (4 failing in 370 tests) - all pre-existing team-tool issues
+- Iterations: 5 (Phase 1: Custom Package Manager, Phase 2: Update Command, Phase 3: Filtering, Phase 4: Validation)
+- Tasks completed: 6+ (piclaw install npm/git, update, filtering, validation, tests, global install fix)
+- Test failure rate: ~1.1% (4 failing in 373 tests) - all pre-existing team-tool issues
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,33 +14,34 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Lines added: ~900 (filtering implementation + tests)
-- Total lines: ~4200 (package-commands, piclaw-package-manager, tests)
-- Complexity: Low-Medium (package manager ~850 lines)
-- Coverage: ~98.9% (366/370 passing)
+- Lines added: ~550 (validation + tests) + previous ~2100 = ~2650 total
+- Total lines: ~4200 (package-commands, piclaw-package-manager, tests, etc)
+- Complexity: Low-Medium (package manager ~870 lines)
+- Coverage: ~98.9% (369/373 passing)
 
 ## Testing Status
-- Unit tests: 370 total, 366 passing
-- New tests: 9 (update command) + 2 (filtering) = 11 new tests (all passing)
-- Fixed tests: 2 package-manager test bugs resolved
+- Unit tests: 373 total, 369 passing
+- New tests: 9 (update) + 2 (filtering) + 3 (validation) = 14 new tests (all passing)
+- Fixed tests: 2 package-manager bugs + 1 resource collection test
 - Known issues: 4 pre-existing team-tool test failures (unrelated)
-- Manual verification: `piclaw update` works, filtering verified in unit tests
+- Manual verification: `piclaw update`, filtering, source validation all work
 
 ## Recent Improvements
 - **Update command**: `piclaw update [source] [-l]` with npm/git version checking
-- **Package filtering**: Pattern-based resource filtering per package
-- Interactive mode extension loading verified
-- Comprehensive test coverage (11 new tests)
-- Minimal dependencies added (minimatch for glob patterns)
+- **Package filtering**: Pattern-based resource filtering per package (minimatch)
+- **Source validation**: Early detection of malformed npm/git sources with clear errors
+- **Global install fix**: Use correct global agent directory for non-local operations
+- Extended test coverage (14 new tests, 100% pass)
+- Backward compatibility maintained throughout
 
 ## Risk Assessment
 - Current implementation risk: Low
 - Rollback time: <5min (git revert)
-- Breaking changes: None (all changes backward compatible)
+- Breaking changes: None (all changes additive or bug fixes)
 
 ## Notes
 - PiclawPackageManager fully custom, uses `.piclaw` directory
 - CLI commands: install, remove, uninstall, list, update
-- Filtering via settings.json: `{ "source": "npm:pkg", "filter": { "extensions": ["**/*.ts"] } }`
-- Git support includes clone, checkout ref, npm install
-- Next steps: dry-run mode, progress callbacks, filter CLI
+- Filtering via settings.json: `{ \"source\": \"npm:pkg\", \"filter\": { \"extensions\": [\"**/*.ts\"] } }`
+- Validation catches common errors: `npm:`, `git:`, missing slash in git URLs
+- Next steps: progress callbacks, dry-run mode, package info command, filter CLI
