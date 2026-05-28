@@ -209,4 +209,21 @@ describe("PiclawPackageManager", () => {
       expect(filtered?.filtered).toBe(true);
     });
   });
+
+  describe("Source Validation", () => {
+    it("should reject npm source with empty name", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      await expect(pm.install("npm:")).rejects.toThrow(/Invalid npm source/);
+    });
+
+    it("should reject git source without host/path", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      await expect(pm.install("git:")).rejects.toThrow(/Invalid git source/);
+    });
+
+    it("should reject git source without slash in path", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      await expect(pm.install("git:github.com")).rejects.toThrow(/Invalid git source/);
+    });
+  });
 });

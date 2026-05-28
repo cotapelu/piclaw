@@ -222,6 +222,7 @@ export class PiclawPackageManager {
     const scope = options?.local ? "project" : "user";
     await this.withProgress("install", source, `Installing ${source}...`, async () => {
       const parsed = this.parseSource(source);
+      this.validateParsed(parsed);
       if (parsed.type === "npm") {
         await this.installNpm(parsed, scope);
         return;
@@ -583,6 +584,21 @@ export class PiclawPackageManager {
       return { type: "git", host, path, ref };
     }
     return { type: "local", path: source };
+  }
+
+  private validateParsed(parsed: ParsedSource): void {
+    if (parsed.type === "npm") {
+      if (!parsed.name || parsed.name.trim() === "") {
+        throw new Error("Invalid npm source: missing package name");
+      }
+    } else if (parsed.type === "git") {
+      if (!parsed.host || !parsed.path) {
+        throw new Error("Invalid git source: missing host or path");
+      }
+      if (!parsed.path.includes("/")) {
+        throw new Error("Invalid git source: path must be in the form host/path (e.g., github.com/user/repo)");
+      }
+    }
   }
 
   private getNpmInstallPath(source: { type: "npm"; name: string; pinned: boolean }, scope: "user" | "project"): string {

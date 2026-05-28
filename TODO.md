@@ -12,7 +12,7 @@
 - [ ] Add progress callback to install/remove commands
 - [x] Support global install (without -l) properly
 - [ ] Add package info command (list with installed paths)
-- [ ] Validate package sources before install
+- [x] Validate package sources before install
 - [x] Fix resource collection test (currently failing due to node_modules skip)
 
 ## Low Priority
