@@ -303,4 +303,76 @@ Provide diagnostics for installed packages to detect common issues.
 - Integrate with pre-install/pre-update hooks.
 
 ### Trajectory
-Phase 7 complete: Health check command added. Future: dependency checks, import/export, version pinning.
+Phase 7 complete: Health check command added. Future: dependency checks.
+
+---
+
+## 2025-05-28 - Phase 8: Pin Command
+
+### Objective
+Enable users to manually update package source in settings (version pinning).
+
+### Changes Made
+1. Added `handlePinCommand` implementing `piclaw pin <old> <new> [-l]`.
+2. Command edits appropriate settings file (project or global).
+3. Replaces old source string with new source, preserving structure.
+4. Added unit tests for pin command (success, missing args, not found).
+
+### Implementation Details
+- Settings path determined by `-l` flag.
+- Uses `readFileSync`/`writeFileSync` to modify JSON.
+- Validates existence of old source before replacing.
+- Supports both plain string entries and filter objects.
+
+### Verification
+- New tests cover happy path and error cases.
+- Manual: `piclaw pin npm:foo@1.0 npm:foo@1.2 -l` updates settings.json.
+
+### Risks & Debt
+- Low risk: simple settings edit.
+- Could validate new source format before writing.
+- Could support batch pinning via file.
+
+### Next Steps (Phase 8)
+- Add undo capability.
+- Allow pinning with filter modifications.
+
+---
+
+## 2025-05-28 - Phase 9: Import/Export
+
+### Objective
+Provide backup and migration via JSON export/import.
+
+### Changes Made
+1. Added `handleExportCommand` and `handleImportCommand`.
+2. Export: writes packages array to file or stdout.
+3. Import: reads JSON, merges without duplicates, creates settings if missing.
+4. Supports stdin via `-`.
+5. Added comprehensive tests (5 cases).
+
+### Implementation Details
+- Export: `piclaw export [file.json] [-l]`.
+- Import: `piclaw import <file.json> [-l]`.
+- Deduplication based on source string.
+- Creates parent directories on import.
+
+### Verification
+- Tests cover stdout/file export, import with/without duplicates, missing file, etc.
+- Manual: `piclaw export -l > packages.json`; `piclaw import packages.json -l`.
+
+### Risks & Debt
+- Low risk: straightforward file I/O.
+- Could add `--force` to overwrite duplicates.
+- Could add dry-run support.
+
+### Next Steps (Phase 9)
+- Expose filter configuration via CLI.
+- Add progress callbacks for large imports.
+
+---
+
+Trajectory:
+Phase 8 complete: Pin command available.
+Phase 9 complete: Import/Export commands done.
+Future: retry logic, structured logging, integration tests.

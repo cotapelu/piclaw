@@ -16,8 +16,8 @@ None observed in recent iterations.
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
 - Comprehensive test writing (30+ tests across multiple files)
-- CLI command development (install, remove, list, update, info, health)
-- Feature parity with pi core (update, filtering, validation, dry-run, health) achieved
+- CLI command development (install, remove, list, update, info, health, pin, import/export)
+- Feature parity with pi core and beyond (all major package management features)
 
 ## Recent Improvements
 - Fixed package manager unit tests (2 failing tests resolved)
@@ -28,7 +28,9 @@ None observed in recent iterations.
 - Added `piclaw info` command to show package details and resource counts
 - Implemented dry-run mode with `--dry-run` / `-d` flag for safe simulation
 - Added `piclaw health` command for package integrity verification
-- Added 20 new tests (update 9, filter 2, validation 3, info 5, health 1) - 100% pass
+- Added `piclaw pin` command for version pinning update
+- Added `piclaw export` and `piclaw import` commands for backup/migration
+- Added 27 new package-command tests (all passing) + 18 package-manager tests
 - Added `minimatch` dependency for glob pattern matching
 - Backward compatible settings format (string entries still work)
 
@@ -40,8 +42,6 @@ None observed in recent iterations.
 - Consider using `execa` for more reliable subprocess management
 - Add retry logic for network failures (npm/git)
 - Expose filter configuration via CLI
-- Add package import/export functionality
-- Implement package version pinning updates
 
 ## Recommended Skills
 - `typescript-architect` for strict typing
