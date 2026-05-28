@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "../../utils/logger.js";
 /**
  * Full-Featured Todo Tool - Complete implementation with all backup features
  * - 6 ops: delete, add_phase, add_task, update, remove_task, list
@@ -112,7 +113,7 @@ async function loadTodoFromFile(): Promise<TodoFile | null> {
     if (parsed.version !== 1) return null;
     return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
   } catch (e) {
-    console.error("Load todos failed:", e);
+    logger.error("Load todos failed:", e);
     return null;
   }
 }
@@ -777,7 +778,7 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
         details: { autoTrigger: true, timestamp: Date.now() }
       }, { triggerTurn: true, deliverAs: "followUp" });
     } catch (e) {
-      console.error("[todos] Auto-continue failed:", e);
+      logger.error("[todos] Auto-continue failed:", e);
     } finally {
       setTimeout(() => { autoTriggering = false; }, 500);
     }

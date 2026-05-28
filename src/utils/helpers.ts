@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "./logger.js";
 
 /**
  * Helper functions for main.ts (extracted for testability)
@@ -28,7 +29,7 @@ export async function ensurePiclawExtensionRegistered(agentDir: string, extensio
     try {
       globalSettings = JSON.parse(readFileSync(globalSettingsPath, "utf-8"));
     } catch (err) {
-      console.warn(chalk.yellow(`Failed to parse global settings, creating new.`));
+      logger.warn(chalk.yellow(`Failed to parse global settings, creating new.`));
     }
   }
 
@@ -45,7 +46,7 @@ export async function ensurePiclawExtensionRegistered(agentDir: string, extensio
   try {
     writeFileSync(globalSettingsPath, JSON.stringify(globalSettings, null, 2), "utf-8");
   } catch (err) {
-    console.warn(chalk.yellow(`Failed to write global settings: ${err}`));
+    logger.warn(chalk.yellow(`Failed to write global settings: ${err}`));
   }
 }
 
@@ -89,10 +90,10 @@ export function validateApiKeys(config: PiclawConfig): void {
 
   // Display warnings
   if (warnings.length > 0) {
-    console.log(chalk.yellow("\n⚠️  API Key Warnings:"));
+    logger.log(chalk.yellow("\n⚠️  API Key Warnings:"));
     for (const warning of warnings) {
-      console.log(chalk.yellow(`  - ${warning}`));
+      logger.log(chalk.yellow(`  - ${warning}`));
     }
-    console.log();
+    logger.log();
   }
 }

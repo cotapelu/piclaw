@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "./utils/logger.js";
 
 /**
  * Piclaw CLI Entry Point
@@ -62,27 +63,27 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     // 6. Run interactive TUI mode
     await runInteractive(runtime, { verbose: config.verbose });
   } catch (error: any) {
-    console.error("\n❌ Failed to start Piclaw:");
+    logger.error("\n❌ Failed to start Piclaw:");
 
     // Provide helpful error messages based on error type
     if (error.message?.includes("ENOENT")) {
-      console.error("  → A required file or directory was not found.");
+      logger.error("  → A required file or directory was not found.");
     } else if (error.message?.includes("EACCES") || error.message?.includes("permission")) {
-      console.error("  → Permission denied. Check file permissions.");
+      logger.error("  → Permission denied. Check file permissions.");
     } else if (error.message?.includes("API key") || error.message?.includes("api key")) {
-      console.error("  → Missing or invalid API key. Check environment variables.");
+      logger.error("  → Missing or invalid API key. Check environment variables.");
     } else if (error.message?.includes("network") || error.message?.includes("ECONNREFUSED")) {
-      console.error("  → Network error. Check your internet connection.");
+      logger.error("  → Network error. Check your internet connection.");
     } else if (error.message?.includes("timeout")) {
-      console.error("  → Request timed out. Try again later.");
+      logger.error("  → Request timed out. Try again later.");
     }
 
-    console.error(`  Error: ${error.message}`);
+    logger.error(`  Error: ${error.message}`);
 
     if (config?.verbose) {
-      console.error(error);
+      logger.error(error);
     } else {
-      console.error("  Run with --verbose for more details.");
+      logger.error("  Run with --verbose for more details.");
     }
 
     process.exit(1);

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "./logger.js";
 
 /**
  * Context Logger
@@ -132,7 +133,7 @@ export function writeContextLog(context: {
 		}
 	} catch (error) {
 		// Don't throw - logging should never break the main flow
-		console.error("ContextLogger: Failed to write log file:", error);
+		logger.error("ContextLogger: Failed to write log file:", error);
 	}
 }
 

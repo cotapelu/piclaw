@@ -1,3 +1,4 @@
+import { logger } from "../../utils/logger.js";
 /**
  * Minimal Team Manager
  *
@@ -79,7 +80,7 @@ export class AgentTeam implements AgentTeamRuntime {
         this.onUpdate(update);
       } catch (e) {
         // Ignore update errors - don't break team execution
-        console.warn('Failed to send update:', e);
+        logger.warn('Failed to send update:', e);
       }
     }
   }
@@ -108,7 +109,7 @@ export class AgentTeam implements AgentTeamRuntime {
       await Promise.allSettled(
         this.runtimes.slice(1).map(rt =>
           rt.dispose().catch(err =>
-            console.error("Failed to dispose child agent:", err)
+            logger.error("Failed to dispose child agent:", err)
           )
         )
       );
@@ -119,7 +120,7 @@ export class AgentTeam implements AgentTeamRuntime {
           registry.unregister(this.id);
         }
       } catch (e) {
-        console.warn('Failed to unregister team from registry:', e);
+        logger.warn('Failed to unregister team from registry:', e);
       }
     };
     this.workspace = new SharedWorkspace();
@@ -572,13 +573,13 @@ export class TeamRegistry {
 
   register(teamId: string, team: AgentTeam): void {
     this.teams.set(teamId, team);
-    console.log(`[TeamRegistry] Registered team ${teamId}`);
+    logger.log(`[TeamRegistry] Registered team ${teamId}`);
   }
 
   unregister(teamId: string): void {
     this.clearAutoDisposeTimer(teamId);
     this.teams.delete(teamId);
-    console.log(`[TeamRegistry] Unregistered team ${teamId}`);
+    logger.log(`[TeamRegistry] Unregistered team ${teamId}`);
   }
 
   get(teamId: string): AgentTeam | undefined {
@@ -622,9 +623,9 @@ export class TeamRegistry {
       try {
         await team.dispose();
         this.unregister(teamId);
-        console.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
+        logger.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
       } catch (e) {
-        console.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}:`, e);
+        logger.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}:`, e);
       }
     }
   }
@@ -852,7 +853,7 @@ Use team_ops to continue. If all tasks done, finish up.`;
   const childPromises = team.runtimes.slice(1).map((runtime, idx) => {
     const role = team.roles[idx + 1];
     return runAgentLoop(runtime, role).catch(err => {
-      console.error(`Agent ${role} failed:`, err);
+      logger.error(`Agent ${role} failed:`, err);
     });
   });
 
@@ -875,7 +876,7 @@ Use team_ops to continue. If all tasks done, finish up.`;
         const registry = TeamRegistry.getInstance();
         registry.resetAutoDisposeTimer(team.id);
       } catch (e) {
-        console.warn('Failed to schedule auto-dispose:', e);
+        logger.warn('Failed to schedule auto-dispose:', e);
       }
     }
   }, 1000);

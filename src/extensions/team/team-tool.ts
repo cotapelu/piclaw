@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "../../utils/logger.js";
 /**
  * Simple Team Tool
  *

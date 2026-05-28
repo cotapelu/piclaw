@@ -37,8 +37,9 @@ None observed in recent iterations.
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - **Progress callbacks**: install/remove/update now show progress messages via default logger
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
-- **Structured logging foundation**: Introduced logger wrapper, migrated console calls in core package manager files
+- **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
+- **Extensions logging**: Migrated extension modules (todos, auto-continue, team) to logger
 - Backward compatible settings format (string entries still work)
 
 ## Areas for Improvement

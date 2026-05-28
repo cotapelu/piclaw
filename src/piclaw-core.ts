@@ -19,6 +19,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { dirname, join } from "node:path";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
 import { createContextLoggingStreamFn } from "./utils/context-logger.js";
+import { logger } from "./utils/logger.js";
 
 export interface PiclawCoreOptions {
   cwd?: string;
@@ -110,13 +111,13 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
         if (model) {
           await runtime.session.setModel(model);
         } else {
-          console.warn(`Model '${options.model}' not found in registry.`);
+          logger.warn(`Model '${options.model}' not found in registry.`);
         }
       } else {
-        console.warn(`Invalid model format: '${options.model}'. Use provider:modelId`);
+        logger.warn(`Invalid model format: '${options.model}'. Use provider:modelId`);
       }
     } catch (err: any) {
-      console.warn(`Failed to set model '${options.model}': ${err.message}`);
+      logger.warn(`Failed to set model '${options.model}': ${err.message}`);
     }
   }
 

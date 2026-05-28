@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "./utils/logger.js";
 
 /**
  * Piclaw CLI Entry Point
@@ -17,12 +18,12 @@ process.env.PI_CODING_AGENT = "true";
 
 // Simple error handlers (avoid crashing without logs)
 process.on("unhandledRejection", (err) => {
-  console.error("Unhandled rejection:", err);
+  logger.error("Unhandled rejection:", err);
   process.exit(1);
 });
 
 process.on("uncaughtException", (err) => {
-  console.error("Uncaught exception:", err);
+  logger.error("Uncaught exception:", err);
   process.exit(1);
 });
 

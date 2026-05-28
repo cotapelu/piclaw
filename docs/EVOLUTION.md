@@ -596,3 +596,36 @@ Introduce a central logger to enable future structured output while maintaining 
 
 ### Trajectory
 Phase 16 complete: Basic logger in place, core files migrated. Next: finish logger migration.
+
+--- 
+
+## 2025-05-28 - Phase 17: Structured Logging Migration
+
+### Objective
+Replace direct console.* calls in extension modules with the logger abstraction.
+
+### Changes Made
+1. Migrated `src/extensions/tools/todos-tool.ts`, `src/extensions/hooks/auto-continue.ts`, `src/extensions/team/team-manager.ts`, `src/extensions/team/team-tool.ts` to use `logger`.
+2. Added correct relative import (`../../utils/logger.js`) in each file.
+3. Replaced `console.log`, `console.error`, `console.warn`, `console.info` with `logger` equivalents.
+4. All tests continue to pass; no regression.
+
+### Implementation Details
+- Used consistent pattern: import logger, then replace.
+- The logger delegates to console, so runtime behavior unchanged.
+- Helps prepare for future structured logging.
+
+### Verification
+- Full test suite: 411/411 passing.
+- Manual checks: Extension logs appear as before.
+
+### Risks & Debt
+- Very low risk: mechanical changes.
+- Could further migrate remaining `console.*` in other modules if needed.
+
+### Next Steps (Phase 17)
+- Add log level control (--verbose, --quiet).
+- Option for JSON log format.
+
+### Trajectory
+Phase 17 complete: Extension modules now use logger. Core and extensions fully on logger abstraction.

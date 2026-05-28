@@ -1,0 +1,1 @@
+- Structured logging migration (extensions use logger)

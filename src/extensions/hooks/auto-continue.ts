@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "../../utils/logger.js";
 /**
  * Auto Continue Extension
  *
@@ -45,14 +46,14 @@ function loadReminderMessage(): string {
       // Take entire content (trim only leading/trailing whitespace)
       const trimmed = content.trim();
       if (trimmed) {
-        console.log("[AutoContinue] Loaded reminder from:", filePath);
+        logger.log("[AutoContinue] Loaded reminder from:", filePath);
         return trimmed;
       }
     }
   } catch (error) {
-    console.error("[AutoContinue] Failed to load reminder file:", error);
+    logger.error("[AutoContinue] Failed to load reminder file:", error);
   }
-  console.log("[AutoContinue] Using default message");
+  logger.log("[AutoContinue] Using default message");
   return DEFAULT_IDLE_MESSAGE;
 }
 
@@ -76,13 +77,13 @@ export default function (pi: ExtensionAPI) {
     if (!enabled) return;
     if (idleTimer) return;
     idleTimer = setTimeout(() => {
-      //console.log("[AutoContinue] Timer fired, enabled:", enabled);
+      //logger.log("[AutoContinue] Timer fired, enabled:", enabled);
       if (enabled) {
         pi.sendMessage(
           { customType: "auto-continue", content: IDLE_MESSAGE, display: false },
           { triggerTurn: true, deliverAs: "followUp" }
         );
-       // console.log("[AutoContinue] Sent idle reminder. Message:", IDLE_MESSAGE);
+       // logger.log("[AutoContinue] Sent idle reminder. Message:", IDLE_MESSAGE);
       }
       idleTimer = null;
     }, idleTimeoutMs);
@@ -104,7 +105,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.hasUI) {
           ctx.ui.notify("Auto-continue đã TẮT", "info");
         }
-        //console.log("[AutoContinue] Disabled");
+        //logger.log("[AutoContinue] Disabled");
         return;
       }
 
@@ -115,9 +116,9 @@ export default function (pi: ExtensionAPI) {
         }
         if (ctx.isIdle()) {
           startIdleTimer();
-          //console.log("[AutoContinue] Started timer immediately (was idle)");
+          //logger.log("[AutoContinue] Started timer immediately (was idle)");
         }
-        //console.log("[AutoContinue] Enabled");
+        //logger.log("[AutoContinue] Enabled");
         return;
       }
 
@@ -128,7 +129,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.hasUI) {
           ctx.ui.notify(`Auto-continue timeout set to ${timeoutSec} giây`, "info");
         }
-        //console.log(`[AutoContinue] Timeout set to ${idleTimeoutMs}ms`);
+        //logger.log(`[AutoContinue] Timeout set to ${idleTimeoutMs}ms`);
         return;
       }
 
@@ -141,7 +142,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.isIdle()) {
           startIdleTimer();
         }
-        //console.log("[AutoContinue] Enabled via toggle");
+        //logger.log("[AutoContinue] Enabled via toggle");
       } else {
         if (idleTimer) {
           clearTimeout(idleTimer);
@@ -150,7 +151,7 @@ export default function (pi: ExtensionAPI) {
         if (ctx.hasUI) {
           ctx.ui.notify("Auto-continue đã TẮT", "info");
         }
-        //console.log("[AutoContinue] Disabled via toggle");
+        //logger.log("[AutoContinue] Disabled via toggle");
       }
     },
   });
@@ -158,7 +159,7 @@ export default function (pi: ExtensionAPI) {
   // Listen to agent_end using pi.on()
   pi.on("agent_end", () => {
     if (!enabled) return;
-    //console.log("[AutoContinue] agent_end fired, enabled:", enabled);
+    //logger.log("[AutoContinue] agent_end fired, enabled:", enabled);
     startIdleTimer();
   });
 }

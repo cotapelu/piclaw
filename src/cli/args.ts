@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "../utils/logger.js";
 
 /**
  * CLI Argument Parser for Piclaw
@@ -73,7 +74,7 @@ export function parseOptions(args: string[]): { opts: Options; cliOverrides: Pic
  * Print help message
  */
 function printHelp(): void {
-  console.log(`
+  logger.log(`
 Piclaw CLI - AI Coding Assistant
 
 Options:

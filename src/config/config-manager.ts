@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { logger } from "../utils/logger.js";
 
 /**
  * Piclaw Configuration Manager
@@ -109,11 +110,11 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 			fileConfig = JSON.parse(content);
 			// Validate and sanitize
 			if (fileConfig.thinking && !["off", "minimal", "low", "medium", "high", "xhigh"].includes(fileConfig.thinking)) {
-				console.warn(`Invalid thinking level in config: ${fileConfig.thinking}. Using default.`);
+				logger.warn(`Invalid thinking level in config: ${fileConfig.thinking}. Using default.`);
 				fileConfig.thinking = DEFAULT_CONFIG.thinking;
 			}
 		} catch (err) {
-			console.warn(`Failed to parse config file: ${err}. Using defaults.`);
+			logger.warn(`Failed to parse config file: ${err}. Using defaults.`);
 			fileConfig = { ...DEFAULT_CONFIG };
 		}
 	}

@@ -1,7 +1,7 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 16 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Part 1)
+- Iterations: 17 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration)
 - Tasks completed: All major features; 100% test pass
 - Test failure rate: 0% (0 failing in 411 tests)
 - Rollbacks: 0
@@ -42,8 +42,9 @@
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
 - Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests, 1 integration test)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 new tests)
-- **Structured logging foundation**: Introduced logger wrapper, migrated console calls in core package manager files
+- **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
+- **Extensions logging**: Migrated extension modules (todos, auto-continue, team) to logger
 - Backward compatibility throughout
 
 ## Risk Assessment
