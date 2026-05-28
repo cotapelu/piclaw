@@ -19,7 +19,7 @@
 - [x] Add dry-run mode
 - [x] Add package health check (dependencies, integrity)
 - [ ] Support package import/export
-- [ ] Implement package version pinning update
+- [x] Implement package version pinning update (pin command)
 
 ## Completed
 - Custom .piclaw directory support (replaced .pi)
@@ -27,3 +27,11 @@
 - Git package clone, checkout, resolve
 - Settings persistence (project & global)
 - Resource resolution (extensions, skills, prompts, themes)
+- piclaw update command (npm/git version checking)
+- Package filtering (pattern-based with minimatch)
+- Source validation for npm/git sources
+- Global install fix (correct agent directory)
+- piclaw info command (package details)
+- Dry-run mode (--dry-run / -d)
+- piclaw health command (integrity check)
+- piclaw pin command (version pinning update)
