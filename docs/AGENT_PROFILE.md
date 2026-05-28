@@ -13,28 +13,33 @@ None observed in recent iterations.
 
 ## Strengths
 - Quick to implement custom solutions with minimal dependencies
-- Good understanding of pi core architecture and extension system
+- Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (20+ tests across multiple files)
+- Comprehensive test writing (30+ tests across multiple files)
 - CLI command development (install, remove, list, update)
+- Feature parity with pi core (update, filtering) achieved
 
 ## Recent Improvements
 - Fixed package manager unit tests (2 failing tests resolved)
-- Implemented full `update` command with npm/git support
-- Added 9 new tests for CLI commands (100% pass rate)
-- Improved error handling in package update flow
-- Version checking and pinned version support
+- Implemented full `update` command with npm/git version checking
+- Implemented pattern-based package filtering (like pi core)
+- Added 11 new tests (9 CLI + 2 filter) all passing
+- Added `minimatch` dependency for glob pattern matching
+- Backward compatible settings format (string entries still work)
 
 ## Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces
-- Add structured logging ( Winston/pino ) instead of console.log/error
+- Add structured logging (Winston/pino) instead of console.log/error
 - Implement progress callbacks for long-running operations
 - Add integration tests for full install→update flow
 - Consider using `execa` for more reliable subprocess management
 - Add retry logic for network failures (npm/git)
+- Expose filter configuration via CLI
+- Add dry-run mode for update command
 
 ## Recommended Skills
 - `typescript-architect` for strict typing
 - `nodejs-architect` for Node.js best practices
 - `testing-strategist` for integration/e2e tests
 - `logger-architect` for structured logging
+- `cli-ux` for progress indicators

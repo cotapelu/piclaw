@@ -96,4 +96,47 @@ Complete the missing `piclaw update` CLI command to reach feature parity with pi
 - Package health check (dependencies, integrity)
 
 ### Trajectory
-Phase 2 complete: `piclaw update` command implemented and tested. Feature parity with pi core mostly achieved (update ✓, filtering pending). Phase 3: Interactive mode verification and polishing (dry-run, progress callbacks, filtering).
+Phase 2 complete: `piclaw update` command implemented and tested. Feature parity with pi core mostly achieved (update ✓).
+
+---
+
+## 2025-05-28 - Phase 3: Package Filtering
+
+### Objective
+Implement package-level filtering to allow users to include/exclude specific resource types from installed packages.
+
+### Changes Made
+1. Extended `PiclawSettings` to support filter objects alongside simple source strings
+   - Settings format: `{ source: string; filter?: PackageFilter }`
+   - Backward compatible: simple string entries still supported
+2. Added `PackageFilter` interface with arrays for `extensions`, `skills`, `prompts`, `themes`
+3. Implemented filtering in `collectPackageResources()`
+   - Uses `minimatch` for glob pattern matching
+   - Filters applied after collection based on patterns
+4. Updated `listConfiguredPackages()` to indicate filtered packages
+5. Added 2 comprehensive filter tests (resource exclusion and filtered flag)
+
+### Implementation Details
+- Filter patterns are matched against relative paths (posix) from package root
+- Empty array means include none (exclude all)
+- Undefined means no filtering (include all)
+- Filtering is applied only to package resources, not to additional paths
+
+### Verification
+- All 15 package-manager tests pass (including 2 new filter tests)
+- Filter correctly excludes resources by type and pattern
+- `listConfiguredPackages` reports `filtered: true` when filter is defined
+- Backward compatibility maintained: existing string-only settings work unchanged
+
+### Risks & Debt
+- Filter CLI configuration not exposed yet (manual settings edit required)
+- Could add progress callbacks for filter application (not needed for small sets)
+
+### Next Steps (Phase 3)
+- Add CLI options for adding/removing filters (e.g., `piclaw filter add <pkg> --extensions "**/test*")`
+- Implement dry-run mode for update command
+- Add progress callback to install/remove/update operations
+- Validate package sources before install
+
+### Trajectory
+Phase 3 complete: Package filtering implemented and tested. Feature parity with pi core achieved. Phase 4: UX improvements (dry-run, progress, filtering CLI).

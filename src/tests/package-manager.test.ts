@@ -159,4 +159,54 @@ describe("PiclawPackageManager", () => {
       expect(resolved).toHaveProperty("themes");
     });
   });
+
+  describe("Package Filtering", () => {
+    it("should apply filter to resources from package", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+
+      // Create test package with multiple resources
+      const pkgRoot = join(cwd, ".piclaw", "npm", "node_modules", "filter-test-pkg");
+      mkdirSync(join(pkgRoot, "extensions"), { recursive: true });
+      mkdirSync(join(pkgRoot, "skills"), { recursive: true });
+      mkdirSync(join(pkgRoot, "prompts"), { recursive: true });
+      mkdirSync(join(pkgRoot, "themes"), { recursive: true });
+      writeFileSync(join(pkgRoot, "extensions", "a.ts"), "");
+      writeFileSync(join(pkgRoot, "extensions", "b.ts"), "");
+      writeFileSync(join(pkgRoot, "skills", "SKILL.md"), "");
+      writeFileSync(join(pkgRoot, "prompts", "guide.md"), "");
+      writeFileSync(join(pkgRoot, "themes", "dark.json"), "");
+
+      // Add with filter: only include a.ts, no skills/prompts/themes
+      pm.addSourceToSettings({
+        source: "npm:filter-test-pkg",
+        filter: { extensions: ["**/a.ts"], skills: [], prompts: [], themes: [] }
+      }, { local: true });
+
+      const resolved = await pm.resolve();
+
+      // Extensions: only a.ts
+      expect(resolved.extensions).toHaveLength(1);
+      expect(resolved.extensions[0].path).toContain("a.ts");
+      // Other types filtered out
+      expect(resolved.skills).toHaveLength(0);
+      expect(resolved.prompts).toHaveLength(0);
+      expect(resolved.themes).toHaveLength(0);
+    });
+
+    it("should list packages with filtered flag when filter is present", () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+
+      pm.addSourceToSettings("npm:simple-pkg", { local: true });
+      pm.addSourceToSettings({
+        source: "npm:filtered-pkg",
+        filter: { extensions: ["**/*.ts"] }
+      }, { local: true });
+
+      const list = pm.listConfiguredPackages();
+      const simple = list.find(p => p.source === "npm:simple-pkg");
+      const filtered = list.find(p => p.source === "npm:filtered-pkg");
+      expect(simple?.filtered).toBe(false);
+      expect(filtered?.filtered).toBe(true);
+    });
+  });
 });

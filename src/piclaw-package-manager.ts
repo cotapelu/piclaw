@@ -12,9 +12,10 @@ import chalk from "chalk";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, rmSync } from "fs";
 import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
+import { minimatch } from "minimatch";
 
 interface PiclawSettings {
-  packages?: string[];
+  packages?: Array<string | { source: string; filter?: PackageFilter }>;
 }
 
 interface PathMetadata {
@@ -22,6 +23,13 @@ interface PathMetadata {
   scope: "user" | "project";
   origin: "package";
   baseDir?: string;
+}
+
+interface PackageFilter {
+  extensions?: string[];
+  skills?: string[];
+  prompts?: string[];
+  themes?: string[];
 }
 
 type ParsedSource =
@@ -64,6 +72,15 @@ const FILE_PATTERNS: Record<ResourceType, RegExp> = {
 
 function toPosixPath(p: string): string {
   return p.split(sep).join("/");
+}
+
+function matchesAnyPattern(filePath: string, patterns: string[]): boolean {
+  for (const pattern of patterns) {
+    if (minimatch(filePath, pattern, { matchBase: true, dot: true })) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function getHomeDir(): string {
@@ -145,12 +162,15 @@ export class PiclawPackageManager {
     writeFileSync(path, JSON.stringify(settings, null, 2), "utf-8");
   }
 
-  addSourceToSettings(source: string, options?: { local?: boolean }): boolean {
+  addSourceToSettings(source: string | { source: string; filter?: PackageFilter }, options?: { local?: boolean }): boolean {
     const scope = options?.local ? "project" : "user";
     const path = scope === "project" ? this.getProjectSettingsPath() : this.getGlobalSettingsPath();
     const settings = this.loadSettings(path);
     if (!settings.packages) settings.packages = [];
-    if (!settings.packages.includes(source)) {
+    // Check duplicate by source string
+    const sourceStr = typeof source === "string" ? source : source.source;
+    const exists = settings.packages.some(p => (typeof p === "string" ? p : p.source) === sourceStr);
+    if (!exists) {
       settings.packages.push(source);
       this.saveSettings(path, settings);
       return true;
@@ -164,7 +184,11 @@ export class PiclawPackageManager {
     const settings = this.loadSettings(path);
     if (!settings.packages) return false;
     const before = settings.packages.length;
-    settings.packages = settings.packages.filter((p) => p !== source);
+    settings.packages = settings.packages.filter((p) => {
+      if (typeof p === "string") return p !== source;
+      if (typeof p === "object" && p.source) return p.source !== source;
+      return true;
+    });
     if (settings.packages.length < before) {
       this.saveSettings(path, settings);
       return true;
@@ -239,18 +263,36 @@ export class PiclawPackageManager {
     return this.removeSourceFromSettings(source, options);
   }
 
-  listConfiguredPackages(): Array<{ source: string; scope: "user" | "project"; installedPath?: string; filtered: boolean }> {
+  private getConfiguredEntries(): Array<{ source: string; scope: "user" | "project"; filter?: PackageFilter }> {
     const globalSettings = this.loadSettings(this.getGlobalSettingsPath());
     const projectSettings = this.loadSettings(this.getProjectSettingsPath());
-    const result: Array<{ source: string; scope: "user" | "project"; installedPath?: string; filtered: boolean }> = [];
+    const result: Array<{ source: string; scope: "user" | "project"; filter?: PackageFilter }> = [];
 
     for (const src of globalSettings.packages || []) {
-      result.push({ source: src, scope: "user", installedPath: this.getInstalledPath(src, "user"), filtered: false });
+      if (typeof src === "string") {
+        result.push({ source: src, scope: "user" });
+      } else if (typeof src === "object" && src.source) {
+        result.push({ source: src.source, scope: "user", filter: src.filter });
+      }
     }
     for (const src of projectSettings.packages || []) {
-      result.push({ source: src, scope: "project", installedPath: this.getInstalledPath(src, "project"), filtered: false });
+      if (typeof src === "string") {
+        result.push({ source: src, scope: "project" });
+      } else if (typeof src === "object" && src.source) {
+        result.push({ source: src.source, scope: "project", filter: src.filter });
+      }
     }
     return result;
+  }
+
+  listConfiguredPackages(): Array<{ source: string; scope: "user" | "project"; installedPath?: string; filtered: boolean }> {
+    const entries = this.getConfiguredEntries();
+    return entries.map(entry => ({
+      source: entry.source,
+      scope: entry.scope,
+      installedPath: this.getInstalledPath(entry.source, entry.scope),
+      filtered: !!entry.filter,
+    }));
   }
 
   async resolveExtensionSources(
@@ -310,9 +352,51 @@ export class PiclawPackageManager {
     };
   }
 
-  // Stubs
   async resolve(_onMissing?: (source: string) => Promise<any>): Promise<ResolvedPaths> {
-    return { extensions: [], skills: [], prompts: [], themes: [] };
+    const entries = this.getConfiguredEntries();
+    const accumulator: ResourceAccumulator = {
+      extensions: new Map(),
+      skills: new Map(),
+      prompts: new Map(),
+      themes: new Map(),
+    };
+
+    for (const entry of entries) {
+      const parsed = this.parseSource(entry.source);
+      const metadata: PathMetadata = {
+        source: entry.source,
+        scope: entry.scope,
+        origin: "package",
+      };
+
+      if (parsed.type === "npm") {
+        const installedPath = this.getNpmInstallPath(parsed, entry.scope);
+        if (existsSync(installedPath)) {
+          metadata.baseDir = installedPath;
+          this.collectPackageResources(installedPath, accumulator, entry.filter, metadata);
+        }
+      } else if (parsed.type === "git") {
+        const installedPath = this.getGitInstallPath(parsed, entry.scope);
+        if (existsSync(installedPath)) {
+          metadata.baseDir = installedPath;
+          this.collectPackageResources(installedPath, accumulator, entry.filter, metadata);
+        }
+      } else if (parsed.type === "local") {
+        const base = entry.scope === "project" ? this.cwd : this.agentDir;
+        const resolved = resolve(base, parsed.path);
+        if (existsSync(resolved)) {
+          metadata.baseDir = resolved;
+          this.collectPackageResources(resolved, accumulator, entry.filter, metadata);
+        }
+      }
+    }
+
+    return {
+      extensions: Array.from(accumulator.extensions.values()).map(e => ({ path: e.path, enabled: e.enabled, metadata: e.metadata })),
+      skills: Array.from(accumulator.skills.values()).map(e => ({ path: e.path, enabled: e.enabled, metadata: e.metadata })),
+      prompts: Array.from(accumulator.prompts.values()).map(e => ({ path: e.path, enabled: e.enabled, metadata: e.metadata })),
+      themes: Array.from(accumulator.themes.values()).map(e => ({ path: e.path, enabled: e.enabled, metadata: e.metadata })),
+    };
   }
 
   async update(source?: string, options?: { local?: boolean }): Promise<void> {
@@ -631,7 +715,7 @@ export class PiclawPackageManager {
   private collectPackageResources(
     packageRoot: string,
     accumulator: ResourceAccumulator,
-    _filter: any,
+    filter?: PackageFilter,
     metadata: PathMetadata,
   ): void {
     const collectFiles = (dir: string, pattern: RegExp): string[] => {
@@ -710,6 +794,24 @@ export class PiclawPackageManager {
     const themeFiles = collectFiles(packageRoot, /\.json$/);
     for (const f of themeFiles) {
       addResource(accumulator.themes, f, true);
+    }
+
+    // Apply filter if provided
+    if (filter) {
+      const applyFilter = (map: Map<string, { path: string; metadata: PathMetadata; enabled: boolean }>, type: keyof PackageFilter) => {
+        const patterns = filter[type];
+        if (patterns === undefined) return; // no filter for this type
+        for (const [key, entry] of map.entries()) {
+          const relPath = toPosixPath(relative(packageRoot, entry.path));
+          if (!matchesAnyPattern(relPath, patterns)) {
+            map.delete(key);
+          }
+        }
+      };
+      applyFilter(accumulator.extensions, "extensions");
+      applyFilter(accumulator.skills, "skills");
+      applyFilter(accumulator.prompts, "prompts");
+      applyFilter(accumulator.themes, "themes");
     }
   }
 }

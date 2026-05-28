@@ -38,12 +38,12 @@
         {
           "id": "task-7",
           "content": "Git commit",
-          "status": "in_progress"
+          "status": "completed"
         }
       ]
     }
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-05-28T00:22:11.745Z"
+  "updatedAt": "2026-05-28T00:22:45.413Z"
 }
