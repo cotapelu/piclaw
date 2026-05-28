@@ -1,7 +1,7 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 12 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI)
+- Iterations: 13 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks)
 - Tasks completed: All major features; 100% test pass
 - Test failure rate: 0% (0 failing in 402 tests)
 - Rollbacks: 0
@@ -38,6 +38,7 @@
 - **Team-tool tests fix**: Updated unit tests to match non-blocking team_run contract; all 8 tests pass
 - **Retry logic**: Automatic retry for network failures in npm/git operations with exponential backoff
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
+- **Progress callbacks**: install/remove/update operations emit progress events; CLI shows start/complete/error messages
 - Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests)
 - Backward compatibility throughout
 

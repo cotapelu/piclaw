@@ -490,3 +490,43 @@ Enable users to specify resource filters via `--filter` when installing packages
 
 ### Trajectory
 Phase 12 complete: Install filter CLI available. Next: structured logging, integration tests.
+
+---
+
+## 2025-05-28 - Phase 13: Progress Callbacks
+
+### Objective
+Improve user experience by showing progress messages during long-running package operations (install, remove, update).
+
+### Changes Made
+1. Added default progress callback in CLI handlers (`handleInstallCommand`, `handleRemoveCommand`, `handleUpdateCommand`).
+2. Callback logs start/complete/error events using chalk colors.
+3. Refactored `update` method to wrap each package operation with `withProgress` (already used by `install` and `remove`).
+4. No changes to command signatures; output enriched with additional progress lines.
+
+### Implementation Details
+- `PiclawPackageManager.setProgressCallback` registers a listener for `ProgressEvent`.
+- Events: `{ type: 'start' | 'complete' | 'error', action, source, message? }`.
+- CLI sets a default logger that prints:
+  - Start: `⏳ <action>: <source>` (cyan)
+  - Complete: `✅ <action> complete: <source>` (green)
+  - Error: `❌ <action> failed: <source> - <message>` (red)
+- `update` now uses `withProgress` per package, mirroring `install` and `remove`.
+
+### Verification
+- All 402 tests pass; no regression.
+- Manual: `piclaw install npm:test` shows start and complete lines.
+- Dry-run and error scenarios show appropriate progress/error messages.
+- Tests unaffected because console.log mocked.
+
+### Risks & Debt
+- Very low risk: additive, no API changes.
+- Could add `--no-progress` flag to suppress.
+- Could output machine-readable JSON progress for tooling.
+
+### Next Steps (Phase 13)
+- Add `--quiet` / `--verbose` levels.
+- Provide progress for other operations (e.g., resolve).
+
+### Trajectory
+Phase 13 complete: Progress callbacks enabled for install/remove/update.

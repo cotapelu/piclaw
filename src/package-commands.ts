@@ -11,6 +11,9 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
+import type { PackageFilter } from "./piclaw-package-manager.js";
+
+type InstallOptions = { local?: boolean; dryRun?: boolean; filter?: PackageFilter };
 
 /**
  * Handle package install command
@@ -109,7 +112,20 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
-    const opts: any = { local, dryRun };
+    pm.setProgressCallback((event: any) => {
+      switch (event.type) {
+        case 'start':
+          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          break;
+        case 'complete':
+          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          break;
+        case 'error':
+          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          break;
+      }
+    });
+    const opts: InstallOptions = { local, dryRun };
     if (filter) opts.filter = filter;
     await pm.installAndPersist(source, opts);
     if (dryRun) {
@@ -183,6 +199,19 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
+    pm.setProgressCallback((event: any) => {
+      switch (event.type) {
+        case 'start':
+          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          break;
+        case 'complete':
+          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          break;
+        case 'error':
+          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          break;
+      }
+    });
     await pm.removeAndPersist(source, { local, dryRun });
     if (dryRun) {
       console.log(chalk.yellow(`[DRY-RUN] Simulated removal of ${source}`));
@@ -320,6 +349,19 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
+    pm.setProgressCallback((event: any) => {
+      switch (event.type) {
+        case 'start':
+          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          break;
+        case 'complete':
+          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          break;
+        case 'error':
+          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          break;
+      }
+    });
     await pm.update(source, { local, dryRun });
     return true;
   } catch (err: any) {

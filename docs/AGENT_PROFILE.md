@@ -35,12 +35,12 @@ None observed in recent iterations.
 - Added `minimatch` dependency for glob pattern matching
 - Added retry logic for network failures (npm/git) with exponential backoff
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
+- **Progress callbacks**: install/remove/update now show progress messages via default logger
 - Backward compatible settings format (string entries still work)
 
 ## Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces
 - Add structured logging (Winston/pino) instead of console.log/error
-- Implement progress callbacks for long-running operations
 - Add integration tests for full install→update flow
 - Consider using `execa` for more reliable subprocess management
 

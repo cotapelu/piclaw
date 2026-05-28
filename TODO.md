@@ -37,3 +37,4 @@
 - piclaw pin command (version pinning update)
 - piclaw export command (JSON export)
 - piclaw import command (JSON import with deduplication)
+- Progress callbacks for install/remove/update (default CLI logger)

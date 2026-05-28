@@ -25,7 +25,7 @@ interface PathMetadata {
   baseDir?: string;
 }
 
-interface PackageFilter {
+export interface PackageFilter {
   extensions?: string[];
   skills?: string[];
   prompts?: string[];
@@ -436,9 +436,13 @@ export class PiclawPackageManager {
         continue;
       }
       if (parsed.type === "npm") {
-        await this.updateNpm(parsed, scope);
+        await this.withProgress("update", entry.source, `Updating ${entry.source}...`, async () => {
+          await this.updateNpm(parsed, scope);
+        });
       } else if (parsed.type === "git") {
-        await this.updateGit(parsed, scope);
+        await this.withProgress("update", entry.source, `Updating ${entry.source}...`, async () => {
+          await this.updateGit(parsed, scope);
+        });
       } else {
         console.log(chalk.yellow(`Skipping ${entry.source}: unsupported source type`));
       }
