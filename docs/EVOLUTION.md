@@ -179,4 +179,53 @@ Add input validation for package sources to catch errors early and provide user-
 - Consider validating package sources in `addSourceToSettings` as well
 
 ### Trajectory
-Phase 4 complete: Source validation implemented and tested. Next: UX improvements (progress callbacks, dry-run, package info).
+Phase 4 complete: Source validation implemented and tested. Phase 5: Package info command.
+
+---
+
+## 2025-05-28 - Phase 5: Package Info Command
+
+### Objective
+Provide users with a way to query details about installed packages, including resource counts and configuration.
+
+### Changes Made
+1. Added `handleInfoCommand()` in `src/package-commands.ts`
+   - CLI: `piclaw info <source> [-l]`
+   - Shows: source, scope, filtered status, installed path, resource counts (extensions, skills, prompts, themes)
+   - Supports global (`-l` omitted) and project (`-l`) scopes
+2. Wired `info` command into `handlePackageCommand()` switch
+3. Added 5 unit tests for info command handling:
+   - Returns false for non-info commands
+   - Shows help text
+   - Requires source argument
+   - Displays package info correctly
+   - Handles missing package gracefully
+
+### Implementation Details
+- Reuses `listConfiguredPackages()` to locate package entry in settings
+- Uses `resolveExtensionSources()` to count resources
+- Non-error exit when package not found (shows message)
+- Help includes usage, options, examples
+- Consistent error handling with other commands
+
+### Verification
+- All 14 package-commands tests pass (5 new info tests)
+- Total package-manager tests: 18 passing
+- Total test suite: 378 tests, 374 passing (4 pre-existing failures unrelated)
+- Manual test: `piclaw info npm:chalk` displays info
+- Manual test: `piclaw info unknown` shows 'not found'
+
+### Risks & Debt
+- Low risk: thin wrapper around existing APIs
+- Could enhance with version info from package.json
+- Could list actual resource paths (verbose flag)
+
+### Next Steps (Phase 5)
+- Add `--verbose` to list resource paths
+- Show npm package version (if available)
+- Add JSON output mode for scripting
+- Implement progress callbacks for install/remove
+- Add dry-run mode for all operations
+
+### Trajectory
+Phase 5 complete: Info command added. Next: progress callbacks, dry-run, and CLI improvements.

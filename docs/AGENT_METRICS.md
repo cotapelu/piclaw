@@ -31,7 +31,8 @@
 - **Package filtering**: Pattern-based resource filtering per package (minimatch)
 - **Source validation**: Early detection of malformed npm/git sources with clear errors
 - **Global install fix**: Use correct global agent directory for non-local operations
-- Extended test coverage (14 new tests, 100% pass)
+- **Package info command**: `piclaw info <source>` shows details and resource counts
+- Extended test coverage (19 new tests, 100% pass)
 - Backward compatibility maintained throughout
 
 ## Risk Assessment
@@ -44,4 +45,4 @@
 - CLI commands: install, remove, uninstall, list, update
 - Filtering via settings.json: `{ \"source\": \"npm:pkg\", \"filter\": { \"extensions\": [\"**/*.ts\"] } }`
 - Validation catches common errors: `npm:`, `git:`, missing slash in git URLs
-- Next steps: progress callbacks, dry-run mode, package info command, filter CLI
+- Next steps: progress callbacks, dry-run mode, filter CLI options
