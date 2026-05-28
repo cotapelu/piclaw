@@ -530,3 +530,35 @@ Improve user experience by showing progress messages during long-running package
 
 ### Trajectory
 Phase 13 complete: Progress callbacks enabled for install/remove/update.
+
+---
+
+## 2025-05-28 - Phase 14: Integration Test
+
+### Objective
+Add an end‑to‑end test to verify the full package lifecycle (install → resolve → remove).
+
+### Changes Made
+1. Created `src/tests/integration-flow.test.ts`.
+2. Test creates a dummy local package, installs it, resolves its extensions, then removes it.
+3. Validates settings persistence, resource resolution, and removal.
+
+### Implementation Details
+- Uses same temp‑home pattern as other tests.
+- Exercises `installAndPersist`, `resolveExtensionSources`, `removeAndPersist`, and `listConfiguredPackages`.
+- No production code changes; test only.
+
+### Verification
+- All 403 tests pass (including new integration test).
+- Manual run confirms the flow works.
+
+### Risks & Debt
+- Very low risk: test‑only.
+- Could expand to cover git and npm operations with network mocking.
+- Could add more scenarios (filter, dry‑run).
+
+### Next Steps (Phase 14)
+- Expand integration tests to cover update and filtering.
+
+### Trajectory
+Phase 14 complete: Integration test added. Next: expand coverage.
