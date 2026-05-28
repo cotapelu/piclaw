@@ -3,7 +3,7 @@
 ## High Priority
 - [x] Write unit tests for PiclawPackageManager (11 passing)
 - [x] Support git package sources in package manager
-- [ ] Add `piclaw update` command
+- [x] Add `piclaw update` command
 - [ ] Verify interactive mode loads extensions from .piclaw/npm
 - [ ] Add support for package filtering (like pi core)
 

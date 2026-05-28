@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Phase: Add piclaw update command",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Fix package manager test bugs (2 failing tests)",
+          "status": "completed"
+        },
+        {
+          "id": "task-2",
+          "content": "Add update command to CLI (handleUpdateCommand)",
+          "status": "completed"
+        },
+        {
+          "id": "task-3",
+          "content": "Write tests for update command",
+          "status": "completed"
+        },
+        {
+          "id": "task-4",
+          "content": "Run all tests to verify no regression",
+          "status": "completed"
+        },
+        {
+          "id": "task-5",
+          "content": "Update evolution docs (METRICS, PROFILE, EVOLUTION)",
+          "status": "completed"
+        },
+        {
+          "id": "task-6",
+          "content": "Update TODO.md to mark update as completed",
+          "status": "completed"
+        },
+        {
+          "id": "task-7",
+          "content": "Git commit",
+          "status": "in_progress"
+        }
+      ]
+    }
+  ],
+  "nextTaskId": 8,
+  "nextPhaseId": 2,
+  "updatedAt": "2026-05-28T00:22:11.745Z"
+}

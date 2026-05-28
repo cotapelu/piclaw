@@ -86,7 +86,9 @@ describe("PiclawPackageManager", () => {
   describe("Path Resolution", () => {
     it("should get correct project npm install path", () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
-      const path = pm.getInstalledPath("npm:chalk", "project");
+      // Use internal method to get expected path without existence check
+      const parsed = (pm as any).parseSource("npm:chalk");
+      const path = (pm as any).getNpmInstallPath(parsed, "project");
       expect(path).toBe(join(cwd, ".piclaw", "npm", "node_modules", "chalk"));
     });
 
@@ -132,7 +134,7 @@ describe("PiclawPackageManager", () => {
   });
 
   describe("Resource Collection", () => {
-    it("should collect extensions, skills, prompts, themes from package", () => {
+    it("should collect extensions, skills, prompts, themes from package", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
 
       // Create package structure in .piclaw/npm to simulate installed package
@@ -147,7 +149,7 @@ describe("PiclawPackageManager", () => {
       writeFileSync(join(pkgRoot, "prompts", "guide.md"), "");
       writeFileSync(join(pkgRoot, "themes", "dark.json"), "");
 
-      const resolved = pm.resolveExtensionSources(["npm:test-pkg"], { local: true });
+      const resolved = await pm.resolveExtensionSources(["npm:test-pkg"], { local: true });
 
       // Note: collection may not detect all files due to skipNodeModules logic
       // At least verify the call doesn't throw and returns expected shape

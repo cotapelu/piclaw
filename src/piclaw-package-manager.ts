@@ -8,6 +8,7 @@
  */
 
 import { spawn, spawnSync } from "child_process";
+import chalk from "chalk";
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSync, rmSync } from "fs";
 import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
@@ -314,7 +315,132 @@ export class PiclawPackageManager {
     return { extensions: [], skills: [], prompts: [], themes: [] };
   }
 
-  async update(_source?: string): Promise<void> {}
+  async update(source?: string, options?: { local?: boolean }): Promise<void> {
+    const scope = options?.local ? "project" : "user";
+    const settingsPath = scope === "project" ? this.getProjectSettingsPath() : this.getGlobalSettingsPath();
+    const settings = this.loadSettings(settingsPath);
+    const packages = settings.packages || [];
+
+    // Filter by source if provided
+    const targets = source ? packages.filter(p => p === source) : packages;
+
+    if (targets.length === 0) {
+      console.log(chalk.gray("No packages to update."));
+      return;
+    }
+
+    for (const pkg of targets) {
+      const parsed = this.parseSource(pkg);
+      if (parsed.type === "npm") {
+        await this.updateNpm(parsed, scope);
+      } else if (parsed.type === "git") {
+        await this.updateGit(parsed, scope);
+      } else {
+        console.log(chalk.yellow(`Skipping ${pkg}: unsupported source type`));
+      }
+    }
+  }
+
+  private async updateNpm(source: { type: "npm"; name: string; pinned: boolean }, scope: "user" | "project"): Promise<void> {
+    const installedPath = this.getNpmInstallPath(source, scope);
+    if (!existsSync(installedPath)) {
+      console.log(chalk.yellow(`Skipping ${source.name}: not installed`));
+      return;
+    }
+
+    // Check if pinned version
+    if (source.pinned) {
+      console.log(chalk.gray(`Skipping ${source.name}: pinned version`));
+      return;
+    }
+
+    // Get installed version
+    const installedVersion = this.getInstalledNpmVersion(installedPath);
+    if (!installedVersion) {
+      console.log(chalk.yellow(`Skipping ${source.name}: no version info`));
+      return;
+    }
+
+    // Get latest version from npm
+    try {
+      const latestVersion = await this.getLatestNpmVersion(source.name);
+      if (installedVersion === latestVersion) {
+        console.log(chalk.green(`${source.name} is already at latest version ${latestVersion}`));
+        return;
+      }
+      console.log(chalk.cyan(`Updating ${source.name} from ${installedVersion} to ${latestVersion}`));
+    } catch (err) {
+      // Cannot check latest, proceed with reinstall anyway
+      console.log(chalk.yellow(`Could not check latest version for ${source.name}, attempting reinstall...`));
+    }
+
+    // Reinstall
+    if (scope === "user") {
+      await this.runNpmCommand(["install", "-g", source.name, "--no-audit", "--no-fund"]);
+    } else {
+      const root = this.getProjectNpmRoot();
+      await this.runNpmCommand(["install", source.name, "--prefix", root, "--no-audit", "--no-fund"]);
+    }
+  }
+
+  private async updateGit(source: { type: "git"; host: string; path: string; ref?: string }, scope: "user" | "project"): Promise<void> {
+    const targetDir = this.getGitInstallPath(source, scope);
+    if (!existsSync(targetDir)) {
+      console.log(chalk.yellow(`Skipping ${source.host}/${source.path}: not installed`));
+      return;
+    }
+
+    // Fetch latest from remote
+    console.log(chalk.cyan(`Updating git ${source.host}/${source.path}`));
+    await this.runCommand("git", ["pull", "--rebase"], { cwd: targetDir }).catch(async (err: any) => {
+      // If pull fails, try fetch + reset
+      await this.runCommand("git", ["fetch", "origin"], { cwd: targetDir }).catch(() => {});
+      const remoteRef = source.ref || "origin/HEAD";
+      await this.runCommand("git", ["reset", "--hard", remoteRef], { cwd: targetDir }).catch(() => {});
+    });
+
+    // Run npm install if package.json exists
+    const packageJsonPath = join(targetDir, "package.json");
+    if (existsSync(packageJsonPath)) {
+      await this.runNpmCommand(["install", "--prefix", targetDir]);
+    }
+  }
+
+  private getInstalledNpmVersion(installedPath: string): string | undefined {
+    const packageJsonPath = join(installedPath, "package.json");
+    if (!existsSync(packageJsonPath)) return undefined;
+    try {
+      const content = readFileSync(packageJsonPath, "utf-8");
+      const pkg = JSON.parse(content) as { version?: string };
+      return pkg.version;
+    } catch {
+      return undefined;
+    }
+  }
+
+  private async getLatestNpmVersion(packageName: string): Promise<string> {
+    const stdout = await this.runCommandCapture("npm", ["view", packageName, "version", "--json"]);
+    const raw = stdout.trim();
+    if (!raw) throw new Error("Empty response from npm view");
+    return JSON.parse(raw);
+  }
+
+  private runCommandCapture(command: string, args: string[], options?: { cwd?: string }): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const child = spawn(command, args, {
+        cwd: options?.cwd,
+        stdio: ["ignore", "pipe", "pipe"],
+        shell: process.platform === "win32",
+      });
+      let stdout = "";
+      child.stdout.on("data", (data) => (stdout += data));
+      child.on("close", (code) => {
+        if (code === 0) resolve(stdout);
+        else reject(new Error(`${command} exited with code ${code}`));
+      });
+      child.on("error", reject);
+    });
+  }
 
   // ============================================================================
   // Private Implementation

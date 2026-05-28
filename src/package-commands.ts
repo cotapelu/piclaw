@@ -219,6 +219,70 @@ List installed packages from user and project settings.
 }
 
 /**
+ * Handle package update command
+ * Usage: piclaw update [source] [-l]
+ */
+export async function handleUpdateCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "update") return false;
+
+  let local = false;
+  let source: string | undefined;
+  let help = false;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "-l" || args[i] === "--local") {
+      local = true;
+    } else if (args[i] === "-h" || args[i] === "--help") {
+      help = true;
+    } else if (!args[i].startsWith("-")) {
+      if (source) {
+        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        console.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+        process.exit(1);
+      }
+      source = args[i];
+    } else {
+      console.error(chalk.red(`Unknown option: ${args[i]}`));
+      console.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+      process.exit(1);
+    }
+  }
+
+  if (help) {
+    console.log(`
+Usage: piclaw update [source] [-l]
+
+Update installed packages to latest version.
+
+Arguments:
+  [source]            Update a specific package (e.g., npm:foo, git:bar)
+
+Options:
+  -l, --local         Update project-local packages (.piclaw/settings.json)
+  -h, --help          Show this help
+
+Examples:
+  piclaw update                   # Update all packages
+  piclaw update npm:chalk         # Update specific npm package
+  piclaw update git:my/repo -l    # Update local git package
+`);
+    return true;
+  }
+
+  const cwd = process.cwd();
+  const agentDir = join(resolve(cwd), ".piclaw", "agent");
+
+  try {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    await pm.update(source, { local });
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
+/**
  * Handle all package commands
  * Called from main.ts
  */
@@ -237,6 +301,9 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
       return true;
     case "list":
       await handleListCommand(args);
+      return true;
+    case "update":
+      await handleUpdateCommand(args);
       return true;
     default:
       return false;
