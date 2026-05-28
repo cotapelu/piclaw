@@ -281,4 +281,117 @@ describe("Package Commands (CLI)", () => {
     });
   });
 
+  describe("handleExportCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(process, 'cwd').mockReturnValue(cwd);
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-export command", async () => {
+      const result = await pkgCommands.handleExportCommand(["list"]);
+      expect(result).toBe(false);
+    });
+
+    it("should export to stdout when no file specified", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:a", "git:b"] }));
+
+      // Mock process.stdout.write to capture output
+      const writeSpy = vi.spyOn(process.stdout, 'write').mockReturnValue(true);
+      await pkgCommands.handleExportCommand(["export", "-l"]);
+
+      expect(writeSpy).toHaveBeenCalledWith(expect.stringContaining('"npm:a"'));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('Exported 2 packages'));
+    });
+
+    it("should export to file when provided", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:x"] }));
+
+      const outFile = join(cwd, "out.json");
+      await pkgCommands.handleExportCommand(["export", outFile, "-l"]);
+
+      expect(existsSync(outFile)).toBe(true);
+      const content = readFileSync(outFile, "utf-8");
+      expect(JSON.parse(content)).toContain("npm:x");
+    });
+
+    it("should export from project settings when -l flag", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:proj"] }));
+
+      const outFile = join(cwd, "proj.json");
+      await pkgCommands.handleExportCommand(["export", outFile, "-l"]);
+
+      expect(existsSync(outFile)).toBe(true);
+      const content = readFileSync(outFile, "utf-8");
+      expect(content).toContain("npm:proj");
+    });
+  });
+
+  describe("handleImportCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(process, 'cwd').mockReturnValue(cwd);
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-import command", async () => {
+      const result = await pkgCommands.handleImportCommand(["list"]);
+      expect(result).toBe(false);
+    });
+
+    it("should require input file", async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      try {
+        await pkgCommands.handleImportCommand(["import"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Missing input file"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should import from file", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      // Initially empty settings
+      writeFileSync(settingsPath, JSON.stringify({ packages: [] }));
+
+      const inFile = join(cwd, "in.json");
+      writeFileSync(inFile, JSON.stringify(["npm:new1", "git:new2"]));
+
+      await pkgCommands.handleImportCommand(["import", inFile, "-l"]);
+
+      const updated = JSON.parse(readFileSync(settingsPath, "utf-8"));
+      expect(updated.packages).toContain("npm:new1");
+      expect(updated.packages).toContain("git:new2");
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Imported 2 new packages"));
+    });
+
+    it("should skip duplicates", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:existing"] }));
+
+      const inFile = join(cwd, "in.json");
+      writeFileSync(inFile, JSON.stringify(["npm:existing", "npm:new"]));
+
+      await pkgCommands.handleImportCommand(["import", inFile, "-l"]);
+
+      const updated = JSON.parse(readFileSync(settingsPath, "utf-8"));
+      // Should not add duplicate
+      expect(updated.packages.filter((p: any) => (typeof p === 'string' ? p : p.source) === 'npm:existing')).toHaveLength(1);
+      expect(updated.packages).toContain("npm:new");
+    });
+  });
+
 });

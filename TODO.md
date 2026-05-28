@@ -18,7 +18,7 @@
 ## Low Priority
 - [x] Add dry-run mode
 - [x] Add package health check (dependencies, integrity)
-- [ ] Support package import/export
+- [x] Support package import/export
 - [x] Implement package version pinning update (pin command)
 
 ## Completed
@@ -35,3 +35,5 @@
 - Dry-run mode (--dry-run / -d)
 - piclaw health command (integrity check)
 - piclaw pin command (version pinning update)
+- piclaw export command (JSON export)
+- piclaw import command (JSON import with deduplication)

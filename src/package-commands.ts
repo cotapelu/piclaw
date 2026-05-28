@@ -7,8 +7,8 @@
  */
 
 import chalk from "chalk";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
+import { dirname, join, resolve } from "node:path";
 import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
 
@@ -536,6 +536,224 @@ Example:
 }
 
 /**
+ * Handle package export command
+ * Usage: piclaw export [output.json] [-l]
+ */
+export async function handleExportCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "export") return false;
+
+  let local = false;
+  let help = false;
+  let outputFile: string | undefined;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "-l" || args[i] === "--local") {
+      local = true;
+    } else if (args[i] === "-h" || args[i] === "--help") {
+      help = true;
+    } else if (!args[i].startsWith("-")) {
+      if (!outputFile) {
+        outputFile = args[i];
+      } else {
+        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        console.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
+        process.exit(1);
+      }
+    } else {
+      console.error(chalk.red(`Unknown option: ${args[i]}`));
+      console.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
+      process.exit(1);
+    }
+  }
+
+  if (help) {
+    console.log(`
+Usage: piclaw export [output.json] [-l]
+
+Export configured packages to a JSON file.
+
+Arguments:
+  [output.json]      Optional output file (defaults to stdout if omitted)
+
+Options:
+  -l, --local         Export from project settings (.piclaw/settings.json)
+  -h, --help          Show this help
+
+Examples:
+  piclaw export -l > packages.json
+  piclaw export backup.json
+`);
+    return true;
+  }
+
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+  const scope = local ? "project" : "user";
+  const settingsPath = scope === "project"
+    ? join(cwd, ".piclaw", "settings.json")
+    : join(agentDir, "settings.json");
+
+  try {
+    if (!existsSync(settingsPath)) {
+      console.error(chalk.yellow(`No settings file found at ${settingsPath}.`));
+      return true; // not an error
+    }
+
+    const raw = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(raw);
+    const packages = settings.packages || [];
+    const json = JSON.stringify(packages, null, 2) + "\n";
+
+    if (outputFile) {
+      writeFileSync(outputFile, json, "utf-8");
+      console.log(chalk.green(`✓ Exported ${packages.length} packages to ${outputFile}`));
+    } else {
+      process.stdout.write(json);
+      console.log(chalk.green(`✓ Exported ${packages.length} packages`));
+    }
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
+/**
+ * Handle package import command
+ * Usage: piclaw import <input.json> [-l]
+ */
+export async function handleImportCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "import") return false;
+
+  let local = false;
+  let help = false;
+  let inputFile: string | undefined;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "-l" || args[i] === "--local") {
+      local = true;
+    } else if (args[i] === "-h" || args[i] === "--help") {
+      help = true;
+    } else if (!args[i].startsWith("-")) {
+      if (!inputFile) {
+        inputFile = args[i];
+      } else {
+        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        console.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
+        process.exit(1);
+      }
+    } else {
+      console.error(chalk.red(`Unknown option: ${args[i]}`));
+      console.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
+      process.exit(1);
+    }
+  }
+
+  if (help) {
+    console.log(`
+Usage: piclaw import <input.json> [-l]
+
+Import packages from a JSON file.
+
+Arguments:
+  <input.json>       Input file containing array of package sources
+
+Options:
+  -l, --local         Import into project settings (.piclaw/settings.json)
+  -h, --help          Show this help
+
+Examples:
+  piclaw import packages.json -l
+  cat packages.json | piclaw import -
+`);
+    return true;
+  }
+
+  if (!inputFile) {
+    console.error(chalk.red("Missing input file. Usage: piclaw import <input.json> [-l]"));
+    process.exit(1);
+  }
+
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+  const scope = local ? "project" : "user";
+  const settingsPath = scope === "project"
+    ? join(cwd, ".piclaw", "settings.json")
+    : join(agentDir, "settings.json");
+
+  try {
+    let content: string;
+    if (inputFile === "-") {
+      // Read from stdin
+      content = await new Promise((resolve, reject) => {
+        let data = "";
+        process.stdin.setEncoding("utf-8");
+        process.stdin.on("data", chunk => data += chunk);
+        process.stdin.on("end", () => resolve(data));
+        process.stdin.on("error", reject);
+        // If stdin is not piped, it may be empty; handle quickly
+        if (process.stdin.isTTY) {
+          resolve("");
+        }
+      });
+    } else {
+      if (!existsSync(inputFile)) {
+        console.error(chalk.red(`Input file not found: ${inputFile}`));
+        process.exit(1);
+      }
+      content = readFileSync(inputFile, "utf-8");
+    }
+
+    if (!content.trim()) {
+      console.error(chalk.red("Empty input."));
+      process.exit(1);
+    }
+
+    let packages: any[];
+    try {
+      packages = JSON.parse(content);
+    } catch (e) {
+      console.error(chalk.red("Invalid JSON in input file."));
+      process.exit(1);
+    }
+
+    if (!Array.isArray(packages)) {
+      console.error(chalk.red("Expected an array of package sources in the JSON."));
+      process.exit(1);
+    }
+
+    // Load existing settings
+    const existing = existsSync(settingsPath)
+      ? JSON.parse(readFileSync(settingsPath, "utf-8"))
+      : { packages: [] };
+    if (!Array.isArray(existing.packages)) existing.packages = [];
+
+    let added = 0;
+    for (const pkg of packages) {
+      // Normalize to string
+      const source = typeof pkg === "string" ? pkg : pkg.source;
+      if (!source) continue;
+      // Check duplicate
+      const exists = existing.packages.some(p => (typeof p === "string" ? p : p.source) === source);
+      if (!exists) {
+        existing.packages.push(pkg);
+        added++;
+      }
+    }
+
+    // Ensure settings directory exists
+    const dir = dirname(settingsPath);
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+    writeFileSync(settingsPath, JSON.stringify(existing, null, 2) + "\n", "utf-8");
+    console.log(chalk.green(`✓ Imported ${added} new packages (total ${existing.packages.length})`));
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
+/**
  * Handle all package commands
  * Called from main.ts
  */
@@ -566,6 +784,12 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
       return true;
     case "pin":
       await handlePinCommand(args);
+      return true;
+    case "export":
+      await handleExportCommand(args);
+      return true;
+    case "import":
+      await handleImportCommand(args);
       return true;
     default:
       return false;
