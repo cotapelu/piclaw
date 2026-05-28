@@ -218,11 +218,15 @@ export class PiclawPackageManager {
     return undefined;
   }
 
-  async install(source: string, options?: { local?: boolean }): Promise<void> {
+  async install(source: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
     const scope = options?.local ? "project" : "user";
     await this.withProgress("install", source, `Installing ${source}...`, async () => {
       const parsed = this.parseSource(source);
       this.validateParsed(parsed);
+      if (options?.dryRun) {
+        console.log(chalk.yellow(`[DRY-RUN] Would install ${source}`));
+        return;
+      }
       if (parsed.type === "npm") {
         await this.installNpm(parsed, scope);
         return;
@@ -240,14 +244,22 @@ export class PiclawPackageManager {
     });
   }
 
-  async installAndPersist(source: string, options?: { local?: boolean }): Promise<void> {
+  async installAndPersist(source: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
     await this.install(source, options);
-    this.addSourceToSettings(source, options);
+    if (!options?.dryRun) {
+      this.addSourceToSettings(source, options);
+    } else {
+      console.log(chalk.yellow(`[DRY-RUN] Would add ${source} to settings`));
+    }
   }
 
-  async remove(source: string, options?: { local?: boolean }): Promise<void> {
+  async remove(source: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
     await this.withProgress("remove", source, `Removing ${source}...`, async () => {
       const parsed = this.parseSource(source);
+      if (options?.dryRun) {
+        console.log(chalk.yellow(`[DRY-RUN] Would remove ${source}`));
+        return;
+      }
       if (parsed.type === "npm") {
         await this.uninstallNpm(parsed, options?.local ? "project" : "user");
         return;
@@ -259,9 +271,14 @@ export class PiclawPackageManager {
     });
   }
 
-  async removeAndPersist(source: string, options?: { local?: boolean }): Promise<boolean> {
+  async removeAndPersist(source: string, options?: { local?: boolean; dryRun?: boolean }): Promise<boolean> {
     await this.remove(source, options);
-    return this.removeSourceFromSettings(source, options);
+    if (!options?.dryRun) {
+      return this.removeSourceFromSettings(source, options);
+    } else {
+      console.log(chalk.yellow(`[DRY-RUN] Would remove ${source} from settings`));
+      return true;
+    }
   }
 
   private getConfiguredEntries(): Array<{ source: string; scope: "user" | "project"; filter?: PackageFilter }> {
@@ -400,7 +417,7 @@ export class PiclawPackageManager {
     };
   }
 
-  async update(source?: string, options?: { local?: boolean }): Promise<void> {
+  async update(source?: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
     const scope = options?.local ? "project" : "user";
     const settingsPath = scope === "project" ? this.getProjectSettingsPath() : this.getGlobalSettingsPath();
     const settings = this.loadSettings(settingsPath);
@@ -416,6 +433,10 @@ export class PiclawPackageManager {
 
     for (const pkg of targets) {
       const parsed = this.parseSource(pkg);
+      if (options?.dryRun) {
+        console.log(chalk.yellow(`[DRY-RUN] Would update ${pkg}`));
+        continue;
+      }
       if (parsed.type === "npm") {
         await this.updateNpm(parsed, scope);
       } else if (parsed.type === "git") {

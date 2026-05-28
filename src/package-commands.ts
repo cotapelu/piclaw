@@ -19,6 +19,7 @@ export async function handleInstallCommand(args: string[]): Promise<boolean> {
   if (args[0] !== "install") return false;
 
   let local = false;
+  let dryRun = false;
   let source: string | undefined;
   let help = false;
 
@@ -76,8 +77,12 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
-    await pm.installAndPersist(source, { local });
-    console.log(chalk.green(`✓ Installed ${source}`));
+    await pm.installAndPersist(source, { local, dryRun });
+    if (dryRun) {
+      console.log(chalk.yellow(`[DRY-RUN] Simulated install of ${source}`));
+    } else {
+      console.log(chalk.green(`✓ Installed ${source}`));
+    }
     return true;
   } catch (err: any) {
     console.error(chalk.red(`✗ Failed: ${err.message}`));
@@ -93,6 +98,7 @@ export async function handleRemoveCommand(args: string[]): Promise<boolean> {
   if (args[0] !== "remove" && args[0] !== "uninstall") return false;
 
   let local = false;
+  let dryRun = false;
   let source: string | undefined;
   let help = false;
 
@@ -143,8 +149,12 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
-    await pm.removeAndPersist(source, { local });
-    console.log(chalk.green(`✓ Removed ${source}`));
+    await pm.removeAndPersist(source, { local, dryRun });
+    if (dryRun) {
+      console.log(chalk.yellow(`[DRY-RUN] Simulated removal of ${source}`));
+    } else {
+      console.log(chalk.green(`✓ Removed ${source}`));
+    }
     return true;
   } catch (err: any) {
     console.error(chalk.red(`✗ Failed: ${err.message}`));
@@ -227,6 +237,7 @@ export async function handleUpdateCommand(args: string[]): Promise<boolean> {
   if (args[0] !== "update") return false;
 
   let local = false;
+  let dryRun = false;
   let source: string | undefined;
   let help = false;
 
@@ -275,7 +286,7 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
-    await pm.update(source, { local });
+    await pm.update(source, { local, dryRun });
     return true;
   } catch (err: any) {
     console.error(chalk.red(`✗ Failed: ${err.message}`));

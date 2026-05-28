@@ -9,7 +9,7 @@
 
 ## Medium Priority
 - [x] Implement package uninstall for git sources
-- [ ] Add progress callback to install/remove commands
+- [x] Add progress callback to install/remove commands
 - [x] Support global install (without -l) properly
 - [x] Add package info command (list with installed paths)
 - [x] Validate package sources before install

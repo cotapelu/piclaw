@@ -74,7 +74,7 @@ describe("Package Commands (CLI)", () => {
       } catch (e) {}
 
       // The constructor should be called and then update called
-      expect(updateSpy).toHaveBeenCalledWith(undefined, { local: false });
+      expect(updateSpy).toHaveBeenCalledWith(undefined, { local: false, dryRun: false });
       expect(exitSpy).not.toHaveBeenCalled(); // success, no exit
     });
 
@@ -86,7 +86,7 @@ describe("Package Commands (CLI)", () => {
         await pkgCommands.handleUpdateCommand(["update", "npm:chalk"]);
       } catch (e) {}
 
-      expect(updateSpy).toHaveBeenCalledWith("npm:chalk", { local: false });
+      expect(updateSpy).toHaveBeenCalledWith("npm:chalk", { local: false, dryRun: false });
       expect(exitSpy).not.toHaveBeenCalled();
     });
 
@@ -98,7 +98,7 @@ describe("Package Commands (CLI)", () => {
         await pkgCommands.handleUpdateCommand(["update", "-l"]);
       } catch (e) {}
 
-      expect(updateSpy).toHaveBeenCalledWith(undefined, { local: true });
+      expect(updateSpy).toHaveBeenCalledWith(undefined, { local: true, dryRun: false });
       expect(exitSpy).not.toHaveBeenCalled();
     });
 
@@ -110,7 +110,7 @@ describe("Package Commands (CLI)", () => {
         await pkgCommands.handleUpdateCommand(["update", "git:my/repo", "-l"]);
       } catch (e) {}
 
-      expect(updateSpy).toHaveBeenCalledWith("git:my/repo", { local: true });
+      expect(updateSpy).toHaveBeenCalledWith("git:my/repo", { local: true, dryRun: false });
       expect(exitSpy).not.toHaveBeenCalled();
     });
 
