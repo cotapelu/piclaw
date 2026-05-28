@@ -16,8 +16,8 @@
 - [x] Fix resource collection test (currently failing due to node_modules skip)
 
 ## Low Priority
-- [ ] Add dry-run mode
-- [ ] Add package health check (dependencies, integrity)
+- [x] Add dry-run mode
+- [x] Add package health check (dependencies, integrity)
 - [ ] Support package import/export
 - [ ] Implement package version pinning update
 

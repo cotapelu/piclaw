@@ -198,4 +198,22 @@ describe("Package Commands (CLI)", () => {
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining("not found"));
     });
   });
+
+  describe("handleHealthCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-health command", async () => {
+      const result = await pkgCommands.handleHealthCommand(["list"]);
+      expect(result).toBe(false);
+    });
+  });
+
 });

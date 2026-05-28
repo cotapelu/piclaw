@@ -7,6 +7,7 @@
  */
 
 import chalk from "chalk";
+import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
@@ -384,6 +385,58 @@ Examples:
   }
 }
 
+export async function handleHealthCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "health") return false;
+
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+
+  try {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    const configured = pm.listConfiguredPackages();
+
+    if (configured.length === 0) {
+      console.log(chalk.dim("No packages configured."));
+      return true;
+    }
+
+    let healthy = 0;
+    let issues = 0;
+
+    for (const pkg of configured) {
+      if (!pkg.installedPath) {
+        console.log(chalk.yellow(`${pkg.source} (${pkg.scope}): not installed`));
+        issues++;
+        continue;
+      }
+
+      const pkgJsonPath = join(pkg.installedPath, "package.json");
+      if (!existsSync(pkgJsonPath)) {
+        console.log(chalk.yellow(`${pkg.source}: missing package.json`));
+        issues++;
+        continue;
+      }
+
+      try {
+        const content = readFileSync(pkgJsonPath, "utf-8");
+        JSON.parse(content);
+        console.log(chalk.green(`${pkg.source}: OK`));
+        healthy++;
+      } catch (e) {
+        console.log(chalk.red(`${pkg.source}: invalid package.json`));
+        issues++;
+      }
+    }
+
+    console.log();
+    console.log(chalk.bold(`Health check complete: ${healthy} healthy, ${issues} issues`));
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
 /**
  * Handle all package commands
  * Called from main.ts
@@ -409,6 +462,9 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
       return true;
     case "info":
       await handleInfoCommand(args);
+      return true;
+    case "health":
+      await handleHealthCommand(args);
       return true;
     default:
       return false;
