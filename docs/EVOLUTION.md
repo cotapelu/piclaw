@@ -228,4 +228,79 @@ Provide users with a way to query details about installed packages, including re
 - Add dry-run mode for all operations
 
 ### Trajectory
-Phase 5 complete: Info command added. Next: progress callbacks, dry-run, and CLI improvements.
+Phase 5 complete: Info command added.
+
+---
+
+## 2025-05-28 - Phase 6: Dry-Run Mode
+
+### Objective
+Allow users to simulate package operations without making changes.
+
+### Changes Made
+1. Extended `PiclawPackageManager` methods: `install`, `installAndPersist`, `remove`, `removeAndPersist`, `update` to accept optional `dryRun` boolean.
+2. When `dryRun: true`, methods log intended actions but skip actual changes.
+3. Added `--dry-run` / `-d` flag to `piclaw install`, `remove`, `update` commands.
+4. Commands output `[DRY-RUN]` messages and suppress success stamps.
+5. Updated CLI tests to account for new option.
+
+### Implementation Details
+- Dry-run check performed after source parsing and validation.
+- Settings modifications are skipped in dry-run, with appropriate logging.
+- Affected methods: `install`, `installAndPersist`, `remove`, `removeAndPersist`, `update`.
+- Infrastructure reuses existing `withProgress` wrapper for consistency.
+
+### Verification
+- Unit tests updated to expect `dryRun: false` in normal mode.
+- Manual tests: `piclaw install npm:foo --dry-run` shows simulation messages.
+- All methods correctly skip actions when dryRun true.
+
+### Risks & Debt
+- Minimal risk: additive feature with no side effects.
+- Could add more detailed simulation output (e.g., versions, sizes).
+
+### Next Steps (Phase 6)
+- Add dry-run for other commands (e.g., filter modifications)
+- Show more detailed information in dry-run (disk space, versions)
+
+### Trajectory
+Phase 6 complete: Dry-run mode implemented. Next: health check, CLI improvements.
+
+---
+
+## 2025-05-28 - Phase 7: Package Health Check
+
+### Objective
+Provide diagnostics for installed packages to detect common issues.
+
+### Changes Made
+1. Added `handleHealthCommand` implementing `piclaw health`.
+2. Checks each configured package:
+   - Verifies installed path exists.
+   - Checks presence of `package.json`.
+   - Validates `package.json` JSON syntax.
+3. Reports status per package and summary tally.
+4. Returns non-error exit even if issues found.
+
+### Implementation Details
+- Uses `listConfiguredPackages` and filesystem checks.
+- No network calls; fast local verification.
+- Output colored: green OK, yellow missing, red invalid.
+
+### Verification
+- New test suite for health command (basic coverage).
+- Manual tests: health on empty config, missing path, missing package.json, invalid JSON.
+- All existing tests pass (375 passing, 4 pre-existing failures).
+
+### Risks & Debt
+- Low risk: read-only operations.
+- Could expand to check dependency integrity via `npm ls` or hash verification.
+- Could add option for automatic fixing.
+
+### Next Steps (Phase 7)
+- Add checks for broken symlinks, missing dependencies.
+- Add `--fix` flag to attempt repairs.
+- Integrate with pre-install/pre-update hooks.
+
+### Trajectory
+Phase 7 complete: Health check command added. Future: dependency checks, import/export, version pinning.
