@@ -7,7 +7,7 @@
  */
 
 import chalk from "chalk";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
@@ -438,6 +438,104 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
 }
 
 /**
+ * Handle package pin command
+ * Usage: piclaw pin <oldSource> <newSource> [-l]
+ */
+export async function handlePinCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "pin") return false;
+
+  let local = false;
+  let help = false;
+  let oldSource: string | undefined;
+  let newSource: string | undefined;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "-l" || args[i] === "--local") {
+      local = true;
+    } else if (args[i] === "-h" || args[i] === "--help") {
+      help = true;
+    } else if (!args[i].startsWith("-")) {
+      if (!oldSource) {
+        oldSource = args[i];
+      } else if (!newSource) {
+        newSource = args[i];
+      } else {
+        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        console.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
+        process.exit(1);
+      }
+    } else {
+      console.error(chalk.red(`Unknown option: ${args[i]}`));
+      console.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
+      process.exit(1);
+    }
+  }
+
+  if (help) {
+    console.log(`
+Usage: piclaw pin <oldSource> <newSource> [-l]
+
+Update a package source in settings (e.g., change pinned version).
+
+Arguments:
+  <oldSource>         Current package source (e.g., npm:foo@1.0)
+  <newSource>         New package source (e.g., npm:foo@1.2)
+
+Options:
+  -l, --local         Operate on project settings (.piclaw/settings.json)
+  -h, --help          Show this help
+
+Example:
+  piclaw pin npm:chalk@1.0 npm:chalk@1.2
+`);
+    return true;
+  }
+
+  if (!oldSource || !newSource) {
+    console.error(chalk.red("Missing arguments. Usage: piclaw pin <oldSource> <newSource> [-l]"));
+    process.exit(1);
+  }
+
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+  const scope = local ? "project" : "user";
+  const settingsPath = scope === "project"
+    ? join(cwd, ".piclaw", "settings.json")
+    : join(agentDir, "settings.json");
+
+  if (!existsSync(settingsPath)) {
+    console.error(chalk.red(`Settings file not found: ${settingsPath}`));
+    process.exit(1);
+  }
+
+  try {
+    const raw = readFileSync(settingsPath, "utf-8");
+    const settings = JSON.parse(raw);
+
+    if (!Array.isArray(settings.packages)) {
+      console.error(chalk.red("Invalid settings: packages array missing"));
+      process.exit(1);
+    }
+
+    const idx = settings.packages.findIndex(
+      (p: any) => (typeof p === "string" ? p : p.source) === oldSource
+    );
+    if (idx === -1) {
+      console.error(chalk.red(`Old source not found in settings: ${oldSource}`));
+      process.exit(1);
+    }
+
+    settings.packages[idx] = newSource;
+    writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+    console.log(chalk.green(`✓ Pinned ${oldSource} -> ${newSource}`));
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
+/**
  * Handle all package commands
  * Called from main.ts
  */
@@ -465,6 +563,9 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
       return true;
     case "health":
       await handleHealthCommand(args);
+      return true;
+    case "pin":
+      await handlePinCommand(args);
       return true;
     default:
       return false;

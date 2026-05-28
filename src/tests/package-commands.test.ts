@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mkdirSync, rmSync, existsSync } from "node:fs";
+import { mkdirSync, rmSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
 
@@ -174,7 +174,7 @@ describe("Package Commands (CLI)", () => {
         { source: "npm:test", scope: "user", filtered: false, installedPath: "/path/to/test" }
       ]);
       vi.spyOn(PiclawPackageManager.prototype, 'resolveExtensionSources').mockResolvedValue({
-        extensions: [{ path: "/path/to/test/ext.ts", enabled: true, metadata: {} }],
+        extensions: [{ path: "/path/to/test/ext.ts", enabled: true, metadata: { source: "npm:test", scope: "user", origin: "package" } }],
         skills: [],
         prompts: [],
         themes: []
@@ -213,6 +213,71 @@ describe("Package Commands (CLI)", () => {
     it("should return false for non-health command", async () => {
       const result = await pkgCommands.handleHealthCommand(["list"]);
       expect(result).toBe(false);
+    });
+  });
+
+  describe("handlePinCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(process, 'cwd').mockReturnValue(cwd);
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-pin command", async () => {
+      const result = await pkgCommands.handlePinCommand(["list"]);
+      expect(result).toBe(false);
+    });
+
+    it("should require both old and new sources", async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      try {
+        await pkgCommands.handlePinCommand(["pin", "npm:foo@1.0"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Missing arguments"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should pin successfully", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:bar@1.0"] }));
+
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      try {
+        await pkgCommands.handlePinCommand(["pin", "npm:bar@1.0", "npm:bar@2.0", "-l"]);
+      } catch (e) {
+        // Should not throw
+        console.error("Unexpected error:", e);
+      }
+      // Debug: if exit was called, log error messages
+      if (exitSpy) {
+        const calls = (console.error as any).mock.calls;
+        if (calls && calls.length > 0) {
+          console.log('console.error calls:', calls);
+        }
+      }
+      expect(console.error).not.toHaveBeenCalled();
+      expect(exitSpy).not.toHaveBeenCalled();
+
+      const updated = JSON.parse(readFileSync(settingsPath, "utf-8"));
+      expect(updated.packages).toContain("npm:bar@2.0");
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("✓ Pinned"));
+    });
+
+    it("should fail when old source not found", async () => {
+      const settingsPath = join(cwd, ".piclaw", "settings.json");
+      mkdirSync(join(cwd, ".piclaw"), { recursive: true });
+      writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:other@1.0"] }));
+
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      try {
+        await pkgCommands.handlePinCommand(["pin", "npm:missing@1.0", "npm:new@2.0", "-l"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Old source not found"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
 

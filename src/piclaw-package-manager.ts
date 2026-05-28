@@ -419,22 +419,19 @@ export class PiclawPackageManager {
 
   async update(source?: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
     const scope = options?.local ? "project" : "user";
-    const settingsPath = scope === "project" ? this.getProjectSettingsPath() : this.getGlobalSettingsPath();
-    const settings = this.loadSettings(settingsPath);
-    const packages = settings.packages || [];
+    // Get configured entries for the target scope
+    const allEntries = this.getConfiguredEntries().filter(e => e.scope === scope);
+    const targetEntries = source ? allEntries.filter(e => e.source === source) : allEntries;
 
-    // Filter by source if provided
-    const targets = source ? packages.filter(p => p === source) : packages;
-
-    if (targets.length === 0) {
+    if (targetEntries.length === 0) {
       console.log(chalk.gray("No packages to update."));
       return;
     }
 
-    for (const pkg of targets) {
-      const parsed = this.parseSource(pkg);
+    for (const entry of targetEntries) {
+      const parsed = this.parseSource(entry.source);
       if (options?.dryRun) {
-        console.log(chalk.yellow(`[DRY-RUN] Would update ${pkg}`));
+        console.log(chalk.yellow(`[DRY-RUN] Would update ${entry.source}`));
         continue;
       }
       if (parsed.type === "npm") {
@@ -442,7 +439,7 @@ export class PiclawPackageManager {
       } else if (parsed.type === "git") {
         await this.updateGit(parsed, scope);
       } else {
-        console.log(chalk.yellow(`Skipping ${pkg}: unsupported source type`));
+        console.log(chalk.yellow(`Skipping ${entry.source}: unsupported source type`));
       }
     }
   }
@@ -752,7 +749,7 @@ export class PiclawPackageManager {
   private collectPackageResources(
     packageRoot: string,
     accumulator: ResourceAccumulator,
-    filter?: PackageFilter,
+    filter: PackageFilter | undefined,
     metadata: PathMetadata,
   ): void {
     const collectFiles = (dir: string, pattern: RegExp): string[] => {
