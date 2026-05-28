@@ -244,10 +244,11 @@ export class PiclawPackageManager {
     });
   }
 
-  async installAndPersist(source: string, options?: { local?: boolean; dryRun?: boolean }): Promise<void> {
+  async installAndPersist(source: string, options?: { local?: boolean; dryRun?: boolean; filter?: PackageFilter }): Promise<void> {
     await this.install(source, options);
     if (!options?.dryRun) {
-      this.addSourceToSettings(source, options);
+      // Attach filter if provided
+      this.addSourceToSettings({ source, filter: options?.filter }, { local: options?.local });
     } else {
       console.log(chalk.yellow(`[DRY-RUN] Would add ${source} to settings`));
     }

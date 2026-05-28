@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 11 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic)
+- Iterations: 12 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI)
 - Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 390 tests)
+- Test failure rate: 0% (0 failing in 402 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -19,8 +19,8 @@
 - Coverage: 100% (390/390 passing)
 
 ## Testing Status
-- Unit tests: 390 total, 390 passing (100%)
-- New tests: 27 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5) + 18 package-manager tests
+- Unit tests: 402 total, 402 passing (100%)
+- New tests: 39 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5, install 12) + 18 package-manager tests
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
 - Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)
@@ -37,7 +37,8 @@
 - **Import/Export**: `piclaw export [file]` and `piclaw import <file>` for backup/migration
 - **Team-tool tests fix**: Updated unit tests to match non-blocking team_run contract; all 8 tests pass
 - **Retry logic**: Automatic retry for network failures in npm/git operations with exponential backoff
-- Full test coverage (27 package-command tests, 8 team-tool tests, 18 package-manager tests)
+- **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
+- Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests)
 - Backward compatibility throughout
 
 ## Risk Assessment

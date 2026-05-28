@@ -23,12 +23,42 @@ export async function handleInstallCommand(args: string[]): Promise<boolean> {
   let dryRun = false;
   let source: string | undefined;
   let help = false;
+  let filter: any;
 
   for (let i = 1; i < args.length; i++) {
     if (args[i] === "-l" || args[i] === "--local") {
       local = true;
+    } else if (args[i] === "-d" || args[i] === "--dry-run") {
+      dryRun = true;
     } else if (args[i] === "-h" || args[i] === "--help") {
       help = true;
+    } else if (args[i] === "--filter") {
+      if (i + 1 < args.length) {
+        const spec = args[++i];
+        try {
+          const parsed = JSON.parse(spec);
+          const allowed = ['extensions', 'skills', 'prompts', 'themes'];
+          const invalidKeys = Object.keys(parsed).filter(k => !allowed.includes(k));
+          if (invalidKeys.length > 0) {
+            console.error(chalk.red(`Invalid filter keys: ${invalidKeys.join(', ')}`));
+            process.exit(1);
+          }
+          for (const key of allowed) {
+            if (parsed[key] !== undefined && !Array.isArray(parsed[key])) {
+              console.error(chalk.red(`Filter '${key}' must be an array of strings`));
+              process.exit(1);
+            }
+          }
+          filter = parsed;
+        } catch (e: any) {
+          console.error(chalk.red(`Invalid JSON for filter: ${e.message}`));
+          process.exit(1);
+        }
+      } else {
+        console.error(chalk.red(`Missing value for --filter`));
+        console.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
+        process.exit(1);
+      }
     } else if (!args[i].startsWith("-")) {
       if (source) {
         console.error(chalk.red(`Unexpected argument: ${args[i]}`));
@@ -56,6 +86,7 @@ Sources:
 
 Options:
   -l, --local        Install to project settings (.piclaw/settings.json)
+  --filter <json>    Apply resource filter (e.g., --filter '{"extensions":["**/*.ts"]}')
   -h, --help         Show this help
 
 Examples:
@@ -78,7 +109,9 @@ Examples:
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
-    await pm.installAndPersist(source, { local, dryRun });
+    const opts: any = { local, dryRun };
+    if (filter) opts.filter = filter;
+    await pm.installAndPersist(source, opts);
     if (dryRun) {
       console.log(chalk.yellow(`[DRY-RUN] Simulated install of ${source}`));
     } else {

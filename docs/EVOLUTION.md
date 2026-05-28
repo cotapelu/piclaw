@@ -451,3 +451,42 @@ Increase reliability of network operations (npm and git) by automatic retries wi
 
 ### Trajectory
 Phase 11 complete: Retry logic implemented. Next: structured logging, progress callbacks, integration tests.
+
+---
+
+## 2025-05-28 - Phase 12: Install Filter CLI
+
+### Objective
+Enable users to specify resource filters via `--filter` when installing packages.
+
+### Changes Made
+1. Added `--filter <json>` option to `piclaw install`.
+2. JSON defines filter fields: `extensions`, `skills`, `prompts`, `themes` (arrays of strings).
+3. Filter passed to `installAndPersist` and persisted in settings.
+4. Extended `installAndPersist` signature to accept optional `filter?: PackageFilter`.
+5. Added 12 comprehensive tests covering flag parsing, validation, and integration.
+
+### Implementation Details
+- Parsing: reads JSON after `--filter`; validates allowed keys and that values are arrays.
+- `installAndPersist` now calls `addSourceToSettings({ source, filter: options?.filter }, { local: options?.local })`.
+- Help text updated with `--filter` description.
+- Backward compatible: when `--filter` omitted, filter undefined.
+
+### Verification
+- All 402 tests pass (12 new install-filter tests).
+- Manual: `piclaw install npm:test --filter '{"extensions":["**/*.ts"]}'` saves filter in settings.
+- Invalid JSON/keys produce clear errors and exit(1).
+- No regression in existing install flow.
+
+### Risks & Debt
+- Low risk: additive.
+- Could extend `--filter` to other commands (update, pin).
+- Could allow multiple `--filter` occurrences to merge (currently last wins).
+
+### Next Steps (Phase 12)
+- Add `--filter` to other commands.
+- Expand help with examples.
+- Consider YAML format for filters.
+
+### Trajectory
+Phase 12 complete: Install filter CLI available. Next: structured logging, integration tests.

@@ -31,9 +31,10 @@ None observed in recent iterations.
 - Added `piclaw pin` command for version pinning update
 - Added `piclaw export` and `piclaw import` commands for backup/migration
 - Updated team-tool unit tests to match non-blocking team_run contract (8 tests pass)
-- Added 27 new package-command tests, 8 team-tool tests, 18 package-manager tests (all passing)
+- Added 39 package-command tests, 8 team-tool tests, 18 package-manager tests (all passing)
 - Added `minimatch` dependency for glob pattern matching
 - Added retry logic for network failures (npm/git) with exponential backoff
+- **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - Backward compatible settings format (string entries still work)
 
 ## Areas for Improvement
@@ -42,7 +43,6 @@ None observed in recent iterations.
 - Implement progress callbacks for long-running operations
 - Add integration tests for full install→update flow
 - Consider using `execa` for more reliable subprocess management
-- Expose filter configuration via CLI
 
 ## Recommended Skills
 - `typescript-architect` for strict typing
