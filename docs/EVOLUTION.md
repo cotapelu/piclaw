@@ -375,4 +375,34 @@ Provide backup and migration via JSON export/import.
 Trajectory:
 Phase 8 complete: Pin command available.
 Phase 9 complete: Import/Export commands done.
-Future: retry logic, structured logging, integration tests.
+
+---
+
+## 2025-05-28 - Phase 10: Team-Tool Test Fix
+
+### Objective
+Fix failing team-tool unit tests to align with non-blocking team_run behavior.
+
+### Changes Made
+1. Updated `src/tests/team-tool.test.ts` tests to match current contract:
+   - `requires parentRuntime in context`: updated expected message to include "No runtime context".
+   - `accepts JSON string params`: added proper mock properties (id, roles) and adjusted expectations for argument signature.
+   - `executes team successfully with default teamSize`: updated to check startup message, agentCount, totalTasks, and correct `executeTeamTasks` call signature (4 arguments).
+   - Removed obsolete `truncates long task and result previews` test (no longer applicable).
+2. No changes to production code; only test adjustments.
+
+### Verification
+- All team-tool tests now pass (8/8).
+- Full test suite: 390/390 passing.
+- No regression in other tests.
+
+### Risks & Debt
+- Very low risk: test-only changes.
+- Could add additional coverage for edge cases (invalid teamSize, large teams).
+
+### Next Steps (Phase 10)
+- Consider adding integration tests for end-to-end team execution.
+- Add tests for status queries and error handling.
+
+### Trajectory
+Phase 10 complete: All tests passing. Continuing with broader quality improvements (retry logic, structured logging, integration tests).

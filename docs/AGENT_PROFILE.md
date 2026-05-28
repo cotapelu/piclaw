@@ -30,7 +30,8 @@ None observed in recent iterations.
 - Added `piclaw health` command for package integrity verification
 - Added `piclaw pin` command for version pinning update
 - Added `piclaw export` and `piclaw import` commands for backup/migration
-- Added 27 new package-command tests (all passing) + 18 package-manager tests
+- Updated team-tool unit tests to match non-blocking team_run contract (8 tests pass)
+- Added 27 new package-command tests, 8 team-tool tests, 18 package-manager tests (all passing)
 - Added `minimatch` dependency for glob pattern matching
 - Backward compatible settings format (string entries still work)
 

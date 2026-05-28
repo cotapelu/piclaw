@@ -41,40 +41,44 @@ describe('team_run tool', () => {
     const ctx = { sessionManager: {} } as any;
     const result = await tool.execute('id', { tasks: ['t1'] }, undefined, undefined, ctx);
     expect(result.isError).toBe(true);
-    expect(result.content[0].text).toContain('No parent runtime');
+    expect(result.content[0].text).toContain('No runtime context');
   });
 
   it('accepts JSON string params', async () => {
     const parent = createMockParentRuntime();
     const ctx = { sessionManager: { parentRuntime: parent } } as any;
-    const mockTeam = { dispose: vi.fn().mockResolvedValue(undefined) };
+    const mockTeam = { id: 'team-json', roles: ['agent'], dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockResolvedValue(undefined);
-    mockTeam.getResults = vi.fn().mockResolvedValue(['res']);
 
     const result = await tool.execute('id', '{"tasks":["t1"]}' as any, undefined, undefined, ctx);
     expect(result.isError).toBe(false);
-    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, expect.anything());
-    expect(mockTeam.getResults).toHaveBeenCalled();
+    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, { teamSize: undefined, teamRoles: undefined });
+    expect(executeTeamTasks).toHaveBeenCalledWith(mockTeam, ['t1'], undefined, {});
+    expect(result.content[0].text).toContain('✅ Team started: team-json');
+    expect(result.details.teamId).toBe('team-json');
+    expect(result.details.agentCount).toBe(1);
+    expect(result.details.totalTasks).toBe(1);
+    expect(result.details.status).toBe('running');
   });
 
   it('executes team successfully with default teamSize', async () => {
     const parent = createMockParentRuntime();
     const ctx = { sessionManager: { parentRuntime: parent } } as any;
-    const mockTeam = { dispose: vi.fn().mockResolvedValue(undefined) };
+    const mockTeam = { id: 'team-default', roles: ['a', 'b'], dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockResolvedValue(undefined);
-    mockTeam.getResults = vi.fn().mockResolvedValue(['Result 1', 'Result 2']);
 
     const result = await tool.execute('id', { tasks: ['Task 1', 'Task 2'] }, undefined, undefined, ctx);
 
-    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, expect.anything());
-    expect(executeTeamTasks).toHaveBeenCalledWith(mockTeam, ['Task 1', 'Task 2']);
-    expect(mockTeam.getResults).toHaveBeenCalled();
-    expect(mockTeam.dispose).toHaveBeenCalled();
+    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, { teamSize: undefined, teamRoles: undefined });
+    expect(executeTeamTasks).toHaveBeenCalledWith(mockTeam, ['Task 1', 'Task 2'], undefined, {});
     expect(result.isError).toBe(false);
-    expect(result.content[0].text).toContain('✅ Team completed 2 tasks.');
-    expect(result.details.results[0].result).toBe('Result 1');
+    expect(result.content[0].text).toContain('✅ Team started: team-default');
+    expect(result.details.teamId).toBe('team-default');
+    expect(result.details.agentCount).toBe(2);
+    expect(result.details.totalTasks).toBe(2);
+    expect(result.details.status).toBe('running');
   });
 
   it('passes custom teamSize and teamRoles', async () => {
@@ -118,22 +122,5 @@ describe('team_run tool', () => {
     expect(mockTeam.dispose).not.toHaveBeenCalled();
   });
 
-  it('truncates long task and result previews', async () => {
-    const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
-    const mockTeam = { dispose: vi.fn().mockResolvedValue(undefined) };
-    bootPiclawTeam.mockResolvedValue(mockTeam);
-    executeTeamTasks.mockResolvedValue(undefined);
-    const longResult = 'a'.repeat(150);
-    mockTeam.getResults = vi.fn().mockResolvedValue([longResult]);
 
-    const result = await tool.execute('id', { tasks: ['x'.repeat(100)] }, undefined, undefined, ctx);
-    const text = result.content[0].text;
-    expect(text).toContain('...'); // both task and result truncated
-    expect(text).toContain('Result:');
-    // Task truncated to 50 chars + '...'
-    expect(text).toContain(`${'x'.repeat(50)  }...`);
-    // Result truncated to 100 chars + '...'
-    expect(text).toContain(`${'a'.repeat(100)  }...`);
-  });
 });
