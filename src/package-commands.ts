@@ -11,6 +11,7 @@ import { existsSync, readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
+import { logger } from "./utils/logger.js";
 import type { PackageFilter } from "./piclaw-package-manager.js";
 
 type InstallOptions = { local?: boolean; dryRun?: boolean; filter?: PackageFilter };
@@ -43,41 +44,41 @@ export async function handleInstallCommand(args: string[]): Promise<boolean> {
           const allowed = ['extensions', 'skills', 'prompts', 'themes'];
           const invalidKeys = Object.keys(parsed).filter(k => !allowed.includes(k));
           if (invalidKeys.length > 0) {
-            console.error(chalk.red(`Invalid filter keys: ${invalidKeys.join(', ')}`));
+            logger.error(chalk.red(`Invalid filter keys: ${invalidKeys.join(', ')}`));
             process.exit(1);
           }
           for (const key of allowed) {
             if (parsed[key] !== undefined && !Array.isArray(parsed[key])) {
-              console.error(chalk.red(`Filter '${key}' must be an array of strings`));
+              logger.error(chalk.red(`Filter '${key}' must be an array of strings`));
               process.exit(1);
             }
           }
           filter = parsed;
         } catch (e: any) {
-          console.error(chalk.red(`Invalid JSON for filter: ${e.message}`));
+          logger.error(chalk.red(`Invalid JSON for filter: ${e.message}`));
           process.exit(1);
         }
       } else {
-        console.error(chalk.red(`Missing value for --filter`));
-        console.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
+        logger.error(chalk.red(`Missing value for --filter`));
+        logger.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
         process.exit(1);
       }
     } else if (!args[i].startsWith("-")) {
       if (source) {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
         process.exit(1);
       }
       source = args[i];
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw install <source> [-l]
 
 Install a pi package and add it to settings.
@@ -102,8 +103,8 @@ Examples:
   }
 
   if (!source) {
-    console.error(chalk.red("Missing install source."));
-    console.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
+    logger.error(chalk.red("Missing install source."));
+    logger.error(chalk.dim(`Usage: piclaw install <source> [-l]`));
     process.exit(1);
   }
 
@@ -115,13 +116,13 @@ Examples:
     pm.setProgressCallback((event: any) => {
       switch (event.type) {
         case 'start':
-          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          logger.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
           break;
         case 'complete':
-          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          logger.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
           break;
         case 'error':
-          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          logger.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
           break;
       }
     });
@@ -129,13 +130,13 @@ Examples:
     if (filter) opts.filter = filter;
     await pm.installAndPersist(source, opts);
     if (dryRun) {
-      console.log(chalk.yellow(`[DRY-RUN] Simulated install of ${source}`));
+      logger.log(chalk.yellow(`[DRY-RUN] Simulated install of ${source}`));
     } else {
-      console.log(chalk.green(`✓ Installed ${source}`));
+      logger.log(chalk.green(`✓ Installed ${source}`));
     }
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -159,20 +160,20 @@ export async function handleRemoveCommand(args: string[]): Promise<boolean> {
       help = true;
     } else if (!args[i].startsWith("-")) {
       if (source) {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
         process.exit(1);
       }
       source = args[i];
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw remove <source> [-l]
 
 Remove a package and its source from settings.
@@ -189,8 +190,8 @@ Examples:
   }
 
   if (!source) {
-    console.error(chalk.red("Missing remove source."));
-    console.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
+    logger.error(chalk.red("Missing remove source."));
+    logger.error(chalk.dim(`Usage: piclaw remove <source> [-l]`));
     process.exit(1);
   }
 
@@ -202,25 +203,25 @@ Examples:
     pm.setProgressCallback((event: any) => {
       switch (event.type) {
         case 'start':
-          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          logger.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
           break;
         case 'complete':
-          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          logger.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
           break;
         case 'error':
-          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          logger.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
           break;
       }
     });
     await pm.removeAndPersist(source, { local, dryRun });
     if (dryRun) {
-      console.log(chalk.yellow(`[DRY-RUN] Simulated removal of ${source}`));
+      logger.log(chalk.yellow(`[DRY-RUN] Simulated removal of ${source}`));
     } else {
-      console.log(chalk.green(`✓ Removed ${source}`));
+      logger.log(chalk.green(`✓ Removed ${source}`));
     }
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -233,13 +234,13 @@ export async function handleListCommand(args: string[]): Promise<boolean> {
   if (args[0] !== "list") return false;
 
   if (args.length > 1 && !["-h", "--help"].includes(args[1])) {
-    console.error(chalk.red("Unexpected arguments"));
-    console.error(chalk.dim(`Usage: piclaw list`));
+    logger.error(chalk.red("Unexpected arguments"));
+    logger.error(chalk.dim(`Usage: piclaw list`));
     process.exit(1);
   }
 
   if (args.includes("-h") || args.includes("--help")) {
-    console.log(`
+    logger.log(`
 Usage: piclaw list
 
 List installed packages from user and project settings.
@@ -258,36 +259,36 @@ List installed packages from user and project settings.
     const projectPkgs = configuredPackages.filter((p) => p.scope === "project");
 
     if (configuredPackages.length === 0) {
-      console.log(chalk.dim("No packages installed."));
+      logger.log(chalk.dim("No packages installed."));
       return true;
     }
 
     if (globalPkgs.length > 0) {
-      console.log(chalk.bold("Global packages:"));
+      logger.log(chalk.bold("Global packages:"));
       for (const pkg of globalPkgs) {
         const display = pkg.filtered ? `${pkg.source} (filtered)` : pkg.source;
-        console.log(`  ${display}`);
+        logger.log(`  ${display}`);
         if (pkg.installedPath) {
-          console.log(chalk.dim(`    ${pkg.installedPath}`));
+          logger.log(chalk.dim(`    ${pkg.installedPath}`));
         }
       }
     }
 
     if (projectPkgs.length > 0) {
-      if (globalPkgs.length > 0) console.log();
-      console.log(chalk.bold("Project packages:"));
+      if (globalPkgs.length > 0) logger.log();
+      logger.log(chalk.bold("Project packages:"));
       for (const pkg of projectPkgs) {
         const display = pkg.filtered ? `${pkg.source} (filtered)` : pkg.source;
-        console.log(`  ${display}`);
+        logger.log(`  ${display}`);
         if (pkg.installedPath) {
-          console.log(chalk.dim(`    ${pkg.installedPath}`));
+          logger.log(chalk.dim(`    ${pkg.installedPath}`));
         }
       }
     }
 
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`Error: ${err.message}`));
+    logger.error(chalk.red(`Error: ${err.message}`));
     process.exit(1);
   }
 }
@@ -311,20 +312,20 @@ export async function handleUpdateCommand(args: string[]): Promise<boolean> {
       help = true;
     } else if (!args[i].startsWith("-")) {
       if (source) {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
         process.exit(1);
       }
       source = args[i];
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw update [source] [-l]
 
 Update installed packages to latest version.
@@ -352,20 +353,20 @@ Examples:
     pm.setProgressCallback((event: any) => {
       switch (event.type) {
         case 'start':
-          console.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
+          logger.log(chalk.cyan(`⏳ ${event.action}: ${event.source}`));
           break;
         case 'complete':
-          console.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
+          logger.log(chalk.green(`✅ ${event.action} complete: ${event.source}`));
           break;
         case 'error':
-          console.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
+          logger.log(chalk.red(`❌ ${event.action} failed: ${event.source} - ${event.message}`));
           break;
       }
     });
     await pm.update(source, { local, dryRun });
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -388,20 +389,20 @@ export async function handleInfoCommand(args: string[]): Promise<boolean> {
       help = true;
     } else if (!args[i].startsWith("-")) {
       if (source) {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
         process.exit(1);
       }
       source = args[i];
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw info <source> [-l]
 
 Show details about an installed package.
@@ -421,8 +422,8 @@ Examples:
   }
 
   if (!source) {
-    console.error(chalk.red("Missing package source."));
-    console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+    logger.error(chalk.red("Missing package source."));
+    logger.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
     process.exit(1);
   }
 
@@ -434,28 +435,28 @@ Examples:
     const configured = pm.listConfiguredPackages();
     const entry = configured.find(p => p.source === source && p.scope === (local ? "project" : "user"));
     if (!entry) {
-      console.error(chalk.yellow(`Package '${source}' not found in ${local ? 'project' : 'global'} settings.`));
+      logger.error(chalk.yellow(`Package '${source}' not found in ${local ? 'project' : 'global'} settings.`));
       return true; // not an error
     }
 
-    console.log(chalk.bold(`Source: ${entry.source}`));
-    console.log(`Scope: ${entry.scope}`);
-    console.log(`Filtered: ${entry.filtered ? "yes" : "no"}`);
+    logger.log(chalk.bold(`Source: ${entry.source}`));
+    logger.log(`Scope: ${entry.scope}`);
+    logger.log(`Filtered: ${entry.filtered ? "yes" : "no"}`);
     if (entry.installedPath) {
-      console.log(`Installed path: ${entry.installedPath}`);
+      logger.log(`Installed path: ${entry.installedPath}`);
     } else {
-      console.log(chalk.yellow(`Installed path: not found`));
+      logger.log(chalk.yellow(`Installed path: not found`));
     }
 
     const resolved = await pm.resolveExtensionSources([source], { local });
-    console.log(`Extensions: ${resolved.extensions.length}`);
-    console.log(`Skills: ${resolved.skills.length}`);
-    console.log(`Prompts: ${resolved.prompts.length}`);
-    console.log(`Themes: ${resolved.themes.length}`);
+    logger.log(`Extensions: ${resolved.extensions.length}`);
+    logger.log(`Skills: ${resolved.skills.length}`);
+    logger.log(`Prompts: ${resolved.prompts.length}`);
+    logger.log(`Themes: ${resolved.themes.length}`);
 
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -471,7 +472,7 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
     const configured = pm.listConfiguredPackages();
 
     if (configured.length === 0) {
-      console.log(chalk.dim("No packages configured."));
+      logger.log(chalk.dim("No packages configured."));
       return true;
     }
 
@@ -480,14 +481,14 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
 
     for (const pkg of configured) {
       if (!pkg.installedPath) {
-        console.log(chalk.yellow(`${pkg.source} (${pkg.scope}): not installed`));
+        logger.log(chalk.yellow(`${pkg.source} (${pkg.scope}): not installed`));
         issues++;
         continue;
       }
 
       const pkgJsonPath = join(pkg.installedPath, "package.json");
       if (!existsSync(pkgJsonPath)) {
-        console.log(chalk.yellow(`${pkg.source}: missing package.json`));
+        logger.log(chalk.yellow(`${pkg.source}: missing package.json`));
         issues++;
         continue;
       }
@@ -495,19 +496,19 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
       try {
         const content = readFileSync(pkgJsonPath, "utf-8");
         JSON.parse(content);
-        console.log(chalk.green(`${pkg.source}: OK`));
+        logger.log(chalk.green(`${pkg.source}: OK`));
         healthy++;
       } catch (e) {
-        console.log(chalk.red(`${pkg.source}: invalid package.json`));
+        logger.log(chalk.red(`${pkg.source}: invalid package.json`));
         issues++;
       }
     }
 
-    console.log();
-    console.log(chalk.bold(`Health check complete: ${healthy} healthy, ${issues} issues`));
+    logger.log();
+    logger.log(chalk.bold(`Health check complete: ${healthy} healthy, ${issues} issues`));
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -535,19 +536,19 @@ export async function handlePinCommand(args: string[]): Promise<boolean> {
       } else if (!newSource) {
         newSource = args[i];
       } else {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
         process.exit(1);
       }
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw pin <oldSource> <newSource> [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw pin <oldSource> <newSource> [-l]
 
 Update a package source in settings (e.g., change pinned version).
@@ -567,7 +568,7 @@ Example:
   }
 
   if (!oldSource || !newSource) {
-    console.error(chalk.red("Missing arguments. Usage: piclaw pin <oldSource> <newSource> [-l]"));
+    logger.error(chalk.red("Missing arguments. Usage: piclaw pin <oldSource> <newSource> [-l]"));
     process.exit(1);
   }
 
@@ -579,7 +580,7 @@ Example:
     : join(agentDir, "settings.json");
 
   if (!existsSync(settingsPath)) {
-    console.error(chalk.red(`Settings file not found: ${settingsPath}`));
+    logger.error(chalk.red(`Settings file not found: ${settingsPath}`));
     process.exit(1);
   }
 
@@ -588,7 +589,7 @@ Example:
     const settings = JSON.parse(raw);
 
     if (!Array.isArray(settings.packages)) {
-      console.error(chalk.red("Invalid settings: packages array missing"));
+      logger.error(chalk.red("Invalid settings: packages array missing"));
       process.exit(1);
     }
 
@@ -596,16 +597,16 @@ Example:
       (p: any) => (typeof p === "string" ? p : p.source) === oldSource
     );
     if (idx === -1) {
-      console.error(chalk.red(`Old source not found in settings: ${oldSource}`));
+      logger.error(chalk.red(`Old source not found in settings: ${oldSource}`));
       process.exit(1);
     }
 
     settings.packages[idx] = newSource;
     writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
-    console.log(chalk.green(`✓ Pinned ${oldSource} -> ${newSource}`));
+    logger.log(chalk.green(`✓ Pinned ${oldSource} -> ${newSource}`));
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -630,19 +631,19 @@ export async function handleExportCommand(args: string[]): Promise<boolean> {
       if (!outputFile) {
         outputFile = args[i];
       } else {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
         process.exit(1);
       }
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw export [output.json] [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw export [output.json] [-l]
 
 Export configured packages to a JSON file.
@@ -670,7 +671,7 @@ Examples:
 
   try {
     if (!existsSync(settingsPath)) {
-      console.error(chalk.yellow(`No settings file found at ${settingsPath}.`));
+      logger.error(chalk.yellow(`No settings file found at ${settingsPath}.`));
       return true; // not an error
     }
 
@@ -681,14 +682,14 @@ Examples:
 
     if (outputFile) {
       writeFileSync(outputFile, json, "utf-8");
-      console.log(chalk.green(`✓ Exported ${packages.length} packages to ${outputFile}`));
+      logger.log(chalk.green(`✓ Exported ${packages.length} packages to ${outputFile}`));
     } else {
       process.stdout.write(json);
-      console.log(chalk.green(`✓ Exported ${packages.length} packages`));
+      logger.log(chalk.green(`✓ Exported ${packages.length} packages`));
     }
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }
@@ -713,19 +714,19 @@ export async function handleImportCommand(args: string[]): Promise<boolean> {
       if (!inputFile) {
         inputFile = args[i];
       } else {
-        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        console.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
+        logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        logger.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
         process.exit(1);
       }
     } else {
-      console.error(chalk.red(`Unknown option: ${args[i]}`));
-      console.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
+      logger.error(chalk.red(`Unknown option: ${args[i]}`));
+      logger.error(chalk.dim(`Usage: piclaw import <input.json> [-l]`));
       process.exit(1);
     }
   }
 
   if (help) {
-    console.log(`
+    logger.log(`
 Usage: piclaw import <input.json> [-l]
 
 Import packages from a JSON file.
@@ -745,7 +746,7 @@ Examples:
   }
 
   if (!inputFile) {
-    console.error(chalk.red("Missing input file. Usage: piclaw import <input.json> [-l]"));
+    logger.error(chalk.red("Missing input file. Usage: piclaw import <input.json> [-l]"));
     process.exit(1);
   }
 
@@ -773,14 +774,14 @@ Examples:
       });
     } else {
       if (!existsSync(inputFile)) {
-        console.error(chalk.red(`Input file not found: ${inputFile}`));
+        logger.error(chalk.red(`Input file not found: ${inputFile}`));
         process.exit(1);
       }
       content = readFileSync(inputFile, "utf-8");
     }
 
     if (!content.trim()) {
-      console.error(chalk.red("Empty input."));
+      logger.error(chalk.red("Empty input."));
       process.exit(1);
     }
 
@@ -788,12 +789,12 @@ Examples:
     try {
       packages = JSON.parse(content);
     } catch (e) {
-      console.error(chalk.red("Invalid JSON in input file."));
+      logger.error(chalk.red("Invalid JSON in input file."));
       process.exit(1);
     }
 
     if (!Array.isArray(packages)) {
-      console.error(chalk.red("Expected an array of package sources in the JSON."));
+      logger.error(chalk.red("Expected an array of package sources in the JSON."));
       process.exit(1);
     }
 
@@ -820,10 +821,10 @@ Examples:
     const dir = dirname(settingsPath);
     if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
     writeFileSync(settingsPath, JSON.stringify(existing, null, 2) + "\n", "utf-8");
-    console.log(chalk.green(`✓ Imported ${added} new packages (total ${existing.packages.length})`));
+    logger.log(chalk.green(`✓ Imported ${added} new packages (total ${existing.packages.length})`));
     return true;
   } catch (err: any) {
-    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    logger.error(chalk.red(`✗ Failed: ${err.message}`));
     process.exit(1);
   }
 }

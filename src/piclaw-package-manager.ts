@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, statSy
 import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { minimatch } from "minimatch";
+import { logger } from "./utils/logger.js";
 
 interface PiclawSettings {
   packages?: Array<string | { source: string; filter?: PackageFilter }>;
@@ -224,7 +225,7 @@ export class PiclawPackageManager {
       const parsed = this.parseSource(source);
       this.validateParsed(parsed);
       if (options?.dryRun) {
-        console.log(chalk.yellow(`[DRY-RUN] Would install ${source}`));
+        logger.log(chalk.yellow(`[DRY-RUN] Would install ${source}`));
         return;
       }
       if (parsed.type === "npm") {
@@ -250,7 +251,7 @@ export class PiclawPackageManager {
       // Attach filter if provided
       this.addSourceToSettings({ source, filter: options?.filter }, { local: options?.local });
     } else {
-      console.log(chalk.yellow(`[DRY-RUN] Would add ${source} to settings`));
+      logger.log(chalk.yellow(`[DRY-RUN] Would add ${source} to settings`));
     }
   }
 
@@ -258,7 +259,7 @@ export class PiclawPackageManager {
     await this.withProgress("remove", source, `Removing ${source}...`, async () => {
       const parsed = this.parseSource(source);
       if (options?.dryRun) {
-        console.log(chalk.yellow(`[DRY-RUN] Would remove ${source}`));
+        logger.log(chalk.yellow(`[DRY-RUN] Would remove ${source}`));
         return;
       }
       if (parsed.type === "npm") {
@@ -277,7 +278,7 @@ export class PiclawPackageManager {
     if (!options?.dryRun) {
       return this.removeSourceFromSettings(source, options);
     } else {
-      console.log(chalk.yellow(`[DRY-RUN] Would remove ${source} from settings`));
+      logger.log(chalk.yellow(`[DRY-RUN] Would remove ${source} from settings`));
       return true;
     }
   }
@@ -425,14 +426,14 @@ export class PiclawPackageManager {
     const targetEntries = source ? allEntries.filter(e => e.source === source) : allEntries;
 
     if (targetEntries.length === 0) {
-      console.log(chalk.gray("No packages to update."));
+      logger.log(chalk.gray("No packages to update."));
       return;
     }
 
     for (const entry of targetEntries) {
       const parsed = this.parseSource(entry.source);
       if (options?.dryRun) {
-        console.log(chalk.yellow(`[DRY-RUN] Would update ${entry.source}`));
+        logger.log(chalk.yellow(`[DRY-RUN] Would update ${entry.source}`));
         continue;
       }
       if (parsed.type === "npm") {
@@ -444,7 +445,7 @@ export class PiclawPackageManager {
           await this.updateGit(parsed, scope);
         });
       } else {
-        console.log(chalk.yellow(`Skipping ${entry.source}: unsupported source type`));
+        logger.log(chalk.yellow(`Skipping ${entry.source}: unsupported source type`));
       }
     }
   }
@@ -452,20 +453,20 @@ export class PiclawPackageManager {
   private async updateNpm(source: { type: "npm"; name: string; pinned: boolean }, scope: "user" | "project"): Promise<void> {
     const installedPath = this.getNpmInstallPath(source, scope);
     if (!existsSync(installedPath)) {
-      console.log(chalk.yellow(`Skipping ${source.name}: not installed`));
+      logger.log(chalk.yellow(`Skipping ${source.name}: not installed`));
       return;
     }
 
     // Check if pinned version
     if (source.pinned) {
-      console.log(chalk.gray(`Skipping ${source.name}: pinned version`));
+      logger.log(chalk.gray(`Skipping ${source.name}: pinned version`));
       return;
     }
 
     // Get installed version
     const installedVersion = this.getInstalledNpmVersion(installedPath);
     if (!installedVersion) {
-      console.log(chalk.yellow(`Skipping ${source.name}: no version info`));
+      logger.log(chalk.yellow(`Skipping ${source.name}: no version info`));
       return;
     }
 
@@ -473,13 +474,13 @@ export class PiclawPackageManager {
     try {
       const latestVersion = await this.getLatestNpmVersion(source.name);
       if (installedVersion === latestVersion) {
-        console.log(chalk.green(`${source.name} is already at latest version ${latestVersion}`));
+        logger.log(chalk.green(`${source.name} is already at latest version ${latestVersion}`));
         return;
       }
-      console.log(chalk.cyan(`Updating ${source.name} from ${installedVersion} to ${latestVersion}`));
+      logger.log(chalk.cyan(`Updating ${source.name} from ${installedVersion} to ${latestVersion}`));
     } catch (err) {
       // Cannot check latest, proceed with reinstall anyway
-      console.log(chalk.yellow(`Could not check latest version for ${source.name}, attempting reinstall...`));
+      logger.log(chalk.yellow(`Could not check latest version for ${source.name}, attempting reinstall...`));
     }
 
     // Reinstall
@@ -494,12 +495,12 @@ export class PiclawPackageManager {
   private async updateGit(source: { type: "git"; host: string; path: string; ref?: string }, scope: "user" | "project"): Promise<void> {
     const targetDir = this.getGitInstallPath(source, scope);
     if (!existsSync(targetDir)) {
-      console.log(chalk.yellow(`Skipping ${source.host}/${source.path}: not installed`));
+      logger.log(chalk.yellow(`Skipping ${source.host}/${source.path}: not installed`));
       return;
     }
 
     // Fetch latest from remote
-    console.log(chalk.cyan(`Updating git ${source.host}/${source.path}`));
+    logger.log(chalk.cyan(`Updating git ${source.host}/${source.path}`));
     await this.withRetry(() => this.runCommand("git", ["pull", "--rebase"], { cwd: targetDir })).catch(async (err: any) => {
       // If pull fails, try fetch + reset
       await this.runCommand("git", ["fetch", "origin"], { cwd: targetDir }).catch(() => {});

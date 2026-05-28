@@ -39,3 +39,6 @@
 - piclaw import command (JSON import with deduplication)
 - Progress callbacks for install/remove/update (default CLI logger)
 - Integration test (install→resolve→remove flow)
+
+- Unit tests for PiclawPackageManager.update (8 tests)
+- Structured logging foundation (logger wrapper)

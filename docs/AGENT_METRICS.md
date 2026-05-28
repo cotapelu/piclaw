@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 14 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test)
+- Iterations: 16 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Part 1)
 - Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 403 tests)
+- Test failure rate: 0% (0 failing in 411 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -19,8 +19,8 @@
 - Coverage: 100% (390/390 passing)
 
 ## Testing Status
-- Unit tests: 403 total, 403 passing (100%)
-- New tests: 39 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5, install 12) + 18 package-manager tests + 1 integration test
+- Unit tests: 411 total, 411 passing (100%)
+- New tests: 39 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5, install 12) + 26 package-manager tests (including 8 update-method tests) + 1 integration test + 1 integration test
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
 - Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)
@@ -41,6 +41,9 @@
 - **Progress callbacks**: install/remove/update operations emit progress events; CLI shows start/complete/error messages
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
 - Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests, 1 integration test)
+- **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 new tests)
+- **Structured logging foundation**: Introduced logger wrapper, migrated console calls in core package manager files
+- **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
 - Backward compatibility throughout
 
 ## Risk Assessment

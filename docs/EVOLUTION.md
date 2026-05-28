@@ -562,3 +562,37 @@ Add an end‑to‑end test to verify the full package lifecycle (install → res
 
 ### Trajectory
 Phase 14 complete: Integration test added. Next: expand coverage.
+
+---
+
+## 2025-05-28 - Phase 16: Structured Logging (Part 1)
+
+### Objective
+Introduce a central logger to enable future structured output while maintaining current console behavior and test compatibility.
+
+### Changes Made
+1. Created `src/utils/logger.ts` – thin wrapper around `console`.
+2. Updated `package-commands.ts` and `piclaw-package-manager.ts` to import and use `logger` for all `log`, `error`, and `warn` calls.
+3. No functional changes; all output remains on `console`.
+
+### Implementation Details
+- `logger.log`, `logger.error`, `logger.warn` directly delegate to `console`.
+- This sets the foundation for switching to structured (JSON) logging via a single file change.
+- Tests continue to work because spies on `console` still capture the underlying calls.
+
+### Verification
+- Full test suite: 411/411 passing (0% failures).
+- No test modifications required.
+- Manual checks: commands still print messages as before.
+
+### Risks & Debt
+- Very low risk: additive, no API changes.
+- Future work: replace `console` uses in remaining files (e.g., `piclaw-core.ts`, `main.ts`) and add optional JSON formatting.
+
+### Next Steps (Phase 16)
+- Migrate remaining `console` calls to `logger`.
+- Add environment variable to switch logger format (plain/JSON).
+- Consider integrating a lightweight structured logger (pino/winston) behind the same interface.
+
+### Trajectory
+Phase 16 complete: Basic logger in place, core files migrated. Next: finish logger migration.
