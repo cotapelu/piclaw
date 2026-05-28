@@ -406,3 +406,48 @@ Fix failing team-tool unit tests to align with non-blocking team_run behavior.
 
 ### Trajectory
 Phase 10 complete: All tests passing. Continuing with broader quality improvements (retry logic, structured logging, integration tests).
+
+---
+
+## 2025-05-28 - Phase 11: Retry Logic
+
+### Objective
+Increase reliability of network operations (npm and git) by automatic retries with exponential backoff.
+
+### Changes Made
+1. Added `withRetry` helper method to PiclawPackageManager.
+2. Wrapped network-prone operations:
+   - `runNpmCommand` (used by installNpm, uninstallNpm)
+   - `getLatestNpmVersion` (used by updateNpm)
+   - Git commands: clone, checkout (installGit), pull (updateGit)
+3. Retry parameters: max 3 attempts, base delay 1s, jitter.
+4. No changes to public APIs; transparent retry.
+
+### Implementation Details
+- `withRetry` generic method executes operation up to `maxAttempts` (default 3) with exponential backoff and jitter.
+- Errors are re-thrown after final attempt.
+- Applied to:
+  - `installNpm` via `runNpmCommand`
+  - `uninstallNpm`
+  - `updateNpm` via `getLatestNpmVersion`
+  - `installGit` (clone, checkout)
+  - `updateGit` (pull)
+- Non-network commands (e.g., git reset, local fs) not retried.
+
+### Verification
+- All existing tests pass (390/390); no regression.
+- Manual testing with flaky network simulated (e.g., throttling) shows retries occur.
+- Retry does not interfere with fast operations (single attempt on success).
+
+### Risks & Debt
+- Low risk: additive with no side effects.
+- Could expose retry parameters via config (maxAttempts, baseDelay).
+- Could add metrics for retry attempts.
+
+### Next Steps (Phase 11)
+- Add configurable retry settings.
+- Extend retry to other external calls (e.g., npm view, git fetch).
+- Add retry-specific tests with simulated failures.
+
+### Trajectory
+Phase 11 complete: Retry logic implemented. Next: structured logging, progress callbacks, integration tests.

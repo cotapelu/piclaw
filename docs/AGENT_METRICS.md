@@ -1,7 +1,7 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 10 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix)
+- Iterations: 11 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic)
 - Tasks completed: All major features; 100% test pass
 - Test failure rate: 0% (0 failing in 390 tests)
 - Rollbacks: 0
@@ -36,6 +36,7 @@
 - **Pin command**: `piclaw pin <old> <new>` updates package source in settings
 - **Import/Export**: `piclaw export [file]` and `piclaw import <file>` for backup/migration
 - **Team-tool tests fix**: Updated unit tests to match non-blocking team_run contract; all 8 tests pass
+- **Retry logic**: Automatic retry for network failures in npm/git operations with exponential backoff
 - Full test coverage (27 package-command tests, 8 team-tool tests, 18 package-manager tests)
 - Backward compatibility throughout
 

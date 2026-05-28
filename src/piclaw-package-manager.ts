@@ -495,7 +495,7 @@ export class PiclawPackageManager {
 
     // Fetch latest from remote
     console.log(chalk.cyan(`Updating git ${source.host}/${source.path}`));
-    await this.runCommand("git", ["pull", "--rebase"], { cwd: targetDir }).catch(async (err: any) => {
+    await this.withRetry(() => this.runCommand("git", ["pull", "--rebase"], { cwd: targetDir })).catch(async (err: any) => {
       // If pull fails, try fetch + reset
       await this.runCommand("git", ["fetch", "origin"], { cwd: targetDir }).catch(() => {});
       const remoteRef = source.ref || "origin/HEAD";
@@ -522,7 +522,7 @@ export class PiclawPackageManager {
   }
 
   private async getLatestNpmVersion(packageName: string): Promise<string> {
-    const stdout = await this.runCommandCapture("npm", ["view", packageName, "version", "--json"]);
+    const stdout = await this.withRetry(() => this.runCommandCapture("npm", ["view", packageName, "version", "--json"]));
     const raw = stdout.trim();
     if (!raw) throw new Error("Empty response from npm view");
     return JSON.parse(raw);
@@ -647,9 +647,9 @@ export class PiclawPackageManager {
     mkdirSync(dirname(targetDir), { recursive: true });
 
     const repo = `https://${source.host}/${source.path}.git`;
-    await this.runCommand("git", ["clone", repo, targetDir]);
+    await this.withRetry(() => this.runCommand("git", ["clone", repo, targetDir]));
     if (source.ref) {
-      await this.runCommand("git", ["checkout", source.ref], { cwd: targetDir });
+      await this.withRetry(() => this.runCommand("git", ["checkout", source.ref], { cwd: targetDir }));
     }
     // Install dependencies if package.json exists
     const packageJsonPath = join(targetDir, "package.json");
@@ -724,7 +724,26 @@ export class PiclawPackageManager {
   }
 
   private runNpmCommand(args: string[], cwd?: string): Promise<void> {
-    return this.runCommand("npm", args, { cwd });
+    return this.withRetry(() => this.runCommand("npm", args, { cwd }));
+  }
+
+  private async withRetry<T>(
+    operation: () => Promise<T>,
+    maxAttempts: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: any;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        return await operation();
+      } catch (err) {
+        lastError = err;
+        if (attempt === maxAttempts) break;
+        const delay = Math.min(baseDelay * Math.pow(2, attempt - 1), 30000) + Math.random() * baseDelay;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+    throw lastError;
   }
 
   private async runCommand(command: string, args: string[], options?: { cwd?: string }): Promise<void> {

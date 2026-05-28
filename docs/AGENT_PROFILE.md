@@ -33,6 +33,7 @@ None observed in recent iterations.
 - Updated team-tool unit tests to match non-blocking team_run contract (8 tests pass)
 - Added 27 new package-command tests, 8 team-tool tests, 18 package-manager tests (all passing)
 - Added `minimatch` dependency for glob pattern matching
+- Added retry logic for network failures (npm/git) with exponential backoff
 - Backward compatible settings format (string entries still work)
 
 ## Areas for Improvement
@@ -41,7 +42,6 @@ None observed in recent iterations.
 - Implement progress callbacks for long-running operations
 - Add integration tests for full install→update flow
 - Consider using `execa` for more reliable subprocess management
-- Add retry logic for network failures (npm/git)
 - Expose filter configuration via CLI
 
 ## Recommended Skills
