@@ -8,6 +8,7 @@
 
 import chalk from "chalk";
 import { join, resolve } from "node:path";
+import { getAgentDir } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
 
 /**
@@ -71,7 +72,7 @@ Examples:
   }
 
   const cwd = process.cwd();
-  const agentDir = join(resolve(cwd), ".piclaw", "agent"); // fallback for global paths
+  const agentDir = getAgentDir();
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
@@ -138,7 +139,7 @@ Examples:
   }
 
   const cwd = process.cwd();
-  const agentDir = join(resolve(cwd), ".piclaw", "agent");
+  const agentDir = getAgentDir();
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
@@ -174,7 +175,7 @@ List installed packages from user and project settings.
   }
 
   const cwd = process.cwd();
-  const agentDir = join(resolve(cwd), ".piclaw", "agent");
+  const agentDir = getAgentDir();
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });
@@ -270,7 +271,7 @@ Examples:
   }
 
   const cwd = process.cwd();
-  const agentDir = join(resolve(cwd), ".piclaw", "agent");
+  const agentDir = getAgentDir();
 
   try {
     const pm = new PiclawPackageManager({ cwd, agentDir });

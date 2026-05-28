@@ -10,10 +10,10 @@
 ## Medium Priority
 - [x] Implement package uninstall for git sources
 - [ ] Add progress callback to install/remove commands
-- [ ] Support global install (without -l) properly
+- [x] Support global install (without -l) properly
 - [ ] Add package info command (list with installed paths)
 - [ ] Validate package sources before install
-- [ ] Fix resource collection test (currently failing due to node_modules skip)
+- [x] Fix resource collection test (currently failing due to node_modules skip)
 
 ## Low Priority
 - [ ] Add dry-run mode
