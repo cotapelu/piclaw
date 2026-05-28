@@ -137,4 +137,65 @@ describe("Package Commands (CLI)", () => {
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
+
+  describe("handleInfoCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-info command", async () => {
+      const result = await pkgCommands.handleInfoCommand(["list"]);
+      expect(result).toBe(false);
+    });
+
+    it("should show help with -h", async () => {
+      const result = await pkgCommands.handleInfoCommand(["info", "-h"]);
+      expect(result).toBe(true);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Usage: piclaw info"));
+    });
+
+    it("should require source argument", async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      try {
+        await pkgCommands.handleInfoCommand(["info"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Missing package source"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should display package info", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:test", scope: "user", filtered: false, installedPath: "/path/to/test" }
+      ]);
+      vi.spyOn(PiclawPackageManager.prototype, 'resolveExtensionSources').mockResolvedValue({
+        extensions: [{ path: "/path/to/test/ext.ts", enabled: true, metadata: {} }],
+        skills: [],
+        prompts: [],
+        themes: []
+      });
+
+      await pkgCommands.handleInfoCommand(["info", "npm:test"]);
+
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Source: npm:test"));
+      expect(console.log).toHaveBeenCalledWith("Scope: user");
+      expect(console.log).toHaveBeenCalledWith("Filtered: no");
+      expect(console.log).toHaveBeenCalledWith("Installed path: /path/to/test");
+      expect(console.log).toHaveBeenCalledWith("Extensions: 1");
+    });
+
+    it("should indicate package not found but not error", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([]);
+      vi.spyOn(PiclawPackageManager.prototype, 'resolveExtensionSources').mockResolvedValue({ extensions: [], skills: [], prompts: [], themes: [] });
+
+      await pkgCommands.handleInfoCommand(["info", "npm:missing"]);
+
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("not found"));
+    });
+  });
 });

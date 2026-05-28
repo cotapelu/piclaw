@@ -284,6 +284,96 @@ Examples:
 }
 
 /**
+ * Handle package info command
+ * Usage: piclaw info <source> [-l]
+ */
+export async function handleInfoCommand(args: string[]): Promise<boolean> {
+  if (args[0] !== "info") return false;
+
+  let local = false;
+  let source: string | undefined;
+  let help = false;
+
+  for (let i = 1; i < args.length; i++) {
+    if (args[i] === "-l" || args[i] === "--local") {
+      local = true;
+    } else if (args[i] === "-h" || args[i] === "--help") {
+      help = true;
+    } else if (!args[i].startsWith("-")) {
+      if (source) {
+        console.error(chalk.red(`Unexpected argument: ${args[i]}`));
+        console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+        process.exit(1);
+      }
+      source = args[i];
+    } else {
+      console.error(chalk.red(`Unknown option: ${args[i]}`));
+      console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+      process.exit(1);
+    }
+  }
+
+  if (help) {
+    console.log(`
+Usage: piclaw info <source> [-l]
+
+Show details about an installed package.
+
+Arguments:
+  <source>            Package source (e.g., npm:foo, git:bar)
+
+Options:
+  -l, --local         Look in project settings (.piclaw/settings.json)
+  -h, --help          Show this help
+
+Examples:
+  piclaw info npm:chalk
+  piclaw info git:my/repo -l
+`);
+    return true;
+  }
+
+  if (!source) {
+    console.error(chalk.red("Missing package source."));
+    console.error(chalk.dim(`Usage: piclaw info <source> [-l]`));
+    process.exit(1);
+  }
+
+  const cwd = process.cwd();
+  const agentDir = getAgentDir();
+
+  try {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+    const configured = pm.listConfiguredPackages();
+    const entry = configured.find(p => p.source === source && p.scope === (local ? "project" : "user"));
+    if (!entry) {
+      console.error(chalk.yellow(`Package '${source}' not found in ${local ? 'project' : 'global'} settings.`));
+      return true; // not an error
+    }
+
+    console.log(chalk.bold(`Source: ${entry.source}`));
+    console.log(`Scope: ${entry.scope}`);
+    console.log(`Filtered: ${entry.filtered ? "yes" : "no"}`);
+    if (entry.installedPath) {
+      console.log(`Installed path: ${entry.installedPath}`);
+    } else {
+      console.log(chalk.yellow(`Installed path: not found`));
+    }
+
+    const resolved = await pm.resolveExtensionSources([source], { local });
+    console.log(`Extensions: ${resolved.extensions.length}`);
+    console.log(`Skills: ${resolved.skills.length}`);
+    console.log(`Prompts: ${resolved.prompts.length}`);
+    console.log(`Themes: ${resolved.themes.length}`);
+
+    return true;
+  } catch (err: any) {
+    console.error(chalk.red(`✗ Failed: ${err.message}`));
+    process.exit(1);
+  }
+}
+
+/**
  * Handle all package commands
  * Called from main.ts
  */
@@ -305,6 +395,9 @@ export async function handlePackageCommand(args: string[]): Promise<boolean> {
       return true;
     case "update":
       await handleUpdateCommand(args);
+      return true;
+    case "info":
+      await handleInfoCommand(args);
       return true;
     default:
       return false;

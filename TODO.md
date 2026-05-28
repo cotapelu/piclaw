@@ -11,7 +11,7 @@
 - [x] Implement package uninstall for git sources
 - [ ] Add progress callback to install/remove commands
 - [x] Support global install (without -l) properly
-- [ ] Add package info command (list with installed paths)
+- [x] Add package info command (list with installed paths)
 - [x] Validate package sources before install
 - [x] Fix resource collection test (currently failing due to node_modules skip)
 
