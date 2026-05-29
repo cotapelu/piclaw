@@ -217,17 +217,17 @@
         {
           "id": "task-38",
           "content": "Add tests for handleInfoCommand error handling (resolve failure)",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-39",
           "content": "Add tests for handleHealthCommand edge cases (invalid JSON, missing package.json)",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-40",
           "content": "Add tests for PiclawPackageManager.runCommandCapture error propagation",
-          "status": "pending"
+          "status": "in_progress"
         },
         {
           "id": "task-41",
@@ -255,9 +255,20 @@
           "status": "pending"
         }
       ]
+    },
+    {
+      "id": "phase-6",
+      "name": "Phase 22: Fix Provider Deprecation Warnings",
+      "tasks": [
+        {
+          "id": "task-46",
+          "content": "Fix kilo provider API key reference: change from \"KILO_API_KEY\" to \"$KILO_API_KEY\"",
+          "status": "completed"
+        }
+      ]
     }
   ],
-  "nextTaskId": 46,
-  "nextPhaseId": 6,
-  "updatedAt": "2026-05-29T03:01:49.767Z"
+  "nextTaskId": 47,
+  "nextPhaseId": 7,
+  "updatedAt": "2026-05-29T04:13:19.781Z"
 }

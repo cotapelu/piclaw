@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { homedir } from "node:os";
+import * as cp from "node:child_process";
 import { PiclawPackageManager } from "../piclaw-package-manager.js";
 
 describe("PiclawPackageManager", () => {
@@ -259,6 +260,80 @@ describe("PiclawPackageManager", () => {
       const runCommandSpy = vi.spyOn(pm as any, 'runCommand');
       await pm.installGit(source, "user");
       expect(runCommandSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("runCommandCapture error handling", () => {
+    it("should reject when command exits with non-zero code", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const mockChild = {
+        stdout: {
+          on: (event: string, cb: Function) => {
+            if (event === 'data') cb(Buffer.from("some output"));
+          }
+        },
+        on: (event: string, cb: Function) => {
+          if (event === 'close') cb(1); // non-zero exit
+        }
+      };
+      const spawnSpy = vi.spyOn(cp, 'spawn').mockReturnValue(mockChild as any);
+
+      await expect((pm as any).runCommandCapture("npm", ["view", "test", "version"])).rejects.toThrow("npm exited with code 1");
+      expect(spawnSpy).toHaveBeenCalled();
+      spawnSpy.mockRestore();
+    });
+
+    it("should reject when spawn throws (e.g., command not found)", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const spawnError = new Error("Command not found");
+      const spawnSpy = vi.spyOn(cp, 'spawn').mockImplementation(() => {
+        throw spawnError;
+      });
+
+      await expect((pm as any).runCommandCapture("nonexistent-cmd", [])).rejects.toThrow("Command not found");
+      expect(spawnSpy).toHaveBeenCalled();
+      spawnSpy.mockRestore();
+    });
+  });
+
+  describe("getLatestNpmVersion error handling", () => {
+    it("should reject when npm view returns empty output", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const runCommandCaptureSpy = vi.spyOn(pm as any, 'runCommandCapture').mockResolvedValue("");
+
+      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("Empty response from npm view");
+      expect(runCommandCaptureSpy).toHaveBeenCalledWith("npm", ["view", "test-pkg", "version", "--json"]);
+    });
+
+    it("should reject when npm view returns invalid JSON", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      vi.spyOn(pm as any, 'runCommandCapture').mockResolvedValue("not json");
+
+      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("Unexpected token o in JSON");
+    });
+
+    it("should propagate errors from runCommandCapture", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      vi.spyOn(pm as any, 'runCommandCapture').mockRejectedValue(new Error("npm command failed"));
+
+      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("npm command failed");
+    });
+  });
+
+  describe("Integration tests with simulated failures", () => {
+    it("should propagate install error when installNpm fails", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const installNpmSpy = vi.spyOn(pm as any, 'installNpm').mockRejectedValue(new Error("npm install failed"));
+      await expect(pm.install("npm:test-pkg")).rejects.toThrow("npm install failed");
+      installNpmSpy.mockRestore();
+    });
+
+    it("should propagate update error when updateNpm fails", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      pm.addSourceToSettings("npm:test-pkg", { local: true });
+      const updateNpmSpy = vi.spyOn(pm as any, 'updateNpm').mockRejectedValue(new Error("npm update failed"));
+      await expect(pm.update(undefined, { local: true })).rejects.toThrow("npm update failed");
+      updateNpmSpy.mockRestore();
     });
   });
 });

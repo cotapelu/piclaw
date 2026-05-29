@@ -46,7 +46,7 @@ function loadReminderMessage(): string {
       // Take entire content (trim only leading/trailing whitespace)
       const trimmed = content.trim();
       if (trimmed) {
-        logger.log("[AutoContinue] Loaded reminder from", { filePath });
+        logger.log(`[AutoContinue] Loaded reminder from ${filePath}`);
         return trimmed;
       }
     }

@@ -20,7 +20,7 @@ export function registerKiloProvider(api: ExtensionAPI): void {
 
   const config: ProviderConfig = {
     baseUrl,
-    apiKey: "KILO_API_KEY",
+    apiKey: "$KILO_API_KEY",
     api: "openai-completions",
     models: KILO_MODELS_ALL,
   };
