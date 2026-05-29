@@ -312,6 +312,67 @@ describe("PiclawPackageManager", () => {
     });
   });
 
+  describe("runCommand method", () => {
+    afterEach(() => {
+      (cp as any).spawn?.mockReset?.();
+    });
+    it("should resolve when command exits with code 0", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const mockChild = {
+        stdout: { on: vi.fn() },
+        stderr: { on: vi.fn() },
+        on: vi.fn((event: string, cb: Function) => {
+          if (event === 'close') cb(0);
+        })
+      };
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockReturnValue(mockChild);
+
+      await expect((pm as any).runCommand("echo", ["hello"])).resolves.toBeUndefined();
+      expect(spawnMock).toHaveBeenCalledWith("echo", ["hello"], expect.anything());
+    });
+
+    it("should reject when command exits with non-zero code", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const mockChild = {
+        stdout: { on: vi.fn() },
+        stderr: { on: vi.fn() },
+        on: vi.fn((event: string, cb: Function) => {
+          if (event === 'close') cb(1);
+        })
+      };
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockReturnValue(mockChild);
+
+      await expect((pm as any).runCommand("false", [])).rejects.toThrow("false exited with code 1");
+    });
+
+    it("should reject when spawn throws", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const spawnError = new Error("Spawn error");
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockImplementation(() => { throw spawnError; });
+
+      await expect((pm as any).runCommand("nonexistent", [])).rejects.toThrow("Spawn error");
+    });
+
+    it("should pass cwd option to spawn", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const mockChild = {
+        stdout: { on: vi.fn() },
+        stderr: { on: vi.fn() },
+        on: vi.fn((event: string, cb: Function) => {
+          if (event === 'close') cb(0);
+        })
+      };
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockReturnValue(mockChild);
+
+      await (pm as any).runCommand("echo", ["test"], { cwd: cwd });
+      expect(spawnMock).toHaveBeenCalledWith("echo", ["test"], { cwd, stdio: "inherit", shell: false });
+    });
+  });
+
   describe("getLatestNpmVersion error handling", () => {
     it("should reject when npm view returns empty output", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });

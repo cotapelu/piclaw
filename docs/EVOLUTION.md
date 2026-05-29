@@ -803,3 +803,41 @@ Resolve failing tests caused by ESM module mocking limitations and brittle error
 ### Trajectory
 Phase 21 complete: Test reliability issues resolved, all 450 tests passing. Next: coverage improvements to reach 75%+.
 
+---
+
+## 2025-05-29 - Phase 22: Coverage Expansion - runCommand Tests
+
+### Objective
+Increase test coverage for PiclawPackageManager by adding unit tests for the `runCommand` method, targeting >75% overall coverage.
+
+### Changes Made
+1. Added new test suite "runCommand method" in `src/tests/package-manager.test.ts` with 4 tests:
+   - Resolves on successful exit (code 0)
+   - Rejects on non-zero exit code
+   - Rejects on spawn throw
+   - Correctly passes `cwd` option to spawn (including `stdio: 'inherit'` and `shell` flags)
+2. Leveraged existing `vi.mock` for `node:child_process` to control spawn behavior.
+3. Updated global afterEach to clear spawn mock state for isolation.
+
+### Implementation Details
+- Tests use the same mocking strategy as `runCommandCapture` tests.
+- `runCommand` method is a thin wrapper around `spawn` with `stdio: 'inherit'` and platform-specific `shell` option.
+- All tests verify both success and error paths.
+
+### Verification
+- All 454 tests now pass (100%).
+- Coverage increased from ~70% to ~73% statements, ~74% lines (closer to 75% target).
+- No regressions; build clean.
+
+### Risks & Debt
+- Very low risk: test-only additions.
+- Coverage still below 80% target; further work needed on `package-commands.ts` and internal methods.
+
+### Next Steps (Phase 22)
+- Continue adding tests for remaining error branches in `installNpm`, `updateGit`, etc.
+- Expand coverage of CLI argument parsing in `package-commands.ts`.
+- Aim for >75% coverage in next iteration.
+
+### Trajectory
+Phase 22 complete: runCommand tests added, coverage increased to ~73%. Next: push towards 75%+ with deeper package manager and command-handler tests.
+

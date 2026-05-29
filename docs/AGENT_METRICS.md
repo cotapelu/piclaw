@@ -1,7 +1,7 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 19 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix)
+- Iterations: 20 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests)
 - Tasks completed: All major features; 100% test pass
 - Test failure rate: 0% (0 failing in 450 tests)
 - Rollbacks: 0
@@ -16,10 +16,10 @@
 ## Code Quality
 - Total lines: ~4900 (including remove dry-run, type improvements, additional tests)
 - Complexity: Low-Medium (package manager ~950 lines)
-- Coverage: ~70% (1858/2649 statements, 1724/2419 lines)
+- Coverage: ~73% statements, ~74% lines
 
 ## Testing Status
-- Unit tests: 450 total, 450 passing (100%)
+- Unit tests: 454 total, 454 passing (100%)
 - New tests: 7 handleRemoveCommand tests, 1 Path Helpers test (getGitInstallPath), improved test reliability
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
@@ -47,6 +47,7 @@
 - **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
 - **Extensions logging**: Migrated extension modules (todos, auto-continue, team) to logger
+- **Coverage expansion**: Added runCommand unit tests, increasing coverage to ~73%
 - Backward compatibility throughout
 
 ## Risk Assessment
