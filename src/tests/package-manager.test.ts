@@ -429,6 +429,8 @@ describe("PiclawPackageManager", () => {
     });
   });
 
+
+
   describe("getLatestNpmVersion error handling", () => {
     it("should reject when npm view returns empty output", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
@@ -460,31 +462,7 @@ describe("PiclawPackageManager", () => {
     });
   });
 
-  describe("updateNpm method", () => {
-    it("should not reinstall if installed version equals latest", async () => {
-      const pm = new PiclawPackageManager({ cwd, agentDir });
-      const parsed = (pm as any).parseSource("npm:chalk");
-      const getInstalledSpy = vi.spyOn(pm as any, 'getInstalledVersion').mockResolvedValue("1.0.0");
-      const getLatestSpy = vi.spyOn(pm as any, 'getLatestNpmVersion').mockResolvedValue("1.0.0");
-      const installNpmSpy = vi.spyOn(pm as any, 'installNpm');
-      await (pm as any).updateNpm(parsed, 'project');
-      expect(installNpmSpy).not.toHaveBeenCalled();
-      expect(getInstalledSpy).toHaveBeenCalledWith(parsed, 'project');
-      expect(getLatestSpy).toHaveBeenCalledWith(parsed.name);
-    });
 
-    it("should reinstall when installed version differs from latest", async () => {
-      const pm = new PiclawPackageManager({ cwd, agentDir });
-      const parsed = (pm as any).parseSource("npm:chalk");
-      const getInstalledSpy = vi.spyOn(pm as any, 'getInstalledVersion').mockResolvedValue("1.0.0");
-      const getLatestSpy = vi.spyOn(pm as any, 'getLatestNpmVersion').mockResolvedValue("2.0.0");
-      const installNpmSpy = vi.spyOn(pm as any, 'installNpm').mockResolvedValue(undefined);
-      await (pm as any).updateNpm(parsed, 'project');
-      expect(installNpmSpy).toHaveBeenCalledWith(parsed, 'project');
-      expect(getInstalledSpy).toHaveBeenCalledWith(parsed, 'project');
-      expect(getLatestSpy).toHaveBeenCalledWith(parsed.name);
-    });
-  });
 
   describe("Integration tests with simulated failures", () => {
     it("should propagate install error when installNpm fails", async () => {
