@@ -133,7 +133,7 @@ export function writeContextLog(context: {
 		}
 	} catch (error) {
 		// Don't throw - logging should never break the main flow
-		logger.error("ContextLogger: Failed to write log file:", error);
+		logger.error("ContextLogger: Failed to write log file", { error });
 	}
 }
 

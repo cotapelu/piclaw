@@ -655,7 +655,8 @@ export class PiclawPackageManager {
     const repo = `https://${source.host}/${source.path}.git`;
     await this.withRetry(() => this.runCommand("git", ["clone", repo, targetDir]));
     if (source.ref) {
-      await this.withRetry(() => this.runCommand("git", ["checkout", source.ref], { cwd: targetDir }));
+      const ref = source.ref;
+      await this.withRetry(() => this.runCommand("git", ["checkout", ref], { cwd: targetDir }));
     }
     // Install dependencies if package.json exists
     const packageJsonPath = join(targetDir, "package.json");

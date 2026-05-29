@@ -80,7 +80,7 @@ export class AgentTeam implements AgentTeamRuntime {
         this.onUpdate(update);
       } catch (e) {
         // Ignore update errors - don't break team execution
-        logger.warn('Failed to send update:', e);
+        logger.warn('Failed to send update', { error: e });
       }
     }
   }
@@ -109,7 +109,7 @@ export class AgentTeam implements AgentTeamRuntime {
       await Promise.allSettled(
         this.runtimes.slice(1).map(rt =>
           rt.dispose().catch(err =>
-            logger.error("Failed to dispose child agent:", err)
+            logger.error("Failed to dispose child agent", { error: err })
           )
         )
       );
@@ -120,7 +120,7 @@ export class AgentTeam implements AgentTeamRuntime {
           registry.unregister(this.id);
         }
       } catch (e) {
-        logger.warn('Failed to unregister team from registry:', e);
+        logger.warn('Failed to unregister team from registry', { error: e });
       }
     };
     this.workspace = new SharedWorkspace();
@@ -625,7 +625,7 @@ export class TeamRegistry {
         this.unregister(teamId);
         logger.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
       } catch (e) {
-        logger.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}:`, e);
+        logger.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}`, { error: e });
       }
     }
   }
@@ -853,7 +853,7 @@ Use team_ops to continue. If all tasks done, finish up.`;
   const childPromises = team.runtimes.slice(1).map((runtime, idx) => {
     const role = team.roles[idx + 1];
     return runAgentLoop(runtime, role).catch(err => {
-      logger.error(`Agent ${role} failed:`, err);
+      logger.error(`Agent ${role} failed`, { error: err });
     });
   });
 
@@ -876,7 +876,7 @@ Use team_ops to continue. If all tasks done, finish up.`;
         const registry = TeamRegistry.getInstance();
         registry.resetAutoDisposeTimer(team.id);
       } catch (e) {
-        logger.warn('Failed to schedule auto-dispose:', e);
+        logger.warn('Failed to schedule auto-dispose', { error: e });
       }
     }
   }, 1000);

@@ -18,12 +18,12 @@ process.env.PI_CODING_AGENT = "true";
 
 // Simple error handlers (avoid crashing without logs)
 process.on("unhandledRejection", (err) => {
-  logger.error("Unhandled rejection:", err);
+  logger.error("Unhandled rejection", { error: err });
   process.exit(1);
 });
 
 process.on("uncaughtException", (err) => {
-  logger.error("Uncaught exception:", err);
+  logger.error("Uncaught exception", { error: err });
   process.exit(1);
 });
 

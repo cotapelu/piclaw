@@ -94,6 +94,6 @@ export function validateApiKeys(config: PiclawConfig): void {
     for (const warning of warnings) {
       logger.log(chalk.yellow(`  - ${warning}`));
     }
-    logger.log();
+    logger.log("");
   }
 }

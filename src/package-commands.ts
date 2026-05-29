@@ -14,6 +14,11 @@ import { PiclawPackageManager } from "./piclaw-package-manager.js";
 import { logger } from "./utils/logger.js";
 import type { PackageFilter } from "./piclaw-package-manager.js";
 
+type SettingsEntry = string | { source: string; filter?: PackageFilter };
+interface Settings {
+  packages?: SettingsEntry[];
+}
+
 type InstallOptions = { local?: boolean; dryRun?: boolean; filter?: PackageFilter };
 
 /**
@@ -275,7 +280,7 @@ List installed packages from user and project settings.
     }
 
     if (projectPkgs.length > 0) {
-      if (globalPkgs.length > 0) logger.log();
+      if (globalPkgs.length > 0) logger.log("");
       logger.log(chalk.bold("Project packages:"));
       for (const pkg of projectPkgs) {
         const display = pkg.filtered ? `${pkg.source} (filtered)` : pkg.source;
@@ -504,7 +509,7 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
       }
     }
 
-    logger.log();
+    logger.log("");
     logger.log(chalk.bold(`Health check complete: ${healthy} healthy, ${issues} issues`));
     return true;
   } catch (err: any) {
@@ -799,8 +804,8 @@ Examples:
     }
 
     // Load existing settings
-    const existing = existsSync(settingsPath)
-      ? JSON.parse(readFileSync(settingsPath, "utf-8"))
+    const existing: Settings = existsSync(settingsPath)
+      ? (JSON.parse(readFileSync(settingsPath, "utf-8")) as Settings)
       : { packages: [] };
     if (!Array.isArray(existing.packages)) existing.packages = [];
 

@@ -46,12 +46,12 @@ function loadReminderMessage(): string {
       // Take entire content (trim only leading/trailing whitespace)
       const trimmed = content.trim();
       if (trimmed) {
-        logger.log("[AutoContinue] Loaded reminder from:", filePath);
+        logger.log("[AutoContinue] Loaded reminder from", { filePath });
         return trimmed;
       }
     }
   } catch (error) {
-    logger.error("[AutoContinue] Failed to load reminder file:", error);
+    logger.error("[AutoContinue] Failed to load reminder file", { error });
   }
   logger.log("[AutoContinue] Using default message");
   return DEFAULT_IDLE_MESSAGE;
