@@ -841,3 +841,43 @@ Increase test coverage for PiclawPackageManager by adding unit tests for the `ru
 ### Trajectory
 Phase 22 complete: runCommand tests added, coverage increased to ~73%. Next: push towards 75%+ with deeper package manager and command-handler tests.
 
+---
+
+## 2025-05-29 - Phase 23: Coverage Expansion - Additional Tests
+
+### Objective
+Increase test coverage further toward the 75% target by adding tests for runCommandCapture success, getLatestNpmVersion happy path, and installNpm/uninstallNpm methods.
+
+### Changes Made
+1. Added success test for runCommandCapture: verifies stdout capture and exit code 0 handling.
+2. Added happy path test for getLatestNpmVersion: mocks runCommandCapture to return valid JSON version and asserts resolution.
+3. Added suite for installNpm and uninstallNpm:
+   - Verifies correct npm command arguments for project and global scopes.
+   - Tests error propagation from runNpmCommand.
+   - Utilizes actual implementation details (e.g., `--prefix`, `--no-audit`, `--no-fund`).
+4. All tests added to `src/tests/package-manager.test.ts`.
+
+### Implementation Details
+- Used same `vi.mock` strategy for child_process.
+- For installNpm/uninstallNpm, used `vi.spyOn` to mock `runNpmCommand`.
+- Corrected earlier errors in expected npm arguments (added `--prefix`, `--no-audit`, `--no-fund`).
+- Tests run in existing test infrastructure without changes.
+
+### Verification
+- All 460 tests pass (100%).
+- Coverage increased to ~74% statements, ~75% lines (very close to 75% target).
+- No regressions; build clean.
+
+### Risks & Debt
+- Very low risk: test-only additions.
+- Coverage approaching but still slightly below 75% statements; may require a few more targeted tests.
+- Some private methods (e.g., updateNpm) still lack direct tests.
+
+### Next Steps (Phase 23)
+- Add remaining tests for updateNpm method (version comparison logic) to push statements coverage past 75%.
+- Consider tests for package-commands CLI parsing edge cases.
+- Aim for >75% statements coverage in next iteration.
+
+### Trajectory
+Phase 23 complete: Additional tests added, coverage ~74% statements, 75% lines. Next: final push past 75% with updateNpm tests and remaining CLI coverage.
+

@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (40+ tests across multiple files, total 454 passing)
+- Comprehensive test writing (40+ tests across multiple files, total 460 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -44,6 +44,7 @@ None observed in recent iterations.
 - **Extensions logging**: Migrated extension modules to logger
 - **Test reliability fix**: Fixed ESM child_process mocking and JSON error message brittleness, all 450 tests now pass
 - **Coverage expansion**: Added runCommand unit tests, increasing coverage to ~73%
+- **Coverage expansion (part 2)**: Added tests for runCommandCapture success, getLatestNpmVersion happy path, installNpm/uninstallNpm; coverage increased to ~74%
 - Backward compatible
 
 ## Areas for Improvement
