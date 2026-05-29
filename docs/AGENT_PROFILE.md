@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (40+ tests across multiple files, total 433 passing)
+- Comprehensive test writing (40+ tests across multiple files, total 450 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -42,6 +42,7 @@ None observed in recent iterations.
 - **Test coverage expansion**: Added handleRemoveCommand tests (7), getGitInstallPath test, fixed existing tests; coverage ~70%
 - **Structured logging**: Migrated console calls to logger across core files
 - **Extensions logging**: Migrated extension modules to logger
+- **Test reliability fix**: Fixed ESM child_process mocking and JSON error message brittleness, all 450 tests now pass
 - Backward compatible
 
 ## Areas for Improvement

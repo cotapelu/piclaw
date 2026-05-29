@@ -763,3 +763,43 @@ Increase test coverage by adding unit tests for error handling and internal meth
 
 ### Trajectory
 Phase 20 in progress: Added error-path tests for remove command and git path helpers; coverage trending upward toward 75%. Next phase will focus on integration tests and deeper package manager coverage.
+
+---
+
+## 2025-05-29 - Phase 21: Test Reliability Fix
+
+### Objective
+Resolve failing tests caused by ESM module mocking limitations and brittle error message assertions, restoring 100% test pass rate.
+
+### Changes Made
+1. Added `vi.mock` for `node:child_process` to enable controlling `spawn` function in tests.
+2. Refactored `runCommandCapture` error handling tests to use the mock directly instead of spying on non-configurable ESM exports.
+3. Fixed JSON parsing error test assertion to match actual Node.js error message ("not valid JSON" substring) rather than version-specific wording.
+4. Added cleanup of spawn mock in afterEach to prevent test contamination.
+5. Updated global afterEach to clear mock state.
+
+### Implementation Details
+- Used Vitest's `vi.mock` with async factory to replace `child_process.spawn` with a mock function while preserving actual `spawnSync` and other exports.
+- The mock is applied module-wide, ensuring both test and production code (PiclawPackageManager) receive the mocked spawn when running in test environment.
+- Tests now set mockReturnValue or mockImplementation for spawn as needed, and verify calls with mock assertions.
+- JSON error message test now uses substring match `.toThrow("not valid JSON")` to be robust across Node versions.
+- No production code changes; all fixes are test-only.
+
+### Verification
+- All 450 tests now pass (100%).
+- No regressions; build remains clean.
+- Test suite stability improved; ESM mocking limitations bypassed.
+
+### Risks & Debt
+- Very low risk: test-only modifications.
+- Mocking `child_process` globally is safe because no tests rely on real spawn (all higher-level calls are mocked or use fs only).
+- Could further refine by using dependency injection for `child_process` in production code, but current approach is sufficient.
+
+### Next Steps (Phase 21)
+- Continue coverage expansion targeting >75%.
+- Address remaining ESLint warnings in test files.
+- Consider adding integration tests that cover more end-to-end scenarios with realistic network and git interactions.
+
+### Trajectory
+Phase 21 complete: Test reliability issues resolved, all 450 tests passing. Next: coverage improvements to reach 75%+.
+

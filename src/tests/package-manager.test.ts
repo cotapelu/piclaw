@@ -5,6 +5,15 @@ import { homedir } from "node:os";
 import * as cp from "node:child_process";
 import { PiclawPackageManager } from "../piclaw-package-manager.js";
 
+vi.mock('node:child_process', async () => {
+  const actual = await vi.importActual<typeof import('node:child_process')>('node:child_process');
+  return {
+    ...actual,
+    spawn: vi.fn(),
+    spawnSync: actual.spawnSync,
+  };
+});
+
 describe("PiclawPackageManager", () => {
   let originalHome: string;
   let tempHome: string;
@@ -32,6 +41,10 @@ describe("PiclawPackageManager", () => {
     }
     vi.restoreAllMocks();
     vi.clearAllMocks();
+    try {
+      (cp as any).spawn?.mockClear?.();
+      (cp as any).spawn?.mockReset?.();
+    } catch {}
   });
 
   describe("Settings Persistence", () => {
@@ -264,6 +277,9 @@ describe("PiclawPackageManager", () => {
   });
 
   describe("runCommandCapture error handling", () => {
+    afterEach(() => {
+      (cp as any).spawn?.mockReset?.();
+    });
     it("should reject when command exits with non-zero code", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
       const mockChild = {
@@ -276,23 +292,23 @@ describe("PiclawPackageManager", () => {
           if (event === 'close') cb(1); // non-zero exit
         }
       };
-      const spawnSpy = vi.spyOn(cp, 'spawn').mockReturnValue(mockChild as any);
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockReturnValue(mockChild);
 
       await expect((pm as any).runCommandCapture("npm", ["view", "test", "version"])).rejects.toThrow("npm exited with code 1");
-      expect(spawnSpy).toHaveBeenCalled();
-      spawnSpy.mockRestore();
+      expect(spawnMock).toHaveBeenCalledWith("npm", expect.arrayContaining(["view", "test", "version"]), expect.anything());
     });
 
     it("should reject when spawn throws (e.g., command not found)", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
       const spawnError = new Error("Command not found");
-      const spawnSpy = vi.spyOn(cp, 'spawn').mockImplementation(() => {
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockImplementation(() => {
         throw spawnError;
       });
 
       await expect((pm as any).runCommandCapture("nonexistent-cmd", [])).rejects.toThrow("Command not found");
-      expect(spawnSpy).toHaveBeenCalled();
-      spawnSpy.mockRestore();
+      expect(spawnMock).toHaveBeenCalledWith("nonexistent-cmd", [], expect.anything());
     });
   });
 
@@ -309,7 +325,7 @@ describe("PiclawPackageManager", () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
       vi.spyOn(pm as any, 'runCommandCapture').mockResolvedValue("not json");
 
-      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("Unexpected token o in JSON");
+      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("not valid JSON");
     });
 
     it("should propagate errors from runCommandCapture", async () => {

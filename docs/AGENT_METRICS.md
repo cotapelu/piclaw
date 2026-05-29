@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 18 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON)
+- Iterations: 19 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix)
 - Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 433 tests)
+- Test failure rate: 0% (0 failing in 450 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -19,13 +19,14 @@
 - Coverage: ~70% (1858/2649 statements, 1724/2419 lines)
 
 ## Testing Status
-- Unit tests: 433 total, 433 passing (100%)
+- Unit tests: 450 total, 450 passing (100%)
 - New tests: 7 handleRemoveCommand tests, 1 Path Helpers test (getGitInstallPath), improved test reliability
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
 - Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)
 
 ## Recent Improvements
+- **Test reliability fix**: Resolved ESM child_process mocking issues and JSON error message brittleness, restoring 100% test pass (450 tests)
 - **Structured logging with levels & JSON**: Enhanced logger with log levels (debug/info/warn/error), configurable format via PICLAW_LOG_FORMAT (pretty/JSON) and PICLAW_LOG_LEVEL env vars, comprehensive unit tests (12 passing)
 - **Update command**: `piclaw update [source] [-l]` with npm/git version checking
 - **Package filtering**: Pattern-based filtering per package (minimatch)
