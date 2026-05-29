@@ -68,7 +68,7 @@ describe("Package Commands (CLI)", () => {
     it("should call pm.update for all packages when no source provided", async () => {
       const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockResolvedValue(undefined);
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update"]);
       } catch (e) {}
@@ -81,7 +81,7 @@ describe("Package Commands (CLI)", () => {
     it("should call pm.update with specific source", async () => {
       const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockResolvedValue(undefined);
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update", "npm:chalk"]);
       } catch (e) {}
@@ -93,7 +93,7 @@ describe("Package Commands (CLI)", () => {
     it("should pass -l flag as local: true", async () => {
       const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockResolvedValue(undefined);
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update", "-l"]);
       } catch (e) {}
@@ -105,7 +105,7 @@ describe("Package Commands (CLI)", () => {
     it("should combine source and -l flag", async () => {
       const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockResolvedValue(undefined);
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update", "git:my/repo", "-l"]);
       } catch (e) {}
@@ -117,7 +117,7 @@ describe("Package Commands (CLI)", () => {
     it("should handle pm.update error", async () => {
       const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockRejectedValue(new Error("Update failed"));
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update"]);
       } catch (e) {
@@ -129,7 +129,7 @@ describe("Package Commands (CLI)", () => {
     });
 
     it("should reject unknown option", async () => {
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleUpdateCommand(["update", "--unknown"]);
       } catch (e) {}
@@ -161,7 +161,7 @@ describe("Package Commands (CLI)", () => {
     });
 
     it("should require source argument", async () => {
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleInfoCommand(["info"]);
       } catch (e) {}
@@ -232,7 +232,7 @@ describe("Package Commands (CLI)", () => {
     });
 
     it("should require both old and new sources", async () => {
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handlePinCommand(["pin", "npm:foo@1.0"]);
       } catch (e) {}
@@ -245,7 +245,7 @@ describe("Package Commands (CLI)", () => {
       mkdirSync(join(cwd, ".piclaw"), { recursive: true });
       writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:bar@1.0"] }));
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handlePinCommand(["pin", "npm:bar@1.0", "npm:bar@2.0", "-l"]);
       } catch (e) {
@@ -272,7 +272,7 @@ describe("Package Commands (CLI)", () => {
       mkdirSync(join(cwd, ".piclaw"), { recursive: true });
       writeFileSync(settingsPath, JSON.stringify({ packages: ["npm:other@1.0"] }));
 
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handlePinCommand(["pin", "npm:missing@1.0", "npm:new@2.0", "-l"]);
       } catch (e) {}
@@ -352,7 +352,7 @@ describe("Package Commands (CLI)", () => {
     });
 
     it("should require input file", async () => {
-      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit") as any });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
       try {
         await pkgCommands.handleImportCommand(["import"]);
       } catch (e) {}

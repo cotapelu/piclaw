@@ -1,14 +1,15 @@
 type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+type LogMeta = Record<string, unknown>;
 
 interface LogContext {
   timestamp: string;
   level: LogLevel;
   message: string;
-  meta?: Record<string, any>;
+  meta?: LogMeta;
 }
 
 class JsonFormatter {
-  static format(level: LogLevel, message: string, meta?: Record<string, any>): string {
+  static format(level: LogLevel, message: string, meta?: LogMeta): string {
     const context: LogContext = {
       timestamp: new Date().toISOString(),
       level,
@@ -58,7 +59,7 @@ function shouldLog(level: LogLevel): boolean {
   return levels.indexOf(level) >= levels.indexOf(currentLevel);
 }
 
-function formatMessage(level: LogLevel, message: string, meta?: Record<string, any>): string {
+function formatMessage(level: LogLevel, message: string, meta?: LogMeta): string {
   const format = getLogFormat();
   if (format === 'json') {
     return JsonFormatter.format(level, message, meta);
@@ -66,7 +67,7 @@ function formatMessage(level: LogLevel, message: string, meta?: Record<string, a
   return PrettyFormatter.format(level, message);
 }
 
-function logToConsole(level: LogLevel, message: string, meta?: Record<string, any>) {
+function logToConsole(level: LogLevel, message: string, meta?: LogMeta) {
   const formatted = formatMessage(level, message, meta);
   switch (level) {
     case 'error':
@@ -83,31 +84,31 @@ function logToConsole(level: LogLevel, message: string, meta?: Record<string, an
 }
 
 export const logger = {
-  debug: (message: string, meta?: Record<string, any>) => {
+  debug: (message: string, meta?: LogMeta) => {
     if (shouldLog('debug')) {
       logToConsole('debug', message, meta);
     }
   },
 
-  info: (message: string, meta?: Record<string, any>) => {
+  info: (message: string, meta?: LogMeta) => {
     if (shouldLog('info')) {
       logToConsole('info', message, meta);
     }
   },
 
-  log: (message: string, meta?: Record<string, any>) => {
+  log: (message: string, meta?: LogMeta) => {
     if (shouldLog('info')) {
       logToConsole('info', message, meta);
     }
   },
 
-  warn: (message: string, meta?: Record<string, any>) => {
+  warn: (message: string, meta?: LogMeta) => {
     if (shouldLog('warn')) {
       logToConsole('warn', message, meta);
     }
   },
 
-  error: (message: string, meta?: Record<string, any>) => {
+  error: (message: string, meta?: LogMeta) => {
     if (shouldLog('error')) {
       logToConsole('error', message, meta);
     }

@@ -226,4 +226,27 @@ describe("PiclawPackageManager", () => {
       await expect(pm.install("git:github.com")).rejects.toThrow(/Invalid git source/);
     });
   });
+
+  describe("installGit error handling", () => {
+    it("should propagate error if git clone fails", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const source = { type: "git", host: "github.com", path: "user/repo" } as any;
+      // Mock runCommand to reject with error
+      const runCommandSpy = vi.spyOn(pm as any, 'runCommand').mockRejectedValue(new Error("git clone failed"));
+      // The withRetry will attempt and eventually reject
+      await expect(pm.installGit(source, "user")).rejects.toThrow("git clone failed");
+      // Ensure retry was attempted
+      expect(runCommandSpy).toHaveBeenCalledTimes(3); // default maxAttempts=3
+    });
+
+    it("should skip if target directory already exists", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const source = { type: "git", host: "github.com", path: "user/repo" } as any;
+      const targetDir = join(agentDir, "git", "github.com", "user", "repo");
+      mkdirSync(targetDir, { recursive: true });
+      const runCommandSpy = vi.spyOn(pm as any, 'runCommand');
+      await pm.installGit(source, "user");
+      expect(runCommandSpy).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -10,9 +10,8 @@ import { logger } from "./logger.js";
  */
 
 import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname } from "node:path";
 import type { Message } from "@earendil-works/pi-ai";
-import type { ToolDefinition } from "@earendil-works/pi-coding-agent";
 
 /**
  * Configuration for context logging.
@@ -37,18 +36,22 @@ const DEFAULT_OPTIONS: Required<Omit<ContextLoggerOptions, "logFile">> = {
 /**
  * Format a single AgentMessage for logging.
  */
+type ContentBlock = 
+  | { type: 'text'; text: string }
+  | { type: 'image'; source: { type: string } };
+
 function formatAgentMessage(msg: Message, index: number): string {
 	const timestamp = "timestamp" in msg && msg.timestamp ? new Date(msg.timestamp).toISOString() : "";
 	let contentStr = "";
 
 	if (Array.isArray(msg.content)) {
 		contentStr = msg.content
-			.map((c) => {
+			.map((c: ContentBlock) => {
 				if (c.type === "text") {
-					return (c as any).text;
+					return (c as { type: 'text'; text: string }).text;
 				}
 				if (c.type === "image") {
-					return `[IMAGE: ${(c as any).source.type}]`;
+					return `[IMAGE: ${(c as { type: 'image'; source: { type: string } }).source.type}]`;
 				}
 				return `[${c.type}]`;
 			})
@@ -69,7 +72,7 @@ export function formatContext(
 	context: {
 		systemPrompt: string;
 		messages: Message[];
-		tools?: Array<{ name: string; description: string; parameters?: any }>;
+		tools?: Array<{ name: string; description: string; parameters?: Record<string, unknown> }>;
 	},
 	options: ContextLoggerOptions = {},
 ): string {

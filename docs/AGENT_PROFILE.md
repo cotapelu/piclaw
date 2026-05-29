@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (40+ tests across multiple files)
+- Comprehensive test writing (40+ tests across multiple files, total 425 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -37,11 +37,12 @@ None observed in recent iterations.
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - **Progress callbacks**: install/remove/update now show progress messages via default logger
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
-- **Structured logging with levels & JSON**: Enhanced logger with configurable levels (PICLAW_LOG_LEVEL) and formats (PICLAW_LOG_FORMAT), 12 unit tests passing
-- **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
-- **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
-- **Extensions logging**: Migrated extension modules (todos, auto-continue, team) to logger
-- Backward compatible settings format (string entries still work)
+- **Structured logging with levels & JSON**: Enhanced logger with configurable levels and formats, 12 unit tests passing
+- **Type safety improvements**: Replaced explicit any in logger.ts, context-logger.ts; fixed unused imports; improved error handling types
+- **Test error handling**: Added unit tests for installGit error propagation; improved overall test coverage to ~69%
+- **Structured logging**: Migrated console calls to logger across core files
+- **Extensions logging**: Migrated extension modules to logger
+- Backward compatible
 
 ## Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces

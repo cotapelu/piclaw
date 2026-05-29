@@ -57,7 +57,7 @@ describe("handleInstallCommand (CLI)", () => {
   });
 
   it("should require source argument", async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install"]);
     } catch (e) {}
@@ -67,7 +67,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should call pm.installAndPersist with correct options", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockResolvedValue(undefined);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "npm:test"]);
     } catch (e) {}
@@ -77,7 +77,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should pass -l flag as local: true", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockResolvedValue(undefined);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "npm:test", "-l"]);
     } catch (e) {}
@@ -87,7 +87,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should combine source and -l flag", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockResolvedValue(undefined);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "git:my/repo", "-l"]);
     } catch (e) {}
@@ -97,7 +97,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should accept -d/--dry-run flag", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockResolvedValue(undefined);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "npm:test", "-d"]);
     } catch (e) {}
@@ -107,7 +107,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should handle pm.installAndPersist error", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockRejectedValue(new Error('Install failed'));
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "npm:test"]);
     } catch (e) {
@@ -118,7 +118,7 @@ describe("handleInstallCommand (CLI)", () => {
   });
 
   it("should reject unknown option", async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "--unknown"]);
     } catch (e) {}
@@ -128,7 +128,7 @@ describe("handleInstallCommand (CLI)", () => {
 
   it("should include filter when --filter provided", async () => {
     const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockResolvedValue(undefined);
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     const filterSpec = JSON.stringify({ extensions: ['**/*.ts'], skills: ['**/*.skill'] });
     try {
       await pkgCommands.handleInstallCommand(['install', 'npm:test', '--filter', filterSpec]);
@@ -142,7 +142,7 @@ describe("handleInstallCommand (CLI)", () => {
   });
 
   it("should reject invalid JSON for --filter", async () => {
-    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit') as any; });
     try {
       await pkgCommands.handleInstallCommand(["install", "npm:test", "--filter", "{invalid}"]);
     } catch (e) {}

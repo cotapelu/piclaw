@@ -115,7 +115,7 @@ describe("Logger", () => {
       logger.error("Pretty error");
       expect(console.error).toHaveBeenCalledTimes(1);
       const callArg = console.error.mock.calls[0][0];
-      const clean = callArg.replace(/\x1b\[[0-9;]*m/g, "");
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
       expect(clean).toContain("[ERROR] Pretty error");
     });
 
@@ -123,7 +123,7 @@ describe("Logger", () => {
       logger.warn("Pretty warn");
       expect(console.warn).toHaveBeenCalledTimes(1);
       const callArg = console.warn.mock.calls[0][0];
-      const clean = callArg.replace(/\x1b\[[0-9;]*m/g, "");
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
       expect(clean).toContain("[WARN] Pretty warn");
     });
 
@@ -131,7 +131,7 @@ describe("Logger", () => {
       logger.info("Pretty info");
       expect(console.log).toHaveBeenCalledTimes(1);
       const callArg = console.log.mock.calls[0][0];
-      const clean = callArg.replace(/\x1b\[[0-9;]*m/g, "");
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
       expect(clean).toContain("Pretty info");
       expect(clean).not.toContain("[INFO]");
     });
