@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED
 // Source: https://models.dev/api.json
-// Generated: 2026-05-29T04:32:02.056Z
+// Generated: 2026-05-29T05:37:47.048Z
 // DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update
 
 import type { Model } from "@earendil-works/pi-ai";
