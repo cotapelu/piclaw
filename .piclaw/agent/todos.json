@@ -199,9 +199,65 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-5",
+      "name": "Phase 21: Coverage Push & Lint Cleanup",
+      "tasks": [
+        {
+          "id": "task-36",
+          "content": "Analyze coverage; identify target files (package-commands.ts ~58%, piclaw-package-manager.ts ~60%)",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-37",
+          "content": "Add tests for handleUpdateCommand error branches (pm.update throws, invalid source)",
+          "status": "pending"
+        },
+        {
+          "id": "task-38",
+          "content": "Add tests for handleInfoCommand error handling (resolve failure)",
+          "status": "pending"
+        },
+        {
+          "id": "task-39",
+          "content": "Add tests for handleHealthCommand edge cases (invalid JSON, missing package.json)",
+          "status": "pending"
+        },
+        {
+          "id": "task-40",
+          "content": "Add tests for PiclawPackageManager.runCommandCapture error propagation",
+          "status": "pending"
+        },
+        {
+          "id": "task-41",
+          "content": "Add tests for PiclawPackageManager.getLatestNpmVersion network errors",
+          "status": "pending"
+        },
+        {
+          "id": "task-42",
+          "content": "Add integration test for full flow with simulated failures",
+          "status": "pending"
+        },
+        {
+          "id": "task-43",
+          "content": "Fix ESLint errors: no-throw-literal, no-control-regex, unused vars",
+          "status": "pending"
+        },
+        {
+          "id": "task-44",
+          "content": "Run coverage; aim >75%",
+          "status": "pending"
+        },
+        {
+          "id": "task-45",
+          "content": "Update documentation and commit",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 36,
-  "nextPhaseId": 5,
-  "updatedAt": "2026-05-29T02:16:57.890Z"
+  "nextTaskId": 46,
+  "nextPhaseId": 6,
+  "updatedAt": "2026-05-29T02:27:37.269Z"
 }

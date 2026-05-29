@@ -197,6 +197,19 @@ describe("Package Commands (CLI)", () => {
 
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining("not found"));
     });
+
+    it("should handle resolve error gracefully", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:test", scope: "user", filtered: false, installedPath: "/path/to/test" }
+      ]);
+      vi.spyOn(PiclawPackageManager.prototype, 'resolveExtensionSources').mockRejectedValue(new Error("resolve failed"));
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleInfoCommand(["info", "npm:test"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("✗ Failed"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
   });
 
   describe("handleRemoveCommand", () => {
