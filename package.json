@@ -24,9 +24,9 @@
     "benchmark": "tsx src/benchmarks/team-performance.ts"
   },
   "dependencies": {
-    "@earendil-works/pi-ai": "^0.75.4",
-    "@earendil-works/pi-coding-agent": "^0.75.4",
-    "@earendil-works/pi-tui": "^0.75.4",
+    "@earendil-works/pi-ai": "^0.77.0",
+    "@earendil-works/pi-coding-agent": "^0.77.0",
+    "@earendil-works/pi-tui": "^0.77.0",
     "chalk": "^5.6.2",
     "globals": "^17.5.0",
     "minimatch": "^10.2.5"
