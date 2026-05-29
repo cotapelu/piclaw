@@ -11,7 +11,14 @@ import { logger } from "./logger.js";
 
 import { existsSync, mkdirSync, writeFileSync, appendFileSync } from "node:fs";
 import { dirname } from "node:path";
-import type { Message } from "@earendil-works/pi-ai";
+import type { Message, TextContent, ThinkingContent, ImageContent, ToolCall } from "@earendil-works/pi-ai";
+
+/**
+ * Helper to ensure exhaustive type checking.
+ */
+function assertNever(x: never): never {
+	throw new Error(`Unexpected content type: ${x}`);
+}
 
 /**
  * Configuration for context logging.
@@ -36,24 +43,28 @@ const DEFAULT_OPTIONS: Required<Omit<ContextLoggerOptions, "logFile">> = {
 /**
  * Format a single AgentMessage for logging.
  */
-type ContentBlock = 
-  | { type: 'text'; text: string }
-  | { type: 'image'; source: { type: string } };
-
 function formatAgentMessage(msg: Message, index: number): string {
 	const timestamp = "timestamp" in msg && msg.timestamp ? new Date(msg.timestamp).toISOString() : "";
 	let contentStr = "";
 
 	if (Array.isArray(msg.content)) {
 		contentStr = msg.content
-			.map((c: ContentBlock) => {
+			.map((c): string => {
 				if (c.type === "text") {
-					return (c as { type: 'text'; text: string }).text;
+					return (c as TextContent).text;
+				}
+				if (c.type === "thinking") {
+					return `[THINKING: ${(c as ThinkingContent).thinking.substring(0, 100)}...]`;
 				}
 				if (c.type === "image") {
-					return `[IMAGE: ${(c as { type: 'image'; source: { type: string } }).source.type}]`;
+					const img = c as ImageContent;
+					return `[IMAGE: ${img.mimeType} (${img.data.length} chars)]`;
 				}
-				return `[${c.type}]`;
+				if (c.type === "toolCall") {
+					const tool = c as ToolCall;
+					return `[TOOL_CALL: ${tool.name}(${JSON.stringify(tool.arguments)})]`;
+				}
+				return assertNever(c);
 			})
 			.join("\n");
 	} else {
@@ -89,7 +100,7 @@ export function formatContext(
 	const messagesToLog = context.messages.slice(0, opts.maxMessages);
 	output += `--- CONVERSATION (${messagesToLog.length} messages) ---\n`;
 	for (let i = 0; i < messagesToLog.length; i++) {
-		output += `${formatAgentMessage(messagesToLog[i], i)  }\n`;
+		output += `${formatAgentMessage(messagesToLog[i], i)}\n`;
 	}
 
 	// Tools

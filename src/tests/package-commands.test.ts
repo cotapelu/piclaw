@@ -345,6 +345,42 @@ describe("Package Commands (CLI)", () => {
       const result = await pkgCommands.handleHealthCommand(["list"]);
       expect(result).toBe(false);
     });
+
+    it("should show 'No packages configured.' when none", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([]);
+      await pkgCommands.handleHealthCommand(["health"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("No packages configured."));
+    });
+
+    it("should detect not installed (missing installedPath)", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:test", scope: "user", filtered: false, installedPath: undefined as any }
+      ]);
+      await pkgCommands.handleHealthCommand(["health"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("not installed"));
+    });
+
+    it("should detect missing package.json", async () => {
+      const pkgDir = join(cwd, "pkg-no-pkgjson");
+      mkdirSync(pkgDir, { recursive: true });
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:test", scope: "project", filtered: false, installedPath: pkgDir }
+      ]);
+      await pkgCommands.handleHealthCommand(["health"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("missing package.json"));
+    });
+
+    it("should detect invalid JSON in package.json", async () => {
+      const pkgDir = join(cwd, "pkg-invalid");
+      mkdirSync(join(pkgDir, "themes"), { recursive: true }); // ensure parent exists
+      const pkgJsonPath = join(pkgDir, "package.json");
+      writeFileSync(pkgJsonPath, "{ invalid json }");
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:test", scope: "project", filtered: false, installedPath: pkgDir }
+      ]);
+      await pkgCommands.handleHealthCommand(["health"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("invalid package.json"));
+    });
   });
 
   describe("handlePinCommand", () => {
