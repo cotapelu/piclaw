@@ -199,6 +199,73 @@ describe("Package Commands (CLI)", () => {
     });
   });
 
+  describe("handleRemoveCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-remove command", async () => {
+      const result = await pkgCommands.handleRemoveCommand(["list"]);
+      expect(result).toBe(false);
+    });
+
+    it("should show help with -h flag", async () => {
+      const result = await pkgCommands.handleRemoveCommand(["remove", "-h"]);
+      expect(result).toBe(true);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Usage: piclaw remove"));
+    });
+
+    it("should show help with --help flag", async () => {
+      const result = await pkgCommands.handleRemoveCommand(["remove", "--help"]);
+      expect(result).toBe(true);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Remove a package"));
+    });
+
+    it("should require source argument", async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleRemoveCommand(["remove"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Missing remove source"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should call pm.removeAndPersist correctly", async () => {
+      const removeSpy = vi.spyOn(PiclawPackageManager.prototype, 'removeAndPersist').mockResolvedValue(undefined);
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleRemoveCommand(["remove", "npm:test", "-l"]);
+      } catch (e) {}
+      expect(removeSpy).toHaveBeenCalledWith("npm:test", { local: true, dryRun: false });
+      expect(exitSpy).not.toHaveBeenCalled();
+    });
+
+    it("should handle remove error", async () => {
+      const removeSpy = vi.spyOn(PiclawPackageManager.prototype, 'removeAndPersist').mockRejectedValue(new Error("Remove failed"));
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleRemoveCommand(["remove", "npm:test"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("✗ Failed"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should show dry-run message when dry-run flag", async () => {
+      const removeSpy = vi.spyOn(PiclawPackageManager.prototype, 'removeAndPersist').mockResolvedValue(undefined);
+      await pkgCommands.handleRemoveCommand(["remove", "npm:test", "-d"]);
+      // Check that dry-run message appears after successful call
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("[DRY-RUN] Simulated removal"));
+      // Should not show regular success
+      expect(console.log).not.toHaveBeenCalledWith(expect.stringContaining("✓ Removed"));
+    });
+  });
+
   describe("handleHealthCommand", () => {
     beforeEach(() => {
       vi.spyOn(console, 'error').mockImplementation(() => {});

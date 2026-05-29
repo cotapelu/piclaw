@@ -161,6 +161,8 @@ export async function handleRemoveCommand(args: string[]): Promise<boolean> {
   for (let i = 1; i < args.length; i++) {
     if (args[i] === "-l" || args[i] === "--local") {
       local = true;
+    } else if (args[i] === "-d" || args[i] === "--dry-run") {
+      dryRun = true;
     } else if (args[i] === "-h" || args[i] === "--help") {
       help = true;
     } else if (!args[i].startsWith("-")) {
@@ -179,17 +181,18 @@ export async function handleRemoveCommand(args: string[]): Promise<boolean> {
 
   if (help) {
     logger.log(`
-Usage: piclaw remove <source> [-l]
+Usage: piclaw remove <source> [-l] [-d]
 
 Remove a package and its source from settings.
 
 Options:
   -l, --local        Remove from project settings (.piclaw/settings.json)
+  -d, --dry-run      Simulate removal without making changes
   -h, --help         Show this help
 
 Examples:
   piclaw remove npm:foo/bar
-  piclaw remove git:github.com/user/repo
+  piclaw remove git:github.com/user/repo -d
 `);
     return true;
   }

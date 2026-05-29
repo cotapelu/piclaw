@@ -726,3 +726,40 @@ Increase test coverage and eliminate remaining `any` types to improve code quali
 
 ### Trajectory
 Phase 19 in progress: Type safety and coverage improvements ongoing. Next push will focus on deeper package manager testing.
+
+---
+
+## 2025-05-29 - Phase 20: Coverage Boost - Error Paths & Internal Methods
+
+### Objective
+Increase test coverage by adding unit tests for error handling and internal methods, particularly for package management commands.
+
+### Changes Made
+1. **Added handleRemoveCommand tests**: 7 new tests covering return values, help flags, missing source, calling pm.removeAndPersist, error handling, and dry-run messages.
+2. **Added getGitInstallPath test**: Verify correct path construction for git packages.
+3. **Fixed installGit propagation test**: Adjusted to avoid directory existence early-return; now correctly tests error propagation from git clone.
+4. **Improved test reliability**: Fixed async error handling in tests, restored mocks properly.
+5. **Updated documentation**: Reflect increased test count and coverage.
+
+### Implementation Details
+- Tests added to `src/tests/package-commands.test.ts` and `src/tests/package-manager.test.ts`.
+- Used proper mocking strategies for private methods, instance vs prototype.
+- Ensured afterEach cleanup with `vi.restoreAllMocks()` to prevent cross-test contamination.
+
+### Verification
+- All 433 tests pass (100%).
+- Coverage increased slightly to ~70% statements (1858/2649), lines 71.26% (1724/2419). The increase is modest due to added code from new features; net improvement ~1 percentage point.
+- Many internal methods (e.g., installNpm, updateGit, runCommandCapture) still have limited coverage; these require complex mocking or integration tests.
+
+### Risks & Debt
+- Coverage still below target (80%). Achieving >75% will require substantial test writing, especially for `package-commands.ts` (currently ~58%) and `piclaw-package-manager.ts` (60%).
+- Some tests for private methods are brittle due to need for casting to `any`; these could be refactored to test through public APIs instead.
+
+### Next Steps (Phase 20)
+- Continue with higher-level integration tests to cover more code paths.
+- Add tests for `runCommandCapture` error handling via public commands.
+- Consider expanding coverage of `package-commands.ts` by testing argument parsing edge cases and error branches in all handle*Command functions.
+- Aim for >75% coverage in next iteration.
+
+### Trajectory
+Phase 20 in progress: Added error-path tests for remove command and git path helpers; coverage trending upward toward 75%. Next phase will focus on integration tests and deeper package manager coverage.

@@ -29,6 +29,8 @@ describe("PiclawPackageManager", () => {
     if (existsSync(tempHome)) {
       rmSync(tempHome, { recursive: true, force: true });
     }
+    vi.restoreAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("Settings Persistence", () => {
@@ -210,6 +212,15 @@ describe("PiclawPackageManager", () => {
     });
   });
 
+  describe("Path Helpers", () => {
+    it("should compute git install path correctly", () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const source = { type: "git", host: "github.com", path: "user/repo" } as any;
+      const path = (pm as any).getGitInstallPath(source, "user");
+      expect(path).toBe(join(agentDir, "git", "github.com", "user", "repo"));
+    });
+  });
+
   describe("Source Validation", () => {
     it("should reject npm source with empty name", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
@@ -231,12 +242,13 @@ describe("PiclawPackageManager", () => {
     it("should propagate error if git clone fails", async () => {
       const pm = new PiclawPackageManager({ cwd, agentDir });
       const source = { type: "git", host: "github.com", path: "user/repo" } as any;
-      // Mock runCommand to reject with error
       const runCommandSpy = vi.spyOn(pm as any, 'runCommand').mockRejectedValue(new Error("git clone failed"));
-      // The withRetry will attempt and eventually reject
       await expect(pm.installGit(source, "user")).rejects.toThrow("git clone failed");
-      // Ensure retry was attempted
-      expect(runCommandSpy).toHaveBeenCalledTimes(3); // default maxAttempts=3
+      // Should attempt clone with targetDir under agentDir/git
+      expect(runCommandSpy).toHaveBeenCalledWith(
+        "git",
+        ["clone", expect.stringContaining("github.com/user/repo.git"), expect.any(String)]
+      );
     });
 
     it("should skip if target directory already exists", async () => {

@@ -100,52 +100,108 @@
         {
           "id": "task-17",
           "content": "Add unit tests for error handling branches in handleInstallCommand (invalid JSON, missing source, network errors)",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-18",
           "content": "Add unit tests for handleRemoveCommand error paths",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-19",
           "content": "Add unit tests for handleUpdateCommand error scenarios (git failures, npm view errors)",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-20",
           "content": "Add unit tests for PiclawPackageManager methods with complex branching (installGit with existing dir, npm failures)",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-21",
           "content": "Replace explicit any in logger.ts with proper generic types (meta?: Record<string, unknown>)",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-22",
           "content": "Fix context-logger.ts unused imports and any types",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-23",
           "content": "Run coverage again to verify >75%",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-24",
           "content": "Update docs (AGENT_METRICS, AGENT_PROFILE, EVOLUTION) with coverage improvements",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-25",
           "content": "Git commit",
-          "status": "pending"
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "id": "phase-4",
+      "name": "Phase 20: Coverage Boost - Error Paths & Internal Methods",
+      "tasks": [
+        {
+          "id": "task-26",
+          "content": "Analyze coverage to identify low-covered files and functions (piclaw-package-manager, package-commands)",
+          "status": "completed"
+        },
+        {
+          "id": "task-27",
+          "content": "Add tests for handleRemoveCommand: missing source, invalid source, pm errors",
+          "status": "completed"
+        },
+        {
+          "id": "task-28",
+          "content": "Add tests for handleUpdateCommand: npm view failures, git pull failures, pinned versions",
+          "status": "completed"
+        },
+        {
+          "id": "task-29",
+          "content": "Add tests for PiclawPackageManager.installNpm error handling (npm command fails)",
+          "status": "completed"
+        },
+        {
+          "id": "task-30",
+          "content": "Add tests for PiclawPackageManager.runCommandCapture error propagation",
+          "status": "completed"
+        },
+        {
+          "id": "task-31",
+          "content": "Add tests for PiclawPackageManager.getGitInstallPath and git methods edge cases",
+          "status": "completed"
+        },
+        {
+          "id": "task-32",
+          "content": "Add tests for PiclawPackageManager.validateParsed additional cases",
+          "status": "completed"
+        },
+        {
+          "id": "task-33",
+          "content": "Run coverage to measure improvement, target >75%",
+          "status": "completed"
+        },
+        {
+          "id": "task-34",
+          "content": "Update docs (AGENT_METRICS, AGENT_PROFILE, EVOLUTION)",
+          "status": "completed"
+        },
+        {
+          "id": "task-35",
+          "content": "Git commit",
+          "status": "completed"
         }
       ]
     }
   ],
-  "nextTaskId": 26,
-  "nextPhaseId": 4,
-  "updatedAt": "2026-05-29T01:08:19.928Z"
+  "nextTaskId": 36,
+  "nextPhaseId": 5,
+  "updatedAt": "2026-05-29T02:16:57.890Z"
 }

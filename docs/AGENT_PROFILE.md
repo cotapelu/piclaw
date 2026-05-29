@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (40+ tests across multiple files, total 425 passing)
+- Comprehensive test writing (40+ tests across multiple files, total 433 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -39,7 +39,7 @@ None observed in recent iterations.
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
 - **Structured logging with levels & JSON**: Enhanced logger with configurable levels and formats, 12 unit tests passing
 - **Type safety improvements**: Replaced explicit any in logger.ts, context-logger.ts; fixed unused imports; improved error handling types
-- **Test error handling**: Added unit tests for installGit error propagation; improved overall test coverage to ~69%
+- **Test coverage expansion**: Added handleRemoveCommand tests (7), getGitInstallPath test, fixed existing tests; coverage ~70%
 - **Structured logging**: Migrated console calls to logger across core files
 - **Extensions logging**: Migrated extension modules to logger
 - Backward compatible
