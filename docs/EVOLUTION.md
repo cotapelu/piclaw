@@ -629,3 +629,52 @@ Replace direct console.* calls in extension modules with the logger abstraction.
 
 ### Trajectory
 Phase 17 complete: Extension modules now use logger. Core and extensions fully on logger abstraction.
+
+---
+
+## 2025-05-29 - Phase 18: Structured Logging with Levels & JSON
+
+### Objective
+Enhance the logger with configurable log levels and output formats (pretty or JSON) for better observability and integration with log aggregators.
+
+### Changes Made
+1. Enhanced `src/utils/logger.ts` with:
+   - Log level support (debug, info, warn, error)
+   - Configurable output format (pretty with colors, JSON)
+   - Environment variable configuration via PICLAW_LOG_LEVEL and PICLAW_LOG_FORMAT
+   - Level filtering (only messages at or above configured level are emitted)
+2. Added `src/tests/logger.test.ts` with 12 comprehensive unit tests covering:
+   - Level filtering (debug suppressed at info level, all levels shown at debug)
+   - JSON format outputs proper structure with timestamp, level, message, optional meta
+   - Pretty format adds appropriate prefixes and ANSI colors
+   - Logger.log alias works like info
+3. Added 'debug' method to logger API.
+4. Updated documentation (AGENT_METRICS, AGENT_PROFILE, EVOLUTION).
+
+### Implementation Details
+- Logger uses environment variables PICLAW_LOG_LEVEL (default: info) and PICLAW_LOG_FORMAT (default: pretty).
+- JSON format includes timestamp (ISO 8601), level, message, and optional meta fields.
+- Pretty format uses colors: debug (gray), info (default), warn (yellow), error (red); non-info levels get [LEVEL] prefix.
+- All existing logger usages remain compatible because existing code uses log/info/warn/error which retain signatures.
+- No changes required to existing code using logger.
+
+### Verification
+- All 423 tests pass (including 12 new logger tests).
+- Manual testing:
+  - `PICLAW_LOG_LEVEL=debug piclaw install ...` shows debug messages.
+  - `PICLAW_LOG_FORMAT=json piclaw install ...` outputs JSON lines.
+  - Default pretty format works unchanged.
+- No regressions in existing output.
+
+### Risks & Debt
+- Very low risk: additive changes, backward compatible.
+- Could integrate with pi's diagnostics/metrics system in future.
+- Could add file logging or rotate logs.
+
+### Next Steps (Phase 18)
+- Add optional log file output via PICLAW_LOG_FILE.
+- Add child logger inheritance for context.
+- Investigate structured logging integration with pi core's diagnostics.
+
+### Trajectory
+Phase 18 complete: Logger now supports levels and JSON format, meeting observability requirements. Phase 19: potential file logging and context propagation.

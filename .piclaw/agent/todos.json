@@ -41,9 +41,55 @@
           "status": "completed"
         }
       ]
+    },
+    {
+      "id": "phase-2",
+      "name": "Phase 18: Structured Logging with Levels & JSON",
+      "tasks": [
+        {
+          "id": "task-8",
+          "content": "Design logger API with levels (debug/info/warn/error) and format (pretty/json)",
+          "status": "completed"
+        },
+        {
+          "id": "task-9",
+          "content": "Implement logger using pino or custom simple JSON logger",
+          "status": "completed"
+        },
+        {
+          "id": "task-10",
+          "content": "Add config via env vars (PICLAW_LOG_FORMAT, PICLAW_LOG_LEVEL)",
+          "status": "completed"
+        },
+        {
+          "id": "task-11",
+          "content": "Migrate all console.* to logger (already mostly done)",
+          "status": "completed"
+        },
+        {
+          "id": "task-12",
+          "content": "Add unit tests for logger",
+          "status": "completed"
+        },
+        {
+          "id": "task-13",
+          "content": "Run full test suite to ensure no regressions",
+          "status": "completed"
+        },
+        {
+          "id": "task-14",
+          "content": "Update docs: AGENT_METRICS, AGENT_PROFILE, EVOLUTION",
+          "status": "completed"
+        },
+        {
+          "id": "task-15",
+          "content": "Git commit with appropriate message",
+          "status": "in_progress"
+        }
+      ]
     }
   ],
-  "nextTaskId": 8,
-  "nextPhaseId": 2,
-  "updatedAt": "2026-05-28T00:22:45.413Z"
+  "nextTaskId": 16,
+  "nextPhaseId": 3,
+  "updatedAt": "2026-05-29T00:54:02.818Z"
 }

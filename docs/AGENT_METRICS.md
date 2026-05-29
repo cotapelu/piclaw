@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 17 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration)
+- Iterations: 18 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON)
 - Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 411 tests)
+- Test failure rate: 0% (0 failing in 423 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,18 +14,19 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Total lines: ~4600 (including import/export, pin, extensive tests)
+- Total lines: ~4700 (including import/export, pin, extensive tests, enhanced logger)
 - Complexity: Low-Medium (package manager ~950 lines)
-- Coverage: 100% (390/390 passing)
+- Coverage: 100% (423/423 passing)
 
 ## Testing Status
-- Unit tests: 411 total, 411 passing (100%)
-- New tests: 39 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5, install 12) + 26 package-manager tests (including 8 update-method tests) + 1 integration test + 1 integration test
+- Unit tests: 423 total, 423 passing (100%)
+- New tests: 39 package-command tests (update 9, filter 2, validation 3, info 5, health 1, pin 2, import/export 5, install 12) + 26 package-manager tests (including 8 update-method tests) + 1 integration test + 12 logger tests
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
 - Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)
 
 ## Recent Improvements
+- **Structured logging with levels & JSON**: Enhanced logger with log levels (debug/info/warn/error), configurable format via PICLAW_LOG_FORMAT (pretty/JSON) and PICLAW_LOG_LEVEL env vars, comprehensive unit tests (12 passing)
 - **Update command**: `piclaw update [source] [-l]` with npm/git version checking
 - **Package filtering**: Pattern-based filtering per package (minimatch)
 - **Source validation**: Early detection of malformed npm/git sources
@@ -40,7 +41,7 @@
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - **Progress callbacks**: install/remove/update operations emit progress events; CLI shows start/complete/error messages
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
-- Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests, 1 integration test)
+- Full test coverage (39 package-command tests, 8 team-tool tests, 18 package-manager tests, 1 integration test, 12 logger tests)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 new tests)
 - **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)

@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (30+ tests across multiple files)
+- Comprehensive test writing (40+ tests across multiple files)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -37,6 +37,7 @@ None observed in recent iterations.
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - **Progress callbacks**: install/remove/update now show progress messages via default logger
 - **Integration test**: End‑to‑end install→resolve→remove flow validated
+- **Structured logging with levels & JSON**: Enhanced logger with configurable levels (PICLAW_LOG_LEVEL) and formats (PICLAW_LOG_FORMAT), 12 unit tests passing
 - **Structured logging**: Migrated console calls to logger across core files (package manager, CLI, config, helpers, context logger)
 - **Update unit tests**: Comprehensive unit tests for PiclawPackageManager.update (8 tests)
 - **Extensions logging**: Migrated extension modules (todos, auto-continue, team) to logger
@@ -44,7 +45,6 @@ None observed in recent iterations.
 
 ## Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces
-- Add structured logging (Winston/pino) instead of console.log/error
 - Consider using `execa` for more reliable subprocess management
 
 ## Recommended Skills
