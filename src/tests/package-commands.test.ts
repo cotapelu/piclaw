@@ -136,6 +136,16 @@ describe("Package Commands (CLI)", () => {
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Unknown option"));
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
+
+    it("should pass -d/--dry-run flag", async () => {
+      const updateSpy = vi.spyOn(PiclawPackageManager.prototype, 'update').mockResolvedValue(undefined);
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleUpdateCommand(["update", "-d"]);
+      } catch (e) {}
+      expect(updateSpy).toHaveBeenCalledWith(undefined, { local: false, dryRun: true });
+      expect(exitSpy).not.toHaveBeenCalled();
+    });
   });
 
   describe("handleInfoCommand", () => {

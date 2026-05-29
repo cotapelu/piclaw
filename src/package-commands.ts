@@ -316,25 +316,27 @@ export async function handleUpdateCommand(args: string[]): Promise<boolean> {
   for (let i = 1; i < args.length; i++) {
     if (args[i] === "-l" || args[i] === "--local") {
       local = true;
+    } else if (args[i] === "-d" || args[i] === "--dry-run") {
+      dryRun = true;
     } else if (args[i] === "-h" || args[i] === "--help") {
       help = true;
     } else if (!args[i].startsWith("-")) {
       if (source) {
         logger.error(chalk.red(`Unexpected argument: ${args[i]}`));
-        logger.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+        logger.error(chalk.dim(`Usage: piclaw update [source] [-l] [-d]`));
         process.exit(1);
       }
       source = args[i];
     } else {
       logger.error(chalk.red(`Unknown option: ${args[i]}`));
-      logger.error(chalk.dim(`Usage: piclaw update [source] [-l]`));
+      logger.error(chalk.dim(`Usage: piclaw update [source] [-l] [-d]`));
       process.exit(1);
     }
   }
 
   if (help) {
     logger.log(`
-Usage: piclaw update [source] [-l]
+Usage: piclaw update [source] [-l] [-d]
 
 Update installed packages to latest version.
 
@@ -343,6 +345,7 @@ Arguments:
 
 Options:
   -l, --local         Update project-local packages (.piclaw/settings.json)
+  -d, --dry-run       Simulate update without making changes
   -h, --help          Show this help
 
 Examples:

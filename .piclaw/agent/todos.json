@@ -207,17 +207,17 @@
         {
           "id": "task-36",
           "content": "Analyze coverage; identify target files (package-commands.ts ~58%, piclaw-package-manager.ts ~60%)",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-37",
           "content": "Add tests for handleUpdateCommand error branches (pm.update throws, invalid source)",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-38",
           "content": "Add tests for handleInfoCommand error handling (resolve failure)",
-          "status": "pending"
+          "status": "in_progress"
         },
         {
           "id": "task-39",
@@ -259,5 +259,5 @@
   ],
   "nextTaskId": 46,
   "nextPhaseId": 6,
-  "updatedAt": "2026-05-29T02:27:37.269Z"
+  "updatedAt": "2026-05-29T03:01:49.767Z"
 }
