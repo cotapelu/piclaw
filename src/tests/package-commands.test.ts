@@ -289,6 +289,47 @@ describe("Package Commands (CLI)", () => {
     });
   });
 
+  describe("handleListCommand", () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'error').mockImplementation(() => {});
+      vi.spyOn(console, 'log').mockImplementation(() => {});
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      vi.spyOn(process, 'cwd').mockReturnValue(cwd);
+    });
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
+
+    it("should return false for non-list command", async () => {
+      const result = await pkgCommands.handleListCommand(["install"]);
+      expect(result).toBe(false);
+    });
+
+    it("should show help with -h flag", async () => {
+      const result = await pkgCommands.handleListCommand(["list", "-h"]);
+      expect(result).toBe(true);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Usage: piclaw list"));
+    });
+
+    it("should list packages from both scopes", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([
+        { source: "npm:global-pkg", scope: "user", filtered: false, installedPath: "/global/path" },
+        { source: "npm:project-pkg", scope: "project", filtered: false, installedPath: "/project/path" }
+      ]);
+      await pkgCommands.handleListCommand(["list"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Global packages:"));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Project packages:"));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("npm:global-pkg"));
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("npm:project-pkg"));
+    });
+
+    it("should display 'No packages installed.' when empty", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockReturnValue([]);
+      await pkgCommands.handleListCommand(["list"]);
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining("No packages installed."));
+    });
+  });
+
   describe("handleHealthCommand", () => {
     beforeEach(() => {
       vi.spyOn(console, 'error').mockImplementation(() => {});
