@@ -23,7 +23,9 @@ describe("AgentSession Team", () => {
   it("should share session manager", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 2 });
-
+    console.log('child0 sessionManager:', team.runtimes[0].session.sessionManager);
+    console.log('child1 sessionManager:', team.runtimes[1].session.sessionManager);
+    console.log('same ref?', team.runtimes[0].session.sessionManager === team.runtimes[1].session.sessionManager);
     expect(team.runtimes[0].session.sessionManager)
       .toBe(team.runtimes[1].session.sessionManager);
 
@@ -34,7 +36,10 @@ describe("AgentSession Team", () => {
   it("should use same codebase", async () => {
     const parent = await bootPiclaw();
     const team = await bootPiclawTeam(parent, { teamSize: 2 });
-
+    console.log('parent:', parent);
+    console.log('parent.cwd:', parent.cwd);
+    console.log('team.runtimes[0].cwd:', team.runtimes[0].cwd);
+    console.log('child services:', team.runtimes[0].services);
     expect(team.runtimes[0].cwd).toBe(parent.cwd);
 
     await team.dispose();

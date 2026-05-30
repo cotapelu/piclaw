@@ -23,7 +23,7 @@ describe('team_run tool', () => {
 
   it('requires tasks array', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const result = await tool.execute('id', {} as any, undefined, undefined, ctx);
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('tasks must be a non-empty array');
@@ -31,14 +31,14 @@ describe('team_run tool', () => {
 
   it('rejects non-array tasks', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const result = await tool.execute('id', { tasks: 'not array' } as any, undefined, undefined, ctx);
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('tasks must be a non-empty array');
   });
 
   it('requires parentRuntime in context', async () => {
-    const ctx = { sessionManager: {} } as any;
+    const ctx = {} as any;
     const result = await tool.execute('id', { tasks: ['t1'] }, undefined, undefined, ctx);
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain('No runtime context');
@@ -46,7 +46,7 @@ describe('team_run tool', () => {
 
   it('accepts JSON string params', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const mockTeam = { id: 'team-json', roles: ['agent'], dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockResolvedValue(undefined);
@@ -64,7 +64,7 @@ describe('team_run tool', () => {
 
   it('executes team successfully with default teamSize', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const mockTeam = { id: 'team-default', roles: ['a', 'b'], dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockResolvedValue(undefined);
@@ -83,7 +83,7 @@ describe('team_run tool', () => {
 
   it('passes custom teamSize and teamRoles', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const mockTeam = { dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockResolvedValue(undefined);
@@ -98,7 +98,7 @@ describe('team_run tool', () => {
 
   it('handles bootPiclawTeam failure', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     bootPiclawTeam.mockRejectedValue(new Error('Boot failed'));
 
     const result = await tool.execute('id', { tasks: ['t1'] }, undefined, undefined, ctx);
@@ -109,7 +109,7 @@ describe('team_run tool', () => {
 
   it('handles executeTeamTasks failure', async () => {
     const parent = createMockParentRuntime();
-    const ctx = { sessionManager: { parentRuntime: parent } } as any;
+    const ctx = { runtime: parent } as any;
     const mockTeam = { dispose: vi.fn().mockResolvedValue(undefined) };
     bootPiclawTeam.mockResolvedValue(mockTeam);
     executeTeamTasks.mockRejectedValue(new Error('Task exec failed'));

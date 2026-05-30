@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 21 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests, Coverage Expansion: Additional Tests)
+- Iterations: 22 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests, Coverage Expansion: Additional Tests, Team Test Fixes, Multi-Runtime Test Refactor)
 - Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 450 tests)
+- Test failure rate: 0% (0 failing in 510 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -16,11 +16,11 @@
 ## Code Quality
 - Total lines: ~4900 (including remove dry-run, type improvements, additional tests)
 - Complexity: Low-Medium (package manager ~950 lines)
-- Coverage: ~74% statements, ~75% lines
+- Coverage: ~75% statements, ~76% lines
 
 ## Testing Status
-- Unit tests: 460 total, 460 passing (100%)
-- New tests: 7 handleRemoveCommand tests, 1 Path Helpers test (getGitInstallPath), improved test reliability
+- Unit tests: 510 total, 510 passing (100%)
+- New tests: Team test fixes, multi-runtime test refactor, build error fix
 - Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
 - Removed obsolete test: truncation test (behavior no longer applicable)
 - Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)

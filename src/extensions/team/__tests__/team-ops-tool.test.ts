@@ -1,20 +1,20 @@
 // @ts-nocheck
-import { jest } from '@jest/globals';
+import { vi } from 'vitest';
 import { createTeamOpsTool } from '../team-ops-tool.js';
 
 // Mock AgentTeam đơn giản
 function createMockTeam() {
   return {
     tasks: [] as string[],
-    claimTask: jest.fn(),
-    releaseTask: jest.fn(),
-    completeTask: jest.fn(),
-    getMyCurrentTask: jest.fn(),
-    getTeamStatus: jest.fn(),
-    workspaceRead: jest.fn(),
-    workspaceWrite: jest.fn(),
-    publishMessage: jest.fn(),
-    getMessages: jest.fn(),
+    claimTask: vi.fn(),
+    releaseTask: vi.fn(),
+    completeTask: vi.fn(),
+    getMyCurrentTask: vi.fn(),
+    getTeamStatus: vi.fn(),
+    workspaceRead: vi.fn(),
+    workspaceWrite: vi.fn(),
+    publishMessage: vi.fn(),
+    getMessages: vi.fn(),
   };
 }
 
@@ -59,7 +59,7 @@ describe('Team Ops Tool', () => {
 
   describe('Execute', () => {
     it('should parse JSON string', async () => {
-      mockTeam.claimTask = jest.fn().mockResolvedValue(0);
+      mockTeam.claimTask = vi.fn().mockResolvedValue(0);
       const result = await tool.execute('call-1', '{"action":"claim_task"}', undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(mockTeam.claimTask).toHaveBeenCalledWith(mockCtx.session.id);
@@ -73,37 +73,37 @@ describe('Team Ops Tool', () => {
 
     it('should handle claim_task - success', async () => {
       mockTeam.tasks = ['task1'];
-      mockTeam.claimTask = jest.fn().mockResolvedValue(0);
+      mockTeam.claimTask = vi.fn().mockResolvedValue(0);
       const result = await tool.execute('call-1', { action: 'claim_task' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.details?.taskIndex).toBe(0);
     });
 
     it('should handle claim_task - no tasks', async () => {
-      mockTeam.claimTask = jest.fn().mockResolvedValue(null);
+      mockTeam.claimTask = vi.fn().mockResolvedValue(null);
       const result = await tool.execute('call-1', { action: 'claim_task' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toBe('No pending tasks available.');
     });
 
     it('should handle release_task', async () => {
-      mockTeam.getMyCurrentTask = jest.fn().mockResolvedValue(1);
-      mockTeam.releaseTask = jest.fn().mockResolvedValue(true);
+      mockTeam.getMyCurrentTask = vi.fn().mockResolvedValue(1);
+      mockTeam.releaseTask = vi.fn().mockResolvedValue(true);
       const result = await tool.execute('call-1', { action: 'release_task' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.content[0].text).toContain('Released task 1');
     });
 
     it('should handle release_task - no active', async () => {
-      mockTeam.getMyCurrentTask = jest.fn().mockResolvedValue(null);
+      mockTeam.getMyCurrentTask = vi.fn().mockResolvedValue(null);
       const result = await tool.execute('call-1', { action: 'release_task' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toBe('No active task to release.');
     });
 
     it('should handle complete_task', async () => {
-      mockTeam.getMyCurrentTask = jest.fn().mockResolvedValue(2);
-      mockTeam.completeTask = jest.fn().mockResolvedValue(undefined);
+      mockTeam.getMyCurrentTask = vi.fn().mockResolvedValue(2);
+      mockTeam.completeTask = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'complete_task', taskIndex: 2, result: 'done' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(mockTeam.completeTask).toHaveBeenCalledWith(mockCtx.session.id, 2, 'done');
@@ -116,7 +116,7 @@ describe('Team Ops Tool', () => {
     });
 
     it('should fail complete_task wrong assignment', async () => {
-      mockTeam.getMyCurrentTask = jest.fn().mockResolvedValue(3);
+      mockTeam.getMyCurrentTask = vi.fn().mockResolvedValue(3);
       const result = await tool.execute('call-1', { action: 'complete_task', taskIndex: 5 }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toBe('Task 5 is not assigned to you.');
@@ -124,21 +124,21 @@ describe('Team Ops Tool', () => {
 
     it('should handle get_team_status', async () => {
       const status = { totalTasks: 5, completedTasks: 2 };
-      mockTeam.getTeamStatus = jest.fn().mockResolvedValue(status);
+      mockTeam.getTeamStatus = vi.fn().mockResolvedValue(status);
       const result = await tool.execute('call-1', { action: 'get_team_status' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(JSON.parse(result.content[0].text)).toEqual(status);
     });
 
     it('should handle workspace_read', async () => {
-      mockTeam.workspaceRead = jest.fn().mockResolvedValue('val');
+      mockTeam.workspaceRead = vi.fn().mockResolvedValue('val');
       const result = await tool.execute('call-1', { action: 'workspace_read', key: 'k' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.content[0].text).toBe('val');
     });
 
     it('should handle workspace_read - not found', async () => {
-      mockTeam.workspaceRead = jest.fn().mockResolvedValue(undefined);
+      mockTeam.workspaceRead = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'workspace_read', key: 'k' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.content[0].text).toBe('(not found)');
@@ -151,7 +151,7 @@ describe('Team Ops Tool', () => {
     });
 
     it('should handle workspace_write', async () => {
-      mockTeam.workspaceWrite = jest.fn().mockResolvedValue(undefined);
+      mockTeam.workspaceWrite = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'workspace_write', key: 'k', value: 'v' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(mockTeam.workspaceWrite).toHaveBeenCalledWith('k', 'v', mockCtx.session.id);
@@ -165,7 +165,7 @@ describe('Team Ops Tool', () => {
     });
 
     it('should handle send_message', async () => {
-      mockTeam.publishMessage = jest.fn().mockResolvedValue(undefined);
+      mockTeam.publishMessage = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'send_message', channel: 'alerts', content: 'hi' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(mockTeam.publishMessage).toHaveBeenCalledWith('alerts', mockCtx.session.id, 'hi');
@@ -179,21 +179,21 @@ describe('Team Ops Tool', () => {
 
     it('should handle get_messages', async () => {
       const msgs = [{ timestamp: 1, from: 'a', content: 'c' }];
-      mockTeam.getMessages = jest.fn().mockResolvedValue(msgs);
+      mockTeam.getMessages = vi.fn().mockResolvedValue(msgs);
       const result = await tool.execute('call-1', { action: 'get_messages' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.details?.messages).toEqual(msgs);
     });
 
     it('should handle get_messages empty', async () => {
-      mockTeam.getMessages = jest.fn().mockResolvedValue([]);
+      mockTeam.getMessages = vi.fn().mockResolvedValue([]);
       const result = await tool.execute('call-1', { action: 'get_messages' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.content[0].text).toBe('(no messages)');
     });
 
     it('should handle update_status', async () => {
-      mockTeam.getMyCurrentTask = jest.fn().mockResolvedValue(null);
+      mockTeam.getMyCurrentTask = vi.fn().mockResolvedValue(null);
       const result = await tool.execute('call-1', { action: 'update_status', status: 'working' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
       expect(result.content[0].text).toBe('Status updated to: working');
@@ -212,7 +212,7 @@ describe('Team Ops Tool', () => {
     });
 
     it('should catch exceptions from team methods', async () => {
-      mockTeam.claimTask = jest.fn().mockRejectedValue(new Error('fail'));
+      mockTeam.claimTask = vi.fn().mockRejectedValue(new Error('fail'));
       const result = await tool.execute('call-1', { action: 'claim_task' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('Error: fail');

@@ -37,38 +37,27 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
   const agentDir = options.agentDir ?? getAgentDir();
   const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
 
-  const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async ({
-    cwd,
-    agentDir,
-    sessionManager,
-    sessionStartEvent,
-  }) => {
-    // Custom storage using .piclaw
-    const storage = {
-      withLock(scope: "global" | "project", fn: (current: string | undefined) => string | undefined): void {
-        const path = scope === "global"
-          ? join(agentDir, "settings.json")
-          : join(cwd, ".piclaw", "settings.json");
-        const dir = dirname(path);
-        if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
-        const current = existsSync(path) ? readFileSync(path, "utf-8") : undefined;
-        const next = fn(current);
-        if (next !== undefined) writeFileSync(path, next, "utf-8");
-      },
-    } as any;
-
-    const SettingsManagerCtor = SettingsManager as any;
-    const settingsManager = new SettingsManagerCtor(storage, cwd, agentDir);
+  const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async (factoryOptions) => {
+    const { cwd, agentDir, sessionManager, sessionStartEvent } = factoryOptions as any;
+    // Fallback in case these are undefined
+    const effectiveCwd = cwd ?? process.cwd();
+    const effectiveAgentDir = agentDir ?? getAgentDir();
+    if (!effectiveCwd) throw new Error('effectiveCwd is not set');
+    // Use default SettingsManager (will use .pi storage)
+    const settingsManager = SettingsManager.create(effectiveCwd, effectiveAgentDir);
 
     // Custom package manager
-    const packageManager = new PiclawPackageManager({ cwd, agentDir });
+    const packageManager = new PiclawPackageManager({ cwd: effectiveCwd, agentDir: effectiveAgentDir });
 
     const newServices = await createAgentSessionServices({
-      cwd,
-      agentDir,
+      cwd: effectiveCwd,
+      agentDir: effectiveAgentDir,
       settingsManager,
       resourceLoaderOptions: { packageManager } as any,
     });
+    if (typeof newServices.cwd !== 'string') {
+      throw new Error('newServices.cwd is not a string: ' + JSON.stringify({ cwd: newServices.cwd, services: newServices }));
+    }
 
     const result = await createAgentSessionFromServices({
       services: newServices,
@@ -91,6 +80,9 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     sessionManager,
     sessionStartEvent: { type: "session_start", reason: "startup" },
   });
+  if (typeof runtime.cwd !== 'string') {
+    throw new Error('runtime cwd missing after creation');
+  }
 
   if (contextLogFile && runtime.session?.agent?.streamFn) {
     const originalStreamFn = runtime.session.agent.streamFn;

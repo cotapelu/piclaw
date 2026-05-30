@@ -1,6 +1,7 @@
 // @ts-nocheck
-import { jest } from '@jest/globals';
+import { vi, expect } from 'vitest';
 import { AgentTeam } from '../team-manager.js';
+import { SessionManager, SettingsManager, AuthStorage, ModelRegistry } from '@earendil-works/pi-coding-agent';
 import type { AgentSessionRuntime, AgentSessionEvent } from '@earendil-works/pi-coding-agent';
 import * as fs from 'node:fs';
 import * as os from 'node:os';
@@ -13,24 +14,32 @@ function createSimpleRuntime(role: string): Partial<AgentSessionRuntime> {
   const id = `session-${role}-${counter++}`;
   const tmpAgentDir = path.join(os.tmpdir(), `evo-test-${role}-${Date.now()}`);
   try { fs.mkdirSync(tmpAgentDir, { recursive: true }); } catch (e) {}
+
+  // Use real in-memory services to avoid mocking hundreds of methods
+  const settingsManager = SettingsManager.inMemory({});
+  const authStorage = AuthStorage.inMemory();
+  const modelRegistry = ModelRegistry.inMemory(authStorage);
+  const sessionMgr = SessionManager.create(process.cwd(), tmpAgentDir);
+
   return {
-    session: { 
-      sessionId: id, 
-      subscribe: jest.fn().mockReturnValue(() => {})
+    session: {
+      sessionId: id,
+      subscribe: vi.fn().mockReturnValue(() => {}),
+      sessionManager: sessionMgr,
     },
     services: {
       agentDir: tmpAgentDir,
       cwd: process.cwd(),
       diagnostics: [],
-      authStorage: {} as any,
-      settingsManager: {} as any,
-      modelRegistry: {} as any
+      authStorage,
+      settingsManager,
+      modelRegistry,
     },
     cwd: process.cwd(),
-    setRebindSession: jest.fn(),
-    setBeforeSessionInvalidate: jest.fn(),
-    dispose: jest.fn().mockResolvedValue(undefined),
-    createRuntime: jest.fn() as any
+    setRebindSession: vi.fn(),
+    setBeforeSessionInvalidate: vi.fn(),
+    dispose: vi.fn().mockResolvedValue(undefined),
+    createRuntime: vi.fn() as any,
   };
 }
 
@@ -44,7 +53,7 @@ function createMockAgentSessionEvent(type: string, message?: any): AgentSessionE
 describe('AgentTeam Multi-Runtime', () => {
   let team: AgentTeam;
   let parentRuntime: AgentSessionRuntime;
-  let notifyUpdateSpy: jest.SpyInstance;
+  let notifyUpdateSpy: any;
 
   function setRoles(team: AgentTeam, count: number) {
     const roles = Array.from({ length: count }, (_, i) => `agent-${i + 1}`);
@@ -60,10 +69,12 @@ describe('AgentTeam Multi-Runtime', () => {
     team.setTeamId('test-team');
     parentRuntime = createSimpleRuntime('parent') as AgentSessionRuntime;
     // Configure parent's createRuntime to return a fresh child runtime each call
-    parentRuntime.createRuntime = jest.fn().mockImplementation(async (options: any) => {
+    parentRuntime.createRuntime = vi.fn().mockImplementation(async (factory: any, options: any) => {
       return createSimpleRuntime('child') as AgentSessionRuntime;
     });
-    notifyUpdateSpy = jest.spyOn(team, 'notifyUpdate');
+    // Verify mock is set
+    expect(typeof parentRuntime.createRuntime).toBe('function');
+    notifyUpdateSpy = vi.spyOn(team, 'notifyUpdate');
   });
 
   afterEach(async () => {
@@ -77,15 +88,37 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should create correct number of child runtimes (teamSize=4)', async () => {
       setRoles(team, 4);
       await team.initialize(['task1', 'task2']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
+      const runtimes = (team as any).runtimes;
+      console.log('runtimes session objects:', runtimes.map((r: any) => r.session));
+      // Check that the mock was used
+      expect(parentRuntime.createRuntime).toHaveBeenCalledTimes(4);
 
       // runtimes array should contain all 4 child runtimes
+      console.log('runtimes length:', (team as any).runtimes.length);
       expect((team as any).runtimes.length).toBe(4);
       // All roles are present
       expect(team.roles).toEqual(['agent-1', 'agent-2', 'agent-3', 'agent-4']);
       // Each runtime should map to a role
       for (const role of team.roles) {
-        const runtime = (team as any).runtimes.find((r: any) => (team as any).roleByAgentId.get(r.session.sessionId) === role);
+        console.log('checking role', role);
+        const allRuntimes = (team as any).runtimes;
+        console.log('total runtimes:', allRuntimes.length);
+        // sessionId is stored in session.sessionManager.sessionId
+        const sessionIds = allRuntimes.map((r: any) => {
+          const s = r.session;
+          // Prefer direct sessionId, fallback to sessionManager.sessionId
+          return s?.sessionId ?? s?.sessionManager?.sessionId ?? 'MISSING';
+        });
+        console.log('all runtimes sessionIds:', JSON.stringify(sessionIds));
+        const runtime = allRuntimes.find((r: any) => {
+          const s = r.session;
+          const sid = s?.sessionId ?? s?.sessionManager?.sessionId ?? 'MISSING';
+          const mappedRole = (team as any).roleByAgentId.get(sid);
+          console.log('checking role', role, 'sid:', sid, 'mappedRole:', mappedRole);
+          return mappedRole === role;
+        });
+        console.log('found runtime?', !!runtime, 'roleByAgentId map:', Array.from((team as any).roleByAgentId.entries()));
         expect(runtime).toBeDefined();
       }
     });
@@ -93,9 +126,9 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should create child runtimes with custom agentCwd', async () => {
       setRoles(team, 2);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime, '/custom/agent/cwd');
+      await (team as any).setupChildRuntimes(parentRuntime, '/custom/agent/cwd', { createRuntime: parentRuntime.createRuntime });
 
-      const createCalls = (parentRuntime.createRuntime as jest.Mock).mock.calls;
+      const createCalls = (parentRuntime.createRuntime as vi.Mock).mock.calls;
       expect(createCalls.length).toBe(2);
       // The second argument of the call is the options object
       const [, firstOpts] = createCalls[0];
@@ -105,9 +138,9 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should use parent cwd when agentCwd not provided', async () => {
       setRoles(team, 2);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
-      const createCalls = (parentRuntime.createRuntime as jest.Mock).mock.calls;
+      const createCalls = (parentRuntime.createRuntime as vi.Mock).mock.calls;
       expect(createCalls.length).toBe(2);
       const [, firstOpts] = createCalls[0];
       expect(firstOpts.cwd).toBe(parentRuntime.cwd);
@@ -116,9 +149,9 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should create isolated session directories for each agent', async () => {
       setRoles(team, 2);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
-      const createCalls = (parentRuntime.createRuntime as jest.Mock).mock.calls;
+      const createCalls = (parentRuntime.createRuntime as vi.Mock).mock.calls;
       // agentDir should be unique per agent: teams/<team-id>/<role>
       const [, firstOpts] = createCalls[0];
       const [, secondOpts] = createCalls[1];
@@ -132,10 +165,10 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should subscribe to child session events', async () => {
       setRoles(team, 1);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
       const childRuntime = (team as any).runtimes[0];
-      const subscribe = childRuntime.session.subscribe as jest.Mock;
+      const subscribe = childRuntime.session.subscribe as vi.Mock;
       expect(subscribe).toHaveBeenCalled();
       const handler = subscribe.mock.calls[0][0];
       expect(typeof handler).toBe('function');
@@ -144,7 +177,7 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should map role to runtime session.id', async () => {
       setRoles(team, 3);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
       // Every runtime.session.sessionId should map to a role
       const teamAny = team as any;
@@ -162,7 +195,7 @@ describe('AgentTeam Multi-Runtime', () => {
     beforeEach(async () => {
       setRoles(team, 1);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
       // Clear notification history after initialization
       notifyUpdateSpy.mockClear();
       childRuntime = (team as any).runtimes[0];
@@ -212,7 +245,7 @@ describe('AgentTeam Multi-Runtime', () => {
     });
 
     it('should ignore message_update events (streaming)', async () => {
-      const subscribe = childRuntime.session.subscribe as jest.Mock;
+      const subscribe = childRuntime.session.subscribe as vi.Mock;
       const handler = subscribe.mock.calls[0][0];
       await handler({ type: 'message_update' });
 
@@ -221,7 +254,7 @@ describe('AgentTeam Multi-Runtime', () => {
     });
 
     it('should handle unknown event types gracefully', async () => {
-      const subscribe = childRuntime.session.subscribe as jest.Mock;
+      const subscribe = childRuntime.session.subscribe as vi.Mock;
       const handler = subscribe.mock.calls[0][0];
       await handler({ type: 'unknown_event' } as any);
 
@@ -233,7 +266,7 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should create runtimes (loops started separately)', async () => {
       setRoles(team, 2);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
       // runtimes should be created
       expect((team as any).runtimes.length).toBe(2);
@@ -242,7 +275,7 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should dispose child runtimes on team.dispose', async () => {
       setRoles(team, 1);
       await team.initialize(['task1']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
 
       // Capture runtime before dispose
       const childRuntimes = (team as any).runtimes as any[];
@@ -260,7 +293,7 @@ describe('AgentTeam Multi-Runtime', () => {
     it('should handle multiple events from different agents concurrently', async () => {
       setRoles(team, 2);
       await team.initialize(['task1', 'task2']);
-      await (team as any).setupChildRuntimes(parentRuntime);
+      await (team as any).setupChildRuntimes(parentRuntime, undefined, { createRuntime: parentRuntime.createRuntime });
       // Clear any notifications from initialization
       notifyUpdateSpy.mockClear();
 

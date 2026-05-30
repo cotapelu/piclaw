@@ -537,7 +537,7 @@ export class AgentTeam implements AgentTeamRuntime {
     this.roles.push(role);
     this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
     this.roleByAgentId.set((runtime.session as any).id, role);
-    this.size = this.runtimes.length;
+    this.size = this.roles.length;
   }
 
   /**
@@ -556,6 +556,8 @@ export class AgentTeam implements AgentTeamRuntime {
     }
 
     for (const role of this.roles) {
+      // Skip parent role (not a child agent)
+      if (role === "parent") continue;
       // Determine agent cwd
       let agentCwd: string;
       if (typeof baseCwd === 'function') {
@@ -563,11 +565,13 @@ export class AgentTeam implements AgentTeamRuntime {
       } else {
         agentCwd = baseCwd ?? parentRuntime.cwd;
       }
+      if (!agentCwd) throw new Error('agentCwd is undefined for role ' + role);
 
       // Create isolated session directory
       const teamDir = path.join(parentRuntime.services.agentDir as string, 'teams', this.id);
       const agentSessionDir = path.join(teamDir, role);
-      const sessionManager = SessionManager.create(agentCwd, agentSessionDir);
+      // Use shared session manager (parent's) for all agents
+      const sessionManager = parentRuntime.session.sessionManager;
 
       // Create session start event
       const sessionStartEvent: SessionStartEvent = {
@@ -607,7 +611,7 @@ export class AgentTeam implements AgentTeamRuntime {
         } as CreateAgentSessionRuntimeResult;
       };
 
-      const createRuntimeImpl = options?.createRuntime ?? (parentRuntime as any).createRuntime ?? createAgentSessionRuntime;
+      const createRuntimeImpl = options?.createRuntime ?? createAgentSessionRuntime;
       const runtime = await createRuntimeImpl(factory, {
         cwd: agentCwd,
         agentDir: agentSessionDir,
@@ -620,7 +624,7 @@ export class AgentTeam implements AgentTeamRuntime {
       // roles already exists; we push agent status
       this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
       this.roleByAgentId.set(runtime.session.sessionId, role);
-      this.size = this.runtimes.length;
+      this.size = this.roles.length;
 
       // Subscribe to child session events
       runtime.session.subscribe((event: any) => this.handleAgentEvent(role, event));
@@ -946,12 +950,13 @@ export async function bootPiclawTeam(
   const team = new AgentTeam();
   team.setTeamId(`team-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
-  // Set roles on team before creating runtimes
-  team.roles = normalizedRoles;
-  for (const role of normalizedRoles) {
+  // Include parent as a role, size includes parent + children
+  const allRoles = ["parent", ...normalizedRoles];
+  team.roles = allRoles;
+  for (const role of allRoles) {
     team.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
   }
-  team.size = normalizedRoles.length;
+  team.size = allRoles.length;
 
   // Create isolated child runtimes and start agent loops
   await team.setupChildRuntimes(parentRuntime, options.agentCwd);
