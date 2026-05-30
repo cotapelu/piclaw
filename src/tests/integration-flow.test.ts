@@ -80,4 +80,74 @@ describe("Integration Flow (Install → Resolve → Remove)", () => {
     const configured = pm.listConfiguredPackages();
     expect(configured.some(p => p.source === pkgRoot)).toBe(false);
   });
+
+  it("should handle install failure and propagate error correctly", async () => {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+
+    // Spy on internal runCommand to simulate failure
+    const runCommandSpy = vi.spyOn(pm as any, 'runCommand').mockRejectedValue(new Error("npm command failed with code 1"));
+
+    // Attempt to install an npm package (not local, as we want to trigger runCommand)
+    await expect(pm.install("npm:test-pkg")).rejects.toThrow("npm command failed with code 1");
+
+    expect(runCommandSpy).toHaveBeenCalledWith("npm", expect.arrayContaining(["install", "-g", "test-pkg"]), expect.anything());
+
+    runCommandSpy.mockRestore();
+  });
+
+  it("should handle update failure with transient errors and retry", async () => {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+
+    // Add a package to settings so update will try to process it
+    pm.addSourceToSettings("npm:test-pkg", { local: false });
+
+    // Create fake installed path to pass existence check
+    const fakeInstallPath = join(cwd, ".piclaw", "npm", "node_modules", "test-pkg");
+    mkdirSync(fakeInstallPath, { recursive: true });
+    writeFileSync(join(fakeInstallPath, "package.json"), JSON.stringify({ version: "1.0.0" }));
+
+    // Spy on getNpmInstallPath to return fake path
+    const getPathSpy = vi.spyOn(pm as any, 'getNpmInstallPath').mockReturnValue(fakeInstallPath);
+    // Mock getInstalledNpmVersion
+    const getInstalledSpy = vi.spyOn(pm as any, 'getInstalledNpmVersion').mockReturnValue("1.0.0");
+    // Mock getLatestNpmVersion to succeed with newer version
+    const getLatestSpy = vi.spyOn(pm as any, 'getLatestNpmVersion').mockResolvedValue("2.0.0");
+
+    // Mock runCommand (low-level) to simulate transient errors
+    const runCommandSpy = vi.spyOn(pm as any, 'runCommand')
+      .mockRejectedValueOnce(new Error("network error"))
+      .mockRejectedValueOnce(new Error("timeout"))
+      .mockResolvedValueOnce(undefined);
+
+    await pm.update(undefined, { local: false });
+
+    // Expect that runCommand was called 3 times (initial + 2 retries)
+    expect(runCommandSpy).toHaveBeenCalledTimes(3);
+    // Check that the args for npm install are correct (user scope uses -g)
+    expect(runCommandSpy).toHaveBeenCalledWith("npm", ["install", "-g", "test-pkg", "--no-audit", "--no-fund"], { cwd: undefined });
+
+    getPathSpy.mockRestore();
+    getInstalledSpy.mockRestore();
+    getLatestSpy.mockRestore();
+    runCommandSpy.mockRestore();
+  });
+
+  it("should handle resolve when package not installed and continue with others", async () => {
+    const pm = new PiclawPackageManager({ cwd, agentDir });
+
+    // Add two packages: one that exists (local dummy), one that doesn't (npm not installed)
+    const dummyPkgRoot = join(cwd, "dummy-pkg");
+    mkdirSync(dummyPkgRoot, { recursive: true });
+    mkdirSync(join(dummyPkgRoot, "extensions"), { recursive: true });
+    writeFileSync(join(dummyPkgRoot, "extensions", "ext.ts"), "");
+    writeFileSync(join(dummyPkgRoot, "package.json"), JSON.stringify({ name: "dummy" }));
+
+    pm.addSourceToSettings(dummyPkgRoot, { local: true });
+    pm.addSourceToSettings("npm:nonexistent-pkg", { local: false });
+
+    // Resolve should succeed and only include the local package
+    const resolved = await pm.resolve();
+    expect(resolved.extensions).toHaveLength(1);
+    expect(resolved.extensions[0].metadata.source).toBe(dummyPkgRoot);
+  });
 });

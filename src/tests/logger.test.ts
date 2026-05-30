@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { logger } from "../utils/logger.js";
 
 describe("Logger", () => {
@@ -115,7 +114,8 @@ describe("Logger", () => {
       logger.error("Pretty error");
       expect(console.error).toHaveBeenCalledTimes(1);
       const callArg = console.error.mock.calls[0][0];
-      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
+      // eslint-disable-next-line no-control-regex, prefer-regex-literals
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/gu, "");
       expect(clean).toContain("[ERROR] Pretty error");
     });
 
@@ -123,7 +123,8 @@ describe("Logger", () => {
       logger.warn("Pretty warn");
       expect(console.warn).toHaveBeenCalledTimes(1);
       const callArg = console.warn.mock.calls[0][0];
-      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
+      // eslint-disable-next-line no-control-regex, prefer-regex-literals
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/gu, "");
       expect(clean).toContain("[WARN] Pretty warn");
     });
 
@@ -131,7 +132,8 @@ describe("Logger", () => {
       logger.info("Pretty info");
       expect(console.log).toHaveBeenCalledTimes(1);
       const callArg = console.log.mock.calls[0][0];
-      const clean = callArg.replace(/\u001b\[[0-9;]*m/g, "");
+      // eslint-disable-next-line no-control-regex, prefer-regex-literals
+      const clean = callArg.replace(/\u001b\[[0-9;]*m/gu, "");
       expect(clean).toContain("Pretty info");
       expect(clean).not.toContain("[INFO]");
     });

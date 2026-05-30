@@ -330,6 +330,21 @@ describe("PiclawPackageManager", () => {
       expect(result).toBe("some output");
       expect(spawnMock).toHaveBeenCalledWith("echo", ["test"], expect.anything());
     });
+
+    it("should reject with child process error event (e.g., ENOENT)", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const mockChild = {
+        stdout: { on: vi.fn() },
+        on: vi.fn((event: string, cb: Function) => {
+          if (event === 'error') cb(new Error('spawn ENOENT'));
+        })
+      };
+      const spawnMock = cp.spawn as any;
+      spawnMock.mockReturnValue(mockChild);
+
+      await expect((pm as any).runCommandCapture("nonexistent", [])).rejects.toThrow('spawn ENOENT');
+      expect(spawnMock).toHaveBeenCalledWith("nonexistent", [], expect.anything());
+    });
   });
 
   describe("runCommand method", () => {
@@ -388,7 +403,7 @@ describe("PiclawPackageManager", () => {
       const spawnMock = cp.spawn as any;
       spawnMock.mockReturnValue(mockChild);
 
-      await (pm as any).runCommand("echo", ["test"], { cwd: cwd });
+      await (pm as any).runCommand("echo", ["test"], { cwd });
       expect(spawnMock).toHaveBeenCalledWith("echo", ["test"], { cwd, stdio: "inherit", shell: false });
     });
   });
@@ -543,6 +558,29 @@ describe("PiclawPackageManager", () => {
       vi.spyOn(pm as any, 'runCommandCapture').mockResolvedValue('"1.2.3"');
       const version = await (pm as any).getLatestNpmVersion("test-pkg");
       expect(version).toBe("1.2.3");
+    });
+
+    it("should retry on transient network error and eventually succeed", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const runCommandCaptureSpy = vi.spyOn(pm as any, 'runCommandCapture')
+        .mockRejectedValueOnce(new Error("network timeout"))
+        .mockRejectedValueOnce(new Error("connection reset"))
+        .mockResolvedValueOnce('"1.2.3"');
+
+      const version = await (pm as any).getLatestNpmVersion("test-pkg");
+      expect(version).toBe("1.2.3");
+      expect(runCommandCaptureSpy).toHaveBeenCalledTimes(3);
+    });
+
+    it("should fail after 3 retry attempts if network errors persist", async () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const runCommandCaptureSpy = vi.spyOn(pm as any, 'runCommandCapture')
+        .mockRejectedValueOnce(new Error("network timeout"))
+        .mockRejectedValueOnce(new Error("connection refused"))
+        .mockRejectedValueOnce(new Error("ETIMEDOUT"));
+
+      await expect((pm as any).getLatestNpmVersion("test-pkg")).rejects.toThrow("ETIMEDOUT");
+      expect(runCommandCaptureSpy).toHaveBeenCalledTimes(3);
     });
   });
 
