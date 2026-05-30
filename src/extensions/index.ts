@@ -11,7 +11,7 @@ import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader";
 import autoContinueExtension from "./hooks/auto-continue.js";
-import autoCompact75Extension from "./hooks/auto-compact-75.js";
+import autoCompact75Extension from "./hooks/auto-compact-85.js";
 
 import piclawHeader from "./piclaw-header.js";
 

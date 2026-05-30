@@ -5,7 +5,7 @@
  * Hook này chạy song song với auto-compaction mặc định.
  */
 
-const COMPACTION_THRESHOLD_PERCENT = 75;
+const COMPACTION_THRESHOLD_PERCENT = 85;
 
 export default function (pi: import("@earendil-works/pi-coding-agent").ExtensionAPI) {
   pi.on("agent_end", async (_event, ctx) => {
