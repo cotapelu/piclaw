@@ -1,34 +1,7 @@
 {
   "version": 1,
-  "phases": [
-    {
-      "id": "phase-1",
-      "name": "Phân tích kiến trúc multi-agent tối ưu",
-      "tasks": [
-        {
-          "id": "task-1",
-          "content": "Đọc và phân tích capabilities của pi-coding-agent",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "So sánh các mô hình: single-agent vs multi-agent",
-          "status": "completed"
-        },
-        {
-          "id": "task-3",
-          "content": "Đề xuất kiến trúc tốt nhất cho PiClaw",
-          "status": "in_progress"
-        },
-        {
-          "id": "task-4",
-          "content": "Viết document phân tích chi tiết",
-          "status": "pending"
-        }
-      ]
-    }
-  ],
-  "nextTaskId": 5,
-  "nextPhaseId": 2,
-  "updatedAt": "2026-05-30T07:10:48.747Z"
+  "phases": [],
+  "nextTaskId": 1,
+  "nextPhaseId": 1,
+  "updatedAt": "2026-05-30T08:11:01.662Z"
 }

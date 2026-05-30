@@ -20,7 +20,9 @@ export default function (api: import("@earendil-works/pi-coding-agent").Extensio
   registerKiloProvider(api);
 
   // Register custom tools
-  registerTodosTool(api);
+  //
+  // registerTodosTool(api);
+  //
   registerMemoryTool(api);
   registerTeamTool(api);
 
