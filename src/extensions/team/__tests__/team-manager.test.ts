@@ -11,9 +11,9 @@ describe('AgentTeam', () => {
     team.registerRuntime({ session: { id: 'agent1-session-456' } } as any, 'agent-1');
   });
 
-  afterEach(() => {
-    if (team.monitorInterval) {
-      clearInterval(team.monitorInterval);
+  afterEach(async () => {
+    if (team) {
+      await team.dispose();
     }
   });
 

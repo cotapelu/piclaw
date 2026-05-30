@@ -60,6 +60,10 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
       contextLogFile: config.contextLogFile ?? opts.contextLogFile,
     });
 
+    // Set global runtime for extensions
+    const { setGlobalRuntime } = await import("./runtime-runner.js");
+    setGlobalRuntime(runtime);
+
     // 6. Run interactive TUI mode
     await runInteractive(runtime, { verbose: config.verbose });
   } catch (error: any) {

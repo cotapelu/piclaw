@@ -18,6 +18,12 @@ describe('AgentTeam Concurrency', () => {
     team.registerRuntime(mockRuntime('parent'), 'parent');
   });
 
+  afterEach(async () => {
+    if (team) {
+      await team.dispose();
+    }
+  });
+
   test('should assign unique tasks under high concurrency', async () => {
     const agents = ['agent-1', 'agent-2', 'agent-3', 'agent-4'];
     const tasks = ['t0', 't1', 't2', 't3']; // 4 tasks for 4 agents

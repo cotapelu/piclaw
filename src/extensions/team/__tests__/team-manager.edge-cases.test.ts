@@ -10,6 +10,12 @@ describe('AgentTeam Edge Cases', () => {
     team.registerRuntime({ session: { id: 'agent2' } } as any, 'agent-2');
   });
 
+  afterEach(async () => {
+    if (team) {
+      await team.dispose();
+    }
+  });
+
   test('completeTask should clear task assignee', async () => {
     await team.initialize(['task1']);
     const idx = await team.claimTask('agent-1');

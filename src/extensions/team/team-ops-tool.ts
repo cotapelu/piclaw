@@ -64,7 +64,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
       },
       required: ["action"]
     },
-    async execute(params: any, ctx: any) {
+    async execute(toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: any, ctx?: any) {
       // Support LLM outputting JSON string
       if (typeof params === "string") {
         try {

@@ -1,4 +1,3 @@
-import { logger } from "../../utils/logger.js";
 /**
  * Minimal Team Manager
  *
@@ -10,6 +9,7 @@ import {
   createAgentSessionRuntime,
   createAgentSessionServices,
   createAgentSessionFromServices,
+  SessionManager,
   type CreateAgentSessionRuntimeFactory,
   type CreateAgentSessionRuntimeResult,
   type SessionStartEvent,
@@ -18,6 +18,7 @@ import {
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { SharedWorkspace, type WorkspaceEntry } from "./workspace.js";
 import { createTeamOpsTool } from "./team-ops-tool.js";
+import * as path from "node:path";
 
 const MAX_TEAM_SIZE = 4;
 const DEFAULT_MAX_RETRIES = 3;
@@ -53,6 +54,8 @@ export class AgentTeam implements AgentTeamRuntime {
   size = 0;
   dispose: () => Promise<void>;
   childPromises: Promise<void>[] = [];
+  private childControllers: Map<string, AbortController> = new Map();
+  private disposed = false;
 
   // State
   tasks: string[] = [];
@@ -64,7 +67,7 @@ export class AgentTeam implements AgentTeamRuntime {
     retryAvailableAt?: number; // timestamp when task becomes claimable again after backoff
   }> = new Map();
   private pendingIndices: number[] = []; // sorted list of indices with status 'pending' (including backoff)
-  private agentStatuses: Map<string, { currentTaskIndex: number | null; status: string }> = new Map();
+  agentStatuses: Map<string, { currentTaskIndex: number | null; status: string }> = new Map();
   private roleByAgentId: Map<string, string> = new Map(); // maps session.id -> role
   private agentLastSeen: Map<string, number> = new Map(); // role -> timestamp of last activity
   private workspace: SharedWorkspace;
@@ -80,7 +83,7 @@ export class AgentTeam implements AgentTeamRuntime {
         this.onUpdate(update);
       } catch (e) {
         // Ignore update errors - don't break team execution
-        logger.warn('Failed to send update', { error: e });
+        console.warn('Failed to send update:', e);
       }
     }
   }
@@ -102,17 +105,26 @@ export class AgentTeam implements AgentTeamRuntime {
         clearInterval(this.monitorInterval);
         this.monitorInterval = null;
       }
+      this.disposed = true;
+      // Abort all child agent loops
+      for (const controller of this.childControllers.values()) {
+        controller.abort();
+      }
       // Wait for all child agent loops to finish (if any)
       if (this.childPromises && this.childPromises.length > 0) {
         await Promise.allSettled(this.childPromises);
       }
+      this.childControllers.clear();
+      this.childPromises = [];
+      // Dispose all runtimes (children)
       await Promise.allSettled(
-        this.runtimes.slice(1).map(rt =>
-          rt.dispose().catch(err =>
-            logger.error("Failed to dispose child agent", { error: err })
+        this.runtimes.map(rt =>
+          (rt.dispose ? rt.dispose() : Promise.resolve()).catch(err =>
+            console.error("Failed to dispose agent runtime:", err)
           )
         )
       );
+      this.runtimes = [];
       // Unregister from TeamRegistry
       try {
         const registry = TeamRegistry.getInstance();
@@ -120,7 +132,7 @@ export class AgentTeam implements AgentTeamRuntime {
           registry.unregister(this.id);
         }
       } catch (e) {
-        logger.warn('Failed to unregister team from registry', { error: e });
+        console.warn('Failed to unregister team from registry:', e);
       }
     };
     this.workspace = new SharedWorkspace();
@@ -280,6 +292,11 @@ export class AgentTeam implements AgentTeamRuntime {
     return this.withLock(() => {
       return this.agentStatuses.get(role)?.currentTaskIndex ?? null;
     });
+  }
+
+  // Heartbeat để theo dõi agent còn sống không
+  public updateHeartbeat(role: string): void {
+    this.agentLastSeen.set(role, Date.now());
   }
 
   // Helper: insert index into pendingIndices while maintaining sorted order
@@ -523,6 +540,217 @@ export class AgentTeam implements AgentTeamRuntime {
     this.size = this.runtimes.length;
   }
 
+  /**
+   * Setup child runtimes (agents) from parent runtime.
+   * Creates isolated sessions and starts agent loops.
+   */
+  async setupChildRuntimes(
+    parentRuntime: AgentSessionRuntime,
+    baseCwd?: string | ((role: string) => string),
+    options?: { createRuntime?: (factory: CreateAgentSessionRuntimeFactory, opts: any) => Promise<AgentSessionRuntime> }
+  ): Promise<void> {
+    if (this.disposed) throw new Error('Team disposed');
+    // roles should already be defined via initialize options or registerRuntime
+    if (this.roles.length === 0) {
+      throw new Error('No agent roles defined. Call initialize() with teamSize or registerRuntime() first.');
+    }
+
+    for (const role of this.roles) {
+      // Determine agent cwd
+      let agentCwd: string;
+      if (typeof baseCwd === 'function') {
+        agentCwd = baseCwd(role);
+      } else {
+        agentCwd = baseCwd ?? parentRuntime.cwd;
+      }
+
+      // Create isolated session directory
+      const teamDir = path.join(parentRuntime.services.agentDir as string, 'teams', this.id);
+      const agentSessionDir = path.join(teamDir, role);
+      const sessionManager = SessionManager.create(agentCwd, agentSessionDir);
+
+      // Create session start event
+      const sessionStartEvent: SessionStartEvent = {
+        type: 'session_start',
+        reason: 'new'
+      };
+
+      // Create child runtime using parent's services and new sessionManager
+      // We'll use a factory similar to bootPiclawTeam but without reusing parent's sessionManager
+      const factory: CreateAgentSessionRuntimeFactory = async ({
+        cwd: sessionCwd,
+        agentDir: sessionAgentDir,
+        sessionManager: providedSessionManager,
+        sessionStartEvent: startEvent,
+      }) => {
+        // Use parent's shared services (auth, settings, model) but isolated session
+        const services = await createAgentSessionServices({
+          cwd: sessionCwd,
+          agentDir: sessionAgentDir,
+          authStorage: parentRuntime.services.authStorage,
+          settingsManager: parentRuntime.services.settingsManager,
+          modelRegistry: parentRuntime.services.modelRegistry,
+        });
+
+        const sessionResult = await createAgentSessionFromServices({
+          services,
+          sessionManager: providedSessionManager,
+          sessionStartEvent: startEvent,
+          tools: [], // no tools initially; team_ops will be added separately?
+          customTools: [createTeamOpsTool(this)],
+        });
+
+        return {
+          session: sessionResult.session,
+          services,
+          diagnostics: services.diagnostics,
+        } as CreateAgentSessionRuntimeResult;
+      };
+
+      const createRuntimeImpl = options?.createRuntime ?? (parentRuntime as any).createRuntime ?? createAgentSessionRuntime;
+      const runtime = await createRuntimeImpl(factory, {
+        cwd: agentCwd,
+        agentDir: agentSessionDir,
+        sessionManager,
+        sessionStartEvent,
+      });
+
+      // Register
+      this.runtimes.push(runtime);
+      // roles already exists; we push agent status
+      this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
+      this.roleByAgentId.set(runtime.session.sessionId, role);
+      this.size = this.runtimes.length;
+
+      // Subscribe to child session events
+      runtime.session.subscribe((event: any) => this.handleAgentEvent(role, event));
+    }
+  }
+
+  /**
+   * Start agent loops for all registered runtimes.
+   * Should be called after initialize().
+   */
+  startAgentLoops(): void {
+    for (const role of this.roles) {
+      const runtime = this.runtimes.find(rt => this.roleByAgentId.get(rt.session.sessionId) === role);
+      if (runtime) {
+        const controller = new AbortController();
+        this.childControllers.set(role, controller);
+        const p = (this.runAgentLoop(role, runtime, controller) as Promise<void>).catch(err => {
+          console.error(`Agent ${role} loop crashed:`, err);
+        });
+        this.childPromises.push(p);
+      }
+    }
+  }
+
+  private async runAgentLoop(role: string, runtime: AgentSessionRuntime, controller: AbortController): Promise<void> {
+    let turnCount = 0;
+    const MAX_TURNS = 50;
+
+    this.notifyUpdate(this.createUpdate(
+      `🤖 Agent ${role} started working`,
+      { role, status: 'started' }
+    ));
+
+    while (!controller.signal.aborted) {
+      this.updateHeartbeat(role);
+      const status = await this.getTeamStatus();
+
+      if (turnCount > 0) {
+        this.notifyUpdate(this.createUpdate(
+          `🔄 Agent ${role} turn ${turnCount}: ${status.completedTasks}/${status.totalTasks} tasks done`,
+          { role, turn: turnCount, completedTasks: status.completedTasks, totalTasks: status.totalTasks }
+        ));
+      }
+
+      if (status.completedTasks === status.totalTasks && status.totalTasks > 0) {
+        this.notifyUpdate(this.createUpdate(
+          `✅ Agent ${role}: all tasks completed!`,
+          { role, status: 'finished' }
+        ));
+        break;
+      }
+
+      if (turnCount >= MAX_TURNS) {
+        this.notifyUpdate(this.createUpdate(
+          `⚠️ Agent ${role}: max turns (${MAX_TURNS}) reached`,
+          { role, status: 'max_turns' }
+        ));
+        break;
+      }
+
+      try {
+        const prompt = turnCount === 0
+          ? this.getBootstrapPrompt(role)
+          : await this.getContinuationPrompt(turnCount);
+
+        await runtime.session.prompt(prompt);
+      } catch (error: any) {
+        console.error(`Agent ${role} prompt error:`, error);
+        this.notifyUpdate(this.createUpdate(
+          `❌ Agent ${role} error: ${error.message}`,
+          { role, error: error.message },
+          true
+        ));
+      }
+
+      turnCount++;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+  }
+
+  /**
+   * Handle events from child sessions and forward to UI updates.
+   */
+  private handleAgentEvent(role: string, event: any): void {
+    let text: string | null = null;
+    switch (event.type) {
+      case 'agent_start':
+        text = `[${role}] Agent started`;
+        break;
+      case 'agent_end':
+        text = `[${role}] Agent finished: ${event.stopReason}`;
+        break;
+      case 'message_start':
+        if (event.message?.role === 'user') {
+          const content = this.extractText(event.message);
+          text = `[${role}] User: ${content.substring(0, 200)}`;
+        } else if (event.message?.role === 'assistant') {
+          const content = this.extractText(event.message);
+          text = `[${role}] Assistant: ${content.substring(0, 200)}`;
+        }
+        break;
+      case 'tool_execution_start':
+        text = `[${role}] Tool: ${event.toolName}`;
+        break;
+      case 'tool_execution_end':
+        text = `[${role}] Tool ${event.toolName} done`;
+        break;
+      case 'message_update':
+        // ignore streaming updates
+        break;
+    }
+    if (text) {
+      this.notifyUpdate({
+        content: [{ type: 'text', text }],
+        details: { role, eventType: event.type },
+        isError: event.type === 'agent_end' && event.stopReason === 'error'
+      });
+    }
+  }
+
+  /**
+   * Extract plain text from a message object (handles array content).
+   */
+  private extractText(message: any): string {
+    if (typeof message.content === 'string') return message.content;
+    const parts = (message.content || []) as Array<{ type: string; text?: string }>;
+    const texts = parts.filter(c => c.type === 'text').map(c => c.text).filter(Boolean);
+    return texts.join('');
+  }
+
   async initialize(tasks: string[]): Promise<void> {
     await this.withLock(async () => {
       this.tasks = tasks;
@@ -538,6 +766,8 @@ export class AgentTeam implements AgentTeamRuntime {
       for (const role of this.roles) {
         this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
       }
+      // Clear heartbeat tracking
+      this.agentLastSeen.clear();
     });
     // Notify team initialized
     this.notifyUpdate(this.createUpdate(
@@ -545,6 +775,42 @@ export class AgentTeam implements AgentTeamRuntime {
       { totalTasks: tasks.length, agents: this.roles }
     ));
   }
+
+
+  private getBootstrapPrompt(role: string): string {
+    const bootstrapTasksList = this.tasks.map((t, i) => `[${i}] ${t}`).join("\n");
+    return `You are ${role}, an AI agent in a collaborative team.
+
+Team tasks:
+${bootstrapTasksList}
+
+Your role: ${role}
+
+INSTRUCTIONS:
+1. Use team_ops(action="claim_task") to get a task
+2. Work on the task using regular tools (bash, read, write, edit, git, etc.)
+3. When done, call team_ops(action="complete_task", taskIndex=X, result="summary")
+4. If you need to share data, use team_ops(action="workspace_write", key="...", value="...")
+5. Communicate via team_ops(action="send_message", channel="team.chat", content="...")
+6. Continue claiming tasks until all are done
+
+Start by claiming your first task.`;
+  }
+
+  private async getContinuationPrompt(turnCount: number): Promise<string> {
+    const status = await this.getTeamStatus();
+    const messages = await this.getMessages("team.chat", 5);
+    const recentMessages = messages.map(m => `[${m.from}]: ${m.content}`).join("\n");
+
+    return `Turn ${turnCount + 1}. Continue.
+
+Progress: ${status.completedTasks}/${status.totalTasks} tasks completed.
+${recentMessages ? `\nRecent messages:\n${recentMessages}\n` : ""}
+
+Use team_ops to continue. If all tasks done, finish up.`;
+  }
+
+  // Extend dispose to wait for child loops and dispose child runtimes
 }
 
 // ============================================
@@ -559,7 +825,7 @@ export class TeamRegistry {
   private static instance: TeamRegistry | null = null;
   private teams: Map<string, AgentTeam> = new Map();
   private locked = false;
-  private autoDisposeTimers: Map<string, ReturnType<typeof setTimeout>> = new Map();
+  private autoDisposeTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly AUTO_DISPOSE_DELAY = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {}
@@ -573,13 +839,13 @@ export class TeamRegistry {
 
   register(teamId: string, team: AgentTeam): void {
     this.teams.set(teamId, team);
-    logger.log(`[TeamRegistry] Registered team ${teamId}`);
+    console.log(`[TeamRegistry] Registered team ${teamId}`);
   }
 
   unregister(teamId: string): void {
     this.clearAutoDisposeTimer(teamId);
     this.teams.delete(teamId);
-    logger.log(`[TeamRegistry] Unregistered team ${teamId}`);
+    console.log(`[TeamRegistry] Unregistered team ${teamId}`);
   }
 
   get(teamId: string): AgentTeam | undefined {
@@ -601,8 +867,7 @@ export class TeamRegistry {
     if (team) {
       const timer = setTimeout(() => {
         this.autoDisposeTeam(teamId);
-      }, this.AUTO_DISPOSE_DELAY);
-      (timer as any).unref?.();
+      }, this.AUTO_DISPOSE_DELAY).unref?.();
       if (timer) {
         this.autoDisposeTimers.set(teamId, timer);
       }
@@ -623,9 +888,9 @@ export class TeamRegistry {
       try {
         await team.dispose();
         this.unregister(teamId);
-        logger.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
+        console.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
       } catch (e) {
-        logger.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}`, { error: e });
+        console.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}:`, e);
       }
     }
   }
@@ -670,74 +935,26 @@ export async function bootPiclawTeam(
     teamSize?: number;
     teamRoles?: string[];
     tools?: string[];
+    agentCwd?: string | ((role: string) => string);
   } = {}
 ): Promise<AgentTeam> {
-  const cwd = parentRuntime.cwd;
-  const agentDir = getAgentDir();
-
   const { size: teamSize, roles: normalizedRoles } = validateOptions(
     options.teamSize ?? 2,
     Array.isArray(options.teamRoles) ? options.teamRoles : []
   );
 
   const team = new AgentTeam();
-  team.registerRuntime(parentRuntime, "parent");
+  team.setTeamId(`team-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
-  // Define factory and startEvent once (same for all agents)
-  const factory: CreateAgentSessionRuntimeFactory = async ({
-    cwd: sessionCwd,
-    agentDir: sessionAgentDir,
-    sessionManager,
-    sessionStartEvent,
-  }) => {
-    const services = await createAgentSessionServices({
-      cwd,
-      agentDir: sessionAgentDir,
-      authStorage: parentRuntime.services.authStorage,
-      settingsManager: parentRuntime.services.settingsManager,
-      modelRegistry: parentRuntime.services.modelRegistry,
-    });
-
-    const sessionResult = await createAgentSessionFromServices({
-      services,
-      sessionManager,
-      sessionStartEvent,
-      tools: options.tools,
-      customTools: [createTeamOpsTool(team)],
-    });
-
-    return {
-      session: sessionResult.session,
-      services,
-      diagnostics: services.diagnostics,
-    } as CreateAgentSessionRuntimeResult;
-  };
-
-  const startEvent: SessionStartEvent = {
-    type: "session_start",
-    reason: "new"
-  };
-
-  // Create all agents in parallel while preserving order
-  const bootPromises = normalizedRoles.map(async (role, idx) => {
-    const runtime = await createAgentSessionRuntime(factory, {
-      cwd,
-      agentDir,
-      sessionManager: parentRuntime.session.sessionManager,
-      sessionStartEvent: startEvent,
-    });
-    return { idx, role, runtime };
-  });
-
-  const results = await Promise.all(bootPromises);
-  // Sort by original index to maintain order
-  results.sort((a, b) => a.idx - b.idx);
-  for (const { role, runtime } of results) {
-    team.registerRuntime(runtime, role);
+  // Set roles on team before creating runtimes
+  team.roles = normalizedRoles;
+  for (const role of normalizedRoles) {
+    team.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
   }
+  team.size = normalizedRoles.length;
 
-  team.id = `team-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  (team as any)._parentRuntime = parentRuntime;
+  // Create isolated child runtimes and start agent loops
+  await team.setupChildRuntimes(parentRuntime, options.agentCwd);
 
   // Register team in global registry
   TeamRegistry.getInstance().register(team.id, team);
@@ -749,160 +966,50 @@ export async function executeTeamTasks(
   team: AgentTeam,
   tasks: string[],
   onUpdate?: (update: any) => void,
-  options?: { wait?: boolean; maxTurnsPerAgent?: number }
+  _options?: { wait?: boolean; maxTurnsPerAgent?: number }
 ): Promise<AgentTeam> {
-  // Set onUpdate for the team
   team.setOnUpdate(onUpdate);
   await team.initialize(tasks);
-  const maxTurnsPerAgent = options?.maxTurnsPerAgent ?? 50;
-
-  const bootstrapTasksList = tasks.map((t, i) => `[${i}] ${t}`).join("\n");
-
-  const getBootstrapPrompt = (role: string) => `You are ${role}, an AI agent in a collaborative team.
-
-Team tasks:
-${bootstrapTasksList}
-
-Your role: ${role}
-
-INSTRUCTIONS:
-1. Use team_ops(action="claim_task") to get a task
-2. Work on the task using regular tools (bash, read, write, edit, git, etc.)
-3. When done, call team_ops(action="complete_task", taskIndex=X, result="summary")
-4. If you need to share data, use team_ops(action="workspace_write", key="...", value="...")
-5. Communicate via team_ops(action="send_message", channel="team.chat", content="...")
-6. Continue claiming tasks until all are done
-
-Start by claiming your first task.`;
-
-  const getContinuationPrompt = async (turnCount: number) => {
-    const status = await team.getTeamStatus();
-    const messages = await team.getMessages("team.chat", 5);
-    const recentMessages = messages.map(m => `[${m.from}]: ${m.content}`).join("\n");
-
-    return `Turn ${turnCount + 1}. Continue.
-
-Progress: ${status.completedTasks}/${status.totalTasks} tasks completed.
-${recentMessages ? `\nRecent messages:\n${recentMessages}\n` : ""}
-
-Use team_ops to continue. If all tasks done, finish up.`;
-  };
-
-  async function runAgentLoop(runtime: AgentSessionRuntime, role: string): Promise<void> {
-    let turnCount = 0;
-    // Use configured maxTurnsPerAgent from outer scope
-
-    team.notifyUpdate?.(team.createUpdate(
-      `🤖 Agent ${role} started working`,
-      { role, status: 'started' }
-    ));
-
-    while (true) {
-      const status = await team.getTeamStatus();
-      // Debug: turn progress (silenced)
-
-      // Notify progress at start of each turn (but not on first turn since we already announced start)
-      if (turnCount > 0) {
-        team.notifyUpdate?.(team.createUpdate(
-          `🔄 Agent ${role} turn ${turnCount}: ${status.completedTasks}/${status.totalTasks} tasks done`,
-          { role, turn: turnCount, completedTasks: status.completedTasks, totalTasks: status.totalTasks }
-        ));
-      }
-
-      if (status.completedTasks === status.totalTasks && status.totalTasks > 0) {
-        team.notifyUpdate?.(team.createUpdate(
-          `✅ Agent ${role}: all tasks completed!`,
-          { role, status: 'finished' }
-        ));
-        break;
-      }
-
-      if (turnCount >= maxTurnsPerAgent) {
-        team.notifyUpdate?.(team.createUpdate(
-          `⚠️ Agent ${role}: max turns (${maxTurnsPerAgent}) reached`,
-          { role, status: 'max_turns' }
-        ));
-        break;
-      }
-
-      try {
-        const prompt = turnCount === 0
-          ? getBootstrapPrompt(role)
-          : await getContinuationPrompt(turnCount);
-
-        await runtime.session.prompt(prompt);
-        turnCount++;
-      } catch (err: any) {
-        // Error already reported via notifyUpdate below
-        team.notifyUpdate?.(team.createUpdate(
-          `❌ Agent ${role} error: ${err.message}`,
-          { role, error: err.message, status: 'error' },
-          true
-        ));
-        // Handle agent failure with retry logic
-        const currentTask = await team.getMyCurrentTask(role);
-        if (currentTask !== null) {
-          await team.handleAgentFailure(role, currentTask, err);
-        }
-        break;
-      }
-    }
-  }
-
-  // Start all child agents (skip parent at index 0)
-  const childPromises = team.runtimes.slice(1).map((runtime, idx) => {
-    const role = team.roles[idx + 1];
-    return runAgentLoop(runtime, role).catch(err => {
-      logger.error(`Agent ${role} failed`, { error: err });
-    });
-  });
-
-  // Save childPromises to team for later disposal
-  team.childPromises = childPromises;
-
-  // Monitor completion and auto-dispose
+  // Start autonomous agent loops
+  team.startAgentLoops();
+  // Setup monitor for completion and auto-dispose
   team.monitorInterval = setInterval(async () => {
-    // Reclaim tasks from zombie agents (under lock to prevent races)
     await team.withLock(() => {
       team.reclaimZombieAgents();
     });
     const status = await team.getTeamStatus();
-    // Team completes when all tasks are either completed or failed (terminal states)
     if (status.isComplete && status.totalTasks > 0) {
-      clearInterval(team.monitorInterval);
+      clearInterval(team.monitorInterval!);
       team.monitorInterval = null;
-      // Schedule auto-dispose after delay (5 min)
       try {
         const registry = TeamRegistry.getInstance();
         registry.resetAutoDisposeTimer(team.id);
       } catch (e) {
-        logger.warn('Failed to schedule auto-dispose', { error: e });
+        console.warn('Failed to schedule auto-dispose:', e);
       }
     }
   }, 1000);
 
-  if (options?.wait) {
+  // If wait option is true, await completion; otherwise return immediately
+  if (_options?.wait) {
     try {
-      await Promise.all(childPromises);
+      await Promise.all(team.childPromises);
     } finally {
       if (team.monitorInterval) {
         clearInterval(team.monitorInterval);
         team.monitorInterval = null;
       }
     }
-    // Final status update
     const finalStatus = await team.getTeamStatus();
     onUpdate?.(team.createUpdate(
       `🎉 Team execution complete: ${finalStatus.completedTasks}/${finalStatus.totalTasks} tasks done`,
       { completed: finalStatus.completedTasks, total: finalStatus.totalTasks }
     ));
   } else {
-    // Non-blocking: return immediately, team continues in background
     onUpdate?.(team.createUpdate(
-      `✅ Team started in background (teamId: ${team.id}). Use team_wait to wait for completion.`,
+      `✅ Team started (teamId: ${team.id}). Progress updates will follow.`,
       { teamId: team.id, agentCount: team.roles.length, totalTasks: tasks.length }
     ));
   }
-
   return team;
 }

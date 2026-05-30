@@ -11,6 +11,12 @@ describe('AgentTeam Performance', () => {
     team.registerRuntime(mockRuntime, 'agent-1');
   });
 
+  afterEach(async () => {
+    if (team) {
+      await team.dispose();
+    }
+  });
+
   test('claimTask linear scan is acceptable for typical sizes', async () => {
     const sizes = [10, 50, 100];
     const iterations = 20; // Reduced for stability
