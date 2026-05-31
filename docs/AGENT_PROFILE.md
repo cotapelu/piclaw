@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (100+ tests across multiple files, total 513 passing)
+- Comprehensive test writing (100+ tests across multiple files, total 523 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 
@@ -47,6 +47,7 @@ None observed in recent iterations.
 - **Coverage expansion (part 2)**: Added tests for runCommandCapture success, getLatestNpmVersion happy path, installNpm/uninstallNpm; coverage increased to ~74%
 - **Team-tool coverage improvement**: Added tests for onUpdate accumulation, team query (existing and non‑existent), dead code removal; team‑tool.ts now 100% statement coverage
 - **Install command test expansion**: Cover error handling paths (missing --filter value, invalid keys, non‑array values) and progress callbacks (start, complete, error) for install command
+- **Remove/Update progress tests & NotifyUpdate error**: Added tests for progress callbacks in remove/update and error handling in notifyUpdate
 - Backward compatible
 
 ## Areas for Improvement
