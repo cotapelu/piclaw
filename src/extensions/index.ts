@@ -11,7 +11,7 @@ import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader";
 import autoContinueExtension from "./hooks/auto-continue.js";
-import autoCompact75Extension from "./hooks/auto-compact-85.js";
+import autoCompact85Extension from "./hooks/auto-compact-85.js";
 
 import piclawHeader from "./piclaw-header.js";
 
@@ -27,14 +27,14 @@ export default function (api: import("@earendil-works/pi-coding-agent").Extensio
   registerTeamTool(api);
 
   // Register universal tool (replaces echo and system_info)
-  registerUniversalTool(api);
-  registerSubToolLoaderExtension(api);
+  // registerUniversalTool(api);
+  // registerSubToolLoaderExtension(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);
 
   // Register Auto Compact at 75% Extension
-  autoCompact75Extension(api);
+  autoCompact85Extension(api);
 
   // Register Piclaw Header
   piclawHeader(api);
