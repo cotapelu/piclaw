@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **513 unit tests passing (100%)**
+- **518 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, and team systems
@@ -49,7 +49,7 @@
 - ✅ Package filtering implemented
 - ✅ Health, pin, import/export implemented
 - ✅ Global install uses correct agent directory
-- ✅ All 510 tests pass (team test fixes and multi-runtime refactor complete)
+- ✅ All 518 tests pass (team test fixes and multi-runtime refactor complete)
 - ✅ Build error fix (variable shadowing) resolved
 
 ### Areas for Improvement
@@ -61,9 +61,10 @@
 - Fixed shadowed variable in `piclaw-core.ts` causing build error
 - Team test fixes: shared session manager and cwd propagation
 - Multi-runtime test refactor: use injection pattern via `createRuntime` option
-- Evolution metrics updated to reflect 513 passing tests
+- Evolution metrics updated to reflect 518 passing tests
 - Updated AGENT_PROFILE.md and EVOLUTION.md accordingly
-- Team-tool coverage improvement: added tests for onUpdate and team query, removed dead code, increased overall coverage to 76% (team-tool 100%)
+- Team-tool coverage improvement: added tests for onUpdate and team query, removed dead code, increased overall coverage to ~77% (team-tool 100%)
+- Install command test expansion: added tests for missing --filter value, invalid filter keys, non-array filter values, and progress callbacks (start, complete, error)
 
 ## Next Steps
 See TODO.md for full task list.

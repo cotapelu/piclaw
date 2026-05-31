@@ -149,4 +149,70 @@ describe("handleInstallCommand (CLI)", () => {
     expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Invalid JSON for filter"));
     expect(exitSpy).toHaveBeenCalledWith(1);
   });
+
+  // Additional install command tests
+
+  it('should error when --filter missing value', async () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    try {
+      await pkgCommands.handleInstallCommand(['install', 'npm:test', '--filter']);
+    } catch (e) {}
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Missing value for --filter'));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('should error when filter contains invalid keys', async () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    try {
+      await pkgCommands.handleInstallCommand(['install', 'npm:test', '--filter', '{"badkey":[]}']);
+    } catch (e) {}
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining('Invalid filter keys'));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('should error when filter value is not an array', async () => {
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    try {
+      await pkgCommands.handleInstallCommand(['install', 'npm:test', '--filter', '{"extensions":"notarray"}']);
+    } catch (e) {}
+    expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Filter 'extensions' must be an array of strings"));
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it('should log progress events (start, complete)', async () => {
+    let capturedCb: any;
+    const setProgressSpy = vi.spyOn(PiclawPackageManager.prototype, 'setProgressCallback').mockImplementation((cb: any) => {
+      capturedCb = cb;
+    });
+    const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockImplementation(async () => {
+      if (capturedCb) {
+        capturedCb({ type: 'start', action: 'install', source: 'npm:test' });
+        capturedCb({ type: 'complete', action: 'install', source: 'npm:test' });
+      }
+    });
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error('exit'); });
+    try {
+      await pkgCommands.handleInstallCommand(['install', 'npm:test']);
+    } catch (e) {}
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('⏳ install: npm:test'));
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('✅ install complete: npm:test'));
+    expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it('should log progress error event', async () => {
+    let capturedCb: any;
+    const setProgressSpy = vi.spyOn(PiclawPackageManager.prototype, 'setProgressCallback').mockImplementation((cb: any) => {
+      capturedCb = cb;
+    });
+    const installSpy = vi.spyOn(PiclawPackageManager.prototype, 'installAndPersist').mockImplementation(async () => {
+      if (capturedCb) {
+        capturedCb({ type: 'error', action: 'install', source: 'npm:test', message: 'something broke' });
+      }
+    });
+    try {
+      await pkgCommands.handleInstallCommand(['install', 'npm:test']);
+    } catch (e) {}
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('❌ install failed: npm:test - something broke'));
+  });
+
 });

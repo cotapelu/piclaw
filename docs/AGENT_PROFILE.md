@@ -36,7 +36,7 @@ None observed in recent iterations.
 - Added retry logic for network failures (npm/git) with exponential backoff
 - **Install filter CLI**: `--filter` option for `piclaw install` to apply resource filters at install time
 - **Progress callbacks**: install/remove/update now show progress messages via default logger
-- **Integration test**: End‑to‑end install→resolve→remove flow validated
+- **Integration test**: End-to-end install→resolve→remove flow validated
 - **Structured logging with levels & JSON**: Enhanced logger with configurable levels and formats, 12 unit tests passing
 - **Type safety improvements**: Replaced explicit any in logger.ts, context-logger.ts; fixed unused imports; improved error handling types
 - **Test coverage expansion**: Added handleRemoveCommand tests (7), getGitInstallPath test, fixed existing tests; coverage ~70%
@@ -45,7 +45,8 @@ None observed in recent iterations.
 - **Test reliability fix**: Fixed ESM child_process mocking and JSON error message brittleness, all 450 tests now pass
 - **Coverage expansion**: Added runCommand unit tests, increasing coverage to ~73%
 - **Coverage expansion (part 2)**: Added tests for runCommandCapture success, getLatestNpmVersion happy path, installNpm/uninstallNpm; coverage increased to ~74%
-- **Team-tool coverage improvement**: Added tests for onUpdate accumulation, team query (existing and non-existent), dead code removal; team-tool.ts now 100% statement coverage
+- **Team-tool coverage improvement**: Added tests for onUpdate accumulation, team query (existing and non‑existent), dead code removal; team‑tool.ts now 100% statement coverage
+- **Install command test expansion**: Cover error handling paths (missing --filter value, invalid keys, non‑array values) and progress callbacks (start, complete, error) for install command
 - Backward compatible
 
 ## Areas for Improvement

@@ -44,3 +44,4 @@
 - Unit tests for PiclawPackageManager.update (8 tests)
 - Structured logging foundation (logger wrapper)
 - Team-tool coverage improvement (onUpdate & team query tests, dead code removal)
+- Install command test expansion (error handling and progress callbacks)
