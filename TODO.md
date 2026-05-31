@@ -6,6 +6,7 @@
 - [x] Add `piclaw update` command
 - [x] Verify interactive mode loads extensions from .piclaw/npm
 - [x] Add support for package filtering (like pi core)
+- [ ] Achieve overall test coverage ≥80% (target: statements ≥80% across key modules: package-commands, team-manager, memory-tool, todos-tool, context-logger)
 
 ## Medium Priority
 - [x] Implement package uninstall for git sources
@@ -42,3 +43,4 @@
 
 - Unit tests for PiclawPackageManager.update (8 tests)
 - Structured logging foundation (logger wrapper)
+- Team-tool coverage improvement (onUpdate & team query tests, dead code removal)

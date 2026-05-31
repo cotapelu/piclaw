@@ -158,24 +158,6 @@ export function createTeamTool(): ToolDefinition {
           throw new Error("No runtime context available. Team tool must be called from an active session (InteractiveMode not running?)");
         }
 
-        // For new team, we want to accumulate onUpdate messages
-        if (onUpdate && !wrappedOnUpdate) {
-          const messageHistory: Array<{ type: string; text: string }> = [];
-          wrappedOnUpdate = ((update: any) => {
-            if (update.content && Array.isArray(update.content)) {
-              for (const block of update.content) {
-                if (block.type === 'text') {
-                  messageHistory.push({ type: 'text', text: block.text });
-                }
-              }
-            }
-            onUpdate({
-              content: [...messageHistory],
-              details: update.details,
-              isError: update.isError || false
-            });
-          }) as typeof onUpdate;
-        }
 
         // Send initial update (will be accumulated)
         wrappedOnUpdate?.({

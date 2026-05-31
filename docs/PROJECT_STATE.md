@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **510 unit tests passing (100%)**
+- **513 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, and team systems
@@ -55,14 +55,15 @@
 ### Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces
 - Consider using `execa` for more reliable subprocess management
-- Increase test coverage beyond 75%
+- Increase test coverage to ≥80%
 
 ## Recent Changes
 - Fixed shadowed variable in `piclaw-core.ts` causing build error
 - Team test fixes: shared session manager and cwd propagation
 - Multi-runtime test refactor: use injection pattern via `createRuntime` option
-- Evolution metrics updated to reflect 510 passing tests
+- Evolution metrics updated to reflect 513 passing tests
 - Updated AGENT_PROFILE.md and EVOLUTION.md accordingly
+- Team-tool coverage improvement: added tests for onUpdate and team query, removed dead code, increased overall coverage to 76% (team-tool 100%)
 
 ## Next Steps
 See TODO.md for full task list.
