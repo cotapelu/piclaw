@@ -15,7 +15,7 @@ None observed in recent iterations.
 - Quick to implement custom solutions with minimal dependencies
 - Deep understanding of pi core architecture and extension system
 - Effective use of dependency injection and configuration management
-- Comprehensive test writing (100+ tests across multiple files, total 571 passing)
+- Comprehensive test writing (100+ tests across multiple files, total 586 passing)
 - CLI command development (install, remove, list, update, info, health, pin, import/export)
 - Feature parity with pi core and beyond (all major package management features)
 

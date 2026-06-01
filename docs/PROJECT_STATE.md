@@ -39,11 +39,11 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **571 unit tests passing (100%)**
+- **586 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
-- Statement coverage: 78.88%, Lines coverage: 80.01% (target ≥80% for lines achieved)
+- Statement coverage: 80.15%, Lines coverage: 81.28% (target ≥80% achieved)
 
 ### Known Limitations (resolved)
 - ✅ `update` command implemented
@@ -68,6 +68,7 @@
 - All 565 tests passing (added 32 new tests)
 - **Type safety improvements**: Replaced `as any` casts in `piclaw-core.ts` and `team-manager.ts` with proper types
 - **Team integration tests**: Added `bootPiclawTeam.integration.test.ts` with real boot scenarios (6 passing)
+- **Coverage expansion**: Added team behavior and backoff tests to push coverage to 80.15% statements
 - Updated metrics in AGENT_METRICS.md and EVOLUTION.md
 - Updated TODO.md with coverage and type-safety achievements
 
