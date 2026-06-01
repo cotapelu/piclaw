@@ -54,7 +54,7 @@
 - ✅ Build error fix (variable shadowing) resolved
 
 ### Areas for Improvement
-- Replace remaining `any` casts with proper TypeScript interfaces
+- ✅ Replace remaining `any` casts in `piclaw-core.ts` and `team-manager.ts` (completed)
 - Consider using `execa` for more reliable subprocess management
 - Increase test coverage to ≥85% (for critical modules)
 
@@ -70,7 +70,7 @@
 - Updated TODO.md with coverage achievement
 
 ## Next Steps
-- Continue increasing coverage for high-complexity modules (team-manager, piclaw-package-manager) towards 85%
-- Refactor remaining `any` types in `piclaw-core.ts` and `team-manager.ts`
+- Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
+- Evaluate `execa` for subprocess management improvements
 - Consider performance optimizations for large team orchestrations
 - Explore adding more deterministic error handling in team loops

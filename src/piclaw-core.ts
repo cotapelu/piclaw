@@ -13,6 +13,19 @@ import {
   type CreateAgentSessionRuntimeFactory,
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
+
+// Augment DefaultResourceLoaderOptions to support custom package manager
+// The pi-core's DefaultResourceLoaderOptions is defined in the dist/core/resource-loader.js module.
+declare module "@earendil-works/pi-coding-agent/dist/core/resource-loader.js" {
+  interface DefaultResourceLoaderOptions {
+    packageManager?: PiclawPackageManager;
+  }
+}
+
+// Local interface for session manager with parentRuntime
+interface SessionManagerWithParent extends SessionManager {
+  parentRuntime?: AgentSessionRuntime;
+}
 import { getAgentDir } from "./config/config-manager.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
@@ -38,7 +51,7 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
   const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
 
   const createRuntimeFactory: CreateAgentSessionRuntimeFactory = async (factoryOptions) => {
-    const { cwd, agentDir, sessionManager, sessionStartEvent } = factoryOptions as any;
+    const { cwd, agentDir, sessionManager, sessionStartEvent } = factoryOptions;
     // Fallback in case these are undefined
     const effectiveCwd = cwd ?? process.cwd();
     const effectiveAgentDir = agentDir ?? getAgentDir();
@@ -53,7 +66,7 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
       cwd: effectiveCwd,
       agentDir: effectiveAgentDir,
       settingsManager,
-      resourceLoaderOptions: { packageManager } as any,
+      resourceLoaderOptions: { packageManager },
     });
     if (typeof newServices.cwd !== 'string') {
       throw new Error('newServices.cwd is not a string: ' + JSON.stringify({ cwd: newServices.cwd, services: newServices }));
@@ -86,14 +99,11 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
 
   if (contextLogFile && runtime.session?.agent?.streamFn) {
     const originalStreamFn = runtime.session.agent.streamFn;
-    runtime.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as any;
+    runtime.session.agent.streamFn = createContextLoggingStreamFn(originalStreamFn, contextLogFile) as typeof originalStreamFn;
   }
 
-  (runtime.session.sessionManager as any).parentRuntime = runtime;
-  const extensionRunner = runtime.session.extensionRunner as any;
-  if (extensionRunner.runtime) {
-    extensionRunner.runtime.sessionRuntime = runtime;
-  }
+  (runtime.session.sessionManager as SessionManagerWithParent).parentRuntime = runtime;
+
 
   if (options.model && runtime.session?.model) {
     try {

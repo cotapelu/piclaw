@@ -7,6 +7,7 @@
 - [x] Verify interactive mode loads extensions from .piclaw/npm
 - [x] Add support for package filtering (like pi core)
 - [x] Achieve overall test coverage ≥80% (current: 80.03% statements, 565 tests passing)
+- [ ] Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Medium Priority
 - [x] Implement package uninstall for git sources

@@ -14,6 +14,7 @@ import {
   type CreateAgentSessionRuntimeResult,
   type SessionStartEvent,
   type ToolDefinition,
+  type AgentSession,
 } from "@earendil-works/pi-coding-agent";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { SharedWorkspace, type WorkspaceEntry } from "./workspace.js";
@@ -536,7 +537,9 @@ export class AgentTeam implements AgentTeamRuntime {
     this.runtimes.push(runtime);
     this.roles.push(role);
     this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
-    this.roleByAgentId.set((runtime.session as any).id, role);
+    const session = runtime.session as AgentSession & { id?: string };
+    const sessionId = session.id ?? session.sessionManager.getSessionId();
+    this.roleByAgentId.set(sessionId, role);
     this.size = this.roles.length;
   }
 

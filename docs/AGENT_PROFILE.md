@@ -56,8 +56,9 @@ None observed in recent iterations.
 - Backward compatible
 
 ## Areas for Improvement
-- Replace remaining `any` casts with proper TypeScript interfaces
+- ✅ Replace remaining `any` casts in `piclaw-core.ts` and `team-manager.ts` (completed)
 - Consider using `execa` for more reliable subprocess management
+- Increase test coverage to ≥85% (added to TODO)
 
 ## Recommended Skills
 - `typescript-architect` for strict typing
