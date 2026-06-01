@@ -1,7 +1,7 @@
 # Piclaw Project State
 
 ## Last Updated
-2025-05-30
+2025-06-01
 
 ## Current Architecture
 
@@ -39,10 +39,11 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **533 unit tests passing (100%)**
+- **565 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
-- Comprehensive coverage of package manager, CLI commands, logging, and team systems
+- Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
+- Statement coverage: 80.03% (target achieved)
 
 ### Known Limitations (resolved)
 - ✅ `update` command implemented
@@ -55,21 +56,21 @@
 ### Areas for Improvement
 - Replace remaining `any` casts with proper TypeScript interfaces
 - Consider using `execa` for more reliable subprocess management
-- Increase test coverage to ≥80%
+- Increase test coverage to ≥85% (for critical modules)
 
 ## Recent Changes
-- Fixed shadowed variable in `piclaw-core.ts` causing build error
-- Team test fixes: shared session manager and cwd propagation
-- Multi-runtime test refactor: use injection pattern via `createRuntime` option
-- Evolution metrics updated to reflect 518 passing tests
-- Updated AGENT_PROFILE.md and EVOLUTION.md accordingly
-- Team-tool coverage improvement: added tests for onUpdate and team query, removed dead code, increased overall coverage to ~77% (team-tool 100%)
-- Install command test expansion: added tests for missing --filter value, invalid filter keys, non-array filter values, and progress callbacks (start, complete, error)
-- Subtool-loader extension implementation and registration
-- Todos-tool test fixes: exported internal helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
-- Universal tool registration restored
-- Mutex and Context-Logger test expansion
-- All 533 tests passing; coverage ~75%
+- Added comprehensive test suite for `skill-reader` module:
+  - Unit tests for `read-skill.ts` command module (11 passing)
+  - Integration tests for `skill-reader.ts` tool wrapper (5 passing)
+- Added unit tests for `auto-compact-85.ts` hook (4 passing)
+- Added test coverage for `tool-template.ts` basics (6 passing) covering tool definition, command metadata, and error handling
+- Increased overall test coverage to 80.03% statements (from ~75%)
+- All 565 tests passing (added 32 new tests)
+- Updated metrics in AGENT_METRICS.md and EVOLUTION.md
+- Updated TODO.md with coverage achievement
 
 ## Next Steps
-See TODO.md for full task list.
+- Continue increasing coverage for high-complexity modules (team-manager, piclaw-package-manager) towards 85%
+- Refactor remaining `any` types in `piclaw-core.ts` and `team-manager.ts`
+- Consider performance optimizations for large team orchestrations
+- Explore adding more deterministic error handling in team loops

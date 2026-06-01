@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 27 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests, Coverage Expansion: Additional Tests, Team Test Fixes, Multi-Runtime Test Refactor, Team-Tool Coverage & Dead Code Removal, Install Command Test Expansion, Remove/Update Progress Tests & NotifyUpdate Error, Test Fixes & Subtool-Loader Implementation, Coverage Expansion: Mutex and Context-Logger)
-- Tasks completed: All major features; 100% test pass
-- Test failure rate: 0% (0 failing in 523 tests)
+- Iterations: 28 (27 previous + Coverage Target Achievement)
+- Tasks completed: All major features; 100% test pass; coverage target achieved
+- Test failure rate: 0% (0 failing in 565 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,16 +14,17 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Total lines: ~4900 (including remove dry-run, type improvements, additional tests)
+- Total lines: ~5200 (includes 32 new test files and additional coverage tests)
 - Complexity: Low-Medium (package manager ~950 lines)
-- Coverage: 75.43% statements, 76.34% lines
+- Coverage: 80.03% statements, 80.73% lines (target ≥80% achieved)
 
 ## Testing Status
-- Unit tests: 533 total, 533 passing (100%)
-- New tests: Remove/update progress callbacks and notifyUpdate error handling
-- Fixed tests: 2 package-manager bugs, 1 resource collection test, and 4 team-tool tests
-- Removed obsolete test: truncation test (behavior no longer applicable)
-- Manual verification: all commands work (install, remove, list, update, info, health, pin, import, export, dry-run)
+- Unit tests: 565 total, 565 passing (100%)
+- New tests: skill-reader module (read-skill.ts, skill-reader.ts), auto-compact-85 hook, tool-template basics, plus additional team-manager variations
+- Test files: 56 (increased from 52)
+- Coverage increased from 75.43% to 80.03% statements
+- Known coverage gaps remaining: team-manager.ts (67.47% - high complexity, needs more integration scenarios), piclaw-package-manager.ts (75.11%), todos-tool.ts (73.70%)
+- All tests pass continuously; build stable
 
 ## Recent Improvements
 - **Test reliability fix**: Resolved ESM child_process mocking issues and JSON error message brittleness, restoring 100% test pass (450 tests)
