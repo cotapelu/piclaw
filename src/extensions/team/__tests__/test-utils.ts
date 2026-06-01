@@ -11,7 +11,7 @@ import { AgentTeam } from '../team-manager.js';
 export function createMockRuntime(): any {
   return {
     session: {
-      id: `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      sessionId: `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       prompt: async () => {},
       sessionManager: {},
     },

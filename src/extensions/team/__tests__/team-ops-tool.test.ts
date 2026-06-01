@@ -21,8 +21,8 @@ function createMockTeam() {
 // Mock context
 function createMockContext(sessionId = 'agent-1') {
   return {
-    session: { id: sessionId },
-    runtime: { session: { id: sessionId } }
+    session: { sessionId },
+    runtime: { session: { sessionId } }
   };
 }
 
@@ -62,7 +62,7 @@ describe('Team Ops Tool', () => {
       mockTeam.claimTask = vi.fn().mockResolvedValue(0);
       const result = await tool.execute('call-1', '{"action":"claim_task"}', undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
-      expect(mockTeam.claimTask).toHaveBeenCalledWith(mockCtx.session.id);
+      expect(mockTeam.claimTask).toHaveBeenCalledWith(mockCtx.session.sessionId);
     });
 
     it('should reject invalid JSON', async () => {
@@ -106,7 +106,7 @@ describe('Team Ops Tool', () => {
       mockTeam.completeTask = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'complete_task', taskIndex: 2, result: 'done' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
-      expect(mockTeam.completeTask).toHaveBeenCalledWith(mockCtx.session.id, 2, 'done');
+      expect(mockTeam.completeTask).toHaveBeenCalledWith(mockCtx.session.sessionId, 2, 'done');
     });
 
     it('should fail complete_task without taskIndex', async () => {
@@ -154,7 +154,7 @@ describe('Team Ops Tool', () => {
       mockTeam.workspaceWrite = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'workspace_write', key: 'k', value: 'v' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
-      expect(mockTeam.workspaceWrite).toHaveBeenCalledWith('k', 'v', mockCtx.session.id);
+      expect(mockTeam.workspaceWrite).toHaveBeenCalledWith('k', 'v', mockCtx.session.sessionId);
     });
 
     it('should fail workspace_write missing key/value', async () => {
@@ -168,7 +168,7 @@ describe('Team Ops Tool', () => {
       mockTeam.publishMessage = vi.fn().mockResolvedValue(undefined);
       const result = await tool.execute('call-1', { action: 'send_message', channel: 'alerts', content: 'hi' }, undefined, undefined, mockCtx);
       expect(result.isError).toBe(false);
-      expect(mockTeam.publishMessage).toHaveBeenCalledWith('alerts', mockCtx.session.id, 'hi');
+      expect(mockTeam.publishMessage).toHaveBeenCalledWith('alerts', mockCtx.session.sessionId, 'hi');
     });
 
     it('should fail send_message missing content', async () => {

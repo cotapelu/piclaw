@@ -84,7 +84,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
         switch (action) {
           // ==================== TASK MANAGEMENT ====================
           case "claim_task": {
-            const taskIndex = await team.claimTask(ctx.session.id);
+            const taskIndex = await team.claimTask(ctx.session.sessionId);
             if (taskIndex !== null) {
               return {
                 content: [{ type: "text", text: `Claimed task ${taskIndex}: ${team.tasks[taskIndex]}` }],
@@ -100,7 +100,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
           }
 
           case "release_task": {
-            const agentId = ctx.session.id;
+            const agentId = ctx.session.sessionId;
             const currentTask = await team.getMyCurrentTask(agentId);
             if (currentTask === null) {
               return {
@@ -126,7 +126,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
 
           case "complete_task": {
             const { taskIndex, result } = params;
-            const agentId = ctx.session.id;
+            const agentId = ctx.session.sessionId;
             if (taskIndex === undefined) {
               return {
                 content: [{ type: "text", text: "Missing taskIndex" }],
@@ -178,7 +178,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
             if (!key || value === undefined) {
               return { content: [{ type: "text", text: "Missing key or value" }], details: undefined, isError: true } as const;
             }
-            await team.workspaceWrite(key, String(value), ctx.session.id);
+            await team.workspaceWrite(key, String(value), ctx.session.sessionId);
             return {
               content: [{ type: "text", text: `Wrote to workspace key: ${key}` }],
               details: { key },
@@ -192,7 +192,7 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
             if (!content) {
               return { content: [{ type: "text", text: "Missing content" }], details: undefined, isError: true } as const;
             }
-            await team.publishMessage(channel, ctx.session.id, content);
+            await team.publishMessage(channel, ctx.session.sessionId, content);
             return {
               content: [{ type: "text", text: `Sent to ${channel}` }],
               details: { channel },
@@ -217,8 +217,8 @@ export function createTeamOpsTool(team: AgentTeam): ToolDefinition {
             if (!status) {
               return { content: [{ type: "text", text: "Missing status" }], details: undefined, isError: true } as const;
             }
-            await team.getMyCurrentTask(ctx.session.id); // ensures agent exists
-            const current = await team.getMyCurrentTask(ctx.session.id);
+            await team.getMyCurrentTask(ctx.session.sessionId); // ensures agent exists
+            const current = await team.getMyCurrentTask(ctx.session.sessionId);
             // For simplicity, just record it; not used yet in minimal version
             return {
               content: [{ type: "text", text: `Status updated to: ${status}` }],

@@ -1,7 +1,7 @@
 import { AgentTeam } from '../team-manager.js';
 
 // Mock runtime (minimal)
-const mockRuntime = { session: { id: 'agent' } } as any;
+const mockRuntime = { session: { sessionId: 'agent' } } as any;
 
 describe('AgentTeam Performance', () => {
   let team: AgentTeam;

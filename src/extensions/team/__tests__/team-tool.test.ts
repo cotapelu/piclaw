@@ -2,8 +2,8 @@ import { createTeamTool } from '../team-tool.js';
 
 // Minimal mock - enough to test param validation
 const mockCtx: any = {
-  runtime: { session: { id: 'test-session' } },
-  session: { id: 'test-session' },
+  runtime: { session: { sessionId: 'test-session' } },
+  session: { sessionId: 'test-session' },
 };
 
 describe('team_run tool', () => {

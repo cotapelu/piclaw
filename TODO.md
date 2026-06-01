@@ -6,7 +6,8 @@
 - [x] Add `piclaw update` command
 - [x] Verify interactive mode loads extensions from .piclaw/npm
 - [x] Add support for package filtering (like pi core)
-- [x] Achieve overall test coverage ≥80% (current: 80.03% statements, 565 tests passing)
+- [x] Achieve overall test coverage ≥80% (current: 80.01% lines, 571 tests passing)
+- [x] Remove remaining `as any` casts in piclaw-core.ts and team-manager.ts
 - [ ] Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Medium Priority

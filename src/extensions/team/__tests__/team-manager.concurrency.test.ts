@@ -8,7 +8,7 @@
 import { AgentTeam } from '../team-manager.js';
 
 // Mock runtime minimal
-const mockRuntime = (id: string) => ({ session: { id } } as any);
+const mockRuntime = (id: string) => ({ session: { sessionId: id } } as any);
 
 describe('AgentTeam Concurrency', () => {
   let team: AgentTeam;

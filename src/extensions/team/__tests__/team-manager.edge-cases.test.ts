@@ -5,9 +5,9 @@ describe('AgentTeam Edge Cases', () => {
 
   beforeEach(() => {
     team = new AgentTeam();
-    team.registerRuntime({ session: { id: 'parent' } } as any, 'parent');
-    team.registerRuntime({ session: { id: 'agent1' } } as any, 'agent-1');
-    team.registerRuntime({ session: { id: 'agent2' } } as any, 'agent-2');
+    team.registerRuntime({ session: { sessionId: 'parent' } } as any, 'parent');
+    team.registerRuntime({ session: { sessionId: 'agent1' } } as any, 'agent-1');
+    team.registerRuntime({ session: { sessionId: 'agent2' } } as any, 'agent-2');
   });
 
   afterEach(async () => {

@@ -5,7 +5,7 @@ import { createTeamOpsTool } from '../../extensions/team/team-ops-tool.js';
 import { AgentTeam } from '../../extensions/team/team-manager.js';
 
 function createMockContext(sessionId: string) {
-  return { session: { id: sessionId } };
+  return { session: { sessionId } };
 }
 
 describe('team-ops-tool', () => {
@@ -16,6 +16,11 @@ describe('team-ops-tool', () => {
     team = new AgentTeam();
     team.id = 'test-team';
     tool = createTeamOpsTool(team);
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe('task management', () => {
@@ -36,8 +41,11 @@ describe('team-ops-tool', () => {
     it('release_task should free assigned task', async () => {
       await team.initialize(['Task 1']);
       const ctx = createMockContext('agent-1');
-      await tool.execute('call', { action: 'claim_task' }, undefined, undefined, ctx);
-      const result = await tool.execute('call', { action: 'release_task' }, undefined, undefined, ctx);
+      const claimResult = await tool.execute('call', { action: 'claim_task' }, undefined, undefined, ctx);
+      expect(claimResult.isError).toBe(false);
+      const taskIndex = claimResult.details?.taskIndex;
+      expect(taskIndex).toBe(0);
+      const result = await tool.execute('call', { action: 'release_task', taskIndex }, undefined, undefined, ctx);
       expect(result.isError).toBe(false);
       expect(await team.getMyCurrentTask('agent-1')).toBeNull();
     });

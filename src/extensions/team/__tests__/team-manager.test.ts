@@ -7,8 +7,8 @@ describe('AgentTeam', () => {
     team = new AgentTeam();
     team.setTeamId('test-team');
     // Register fake runtimes with distinct session IDs
-    team.registerRuntime({ session: { id: 'parent-session-123' } } as any, 'parent');
-    team.registerRuntime({ session: { id: 'agent1-session-456' } } as any, 'agent-1');
+    team.registerRuntime({ session: { sessionId: 'parent-session-123' } } as any, 'parent');
+    team.registerRuntime({ session: { sessionId: 'agent1-session-456' } } as any, 'agent-1');
   });
 
   afterEach(async () => {
@@ -87,7 +87,7 @@ describe('AgentTeam', () => {
 
     it('should isolate agents: agent-1 cannot complete agent-2 task', async () => {
       // Need agent-2 registered for role mapping
-      (team as any).registerRuntime({ session: { id: 'agent2-session-789' } } as any, 'agent-2');
+      (team as any).registerRuntime({ session: { sessionId: 'agent2-session-789' } } as any, 'agent-2');
       await team.initialize(['taskX', 'taskY']);
 
       // agent-1 claims task 0
@@ -104,7 +104,7 @@ describe('AgentTeam', () => {
     it('should respect maxTurnsPerAgent option', async () => {
       // Create a mock runtime that never completes tasks
       const mockRuntime = {
-        session: { id: 'agent-test-session' },
+        session: { sessionId: 'agent-test-session' },
         async prompt() {
           // Simulate agent that never calls team_ops to complete
           // Should hit maxTurnsPerAgent and exit

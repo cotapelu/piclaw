@@ -537,9 +537,7 @@ export class AgentTeam implements AgentTeamRuntime {
     this.runtimes.push(runtime);
     this.roles.push(role);
     this.agentStatuses.set(role, { currentTaskIndex: null, status: 'idle' });
-    const session = runtime.session as AgentSession & { id?: string };
-    const sessionId = session.id ?? session.sessionManager.getSessionId();
-    this.roleByAgentId.set(sessionId, role);
+    this.roleByAgentId.set(runtime.session.sessionId, role);
     this.size = this.roles.length;
   }
 
