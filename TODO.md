@@ -45,3 +45,7 @@
 - Structured logging foundation (logger wrapper)
 - Team-tool coverage improvement (onUpdate & team query tests, dead code removal)
 - Install command test expansion (error handling and progress callbacks)
+- Subtool-loader extension and registration
+- Todos-tool test fixes: exported helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
+- Universal tool registration restored
+- All 523 tests passing

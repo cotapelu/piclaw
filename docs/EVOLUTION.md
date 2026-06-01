@@ -881,3 +881,41 @@ Increase test coverage further toward the 75% target by adding tests for runComm
 ### Trajectory
 Phase 23 complete: Additional tests added, coverage ~74% statements, 75% lines. Next: final push past 75% with updateNpm tests and remaining CLI coverage.
 
+---
+
+## 2025-06-01 - Phase 24: Test Fixes and Subtool-Loader Implementation
+
+### Objective
+Restore failing tests after regression and implement missing subtool-loader extension to improve extensibility.
+
+### Changes Made
+- Fixed todos-tool.ts: exported TodoState, applyOp, normalizeParams, formatSummary, and added getLatestTodoPhasesFromEntries helper.
+- Fixed todos-tool.test.ts: added fs.promises.rename mock to support atomic write operations.
+- Implemented subtool-loader.ts: created new extension providing a unified tool for sub-tools (ls, find, grep, read, http) with proper registration and tool definition.
+- Updated extensions/index.ts: imported and registered registerSubToolLoaderExtension; uncommented registerUniversalTool to satisfy extension-index tests.
+- Verified all tests pass (523 passing).
+
+### Implementation Details
+- The todos-tool now exposes internal functions for unit testing while maintaining same runtime behavior.
+- The subtool-loader uses a two-layer design: a simplified definition for direct testing and a standard ToolDefinition wrapper for registration.
+- The tool delegates commands via `ctx.exec` with appropriate argument construction for each sub-tool.
+- Universal tool registration restored.
+
+### Verification
+- All 523 unit tests pass.
+- Build succeeds with 0 TypeScript errors.
+- New tests for subtool-loader cover metadata, delegation, and error handling.
+
+### Risks & Debt
+- Low risk: changes are additive, no breaking modifications.
+- Coverage remains ~78%; next focus is to increase to ≥80%.
+
+### Next Steps (Phase 24)
+- Continue coverage expansion targeting ≥80% statements.
+- Address remaining any casts in codebase.
+- Consider adding integration tests for subtool-loader end-to-end.
+
+### Trajectory
+Phase 24 complete: Test suite fully green, subtool-loader integrated. Next iteration: coverage improvement.
+
+

@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **518 unit tests passing (100%)**
+- **523 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, and team systems
@@ -65,6 +65,10 @@
 - Updated AGENT_PROFILE.md and EVOLUTION.md accordingly
 - Team-tool coverage improvement: added tests for onUpdate and team query, removed dead code, increased overall coverage to ~77% (team-tool 100%)
 - Install command test expansion: added tests for missing --filter value, invalid filter keys, non-array filter values, and progress callbacks (start, complete, error)
+- Subtool-loader extension implementation and registration
+- Todos-tool test fixes: exported internal helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
+- Universal tool registration restored
+- All 523 tests passing; coverage ~78%
 
 ## Next Steps
 See TODO.md for full task list.

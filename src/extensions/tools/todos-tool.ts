@@ -191,7 +191,7 @@ function normalizeInProgress(phases: TodoPhase[]): void {
 // Input normalization (IDENTICAL to backup)
 // ============================================================================
 
-function normalizeParams(params: unknown): any {
+export function normalizeParams(params: unknown): any {
   if (typeof params === "string") {
     try {
       params = JSON.parse(params);
@@ -416,7 +416,7 @@ function applySingleOp(file: TodoFile, params: any): { file: TodoFile; errors: s
   return { file, errors };
 }
 
-function formatSummary(phases: TodoPhase[], errors: string[]): string {
+export function formatSummary(phases: TodoPhase[], errors: string[]): string {
   const tasks = phases.flatMap((p) => p.tasks);
   if (tasks.length === 0) return errors.length > 0 ? `Errors: ${errors.join("; ")}` : "Todo list cleared.";
 
@@ -464,6 +464,29 @@ function formatSummary(phases: TodoPhase[], errors: string[]): string {
   return lines.join("\n");
 }
 
+/**
+ * Extracts the latest todo phases from a list of message entries.
+ * Used for reconstructing state from conversation history.
+ */
+export function getLatestTodoPhasesFromEntries(entries: any[]): TodoPhase[] {
+  // Iterate from the end to find the most recent valid todos toolResult
+  for (let i = entries.length - 1; i >= 0; i--) {
+    const entry = entries[i];
+    if (entry.type !== 'message') continue;
+    const message = entry.message;
+    if (message.role !== 'toolResult') continue;
+    const toolName = message.toolName;
+    if (toolName !== 'todos' && toolName !== 'todo_write') continue;
+    // Skip error entries (they may have isError flag)
+    if (message.isError) continue;
+    const details = message.details;
+    if (details && Array.isArray(details.phases)) {
+      return details.phases;
+    }
+  }
+    return [];
+}
+
 // ============================================================================
 // Helper functions (from backup)
 // ============================================================================
@@ -490,7 +513,7 @@ function getOperationName(params: any): string {
 }
 
 
-function applyOp(
+export function applyOp(
   phases: TodoPhase[],
   nextTaskId: number,
   nextPhaseId: number,
@@ -510,7 +533,7 @@ function applyOp(
 // State (Enhanced with session-based detection)
 // ============================================================================
 
-class TodoState {
+export class TodoState {
   phases: TodoPhase[] = [];
   nextTaskId: number = 1;
   nextPhaseId: number = 1;

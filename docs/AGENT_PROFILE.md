@@ -48,6 +48,10 @@ None observed in recent iterations.
 - **Team-tool coverage improvement**: Added tests for onUpdate accumulation, team query (existing and non‑existent), dead code removal; team‑tool.ts now 100% statement coverage
 - **Install command test expansion**: Cover error handling paths (missing --filter value, invalid keys, non‑array values) and progress callbacks (start, complete, error) for install command
 - **Remove/Update progress tests & NotifyUpdate error**: Added tests for progress callbacks in remove/update and error handling in notifyUpdate
+- **Subtool-loader extension**: Implemented sub-tool delegation tool with registration
+- **Todos-tool test fixes**: Exported internal helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
+- **Universal tool registration restored**: Uncommented in extensions/index
+- All 523 tests passing
 - Backward compatible
 
 ## Areas for Improvement

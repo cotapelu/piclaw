@@ -1,7 +1,7 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 25 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests, Coverage Expansion: Additional Tests, Team Test Fixes, Multi-Runtime Test Refactor, Team-Tool Coverage & Dead Code Removal, Install Command Test Expansion, Remove/Update Progress Tests & NotifyUpdate Error)
+- Iterations: 26 (Custom PM, Update, Filtering, Validation, Info, Dry-Run, Health, Pin, Import/Export, Team-Tool Fix, Retry Logic, Install Filter CLI, Progress Callbacks, Integration Test, Update Unit Tests, Structured Logging Migration, Structured Logging with Levels & JSON, Test Reliability Fix, Coverage Expansion: runCommand Tests, Coverage Expansion: Additional Tests, Team Test Fixes, Multi-Runtime Test Refactor, Team-Tool Coverage & Dead Code Removal, Install Command Test Expansion, Remove/Update Progress Tests & NotifyUpdate Error, Test Fixes & Subtool-Loader Implementation)
 - Tasks completed: All major features; 100% test pass
 - Test failure rate: 0% (0 failing in 523 tests)
 - Rollbacks: 0
@@ -16,7 +16,7 @@
 ## Code Quality
 - Total lines: ~4900 (including remove dry-run, type improvements, additional tests)
 - Complexity: Low-Medium (package manager ~950 lines)
-- Coverage: ~77% statements, ~79% lines
+- Coverage: ~78% statements, ~80% lines
 
 ## Testing Status
 - Unit tests: 523 total, 523 passing (100%)
