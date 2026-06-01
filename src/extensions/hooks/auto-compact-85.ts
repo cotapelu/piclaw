@@ -11,7 +11,7 @@ export default function (pi: import("@earendil-works/pi-coding-agent").Extension
   pi.on("turn_end", async (_event, ctx) => {
     const usage = ctx.getContextUsage();
     if (usage?.percent && usage.percent > COMPACTION_THRESHOLD_PERCENT) {
-      ctx.compact();
+      await ctx.compact();
     }
   });
 }
