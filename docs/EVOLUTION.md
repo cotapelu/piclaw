@@ -918,4 +918,39 @@ Restore failing tests after regression and implement missing subtool-loader exte
 ### Trajectory
 Phase 24 complete: Test suite fully green, subtool-loader integrated. Next iteration: coverage improvement.
 
+---
+
+## 2025-06-01 - Phase 25: Coverage Expansion - Mutex and Context-Logger
+
+### Objective
+Increase test coverage by adding unit tests for previously under-tested utility modules.
+
+### Changes Made
+- Added comprehensive tests for `Mutex` class covering lock acquisition, queuing, ordering, and release.
+- Added extensive tests for `ContextLogger` utilities: `formatContext`, `writeContextLog`, `createContextLoggingStreamFn` with proper fs mocking.
+- Verified all new tests pass and build succeeds.
+
+### Implementation Details
+- Mutex tests verify async lock behavior, including queue ordering and reentrancy.
+- ContextLogger tests mock `node:fs` to test file writing, error handling, and context formatting options like `maxMessages`.
+- Both sets increase overall statement coverage by ~0.27% points.
+
+### Verification
+- All 533 unit tests pass (100%).
+- Build clean with 0 TypeScript errors.
+- Coverage increased from 75.16% to 75.43% statements.
+
+### Risks & Debt
+- Low risk: test-only additions, no production changes.
+- Coverage still below 80% target; further modules to address (tool-template, skill-reader, team-manager).
+
+### Next Steps (Phase 25)
+- Continue coverage expansion toward ≥80% by targeting low-covered modules (tool-template, skill-reader, team-manager, todos-tool, package-commands).
+- Add edge case tests for package-commands error handling.
+- Consider integration tests for team features.
+
+### Trajectory
+Phase 25 complete: Added mutex and context-logger tests, modest coverage gain. Next push: target remaining low-coverage modules.
+
+
 

@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **523 unit tests passing (100%)**
+- **533 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, and team systems
@@ -68,7 +68,8 @@
 - Subtool-loader extension implementation and registration
 - Todos-tool test fixes: exported internal helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
 - Universal tool registration restored
-- All 523 tests passing; coverage ~78%
+- Mutex and Context-Logger test expansion
+- All 533 tests passing; coverage ~75%
 
 ## Next Steps
 See TODO.md for full task list.

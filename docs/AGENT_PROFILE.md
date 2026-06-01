@@ -51,7 +51,8 @@ None observed in recent iterations.
 - **Subtool-loader extension**: Implemented sub-tool delegation tool with registration
 - **Todos-tool test fixes**: Exported internal helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
 - **Universal tool registration restored**: Uncommented in extensions/index
-- All 523 tests passing
+- **Mutex and Context-Logger tests**: Increased coverage with comprehensive unit tests
+- All 533 tests passing
 - Backward compatible
 
 ## Areas for Improvement
