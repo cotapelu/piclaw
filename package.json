@@ -13,7 +13,7 @@
   },
   "scripts": {
     "generate-custom-models": "tsx scripts/generate-custom-models.ts",
-    "build": "npm run generate-custom-models && tsc -p tsconfig.build.json && chmod +x dist/cli.js dist/main.js",
+    "build": "npm run generate-custom-models && tsc -p tsconfig.build.json && chmod +x dist/cli.js dist/main.js && cp -r src/extensions/tools/skill-reader/skills dist/extensions/tools/skill-reader/",
     "start": "node dist/cli.js",
     "dev": "npm run generate-custom-models && tsx src/cli.ts",
     "lint": "eslint src/**/*.ts --fix",
