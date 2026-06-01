@@ -220,6 +220,18 @@ describe("Package Commands (CLI)", () => {
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining("✗ Failed"));
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
+
+    it("should handle listConfiguredPackages error gracefully", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockImplementation(() => {
+        throw new Error("list failed");
+      });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleInfoCommand(["info", "npm:oops"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("✗ Failed"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
   });
 
   describe("handleRemoveCommand", () => {
@@ -328,6 +340,15 @@ describe("Package Commands (CLI)", () => {
       await pkgCommands.handleListCommand(["list"]);
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining("No packages installed."));
     });
+
+    it("should error on unexpected arguments", async () => {
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleListCommand(["list", "unexpected"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Unexpected arguments"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
   });
 
   describe("handleHealthCommand", () => {
@@ -380,6 +401,18 @@ describe("Package Commands (CLI)", () => {
       ]);
       await pkgCommands.handleHealthCommand(["health"]);
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining("invalid package.json"));
+    });
+
+    it("should handle errors from listConfiguredPackages", async () => {
+      vi.spyOn(PiclawPackageManager.prototype, 'listConfiguredPackages').mockImplementation(() => {
+        throw new Error("list error");
+      });
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleHealthCommand(["health"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("✗ Failed"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
 
@@ -444,6 +477,16 @@ describe("Package Commands (CLI)", () => {
         await pkgCommands.handlePinCommand(["pin", "npm:missing@1.0", "npm:new@2.0", "-l"]);
       } catch (e) {}
       expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Old source not found"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should fail when settings file not found", async () => {
+      // Do NOT create settings file
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handlePinCommand(["pin", "npm:foo@1.0", "npm:foo@2.0", "-l"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Settings file not found"));
       expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
@@ -558,6 +601,28 @@ describe("Package Commands (CLI)", () => {
       // Should not add duplicate
       expect(updated.packages.filter((p: any) => (typeof p === 'string' ? p : p.source) === 'npm:existing')).toHaveLength(1);
       expect(updated.packages).toContain("npm:new");
+    });
+
+    it("should handle invalid JSON in input file", async () => {
+      const inFile = join(cwd, "bad.json");
+      writeFileSync(inFile, "{ invalid json }",);
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleImportCommand(["import", inFile, "-l"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Invalid JSON"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
+    });
+
+    it("should handle non-array input file", async () => {
+      const inFile = join(cwd, "notarray.json");
+      writeFileSync(inFile, JSON.stringify({ not: "array" }));
+      const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => { throw new Error("exit"); });
+      try {
+        await pkgCommands.handleImportCommand(["import", inFile, "-l"]);
+      } catch (e) {}
+      expect(console.error).toHaveBeenCalledWith(expect.stringContaining("Expected an array"));
+      expect(exitSpy).toHaveBeenCalledWith(1);
     });
   });
 
