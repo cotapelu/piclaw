@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import {
   setupModelScoping,
   resolveModelPattern,
@@ -7,8 +7,10 @@ import {
   findScopedModelIndex,
   type ScopedModel,
 } from "../model-scoper";
+import * as modelScoperModule from "../model-scoper";
 import type { Model } from "@earendil-works/pi-ai";
 import { modelsAreEqual } from "@earendil-works/pi-ai";
+import { logger } from "../utils/logger.js";
 
 // Helper to create mock model
 function mockModel(provider: string, id: string): Model {
@@ -153,6 +155,23 @@ describe("ModelScoper", () => {
 
       expect(result.scopedModels.length).toBe(mockModels.length);
     });
+
+    it("skips empty patterns and logs warning", async () => {
+      const warnSpy = vi.spyOn(logger, 'warn');
+      mockSettings.getEnabledModels = vi.fn(() => ["", "  ", "anthropic:*"]);
+      const result = await setupModelScoping({
+        modelRegistry: mockRegistry,
+        settingsManager: mockSettings,
+        cliModel: undefined,
+        cliThinking: undefined,
+        currentSessionHasModel: false,
+      });
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining("Empty model pattern"));
+      expect(result.scopedModels.length).toBeGreaterThanOrEqual(3);
+    });
+
+
+
   });
 
   describe("setupModelScoping - limit (MAX=50)", () => {
@@ -299,5 +318,9 @@ describe("ModelScoper", () => {
       ];
       expect(findScopedModelIndex(models, mockModel("x", "9"))).toBe(-1);
     });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   });
 });

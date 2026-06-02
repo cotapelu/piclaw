@@ -138,12 +138,23 @@ export async function setupModelScoping(
         }
       }
 
-      const matches = resolveModelPattern(patternClean, allModels);
-      for (const model of matches) {
-        const existing = scopedModels.find(sm => modelsAreEqual(sm.model, model));
-        if (!existing) {
-          scopedModels.push({ model, thinkingLevel });
+      // Skip empty patterns
+      if (!patternClean.trim()) {
+        logger.warn(`Empty model pattern, skipping`);
+        continue;
+      }
+
+      try {
+        const matches = resolveModelPattern(patternClean, allModels);
+        for (const model of matches) {
+          const existing = scopedModels.find(sm => modelsAreEqual(sm.model, model));
+          if (!existing) {
+            scopedModels.push({ model, thinkingLevel });
+          }
         }
+      } catch (err: any) {
+        logger.warn(`Invalid model pattern '${pattern}': ${err.message}`);
+        // Continue with next pattern
       }
     }
   }

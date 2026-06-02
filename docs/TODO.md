@@ -47,7 +47,7 @@
 - [x] **Ctrl+R keybinding** - Bound session selector to Ctrl+R (UX improvement)
 - [x] **Unit test suite** - Comprehensive tests added (output-guard, prompt, file-processor, model-scoper, session-resolver); 79 new tests
 - [x] **Image auto-resize** - Implemented using sharp; resizes images >2048px, configurable via settings (default true)
-- ⏳ **Settings validation** (graceful handling of invalid patterns)
+- [x] **Settings validation** - Robust handling: skip empty patterns, catch errors from invalid patterns, with logging
 
 ---
 
@@ -62,12 +62,12 @@
 | P1 | Session UI | Using package's `SessionSelectorComponent` via `/resume` | ⚠️ Works, needs Ctrl+R |
 | P1 | Model UI | Using package's `ModelSelectorComponent` via Ctrl+L | ✅ Works |
 | P1 | Stdout Guard | `utils/output-guard.ts` | ✅ Done |
-| P2 | Ctrl+R Binding | Override `app.session.resume` keybinding | ⏳ Next |
-| P2 | Unit Tests | vitest for file-processor, model-scoper, session-resolver | ⏳ Pending |
-| P2 | Image Resize | Implement auto-resize before upload | ⏳ Pending |
+| P2 | Ctrl+R Binding | Override `app.session.resume` keybinding | ✅ Done |
+| P2 | Unit Tests | Comprehensive test suite added (79 tests) | ✅ Done |
+| P2 | Image Resize | Implement auto-resize before upload | ✅ Done |
 | P3 | Tests Coverage | 80% target | ⏳ Pending |
 | P3 | Error Handling | Network, API, permission errors | ⏳ Partial |
-| P3 | Settings Validation | Invalid pattern handling | ⏳ Partial |
+| P3 | Settings Validation | Invalid pattern handling | ✅ Done |
 
 ---
 
