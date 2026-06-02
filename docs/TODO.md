@@ -59,7 +59,7 @@
 | P0 | Model Scoping | `model-scoper.ts`, limit 50, Ctrl+P | ✅ Done |
 | P0 | @file Support | `file-processor.ts`, stdin + images | ✅ Done |
 | P0 | Multi-mode | `main.ts` routing, `output-guard.ts` | ✅ Done |
-| P1 | Session UI | Using package's `SessionSelectorComponent` via `/resume` | ⚠️ Works, needs Ctrl+R |
+| P1 | Session UI | Using package's `SessionSelectorComponent` via `/resume` | ✅ Done |
 | P1 | Model UI | Using package's `ModelSelectorComponent` via Ctrl+L | ✅ Works |
 | P1 | Stdout Guard | `utils/output-guard.ts` | ✅ Done |
 | P2 | Ctrl+R Binding | Override `app.session.resume` keybinding | ✅ Done |
@@ -153,9 +153,9 @@ piclaw --mode rpc < input.json > output.json
 |------|--------|------------|
 | Model scope too large (259 items) | ✅ Fixed | Limit to 50, prioritize current+default |
 | Keybinding conflict (Enter → model selector) | ✅ Fixed | Use package defaults only |
-| Session selector not discoverable | ⏳ Open | Add Ctrl+R binding |
-| No test coverage | ⏳ High | Write unit tests (P1-002) |
-| Image resize not implemented | ⏳ Medium | Implement P1-003 |
+| Session selector not discoverable | ✅ Fixed | Added Ctrl+R binding |
+| No test coverage | ✅ Fixed | Comprehensive test suite (692 tests) |
+| Image resize not implemented | ✅ Fixed | Auto-resize with sharp (>2048px) |
 
 ---
 

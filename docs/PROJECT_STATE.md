@@ -107,11 +107,15 @@
 - **Team test expansion**: behavior, backoff, and integration tests
 - Updated documentation and evolution logs
 
+**2025-06-02 - Settings Validation**
+- Added empty pattern skip in model-scoper
+- Added try-catch around resolveModelPattern for invalid patterns
+- Added unit test for empty pattern warning
+- Robust settings handling
+
 ## Next Steps
 - Increase test coverage to ≥85% by adding tests for team-manager edge cases and piclaw-package-manager internal methods
 - Evaluate `execa` for subprocess management improvements
 - Consider performance optimizations for large team orchestrations
 - Explore adding more deterministic error handling in team loops
 
-- **P1-002: Unit Test Suite** - Write tests for new modules (file-processor, model-scoper, session-resolver)
-- **P1-003: Image Auto-resize** - Implement auto-resize for large images before upload
