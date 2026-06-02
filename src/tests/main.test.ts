@@ -29,7 +29,13 @@ vi.mock('../config/config-manager.js', () => {
 
 vi.mock('../piclaw-core.js', () => ({
   bootPiclaw: vi.fn(() => Promise.resolve({
-    session: { id: 'test-session' } as any,
+    session: {
+      id: 'test-session',
+      sessionManager: {
+        getSessionId: () => 'test-session',
+        getSessionFile: () => '/tmp/test-session.jsonl',
+      },
+    } as any,
     dispose: vi.fn(() => Promise.resolve()),
     cwd: '/tmp',
   })),

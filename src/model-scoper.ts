@@ -45,17 +45,29 @@ export function getAllModels(registry: ModelRegistry): Model<any>[] {
  */
 function modelMatchesPattern(model: Model<any>, pattern: string): boolean {
   const patternLower = pattern.toLowerCase();
+  const modelIdLower = model.id.toLowerCase();
+  const modelProviderLower = model.provider.toLowerCase();
 
-  if (pattern.includes("/")) {
-    const [provider, modelId] = pattern.split("/", 2);
-    if (provider && modelId) {
-      return model.provider.toLowerCase() === provider.toLowerCase() &&
-             model.id.toLowerCase().includes(modelId.toLowerCase());
+  // Check for provider separator: '/' or ':'
+  const sep = pattern.includes('/') ? '/' : (pattern.includes(':') ? ':' : null);
+  if (sep) {
+    const [provider, ...rest] = pattern.split(sep);
+    const modelIdPattern = rest.join(sep); // in case multiple separators
+    if (!provider || !modelIdPattern) return false;
+
+    if (modelProviderLower !== provider.toLowerCase()) {
+      return false;
     }
+
+    // Match model id against pattern (exact or wildcard)
+    const idPatternLower = modelIdPattern.toLowerCase();
+    return minimatch(modelIdLower, idPatternLower, { matchBase: true }) ||
+           modelIdLower.includes(idPatternLower.replace(/\*/g, ''));
   }
 
-  return minimatch(model.id.toLowerCase(), patternLower, { matchBase: true }) ||
-         model.id.toLowerCase().includes(patternLower.replace(/\*/g, ''));
+  // No provider specified: match against model id only
+  return minimatch(modelIdLower, patternLower, { matchBase: true }) ||
+         modelIdLower.includes(patternLower.replace(/\*/g, ''));
 }
 
 /**

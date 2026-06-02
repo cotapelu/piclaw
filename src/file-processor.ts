@@ -97,22 +97,26 @@ export function processFileArgument(
   const resultText: string[] = [];
   const images: ImageContent[] = [];
 
-  // Resolve path (if not absolute, relative to cwd)
-  let resolvedPath = arg;
-  if (!arg.startsWith("/") && !arg.match(/^[a-zA-Z]:\\/)) {
-    resolvedPath = join(cwd, arg);
-  }
+  // Determine if it's a @file reference
+  const isAtFile = arg.startsWith("@");
+
+  // Extract the actual path (without @ if present)
+  const rawPath = isAtFile ? arg.slice(1) : arg;
+
+  // Resolve to absolute path if needed
+  const resolvedPath = (rawPath.startsWith("/") || rawPath.match(/^[a-zA-Z]:\\/))
+    ? rawPath
+    : join(cwd, rawPath);
 
   // Case 1: @file syntax
-  if (arg.startsWith("@")) {
-    const filePath = resolvedPath.slice(1); // remove '@'
+  if (isAtFile) {
+    const filePath = resolvedPath;
 
     if (!existsSync(filePath)) {
       logger.warn(`File not found: ${filePath}`);
       return { text: `[File not found: ${basename(filePath)}]`, images: [] };
     }
 
-    // Check if it's an image
     if (isImagePath(filePath)) {
       try {
         const image = loadImageAsContent(filePath);
@@ -123,7 +127,6 @@ export function processFileArgument(
         resultText.push(`[Failed to load image: ${basename(filePath)}]`);
       }
     } else {
-      // Read as text
       try {
         const content = readTextFile(filePath);
         resultText.push(content);
@@ -133,10 +136,7 @@ export function processFileArgument(
       }
     }
 
-    return {
-      text: resultText.join("\n"),
-      images,
-    };
+    return { text: resultText.join("\n"), images };
   }
 
   // Case 2: Direct image path (no @)
@@ -156,13 +156,6 @@ export function processFileArgument(
   }
 
   // Case 3: Plain text (literal or file path without @)
-  // If file exists and is text, read it; otherwise treat as literal
-  if (existsSync(resolvedPath) && !statSync(resolvedPath).isDirectory()) {
-    // It's a file, but not marked with @. Should we read it?
-    // Standard CLI behavior: only @ triggers file read.
-    // So treat as literal text.
-  }
-
   return { text: arg, images: [] };
 }
 

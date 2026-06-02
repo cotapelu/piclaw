@@ -4,12 +4,13 @@
  * Prompt utilities for interactive CLI
  */
 
+import { createInterface } from "node:readline";
+
 /**
  * Prompt for yes/no confirmation
  */
 export async function promptConfirm(message: string): Promise<boolean> {
-  const readline = require("node:readline");
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });
@@ -26,8 +27,7 @@ export async function promptConfirm(message: string): Promise<boolean> {
  * Prompt with default value
  */
 export async function promptWithDefault(question: string, defaultValue: string): Promise<string> {
-  const readline = require("node:readline");
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });
@@ -47,8 +47,7 @@ export async function promptSelect(
   options: string[],
   prompt: string = "Select an option"
 ): Promise<string | undefined> {
-  const readline = require("node:readline");
-  const rl = readline.createInterface({
+  const rl = createInterface({
     input: process.stdin,
     output: process.stdout,
   });

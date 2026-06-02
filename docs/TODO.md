@@ -44,8 +44,8 @@
 
 ### 🟡 **In Progress / Verification**
 
-- ⏳ **Ctrl+R keybinding** for session selector (currently only `/resume`)
-- ⏳ **Unit test suite** (target 80% coverage)
+- [x] **Ctrl+R keybinding** - Bound session selector to Ctrl+R (UX improvement)
+- [x] **Unit test suite** - Comprehensive tests added (output-guard, prompt, file-processor, model-scoper, session-resolver); 79 new tests
 - ⏳ **Image auto-resize** (option exists but not implemented)
 - ⏳ **Settings validation** (graceful handling of invalid patterns)
 

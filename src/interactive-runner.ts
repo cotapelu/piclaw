@@ -16,6 +16,7 @@
 import { AgentSessionRuntime } from "@earendil-works/pi-coding-agent";
 import { InteractiveMode } from "@earendil-works/pi-coding-agent";
 import type { InteractiveModeOptions } from "@earendil-works/pi-coding-agent";
+import { logger } from "./utils/logger.js";
 
 /**
  * Run the interactive TUI mode with the given runtime.
@@ -39,10 +40,27 @@ export async function runInteractive(
 
   const interactive = new InteractiveMode(runtime, interactiveOptions);
 
-  // No keybinding modifications - use package defaults
-  // Ctrl+P / Ctrl+Shift+P: Cycle models
-  // Ctrl+L: Open model selector
-  // /resume command: Open session selector
+  // Custom keybindings: Override session selector to Ctrl+R (if not already set)
+  // Only override if user hasn't customized it in their keybindings.json
+  try {
+    const anyInteractive = interactive as any;
+    const kb: any = anyInteractive.keybindings;
+    if (kb && typeof kb.setUserBindings === 'function') {
+      const currentBindings: any = kb.getUserBindings();
+      // Only set if not already customized
+      if (!currentBindings['app.session.resume']) {
+        kb.setUserBindings({ 'app.session.resume': 'ctrl+r' });
+        logger.debug('Bound session selector to Ctrl+R');
+      } else {
+        const userBinding = currentBindings['app.session.resume'];
+        const bindingStr = Array.isArray(userBinding) ? userBinding.join(', ') : String(userBinding);
+        logger.debug(`Session selector using user binding: ${bindingStr}`);
+      }
+    }
+  } catch (e) {
+    // Silently ignore - keybindings setup is non-critical
+    logger.debug('Could not set Ctrl+R binding: ' + (e as Error).message);
+  }
 
   await interactive.run();
 }

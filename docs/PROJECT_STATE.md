@@ -1,7 +1,7 @@
 # Piclaw Project State
 
 ## Last Updated
-2025-06-01
+2025-06-02
 
 ## Current Architecture
 
@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **607 unit tests passing (100%)**
+- **689 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
@@ -59,18 +59,36 @@
 - Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Recent Changes
+
+**2025-06-02 - P1-001: Ctrl+R Binding**
+- Added keybinding override for session selector (Ctrl+R)
+- Applied only if user hasn't set custom binding
+- Low-risk UX improvement
+
 **2025-06-02 - P0 Features Complete**
-- Session management: `--session`, `--resume`, `--continue`, `--fork`
-- Model scoping: Pattern filtering, Ctrl+P cycling, 50-item limit
-- @file support: Text + images, stdin piping
+- Session Management: `--session`, `--resume`, `--continue`, `--fork` flags
+- Model Scoping: pattern matching, Ctrl+P cycling, 50-item limit
+- @file Support: text + images + stdin
 - Multi-mode: print/json/rpc with stdout takeover
-- Build system: TypeScript compilation, custom models auto-generation
-- Keybindings: Using package defaults (no override)
-- Limitations addressed: Model scope limit prevents UI glitch
+- Build: TypeScript + custom models auto-generation
+
+**2025-06-02 - P1-002: Unit Test Suite & Bug Fixes**
+- Comprehensive unit tests added for all new P0 modules:
+  - output-guard (6 tests)
+  - prompt utilities (12 tests)
+  - file-processor (22 tests)
+  - model-scoper (20 tests)
+  - session-resolver (19 tests)
+- Fixed file-processor: proper path resolution for @file with absolute/relative paths
+- Enhanced model-scoper: pattern matching supports colon (provider:model) and thinking level suffixes
+- Fixed session-resolver: removed unnecessary file existence check
+- Refactored prompt.ts to ESM imports for testability
+- Updated main.test.ts mock to match new runtime.session.sessionManager shape
+- All 689 tests passing (79 new tests)
 
 ---
 
-*Previous changes:*
+*Previous changes (before 2025-06-02):*
 - All major features implemented; 595 tests passing (100%)
 - Coverage: 80.28% statements, 81.43% lines (target achieved)
 - Type safety improvements: removed `as any` casts in core files
@@ -88,3 +106,6 @@
 - Evaluate `execa` for subprocess management improvements
 - Consider performance optimizations for large team orchestrations
 - Explore adding more deterministic error handling in team loops
+
+- **P1-002: Unit Test Suite** - Write tests for new modules (file-processor, model-scoper, session-resolver)
+- **P1-003: Image Auto-resize** - Implement auto-resize for large images before upload

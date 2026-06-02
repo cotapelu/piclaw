@@ -46,10 +46,7 @@ export async function resolveSessionArgument(
   // If looks like file path (contains slash or ends with .jsonl)
   if (arg.includes("/") || arg.includes("\\") || arg.endsWith(".jsonl")) {
     const resolvedPath = path.isAbsolute(arg) ? arg : path.join(cwd, arg);
-    if (fs.existsSync(resolvedPath)) {
-      return { type: "local", path: resolvedPath, sessionId: path.basename(resolvedPath, ".jsonl") };
-    }
-    return { type: "not_found", arg };
+    return { type: "local", path: resolvedPath, sessionId: path.basename(resolvedPath, ".jsonl") };
   }
 
   // Search local sessions first
