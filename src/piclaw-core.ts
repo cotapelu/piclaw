@@ -197,28 +197,31 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
   runtime.session.setScopedModels(scopedModels as any);
   logger.debug(`Scoped models: ${scopedModels.length} models available for cycling`);
 
-  // Set active model if needed
+  // Set active model if needed (only when not already present in session)
   if (activeScopedModel && !sessionHasModel) {
-    // Only set if session doesn't already have a model
     await runtime.session.setModel(activeScopedModel.model);
     logger.info(`Active model: ${activeScopedModel.model.provider}/${activeScopedModel.model.id}`);
-
-    // Apply thinking level from scoped model if set
-    if (activeScopedModel.thinkingLevel) {
-      runtime.session.setThinkingLevel(activeScopedModel.thinkingLevel);
-      logger.debug(`Thinking level from scoped model: ${activeScopedModel.thinkingLevel}`);
-    }
   } else if (sessionHasModel) {
     logger.debug(`Session already has model: ${runtime.session.model?.provider}/${runtime.session.model?.id}`);
   }
 
   // ============================================
-  // 6. APPLY CLI THINKING LEVEL (if not set from scoped model)
+  // 6. APPLY THINKING LEVEL WITH PROPER PRECEDENCE
+  // Precedence: 1) Scoped model pattern/CLI model suffix → 2) CLI flag → 3) Existing session value (keep)
   // ============================================
-  if (options.thinking && runtime.session && !activeScopedModel?.thinkingLevel) {
-    // CLI thinking overrides, but only if not already set by scoped model
-    runtime.session.setThinkingLevel(options.thinking);
-    logger.debug(`Thinking level from CLI: ${options.thinking}`);
+  const thinkingFromScoped = activeScopedModel?.thinkingLevel;
+  const thinkingFromCli = options.thinking;
+  // Note: runtime.session.thinkingLevel already contains the session's persisted value (if any)
+
+  if (thinkingFromScoped) {
+    runtime.session.setThinkingLevel(thinkingFromScoped);
+    logger.debug(`Thinking level from scoped model: ${thinkingFromScoped}`);
+  } else if (thinkingFromCli) {
+    runtime.session.setThinkingLevel(thinkingFromCli);
+    logger.debug(`Thinking level from CLI: ${thinkingFromCli}`);
+  } else {
+    // No explicit override; keep whatever the session already had (or default from package)
+    logger.debug(`Thinking level unchanged (using session/default)`);
   }
 
   return runtime;

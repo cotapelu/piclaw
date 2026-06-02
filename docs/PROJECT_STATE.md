@@ -118,7 +118,12 @@
 - Reads plan file, splits into lines, ignores blanks/comments
 - Expands into `--message` arguments concatenated with existing messages
 - Logs number of tasks added
-- Added unit test in main.test.ts
+- Added unit test in main.test.ts\ n
+**2025-06-02 - Thinking Level Precedence**
+- Revised `piclaw-core.ts` to handle thinking level with clear precedence
+- Order: scoped model pattern thinking → CLI `--thinking` → existing session value
+- Ensures per‑session thinking level is respected and can be overridden correctly
+- No regression; all 693 tests passing
 
 ## Next Steps
 - Increase test coverage to ≥85% by adding tests for team-manager edge cases and piclaw-package-manager internal methods
