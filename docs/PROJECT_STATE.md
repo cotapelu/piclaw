@@ -113,6 +113,13 @@
 - Added unit test for empty pattern warning
 - Robust settings handling
 
+**2025-06-02 - P2-001: @plan Support**
+- Recognizes `@plan <file>` argument
+- Reads plan file, splits into lines, ignores blanks/comments
+- Expands into `--message` arguments concatenated with existing messages
+- Logs number of tasks added
+- Added unit test in main.test.ts
+
 ## Next Steps
 - Increase test coverage to ≥85% by adding tests for team-manager edge cases and piclaw-package-manager internal methods
 - Evaluate `execa` for subprocess management improvements

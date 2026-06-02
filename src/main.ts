@@ -14,6 +14,7 @@ import { SessionManager } from "@earendil-works/pi-coding-agent";
 import { takeOverStdout, restoreStdout } from "./utils/output-guard.js";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "url";
+import { existsSync, readFileSync } from "node:fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -50,6 +51,42 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     // 1. Parse CLI arguments
     const { opts, cliOverrides } = parseOptions(args);
     const cwd = opts.cwd ?? process.cwd();
+
+
+    // Handle @plan arguments: read plan files and expand into messages
+    if (opts.files) {
+      const planMessages: string[] = [];
+      const otherFiles: string[] = [];
+
+      for (const arg of opts.files) {
+        if (arg.startsWith('@plan')) {
+          const planPathRaw = arg.slice('@plan'.length);
+          const planPath = planPathRaw.trimStart();
+          const resolvedPath = planPath.startsWith('/') ? planPath : join(cwd, planPath);
+          if (existsSync(resolvedPath)) {
+            try {
+              const content = readFileSync(resolvedPath, 'utf-8');
+              const lines = content.split(/\r?\n/).map(l => l.trim()).filter(l => l && !l.startsWith('#'));
+              planMessages.push(...lines);
+              logger.debug(`Loaded plan ${resolvedPath}: ${lines.length} tasks`);
+            } catch (err: any) {
+              logger.warn(`Failed to read plan file ${resolvedPath}: ${err.message}`);
+            }
+          } else {
+            logger.warn(`Plan file not found: ${resolvedPath}`);
+          }
+        } else {
+          otherFiles.push(arg);
+        }
+      }
+
+      // Update opts
+      opts.files = otherFiles;
+      if (planMessages.length > 0) {
+        opts.message = (opts.message || []).concat(planMessages);
+        logger.info(`Added ${planMessages.length} task(s) from plan(s)`);
+      }
+    }
 
     // 2. Load persistent config (merged with CLI overrides)
     config = loadConfig(cliOverrides);

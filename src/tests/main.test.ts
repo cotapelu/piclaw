@@ -48,6 +48,8 @@ vi.mock('../interactive-runner.js', () => ({
 import { main } from '../main';
 import { loadConfig } from '../config/config-manager.js';
 import { bootPiclaw } from '../piclaw-core.js';
+import { existsSync, readFileSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { runInteractive } from '../interactive-runner.js';
 import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
 
@@ -112,6 +114,18 @@ describe('main()', () => {
     expect(actualArg.thinking).toBe('high');
     expect(actualArg.verbose).toBe(false);
     expect(actualArg.contextLogFile).toBeUndefined();
+  });
+
+  it('should expand @plan file into messages', async () => {
+    const tmpDir = mkdtempSync('/tmp/piclaw-plan-test-');
+    const planFile = join(tmpDir, 'plan.txt');
+    writeFileSync(planFile, 'Task1\nTask2\n');
+
+    await main([`@plan${planFile}`]);
+    const bootArgs = (bootPiclaw as any).mock.calls[0][0];
+    expect(bootArgs.files).toEqual([]);
+    expect((bootArgs.messages as string[])).toContain('Task1');
+    expect((bootArgs.messages as string[])).toContain('Task2');
   });
 
   it('should handle errors gracefully and exit with code 1', async () => {

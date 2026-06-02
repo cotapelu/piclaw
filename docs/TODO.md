@@ -48,6 +48,7 @@
 - [x] **Unit test suite** - Comprehensive tests added (output-guard, prompt, file-processor, model-scoper, session-resolver); 79 new tests
 - [x] **Image auto-resize** - Implemented using sharp; resizes images >2048px, configurable via settings (default true)
 - [x] **Settings validation** - Robust handling: skip empty patterns, catch errors from invalid patterns, with logging
+- [x] **@plan support** - Recognize `@plan <file>` and expand into messages
 
 ---
 
@@ -65,6 +66,7 @@
 | P2 | Ctrl+R Binding | Override `app.session.resume` keybinding | ✅ Done |
 | P2 | Unit Tests | Comprehensive test suite added (79 tests) | ✅ Done |
 | P2 | Image Resize | Implement auto-resize before upload | ✅ Done |
+| P2 | @plan Support | Recognize `@plan <file>`, expand lines into `--message` | ✅ Done |
 | P3 | Tests Coverage | ≥80% target (statement & line) | ✅ Done |
 | P3 | Error Handling | Network, API, permission errors | ✅ Done |
 | P3 | Settings Validation | Invalid pattern handling | ✅ Done |
