@@ -159,6 +159,8 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
       logger.error("  → Network error. Check your internet connection.");
     } else if (error.message?.includes("timeout")) {
       logger.error("  → Request timed out. Try again later.");
+    } else if (error.message?.includes("429") || error.message?.toLowerCase().includes("rate limit")) {
+      logger.error("  → Rate limit exceeded. Please wait before retrying.");
     }
 
     logger.error(`  Error: ${error.message}`);

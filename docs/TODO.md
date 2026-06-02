@@ -66,7 +66,7 @@
 | P2 | Unit Tests | Comprehensive test suite added (79 tests) | ✅ Done |
 | P2 | Image Resize | Implement auto-resize before upload | ✅ Done |
 | P3 | Tests Coverage | ≥80% target (statement & line) | ✅ Done |
-| P3 | Error Handling | Network, API, permission errors | ⏳ Partial |
+| P3 | Error Handling | Network, API, permission errors | ✅ Done |
 | P3 | Settings Validation | Invalid pattern handling | ✅ Done |
 
 ---
