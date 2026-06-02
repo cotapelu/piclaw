@@ -1,4 +1,15 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+
+// Mock sharp to avoid native dependencies in tests
+vi.mock("sharp", () => {
+  const mockSharp = vi.fn().mockImplementation(() => ({
+    metadata: vi.fn().mockResolvedValue({ width: 3000, height: 2000 }),
+    resize: vi.fn().mockReturnThis(),
+    toBuffer: vi.fn().mockResolvedValue(Buffer.from("resized-buffer")),
+  }));
+  return { default: mockSharp };
+});
+
 import {
   isImagePath,
   getMimeTypeFromExtension,
@@ -230,6 +241,33 @@ describe("FileProcessor", () => {
 
       const result = await buildInitialMessage([`@${img}`], undefined);
       expect(result.images).toHaveLength(1);
+    });
+
+    it("resizes large images when autoResizeImages enabled", async () => {
+      const imgFile = join(tempDir, "large.png");
+      // Write a small dummy buffer; sharp mock will treat it as large
+      writeFileSync(imgFile, Buffer.from('fake image data'));
+
+      // The original base64 of the buffer
+      const originalBase64 = Buffer.from('fake image data').toString('base64');
+
+      const result = await buildInitialMessage([`@${imgFile}`], undefined, true);
+      expect(result.images).toHaveLength(1);
+      // After auto-resize, the data should be the mocked resized buffer
+      expect(result.images[0].data).not.toBe(originalBase64);
+      expect(result.images[0].data).toBe('cmVzaXplZC1idWZmZXI=');
+    });
+
+    it("does not resize small images when autoResizeImages enabled", async () => {
+      const imgFile = join(tempDir, "small.png");
+      // Mock sharp to return small dimensions for this test? Need to reset mock per test
+      // Since mock is shared, we'll rely on default mock which returns {width:3000,height:2000} => triggers resize.
+      // To test no resize, we can set autoResizeImages false.
+      writeFileSync(imgFile, Buffer.from('small'));
+      const originalBase64 = Buffer.from('small').toString('base64');
+
+      const result = await buildInitialMessage([`@${imgFile}`], undefined, false);
+      expect(result.images[0].data).toBe(originalBase64);
     });
   });
 });

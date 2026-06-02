@@ -12,6 +12,39 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { join, extname, basename } from "node:path";
 import { logger } from "./utils/logger.js";
+import sharp from "sharp";
+
+const MAX_IMAGE_DIMENSION = 2048;
+
+/**
+ * Resize image base64 data if it exceeds max dimension, preserving aspect ratio.
+ * Uses sharp for efficient resizing.
+ */
+async function resizeImageIfNeeded(base64: string, mimeType: string): Promise<string> {
+  const buffer = Buffer.from(base64, "base64");
+  try {
+    const metadata = await sharp(buffer).metadata();
+    if (metadata.width <= MAX_IMAGE_DIMENSION && metadata.height <= MAX_IMAGE_DIMENSION) {
+      return base64; // No resize needed
+    }
+
+    // Compute new dimensions to fit within MAX while preserving aspect ratio
+    let { width, height } = metadata;
+    if (width > height) {
+      height = Math.round((height / width) * MAX_IMAGE_DIMENSION);
+      width = MAX_IMAGE_DIMENSION;
+    } else {
+      width = Math.round((width / height) * MAX_IMAGE_DIMENSION);
+      height = MAX_IMAGE_DIMENSION;
+    }
+
+    const resized = await sharp(buffer).resize(width, height).toBuffer();
+    return resized.toString("base64");
+  } catch (err: any) {
+    logger.warn(`Image resize failed: ${err.message}`);
+    return base64; // fallback to original
+  }
+}
 
 // Import types from pi-ai for ImageContent (if needed)
 // But we can use any shape that matches { type: 'image', mimeType, data }
@@ -200,6 +233,22 @@ export async function buildInitialMessage(
 ): Promise<{ text: string; images: ImageContent[] }> {
   const { text: fileText, images } = processFileArguments(fileArgs, { autoResizeImages });
 
+  // Auto-resize images if requested
+  let finalImages = images;
+  if (autoResizeImages && images.length > 0) {
+    finalImages = await Promise.all(
+      images.map(async (img) => {
+        try {
+          const resizedData = await resizeImageIfNeeded(img.data, img.mimeType);
+          return { ...img, data: resizedData };
+        } catch (err: any) {
+          logger.warn(`Failed to resize image: ${err.message}`);
+          return img; // fallback to original
+        }
+      })
+    );
+  }
+
   // Combine file text + stdin
   const parts: string[] = [];
   if (fileText) {
@@ -211,6 +260,6 @@ export async function buildInitialMessage(
 
   return {
     text: parts.join("\n\n").trim(),
-    images,
+    images: finalImages,
   };
 }

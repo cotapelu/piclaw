@@ -39,7 +39,7 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **689 unit tests passing (100%)**
+- **691 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
@@ -85,6 +85,12 @@
 - Refactored prompt.ts to ESM imports for testability
 - Updated main.test.ts mock to match new runtime.session.sessionManager shape
 - All 689 tests passing (79 new tests)
+
+**2025-06-02 - P1-003: Image Auto-Resize**
+- Implemented automatic image resizing for large images (>2048px) using sharp
+- Integrated into buildInitialMessage(); preserves aspect ratio, reduces token usage
+- Added 2 new tests for resize behavior
+- All 691 tests passing
 
 ---
 

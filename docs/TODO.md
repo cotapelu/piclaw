@@ -46,7 +46,7 @@
 
 - [x] **Ctrl+R keybinding** - Bound session selector to Ctrl+R (UX improvement)
 - [x] **Unit test suite** - Comprehensive tests added (output-guard, prompt, file-processor, model-scoper, session-resolver); 79 new tests
-- ⏳ **Image auto-resize** (option exists but not implemented)
+- [x] **Image auto-resize** - Implemented using sharp; resizes images >2048px, configurable via settings (default true)
 - ⏳ **Settings validation** (graceful handling of invalid patterns)
 
 ---
