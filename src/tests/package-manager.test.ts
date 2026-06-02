@@ -602,4 +602,30 @@ describe("PiclawPackageManager", () => {
       updateNpmSpy.mockRestore();
     });
   });
+
+  describe("Additional unit tests for coverage", () => {
+    it("should compute git install path correctly", () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const path = (pm as any).getGitInstallPath({ type: "git", host: "gh", path: "user/repo" }, "project");
+      expect(path).toContain(".piclaw/git/gh/user/repo");
+    });
+
+    it("should return undefined installedPath for unknown source", () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const path = (pm as any).getInstalledPath("unknown:foo", "user");
+      expect(path).toBeUndefined();
+    });
+
+    it("should skip null entries in getConfiguredEntries", () => {
+      const pm = new PiclawPackageManager({ cwd, agentDir });
+      const globalSettingsPath = (pm as any).getGlobalSettingsPath();
+      const corrupt = { packages: [null, "npm:good"] as any };
+      mkdirSync(dirname(globalSettingsPath), { recursive: true });
+      writeFileSync(globalSettingsPath, JSON.stringify(corrupt));
+      const entries = (pm as any).getConfiguredEntries();
+      const sources = entries.map(e => e.source);
+      expect(sources).toContain("npm:good");
+      expect(sources.filter(s => s === null)).toHaveLength(0);
+    });
+  });
 });

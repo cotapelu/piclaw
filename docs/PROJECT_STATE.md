@@ -59,6 +59,18 @@
 - Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Recent Changes
+**2025-06-02 - P0 Features Complete**
+- Session management: `--session`, `--resume`, `--continue`, `--fork`
+- Model scoping: Pattern filtering, Ctrl+P cycling, 50-item limit
+- @file support: Text + images, stdin piping
+- Multi-mode: print/json/rpc with stdout takeover
+- Build system: TypeScript compilation, custom models auto-generation
+- Keybindings: Using package defaults (no override)
+- Limitations addressed: Model scope limit prevents UI glitch
+
+---
+
+*Previous changes:*
 - All major features implemented; 595 tests passing (100%)
 - Coverage: 80.28% statements, 81.43% lines (target achieved)
 - Type safety improvements: removed `as any` casts in core files
