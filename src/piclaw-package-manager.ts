@@ -291,14 +291,14 @@ export class PiclawPackageManager {
     for (const src of globalSettings.packages || []) {
       if (typeof src === "string") {
         result.push({ source: src, scope: "user" });
-      } else if (typeof src === "object" && src.source) {
+      } else if (src && typeof src === "object" && src.source) {
         result.push({ source: src.source, scope: "user", filter: src.filter });
       }
     }
     for (const src of projectSettings.packages || []) {
       if (typeof src === "string") {
         result.push({ source: src, scope: "project" });
-      } else if (typeof src === "object" && src.source) {
+      } else if (src && typeof src === "object" && src.source) {
         result.push({ source: src.source, scope: "project", filter: src.filter });
       }
     }
