@@ -39,11 +39,11 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **586 unit tests passing (100%)**
+- **595 unit tests passing (100%)**
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
-- Statement coverage: 80.15%, Lines coverage: 81.28% (target ≥80% achieved)
+- Statement coverage: 80.28%, Lines coverage: 81.43% (target ≥80% achieved)
 
 ### Known Limitations (resolved)
 - ✅ `update` command implemented
@@ -59,18 +59,17 @@
 - Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Recent Changes
-- Added comprehensive test suite for `skill-reader` module:
-  - Unit tests for `read-skill.ts` command module (11 passing)
-  - Integration tests for `skill-reader.ts` tool wrapper (5 passing)
-- Added unit tests for `auto-compact-85.ts` hook (4 passing)
-- Added test coverage for `tool-template.ts` basics (6 passing) covering tool definition, command metadata, and error handling
-- Increased overall test coverage to 80.03% statements (from ~75%)
-- All 565 tests passing (added 32 new tests)
-- **Type safety improvements**: Replaced `as any` casts in `piclaw-core.ts` and `team-manager.ts` with proper types
-- **Team integration tests**: Added `bootPiclawTeam.integration.test.ts` with real boot scenarios (6 passing)
-- **Coverage expansion**: Added team behavior and backoff tests to push coverage to 80.15% statements
-- Updated metrics in AGENT_METRICS.md and EVOLUTION.md
-- Updated TODO.md with coverage and type-safety achievements
+- All major features implemented; 595 tests passing (100%)
+- Coverage: 80.28% statements, 81.43% lines (target achieved)
+- Type safety improvements: removed `as any` casts in core files
+- Custom .piclaw storage, full package manager (install, remove, update, info, health, pin, import, export)
+- Git & npm support with retry logic, filtering, validation
+- Structured logging with levels & JSON
+- Team orchestration with non-blocking execution
+- **Package-manager error tests**: 9 new tests covering error paths in npm/git operations, validateParsed, settings edge cases
+- **Bug fix**: getConfiguredEntries now safely handles null entries in settings files
+- **Team test expansion**: behavior, backoff, and integration tests
+- Updated documentation and evolution logs
 
 ## Next Steps
 - Increase test coverage to ≥85% by adding tests for team-manager edge cases and piclaw-package-manager internal methods

@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 30 (29 previous + Coverage Expansion)
-- Tasks completed: All major features; 100% test pass; coverage target achieved; any casts removed; expanded test suite
-- Test failure rate: 0% (0 failing in 586 tests)
+- Iterations: 31 (30 previous + Error Test Expansion + Bug Fix)
+- Tasks completed: All major features; 100% test pass; coverage target achieved; any casts removed; expanded test suite; bug fixes
+- Test failure rate: 0% (0 failing in 595 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,17 +14,18 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Total lines: ~5600 (includes behavior and backoff tests)
+- Total lines: ~5700 (includes package-manager error tests)
 - Complexity: Low-Medium (package manager ~950 lines, team-manager ~1021 lines)
-- Coverage: 80.15% statements, 81.28% lines (target ≥80% achieved)
+- Coverage: 80.28% statements, 81.43% lines (target ≥80% achieved)
 - Type safety: Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
+- Recent bug fix: getConfiguredEntries now safely handles null entries
 
 ## Testing Status
-- Unit tests: 586 total, 586 passing (100%)
-- New tests: team behavior tests (heartbeat, prompts, messages), backoff & retry tests, integration tests (bootPiclawTeam), skill-reader, auto-compact-85, tool-template
-- Test files: 59 (increased from 52)
-- Coverage: 80.15% statements, 81.28% lines (target ≥80% achieved)
-- Known coverage gaps remaining: team-manager.ts (75.6% - still needs more branch coverage), piclaw-package-manager.ts (75.11%), todos-tool.ts (73.70%)
+- Unit tests: 595 total, 595 passing (100%)
+- New tests: package-manager error handling (9 tests), team behavior (11), backoff (4), integration (6), plus earlier sets
+- Test files: 60 (increased from 52)
+- Coverage: 80.28% statements, 81.43% lines (target ≥80% achieved)
+- Known coverage gaps: team-manager.ts (75.6%), piclaw-package-manager.ts (~75%), todos-tool.ts (73.70%)
 - All tests pass continuously; build stable
 
 ## Recent Improvements
