@@ -279,5 +279,6 @@ describe('TodosTool Edge Cases', () => {
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('add_task.content must be a string');
     });
+
   });
 });

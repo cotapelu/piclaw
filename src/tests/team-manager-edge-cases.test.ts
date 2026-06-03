@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { AgentTeam } from '../extensions/team/team-manager.js';
+import { AgentTeam, TeamRegistry } from '../extensions/team/team-manager.js';
 
 // Use AGENT_TIMEOUT_MS constant from file? It's private. We'll compute relative.
 // We can access via any or just use our own value larger than constant? Actually we need to set timestamp older than constant. We'll approximate: AGENT_TIMEOUT_MS = 2 * 60 * 1000 = 120000.
@@ -272,5 +272,31 @@ describe('AgentTeam Edge Cases', () => {
     const anyTeam = team as any;
     const task0 = anyTeam.taskStatuses.get(0) as any;
     expect(task0.status).toBe('pending');
+  });
+
+  it('should dispose team and clean up resources', async () => {
+    const team = new AgentTeam();
+    team.setTeamId('test-team');
+
+    // Mock runtimes with dispose
+    const mockRuntime = { dispose: vi.fn().mockResolvedValue(undefined) } as any;
+    (team as any).runtimes.push(mockRuntime);
+    // Mock childControllers
+    const mockController = { abort: vi.fn() };
+    (team as any).childControllers.set('test-controller', mockController);
+    // Mock childPromises
+    const childPromise = Promise.resolve();
+    (team as any).childPromises.push(childPromise);
+    // Mock TeamRegistry
+    const mockRegistry = { unregister: vi.fn() };
+    vi.spyOn(TeamRegistry, 'getInstance').mockReturnValue(mockRegistry as any);
+
+    await team.dispose();
+
+    expect(mockRuntime.dispose).toHaveBeenCalled();
+    expect(mockController.abort).toHaveBeenCalled();
+    expect((team as any).childPromises).toHaveLength(0);
+    expect((team as any).runtimes).toHaveLength(0);
+    expect(mockRegistry.unregister).toHaveBeenCalledWith('test-team');
   });
 });

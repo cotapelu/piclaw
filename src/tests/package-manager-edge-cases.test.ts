@@ -208,4 +208,21 @@ describe('PiclawPackageManager Edge Cases', () => {
     await pmAny.uninstallNpm({ type: 'npm', name: 'testpkg', pinned: false }, 'project');
     expect(runSpy).toHaveBeenCalledWith(['uninstall', 'testpkg', '--prefix', join(tmpDir, '.piclaw', 'npm')]);
   });
+
+  // Route git install to installGit
+  it('should route git install to installGit', async () => {
+    const pmAny = pm as any;
+    const installGitSpy = vi.spyOn(pmAny, 'installGit').mockResolvedValue(undefined);
+    await pm.install('git:https://github.com/user/repo.git');
+    expect(installGitSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'git', host: 'github.com', path: 'user/repo.git' }), 'user');
+  });
+
+  // Route git uninstall to uninstallGit
+  it('should route git uninstall to uninstallGit', async () => {
+    const pmAny = pm as any;
+    const uninstallGitSpy = vi.spyOn(pmAny, 'uninstallGit').mockResolvedValue(undefined);
+    await pm.remove('git:https://github.com/user/repo.git');
+    expect(uninstallGitSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'git', host: 'github.com', path: 'user/repo.git' }), 'user');
+  });
+
 });

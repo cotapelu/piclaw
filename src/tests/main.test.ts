@@ -45,11 +45,32 @@ vi.mock('../interactive-runner.js', () => ({
   runInteractive: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('../utils/output-guard.js', () => ({
+  takeOverStdout: vi.fn(),
+  restoreStdout: vi.fn(),
+}));
+
 vi.mock('@earendil-works/pi-coding-agent', () => ({
   runPrintMode: vi.fn().mockResolvedValue(0),
   runRpcMode: vi.fn().mockResolvedValue(undefined),
   SessionManager: {},
 }));
+
+vi.mock('../package-commands.js', async () => {
+  const actual = await vi.importActual('../package-commands.js');
+  return {
+    ...actual,
+    handleInstallCommand: vi.fn().mockResolvedValue(undefined),
+    handleRemoveCommand: vi.fn().mockResolvedValue(undefined),
+    handleListCommand: vi.fn().mockResolvedValue(undefined),
+    handleUpdateCommand: vi.fn().mockResolvedValue(undefined),
+    handleInfoCommand: vi.fn().mockResolvedValue(undefined),
+    handleHealthCommand: vi.fn().mockResolvedValue(undefined),
+    handlePinCommand: vi.fn().mockResolvedValue(undefined),
+    handleExportCommand: vi.fn().mockResolvedValue(undefined),
+    handleImportCommand: vi.fn().mockResolvedValue(undefined),
+  };
+});
 
 import { main } from '../main';
 import { loadConfig } from '../config/config-manager.js';
@@ -59,7 +80,9 @@ import { join } from 'node:path';
 import { runInteractive } from '../interactive-runner.js';
 import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
 import { logger } from '../utils/logger.js';
-import { runPrintMode as mockedRunPrintMode } from '@earendil-works/pi-coding-agent';
+import { runPrintMode as mockedRunPrintMode, runRpcMode as mockedRunRpcMode } from '@earendil-works/pi-coding-agent';
+import { takeOverStdout, restoreStdout } from '../utils/output-guard.js';
+import * as pkgCommands from '../package-commands.js';
 
 describe('main()', () => {
   let origArgv: string[];
@@ -283,9 +306,60 @@ describe('main() additional scenarios', () => {
 
   it('should handle rate limit error (429) specifically', async () => {
     const error = new Error('429 Too Many Requests');
-    (bootPiclaw as any).mockRejectedValue(error);
+    (bootPiclaw as any).mockRejectedValueOnce(error);
     const errorSpy = vi.spyOn(console, 'error');
     await expect(main([])).rejects.toThrow();
     expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Rate limit exceeded'));
+  });
+
+  it('should return early if a package command is provided', async () => {
+    const spy = vi.spyOn(pkgCommands, 'handlePackageCommand').mockResolvedValueOnce(true);
+    await main(['install', 'testpkg']);
+    expect(bootPiclaw).not.toHaveBeenCalled();
+  });
+
+  it('should pass session flag to bootPiclaw', async () => {
+    try {
+      await main(['--session', 'custom-session-123']);
+    } catch (e) {
+      console.log('Caught error in session test:', e);
+      throw e;
+    }
+    const bootArgs = (bootPiclaw as any).mock.calls[0][0];
+    expect(bootArgs.session).toBe('custom-session-123');
+  });
+
+  it('should pass resume flag to bootPiclaw', async () => {
+    await main(['--resume']);
+    const bootArgs = (bootPiclaw as any).mock.calls[0][0];
+    expect(bootArgs.resume).toBe(true);
+  });
+
+  it('should pass continue flag to bootPiclaw', async () => {
+    await main(['--continue']);
+    const bootArgs = (bootPiclaw as any).mock.calls[0][0];
+    expect(bootArgs.continue).toBe(true);
+  });
+
+  it('should pass fork flag to bootPiclaw', async () => {
+    await main(['--fork', 'fork-id-123']);
+    const bootArgs = (bootPiclaw as any).mock.calls[0][0];
+    expect(bootArgs.fork).toBe('fork-id-123');
+  });
+
+  it('should run in rpc mode', async () => {
+    await main(['--mode', 'rpc']);
+    expect(mockedRunRpcMode).toHaveBeenCalled();
+    expect(takeOverStdout).toHaveBeenCalled();
+    expect(restoreStdout).toHaveBeenCalled();
+  });
+
+  it('should run in json mode', async () => {
+    await main(['--mode', 'json']);
+    expect(mockedRunPrintMode).toHaveBeenCalled();
+    const callArgs = (mockedRunPrintMode as any).mock.calls[0][1];
+    expect(callArgs.mode).toBe('json');
+    expect(takeOverStdout).toHaveBeenCalled();
+    expect(restoreStdout).toHaveBeenCalled();
   });
 });
