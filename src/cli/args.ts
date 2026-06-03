@@ -20,6 +20,8 @@ export interface Options {
   mode?: 'interactive' | 'print' | 'json' | 'rpc';
   // Additional messages (for print/json modes) - via --message flags
   message?: string[];
+  // Show usage statistics (tokens, cost) after completion
+  stats?: boolean;
 }
 
 export interface PiclawConfig {
@@ -98,6 +100,9 @@ export function parseOptions(args: string[]): { opts: Options; cliOverrides: Pic
         opts.verbose = true;
         cliOverrides.verbose = true;
         break;
+      case '--stats':
+        opts.stats = true;
+        break;
       case '-h':
       case '--help':
         printHelp();
@@ -130,6 +135,7 @@ Options:
   --thinking <level>   Thinking level: off|minimal|low|medium|high|xhigh
   --contextLogFile <p> Log LLM context to file
   --verbose            Show detailed logs
+  --stats              Show usage statistics (tokens, cost) after completion
   -h, --help           Show this help
 
 Session Management:

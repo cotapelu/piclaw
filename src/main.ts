@@ -157,22 +157,34 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     } else if (mode === 'print' || mode === 'json') {
       // Print/JSON mode: single turn output
       takeOverStdout();
+      try {
+        // Additional messages after initial (from --message flags)
+        const additionalMessages = opts.message || [];
 
-      // Additional messages after initial (from --message flags)
-      const additionalMessages = opts.message || [];
+        // For print/json mode, we need to send initial message + additional messages sequentially
+        // The runtime will handle this via runPrintMode options
+        const exitCode = await runPrintMode(runtime, {
+          mode: mode === 'json' ? 'json' : 'text',
+          messages: additionalMessages,
+          initialMessage,
+          initialImages,
+        } as any); // Type assertion needed if strict
 
-      // For print/json mode, we need to send initial message + additional messages sequentially
-      // The runtime will handle this via runPrintMode options
-      const exitCode = await runPrintMode(runtime, {
-        mode: mode === 'json' ? 'json' : 'text',
-        messages: additionalMessages,
-        initialMessage,
-        initialImages,
-      } as any); // Type assertion needed if strict
+        if (opts.stats) {
+          try {
+            const stats = runtime.session.getSessionStats();
+            const t = stats.tokens;
+            console.error(`[Stats] Tokens: ${t.total} (in:${t.input} out:${t.output}) Cost: $${stats.cost.toFixed(4)}`);
+          } catch (e: any) {
+            logger.debug('Failed to retrieve session stats: ' + e.message);
+          }
+        }
 
-      restoreStdout();
-      if (exitCode !== 0) {
-        process.exitCode = exitCode;
+        if (exitCode !== 0) {
+          process.exitCode = exitCode;
+        }
+      } finally {
+        restoreStdout();
       }
     } else {
       // Interactive mode (default)

@@ -45,6 +45,12 @@ vi.mock('../interactive-runner.js', () => ({
   runInteractive: vi.fn(() => Promise.resolve()),
 }));
 
+vi.mock('@earendil-works/pi-coding-agent', () => ({
+  runPrintMode: vi.fn().mockResolvedValue(0),
+  runRpcMode: vi.fn().mockResolvedValue(undefined),
+  SessionManager: {},
+}));
+
 import { main } from '../main';
 import { loadConfig } from '../config/config-manager.js';
 import { bootPiclaw } from '../piclaw-core.js';
@@ -52,6 +58,8 @@ import { existsSync, readFileSync, mkdtempSync, rmSync, writeFileSync } from 'no
 import { join } from 'node:path';
 import { runInteractive } from '../interactive-runner.js';
 import { validateApiKeys, ensurePiclawExtensionRegistered } from '../utils/helpers.js';
+import { logger } from '../utils/logger.js';
+import { runPrintMode as mockedRunPrintMode } from '@earendil-works/pi-coding-agent';
 
 describe('main()', () => {
   let origArgv: string[];
@@ -174,6 +182,49 @@ describe('main()', () => {
     (bootPiclaw as any).mockRejectedValueOnce(new Error('test error'));
     await expect(main([])).rejects.toThrow('process.exit');
   });
+
+  it('should print stats when --stats flag provided', async () => {
+    const mockStats = {
+      tokens: { input: 100, output: 50, cacheRead: 0, cacheWrite: 0, total: 150 },
+      cost: 0.00123,
+    };
+    const mockSession = {
+      getSessionStats: vi.fn().mockReturnValue(mockStats),
+      sessionManager: {
+        getSessionId: () => 'test-session',
+        getSessionFile: () => '/tmp/test-session.jsonl',
+      },
+    };
+    (bootPiclaw as any).mockResolvedValue({
+      session: mockSession,
+      services: {
+        settingsManager: {
+          getImageAutoResize: vi.fn().mockReturnValue(true),
+        },
+      },
+      dispose: vi.fn(() => Promise.resolve()),
+      cwd: '/tmp',
+    });
+
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {});
+
+    try {
+      await main(['--mode', 'print', '--stats']);
+      expect(mockedRunPrintMode).toHaveBeenCalled();
+      expect(mockSession.getSessionStats).toHaveBeenCalled();
+      const calls = errorSpy.mock.calls.map(c => c[0]);
+      const statsLine = calls.find((m: string) => typeof m === 'string' && m.includes('[Stats]'));
+      expect(statsLine).toBeDefined();
+      if (typeof statsLine === 'string') {
+        expect(statsLine).toContain('Tokens: 150');
+        expect(statsLine).toContain('Cost: $0.0012');
+      }
+    } finally {
+      errorSpy.mockRestore();
+      exitSpy.mockRestore();
+    }
+  });
 });
 
 // Direct unit test for parseOptions (real function)
@@ -181,5 +232,60 @@ import { parseOptions } from '../cli/args.js';
 describe('parseOptions', () => {
   it('should handle --help and exit', () => {
     expect(() => parseOptions(['--help'])).toThrow('process.exit');
+  });
+});
+
+describe('main() additional scenarios', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should set process.exitCode when print mode returns non-zero', async () => {
+    const mockSession = {
+      getSessionStats: vi.fn().mockReturnValue({ tokens: { total: 0, input: 0, output: 0 }, cost: 0 }),
+      sessionManager: {
+        getSessionId: () => 'test-session',
+        getSessionFile: () => '/tmp/test-session.jsonl',
+      },
+    };
+    (bootPiclaw as any).mockResolvedValue({
+      session: mockSession,
+      services: { settingsManager: { getImageAutoResize: vi.fn().mockReturnValue(true) } },
+      dispose: vi.fn(() => Promise.resolve()),
+      cwd: '/tmp',
+    });
+    mockedRunPrintMode.mockResolvedValue(1); // non-zero exit
+
+    const originalExitCode = process.exitCode;
+    await main(['--mode', 'print']);
+    expect(process.exitCode).toBe(1);
+    process.exitCode = originalExitCode; // reset
+  });
+
+  it('should handle stats retrieval error gracefully', async () => {
+    const mockSession = {
+      getSessionStats: vi.fn().mockImplementation(() => { throw new Error('stats error'); }),
+      sessionManager: {
+        getSessionId: () => 'test-session',
+        getSessionFile: () => '/tmp/test-session.jsonl',
+      },
+    };
+    (bootPiclaw as any).mockResolvedValue({
+      session: mockSession,
+      services: { settingsManager: { getImageAutoResize: vi.fn().mockReturnValue(true) } },
+      dispose: vi.fn(() => Promise.resolve()),
+      cwd: '/tmp',
+    });
+    const debugSpy = vi.spyOn(logger, 'debug');
+    await main(['--mode', 'print', '--stats']);
+    expect(debugSpy).toHaveBeenCalledWith(expect.stringContaining('Failed to retrieve session stats'));
+  });
+
+  it('should handle rate limit error (429) specifically', async () => {
+    const error = new Error('429 Too Many Requests');
+    (bootPiclaw as any).mockRejectedValue(error);
+    const errorSpy = vi.spyOn(console, 'error');
+    await expect(main([])).rejects.toThrow();
+    expect(errorSpy).toHaveBeenCalledWith(expect.stringContaining('Rate limit exceeded'));
   });
 });

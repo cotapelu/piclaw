@@ -146,4 +146,44 @@ describe('parseOptions', () => {
       expect(opts.cwd).toBe('/second'); // last one wins
     });
   });
+
+  describe('session flags', () => {
+    it('should set opts.resume true when --resume', () => {
+      const { opts } = parseOptions(['--resume']);
+      expect(opts.resume).toBe(true);
+    });
+
+    it('should set opts.continue true when --continue', () => {
+      const { opts } = parseOptions(['--continue']);
+      expect(opts.continue).toBe(true);
+    });
+
+    it('should set opts.fork when --fork has value', () => {
+      const { opts } = parseOptions(['--fork', 'session-id']);
+      expect(opts.fork).toBe('session-id');
+    });
+
+    it('should not set opts.fork when --fork has no value', () => {
+      const { opts } = parseOptions(['--fork']);
+      expect(opts.fork).toBeUndefined();
+    });
+  });
+
+  describe('mode validation', () => {
+    it('should log warning for invalid mode value', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      parseOptions(['--mode', 'invalid']);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Invalid mode: invalid'));
+      warnSpy.mockRestore();
+    });
+  });
+
+  describe('unknown flags', () => {
+    it('should log warning for unknown flag', () => {
+      const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      parseOptions(['--unknownflag']);
+      expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('Unknown flag: --unknownflag'));
+      warnSpy.mockRestore();
+    });
+  });
 });
