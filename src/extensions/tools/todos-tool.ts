@@ -474,7 +474,7 @@ export function getLatestTodoPhasesFromEntries(entries: any[]): TodoPhase[] {
     const entry = entries[i];
     if (entry.type !== 'message') continue;
     const message = entry.message;
-    if (message.role !== 'toolResult') continue;
+    if (!message || message.role !== 'toolResult') continue;
     const toolName = message.toolName;
     if (toolName !== 'todos' && toolName !== 'todo_write') continue;
     // Skip error entries (they may have isError flag)
