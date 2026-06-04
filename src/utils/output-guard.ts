@@ -9,7 +9,7 @@
  * IMPORTANT: This is Piclaw's own simple implementation.
  */
 
-let originalWrite: any = null;
+let originalWrite: typeof process.stdout.write | null = null;
 let buffer: string[] = [];
 
 /**
@@ -18,8 +18,8 @@ let buffer: string[] = [];
  */
 export function takeOverStdout(): void {
   if (!originalWrite) {
-    originalWrite = (process.stdout as any).write.bind(process.stdout);
-    (process.stdout as any).write = (chunk: any, encoding?: any, callback?: any) => {
+    originalWrite = process.stdout.write.bind(process.stdout);
+    (process.stdout as typeof process.stdout).write = (chunk: unknown, encoding?: string | undefined, callback?: ((error: Error | null) => void) | undefined) => {
       buffer.push(chunk.toString());
       return true;
     };
