@@ -162,4 +162,14 @@ export default function (pi: ExtensionAPI) {
     //logger.log("[AutoContinue] agent_end fired, enabled:", enabled);
     startIdleTimer();
   });
+
+  // Also start timer on turn_end to handle cases where agent_end is missed (e.g., auto-compact disconnects)
+  pi.on("turn_end", (_event, ctx) => {
+    if (!enabled) return;
+    if (idleTimer) return; // already started
+    // Only start if truly idle and no pending messages
+    if (ctx.isIdle() && !ctx.hasPendingMessages()) {
+      startIdleTimer();
+    }
+  });
 }
