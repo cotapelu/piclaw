@@ -20,6 +20,12 @@ describe('TodosTool Edge Cases', () => {
     it('should throw on invalid JSON string', () => {
       expect(() => normalizeParams('{invalid}')).toThrow('Invalid JSON string');
     });
+    it('should throw when add_phase string is invalid JSON', () => {
+      expect(() => normalizeParams({ add_phase: '{invalid}' })).toThrow('add_phase must be an object');
+    });
+    it('should throw when delete string is invalid JSON', () => {
+      expect(() => normalizeParams({ delete: '{invalid}' })).toThrow('delete must be an object');
+    });
   });
 
   describe('applyOp', () => {
@@ -68,6 +74,31 @@ describe('TodosTool Edge Cases', () => {
       const result = applyOp(phases, 1, 1, { update: { id: 't1', content: 'new content' } });
       expect(result.errors).toHaveLength(0);
       expect(result.phases[0].tasks[0].content).toBe('new content');
+    });
+
+    // Additional applyOp coverage tests
+    it('should handle batch update with ids array', () => {
+      const phases = [{ id: 'phase-1', name: 'P', tasks: [
+        { id: 't1', content: 'c', status: 'pending' },
+        { id: 't2', content: 'c2', status: 'pending' }
+      ] }];
+      const result = applyOp(phases, 1, 1, { update: { ids: ['t1','t2'], status: 'completed' } });
+      expect(result.errors).toHaveLength(0);
+      expect(result.phases[0].tasks[0].status).toBe('completed');
+      expect(result.phases[0].tasks[1].status).toBe('completed');
+    });
+
+    it('should error when update matches no tasks', () => {
+      const phases = [{ id: 'phase-1', name: 'P', tasks: [{ id: 't1', content: 'c' }] }];
+      const result = applyOp(phases, 1, 1, { update: { ids: ['nonexistent'], status: 'completed' } });
+      expect(result.errors).toContain('No valid tasks found to update');
+    });
+
+    it('should remove task successfully', () => {
+      const phases = [{ id: 'phase-1', name: 'P', tasks: [{ id: 't1', content: 'c' }] }];
+      const result = applyOp(phases, 1, 1, { remove_task: { id: 't1' } });
+      expect(result.errors).toHaveLength(0);
+      expect(result.phases[0].tasks).toHaveLength(0);
     });
   });
 

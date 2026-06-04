@@ -9,7 +9,7 @@ vi.mock('child_process', () => ({
 import { spawn as mockSpawn, spawnSync as mockSpawnSync } from 'child_process';
 import { PiclawPackageManager } from '../piclaw-package-manager.js';
 import { mkdirSync, existsSync, rmSync, writeFileSync, readFileSync } from 'node:fs';
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import os from 'os';
 
 describe('PiclawPackageManager Edge Cases', () => {
@@ -223,6 +223,151 @@ describe('PiclawPackageManager Edge Cases', () => {
     const uninstallGitSpy = vi.spyOn(pmAny, 'uninstallGit').mockResolvedValue(undefined);
     await pm.remove('git:https://github.com/user/repo.git');
     expect(uninstallGitSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'git', host: 'github.com', path: 'user/repo.git' }), 'user');
+  });
+
+  describe('PiclawPackageManager Additional Coverage', () => {
+    let pm: PiclawPackageManager;
+    let tmpDir: string;
+    let cwd: string;
+    let agentDir: string;
+
+    beforeEach(() => {
+      tmpDir = join('/tmp', 'piclaw-add-' + Date.now());
+      cwd = join(tmpDir, 'cwd');
+      agentDir = join(tmpDir, 'agent');
+      mkdirSync(cwd, { recursive: true });
+      mkdirSync(agentDir, { recursive: true });
+      pm = new PiclawPackageManager({ cwd, agentDir });
+      pm.setProgressCallback((event) => {});
+      vi.clearAllMocks();
+    });
+
+    afterEach(() => {
+      if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true, force: true });
+    });
+
+    it('should return false when adding duplicate source', () => {
+      const added1 = pm.addSourceToSettings('npm:lodash', { local: false });
+      expect(added1).toBe(true);
+      const added2 = pm.addSourceToSettings('npm:lodash', { local: false });
+      expect(added2).toBe(false);
+    });
+
+    it('should return false when removing non-existent source', () => {
+      const removed = pm.removeSourceFromSettings('npm:nonexistent', { local: false });
+      expect(removed).toBe(false);
+    });
+
+    it('should load settings with invalid JSON and return empty packages', () => {
+      const anyPm = pm as any;
+      const settingsPath = join(cwd, '.piclaw', 'settings.json'); // using project settings
+      mkdirSync(dirname(settingsPath), { recursive: true });
+      writeFileSync(settingsPath, '{ invalid json }', 'utf-8');
+      const settings = anyPm.loadSettings(settingsPath);
+      expect(settings.packages).toEqual([]);
+    });
+
+    it('should call installNpm when installing npm source', async () => {
+      const anyPm = pm as any;
+      const installNpmSpy = vi.spyOn(anyPm, 'installNpm').mockResolvedValue(undefined);
+      await pm.install('npm:test-pkg', { local: false });
+      expect(installNpmSpy).toHaveBeenCalledWith({ type: 'npm', name: 'test-pkg', pinned: false }, 'user');
+    });
+
+    it('should call installGit when installing git source', async () => {
+      const anyPm = pm as any;
+      const installGitSpy = vi.spyOn(anyPm, 'installGit').mockResolvedValue(undefined);
+      await pm.install('git:github.com/user/repo');
+      expect(installGitSpy).toHaveBeenCalledWith({ type: 'git', host: 'github.com', path: 'user/repo', ref: undefined }, 'user');
+    });
+
+    it('should throw when local install path does not exist', async () => {
+      await expect(pm.install('nonexistent-local-path')).rejects.toThrow('Path does not exist');
+    });
+
+    it('should not call installNpm when dryRun', async () => {
+      const anyPm = pm as any;
+      const installNpmSpy = vi.spyOn(anyPm, 'installNpm');
+      await pm.install('npm:test', { local: false, dryRun: true });
+      expect(installNpmSpy).not.toHaveBeenCalled();
+    });
+
+    it('should call uninstallNpm when removing npm source', async () => {
+      const anyPm = pm as any;
+      const uninstallSpy = vi.spyOn(anyPm, 'uninstallNpm').mockResolvedValue(undefined);
+      await pm.remove('npm:test-pkg', { local: false });
+      expect(uninstallSpy).toHaveBeenCalledWith({ type: 'npm', name: 'test-pkg', pinned: false }, 'user');
+    });
+
+    it('should call uninstallGit when removing git source', async () => {
+      const anyPm = pm as any;
+      const uninstallSpy = vi.spyOn(anyPm, 'uninstallGit').mockResolvedValue(undefined);
+      await pm.remove('git:github.com/user/repo');
+      expect(uninstallSpy).toHaveBeenCalledWith({ type: 'git', host: 'github.com', path: 'user/repo', ref: undefined }, 'user');
+    });
+
+    it('installAndPersist should install and add to settings', async () => {
+      const anyPm = pm as any;
+      const installSpy = vi.spyOn(pm, 'install').mockResolvedValue(undefined);
+      const addSpy = vi.spyOn(pm, 'addSourceToSettings').mockReturnValue(true);
+      await pm.installAndPersist('npm:test', { local: false });
+      expect(installSpy).toHaveBeenCalledWith('npm:test', { local: false, dryRun: undefined, filter: undefined });
+      expect(addSpy).toHaveBeenCalledWith({ source: 'npm:test', filter: undefined }, { local: false });
+    });
+
+    it('removeAndPersist should remove and delete from settings', async () => {
+      const anyPm = pm as any;
+      const removeSpy = vi.spyOn(pm, 'remove').mockResolvedValue(undefined);
+      const removeSettingsSpy = vi.spyOn(pm, 'removeSourceFromSettings').mockReturnValue(true);
+      await pm.removeAndPersist('npm:test', { local: false });
+      expect(removeSpy).toHaveBeenCalledWith('npm:test', { local: false, dryRun: undefined });
+      expect(removeSettingsSpy).toHaveBeenCalledWith('npm:test', { local: false });
+    });
+
+    it('getConfiguredEntries should include entries from both global and project settings', () => {
+      // Add to global (agentDir)
+      pm.addSourceToSettings('npm:global-pkg', { local: false });
+      // Add to project (cwd)
+      pm.addSourceToSettings({ source: 'git:gh/u/repo', filter: {} }, { local: true });
+      const entries = pm.getConfiguredEntries();
+      expect(entries.some(e => e.source === 'npm:global-pkg' && e.scope === 'user')).toBe(true);
+      expect(entries.some(e => e.source === 'git:gh/u/repo' && e.scope === 'project')).toBe(true);
+    });
+
+    it('should handle local install when path exists', async () => {
+      const anyPm = pm as any;
+      const localFile = join(cwd, 'file.txt');
+      writeFileSync(localFile, 'content');
+      const installNpmSpy = vi.spyOn(anyPm, 'installNpm');
+      const installGitSpy = vi.spyOn(anyPm, 'installGit');
+      await pm.install(localFile);
+      expect(installNpmSpy).not.toHaveBeenCalled();
+      expect(installGitSpy).not.toHaveBeenCalled();
+    });
+
+    it('should update npm package', async () => {
+      const anyPm = pm as any;
+      pm.addSourceToSettings('npm:testpkg', { local: false });
+      const updateNpmSpy = vi.spyOn(anyPm, 'updateNpm').mockResolvedValue(undefined);
+      await pm.update('npm:testpkg');
+      expect(updateNpmSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'npm', name: 'testpkg', pinned: false }), 'user');
+    });
+
+    it('should update git package', async () => {
+      const anyPm = pm as any;
+      pm.addSourceToSettings('git:github.com/user/repo', { local: false });
+      const updateGitSpy = vi.spyOn(anyPm, 'updateGit').mockResolvedValue(undefined);
+      await pm.update('git:github.com/user/repo');
+      expect(updateGitSpy).toHaveBeenCalledWith(expect.objectContaining({ type: 'git', host: 'github.com', path: 'user/repo', ref: undefined }), 'user');
+    });
+
+    it('should not call updateNpm when dryRun', async () => {
+      const anyPm = pm as any;
+      pm.addSourceToSettings('npm:testpkg', { local: false });
+      const updateNpmSpy = vi.spyOn(anyPm, 'updateNpm');
+      await pm.update('npm:testpkg', { dryRun: true });
+      expect(updateNpmSpy).not.toHaveBeenCalled();
+    });
   });
 
 });

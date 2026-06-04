@@ -18,4 +18,12 @@ describe('tool-template', () => {
     expect(guidelines.some(g => g.includes('example_command'))).toBe(true);
     expect(guidelines.some(g => g.includes('another_command'))).toBe(true);
   });
+
+  it('should handle command execution error (module not found)', async () => {
+    const tool = createYourTool();
+    // Pass non-empty args to trigger module load
+    const result = await tool.execute('test-call', { command: 'example_command', args: { input: 'test.txt' } }, undefined, undefined, { session: { cwd: process.cwd() } } as any);
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Failed to load command');
+  });
 });

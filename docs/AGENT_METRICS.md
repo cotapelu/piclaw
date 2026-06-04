@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 32 (31 previous + Coverage Test Expansion)
-- Tasks completed: All major features; 100% test pass; coverage target achieved; any casts removed; expanded test suite; bug fixes
-- Test failure rate: 0% (0 failing in 607 tests)
+- Iterations: 33 (focused coverage expansion)
+- Tasks completed: All major features; 100% test pass; coverage target ≥85% achieved; any casts removed; expanded test suite; bug fixes
+- Test failure rate: 0% (0 failing in 829 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -16,16 +16,15 @@
 ## Code Quality
 - Total lines: ~5900 (includes team-manager coverage tests)
 - Complexity: Low-Medium (package manager ~950 lines, team-manager ~1021 lines)
-- Coverage: 80.46% statements, 81.58% lines (target ≥80% achieved)
+- Coverage: 85.01% statements, 85.99% lines (target ≥85% achieved)
 - Type safety: Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
 - Recent bug fix: getConfiguredEntries safely handles null entries
 
 ## Testing Status
-- Unit tests: 607 total, 607 passing (100%)
-- New tests: team-manager coverage (12), plus earlier sets (package-manager errors, team behavior/backoff/integration)
-- Test files: 61 (increased from 52)
-- Coverage: 80.46% statements, 81.58% lines (target ≥80% achieved)
-- Known coverage gaps: team-manager.ts (76.7%), piclaw-package-manager.ts (~75%), todos-tool.ts (73.70%)
+- Unit tests: 832 total, 829 passing, 3 skipped (100% non-skipped pass rate)
+- New tests: team-manager (dispose error handling), package-manager settings edge cases (2), todos load edge cases (2), plus earlier sets
+- Test files: 73+
+- Coverage: 85.01% statements, 85.99% lines (target ≥85% achieved)
 - All tests pass continuously; build stable
 
 ## Recent Improvements
