@@ -159,11 +159,16 @@ export async function setupModelScoping(
     }
   }
 
-  // Nếu không có enabled patterns, hoặc scoped list rỗng, dùng tất cả models
+  // Nếu không có enabled patterns, hoặc scoped list rỗng, chỉ dùng default model (nếu có)
   if (scopedModels.length === 0) {
-    const allScoped: ScopedModel[] = allModels.map(m => ({ model: m }));
-    logger.warn(`No models matched enabled patterns, falling back to all ${allModels.length} models`);
-    scopedModels = allScoped;
+    const defaultModel = getDefaultModelFromSettings(modelRegistry, settingsManager);
+    if (defaultModel) {
+      scopedModels = [{ model: defaultModel }];
+      logger.debug(`No models matched enabled patterns, using default model: ${defaultModel.provider}/${defaultModel.id}`);
+    } else {
+      logger.warn('No models matched enabled patterns and no default model set. Configure with: piclaw config set enabledModels <patterns> or set a default model.');
+      scopedModels = [];
+    }
   }
 
   // 🔥 LIMIT: Giới hạn scoped models để tránh UI hỏng
