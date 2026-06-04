@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 34 (coverage push to 85%+)
-- Tasks completed: Fixed model-scoper fallback; added CLI args tests; added config-manager tests; coverage target ≥85% achieved; 100% test pass; expanded test suite; bug fixes
-- Test failure rate: 0% (0 failing in 838 tests)
+- Iterations: 35 (coverage follow-ups)
+- Tasks completed: Added team-manager lifecycle and error handling tests (waitForTeam, handleAgentFailure, reclaimZombieAgents); 100% test pass; expanded test suite
+- Test failure rate: 0% (0 failing in 855 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -16,15 +16,15 @@
 ## Code Quality
 - Total lines: ~5900 (includes team-manager coverage tests)
 - Complexity: Low-Medium (package manager ~950 lines, team-manager ~1021 lines)
-- Coverage: 85.13% statements, 86% lines (target ≥85% achieved)
+- Coverage: 85.51% statements, 86.41% lines (target ≥85% achieved)
 - Type safety: Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
 - Recent bug fix: getConfiguredEntries safely handles null entries
 
 ## Testing Status
-- Unit tests: 841 total, 838 passing, 3 skipped (100% non-skipped pass rate)
-- New tests: model-scoper fallback behavior (1), CLI args (contextLogFile, message) (3), config-manager (getAgentDir, getBinDir) (5), plus earlier sets
-- Test files: 73+
-- Coverage: 85.13% statements, 86% lines (target ≥85% achieved)
+- Unit tests: 858 total, 855 passing, 3 skipped (100% non-skipped pass rate)
+- New tests: model-scoper (1), CLI args (3), config-manager (5), context-logger (14), team-manager (3), plus earlier sets
+- Test files: 74+
+- Coverage: 85.51% statements, 86.41% lines (target ≥85% achieved)
 - All tests pass continuously; build stable
 
 ## Recent Improvements

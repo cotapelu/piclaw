@@ -1,7 +1,7 @@
 # Piclaw Development Roadmap
 
 **Last Updated:** 2025-06-04
-**Status:** P0-P2 Complete, Quality Targets Met
+**Status:** P0-P1 Complete, Phase 2 (Coverage Follow-ups) In Progress
 
 ---
 
@@ -50,6 +50,7 @@
 - [x] **Settings validation** - Robust handling: skip empty patterns, catch errors from invalid patterns, with logging
 - [x] **@plan support** - Recognize `@plan <file>` and expand into messages
 - [x] **Coverage ≥85%** - Fixed model-scoper fallback; added tests for CLI args (--contextLogFile, --message) and config-manager (getAgentDir, getBinDir); coverage 85.13%
+- [x] **Team-manager coverage** - Added tests for waitForTeam, handleAgentFailure, reclaimZombieAgents; coverage 85.51%
 
 ---
 

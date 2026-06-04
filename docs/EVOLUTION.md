@@ -1069,3 +1069,35 @@ Fix failing test in model-scoper and increase overall statement coverage to ≥8
 
 ### Trajectory
 Phase 28 complete: coverage target of ≥85% achieved with robust tests and stable build.
+
+## 2025-06-04 - Phase 29: Team-Manager Coverage Gaps
+
+### Objective
+Increase coverage for team-manager by testing critical error handling and lifecycle methods.
+
+### Changes Made
+1. Added comprehensive unit tests in `src/tests/team-manager-coverage.test.ts`:
+   - `TeamRegistry.waitForTeam` throws when team not found (covers line 906)
+   - `AgentTeam.handleAgentFailure` retries failed task with backoff (covers calculateRetryDelay line 32 and usage)
+   - `AgentTeam.reclaimZombieAgents` detects and reclaims zombie tasks (covers same)
+2. All tests: 855 passing, 3 skipped.
+3. Coverage: improved to 85.51% statements, 86.41% lines.
+
+### Implementation Details
+- Tests use real `AgentTeam` and `TeamRegistry` classes, manipulating internal state via assertions to verify retry logic and error handling.
+- No production code changes.
+
+### Verification
+- All tests pass.
+- Build succeeds with 0 TypeScript errors.
+
+### Risks & Debt
+- Low risk; test-only.
+- Remaining uncovered lines in team-manager: error paths in auto-dispose (898, 994) could be covered with more complex integration tests.
+
+### Next Steps (Phase 29)
+- Continue with task 10: piclaw-package-manager edge cases (network failures, invalid sources).
+- Then task 11: todos-tool async operations and error paths.
+
+### Trajectory
+Phase 29 complete: covered key team-manager branches, increased overall coverage.
