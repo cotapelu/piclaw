@@ -137,8 +137,9 @@ export async function resolveSessionManager(
       }
       logger.info(`Continuing session: ${recent.getSessionId()}`);
       return recent;
-    } catch (error: any) {
-      throw new Error(`Failed to continue session: ${error.message}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to continue session: ${msg}`);
     }
   }
 
@@ -161,8 +162,9 @@ export async function resolveSessionManager(
       const opened = SessionManager.open(selectedPath, sessionDir);
       logger.info(`Resumed session: ${opened.getSessionId()}`);
       return opened;
-    } catch (error: any) {
-      throw new Error(`Failed to resume session: ${error.message}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to resume session: ${msg}`);
     }
   }
 
@@ -186,8 +188,9 @@ export async function resolveSessionManager(
       const forked = SessionManager.forkFrom(resolved.path, cwd, sessionDir);
       logger.info(`Forked session ${resolved.sessionId} → ${forked.getSessionId()}`);
       return forked;
-    } catch (error: any) {
-      throw new Error(`Failed to fork session: ${error.message}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to fork session: ${msg}`);
     }
   }
 
@@ -202,8 +205,9 @@ export async function resolveSessionManager(
       const opened = SessionManager.open(resolved.path, sessionDir);
       logger.info(`Opened session: ${opened.getSessionId()}`);
       return opened;
-    } catch (error: any) {
-      throw new Error(`Failed to open session: ${error.message}`);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to open session: ${msg}`);
     }
   }
 
@@ -212,8 +216,9 @@ export async function resolveSessionManager(
     const created = SessionManager.create(cwd, sessionDir);
     logger.debug(`Created new session: ${created.getSessionId()}`);
     return created;
-  } catch (error: any) {
-    throw new Error(`Failed to create session: ${error.message}`);
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    throw new Error(`Failed to create session: ${msg}`);
   }
 }
 

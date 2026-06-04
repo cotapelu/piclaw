@@ -32,7 +32,7 @@ export async function handleInstallCommand(args: string[]): Promise<boolean> {
   let dryRun = false;
   let source: string | undefined;
   let help = false;
-  let filter: any;
+  let filter: PackageFilter | undefined;
 
   for (let i = 1; i < args.length; i++) {
     if (args[i] === "-l" || args[i] === "--local") {
@@ -59,8 +59,9 @@ export async function handleInstallCommand(args: string[]): Promise<boolean> {
             }
           }
           filter = parsed;
-        } catch (e: any) {
-          logger.error(chalk.red(`Invalid JSON for filter: ${e.message}`));
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : String(e);
+          logger.error(chalk.red(`Invalid JSON for filter: ${msg}`));
           process.exit(1);
         }
       } else {
@@ -140,8 +141,9 @@ Examples:
       logger.log(chalk.green(`✓ Installed ${source}`));
     }
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -228,8 +230,9 @@ Examples:
       logger.log(chalk.green(`✓ Removed ${source}`));
     }
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -295,8 +298,9 @@ List installed packages from user and project settings.
     }
 
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`Error: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`Error: ${msg}`));
     process.exit(1);
   }
 }
@@ -376,8 +380,9 @@ Examples:
     });
     await pm.update(source, { local, dryRun });
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -466,8 +471,9 @@ Examples:
     logger.log(`Themes: ${resolved.themes.length}`);
 
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -518,8 +524,9 @@ export async function handleHealthCommand(args: string[]): Promise<boolean> {
     logger.log("");
     logger.log(chalk.bold(`Health check complete: ${healthy} healthy, ${issues} issues`));
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -616,8 +623,9 @@ Example:
     writeFileSync(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
     logger.log(chalk.green(`✓ Pinned ${oldSource} -> ${newSource}`));
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -699,8 +707,9 @@ Examples:
       logger.log(chalk.green(`✓ Exported ${packages.length} packages`));
     }
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
@@ -834,8 +843,9 @@ Examples:
     writeFileSync(settingsPath, JSON.stringify(existing, null, 2) + "\n", "utf-8");
     logger.log(chalk.green(`✓ Imported ${added} new packages (total ${existing.packages.length})`));
     return true;
-  } catch (err: any) {
-    logger.error(chalk.red(`✗ Failed: ${err.message}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    logger.error(chalk.red(`✗ Failed: ${msg}`));
     process.exit(1);
   }
 }
