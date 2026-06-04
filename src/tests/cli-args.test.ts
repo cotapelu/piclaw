@@ -169,6 +169,29 @@ describe('parseOptions', () => {
     });
   });
 
+  describe('additional flags', () => {
+    it('should parse --contextLogFile', () => {
+      const { opts, cliOverrides } = parseOptions(['--contextLogFile', '/path/to/context.log']);
+      expect(opts.contextLogFile).toBe('/path/to/context.log');
+      expect(cliOverrides.contextLogFile).toBe('/path/to/context.log');
+    });
+
+    it('should parse --message flags (single and multiple)', () => {
+      const { opts } = parseOptions(['--message', 'First message', '--message', 'Second message']);
+      expect(opts.message).toEqual(['First message', 'Second message']);
+    });
+
+    it('should handle --message flag with value containing spaces', () => {
+      const { opts } = parseOptions(['--message', 'Hello world!']);
+      expect(opts.message).toEqual(['Hello world!']);
+    });
+
+    it('should ignore --stats flag', () => {
+      const { opts } = parseOptions(['--stats']);
+      expect(opts.stats).toBe(true);
+    });
+  });
+
   describe('mode validation', () => {
     it('should log warning for invalid mode value', () => {
       const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});

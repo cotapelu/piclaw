@@ -1,7 +1,7 @@
 # Piclaw Development Roadmap
 
-**Last Updated:** 2025-06-02
-**Status:** P0 Complete, P1 In Progress
+**Last Updated:** 2025-06-04
+**Status:** P0-P2 Complete, Quality Targets Met
 
 ---
 
@@ -49,6 +49,7 @@
 - [x] **Image auto-resize** - Implemented using sharp; resizes images >2048px, configurable via settings (default true)
 - [x] **Settings validation** - Robust handling: skip empty patterns, catch errors from invalid patterns, with logging
 - [x] **@plan support** - Recognize `@plan <file>` and expand into messages
+- [x] **Coverage ≥85%** - Fixed model-scoper fallback; added tests for CLI args (--contextLogFile, --message) and config-manager (getAgentDir, getBinDir); coverage 85.13%
 
 ---
 

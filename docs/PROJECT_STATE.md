@@ -39,11 +39,11 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **829 unit tests passing (100%)
+- **838 unit tests passing (100%)
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
-- Statement coverage: 85.01%, Lines coverage: 85.99% (target ≥85% achieved)
+- Statement coverage: 85.13%, Lines coverage: 86% (target ≥85% achieved)
 
 ### Known Limitations (resolved)
 - ✅ `update` command implemented
@@ -124,6 +124,13 @@
 - Order: scoped model pattern thinking → CLI `--thinking` → existing session value
 - Ensures per‑session thinking level is respected and can be overridden correctly
 - No regression; all 693 tests passing
+
+**2025-06-04 - Coverage Push to ≥85%**
+- Fixed model-scoper fallback: when enabled patterns yield no matches, fall back to all models instead of only default.
+- Added tests for CLI args (`--contextLogFile`, `--message`) in `src/tests/cli-args.test.ts`.
+- Added tests for config manager (`getAgentDir`, `getBinDir`) in `src/tests/config-manager.test.ts`.
+- All tests: 838 passing, 3 skipped (100% pass).
+- Coverage: 85.13% statements, 86% lines (≥85% target achieved).
 
 ## Next Steps
 - Evaluate `execa` for subprocess management improvements

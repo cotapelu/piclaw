@@ -159,15 +159,30 @@ export async function setupModelScoping(
     }
   }
 
-  // Nếu không có enabled patterns, hoặc scoped list rỗng, chỉ dùng default model (nếu có)
+  // Determine fallback based on whether non-empty patterns were provided
+  let hasNonEmptyPattern = false;
+  for (const p of enabledPatterns) {
+    if (p.trim()) {
+      hasNonEmptyPattern = true;
+      break;
+    }
+  }
+
   if (scopedModels.length === 0) {
-    const defaultModel = getDefaultModelFromSettings(modelRegistry, settingsManager);
-    if (defaultModel) {
-      scopedModels = [{ model: defaultModel }];
-      logger.debug(`No models matched enabled patterns, using default model: ${defaultModel.provider}/${defaultModel.id}`);
+    if (hasNonEmptyPattern) {
+      // Non-empty patterns were provided but matched nothing → fallback to all models
+      scopedModels = allModels.map(m => ({ model: m } as ScopedModel));
+      logger.debug(`No models matched enabled patterns, falling back to all ${allModels.length} models`);
     } else {
-      logger.warn('No models matched enabled patterns and no default model set. Configure with: piclaw config set enabledModels <patterns> or set a default model.');
-      scopedModels = [];
+      // No non-empty patterns (empty array or all empty) → use default model
+      const defaultModel = getDefaultModelFromSettings(modelRegistry, settingsManager);
+      if (defaultModel) {
+        scopedModels = [{ model: defaultModel }];
+        logger.debug(`No enabled models patterns configured, using default model: ${defaultModel.provider}/${defaultModel.id}`);
+      } else {
+        logger.warn('No models matched enabled patterns and no default model set. Configure with: piclaw config set enabledModels <patterns> or set a default model.');
+        scopedModels = [];
+      }
     }
   }
 

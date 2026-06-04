@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { loadConfig, saveConfig, getConfigPath, getDefaultContextLogFile, type PiclawConfig } from "../config/config-manager.js";
+import { loadConfig, saveConfig, getConfigPath, getDefaultContextLogFile, getAgentDir, getBinDir, type PiclawConfig } from "../config/config-manager.js";
 import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
@@ -160,6 +160,47 @@ describe("ConfigManager", () => {
       expect(path).toContain("context");
       expect(path).toContain("context.log");
       expect(path).toContain(cwd);
+    });
+  });
+
+  describe("getAgentDir", () => {
+    beforeEach(() => {
+      // Ensure no leftover env
+      vi.unstubAllEnvs();
+    });
+
+    it("should return default path when PICLAW_AGENT_DIR not set", () => {
+      vi.unstubAllEnvs(); // ensure env not set
+      const dir = getAgentDir();
+      const expected = join(homedir(), ".piclaw", "agent");
+      expect(dir).toBe(expected);
+    });
+
+    it("should resolve '~' to home directory", () => {
+      vi.stubEnv('PICLAW_AGENT_DIR', '~');
+      const dir = getAgentDir();
+      expect(dir).toBe(homedir());
+    });
+
+    it("should resolve '~/subdir' to home + subdir", () => {
+      vi.stubEnv('PICLAW_AGENT_DIR', '~/myagent');
+      const dir = getAgentDir();
+      expect(dir).toBe(join(homedir(), 'myagent'));
+    });
+
+    it("should handle absolute path without tilde", () => {
+      vi.stubEnv('PICLAW_AGENT_DIR', '/custom/agent');
+      const dir = getAgentDir();
+      expect(dir).toBe('/custom/agent');
+    });
+  });
+
+  describe("getBinDir", () => {
+    it("should return agentDir + '/bin'", () => {
+      // Use a custom agent dir to control output
+      vi.stubEnv('PICLAW_AGENT_DIR', '/tmp/agent');
+      const binDir = getBinDir();
+      expect(binDir).toBe('/tmp/agent/bin');
     });
   });
 });

@@ -1036,3 +1036,36 @@ Remove remaining `as any` type assertions in core files to improve type safety a
 
 ### Trajectory
 Phase 27 complete: eliminated `as any` casts in core files, enhancing type safety. Next iteration: coverage expansion.
+
+## 2025-06-04 - Phase 28: Coverage Push to ≥85%
+
+### Objective
+Fix failing test in model-scoper and increase overall statement coverage to ≥85%.
+
+### Changes Made
+1. Fixed fallback logic in `src/model-scoper.ts`: When enabled patterns yield no matches, fall back to all models instead of only default model. This ensures UI shows all models for selection.
+2. Added unit tests for CLI argument parsing: `--contextLogFile` and `--message` flags in `src/tests/cli-args.test.ts`.
+3. Added unit tests for config manager helpers: `getAgentDir()` (various `PICLAW_AGENT_DIR` scenarios) and `getBinDir()` in `src/tests/config-manager.test.ts`.
+4. All tests: 838 passing, 3 skipped (100% pass).
+5. Coverage: 85.13% statements, 86% lines (≥85% target).
+
+### Implementation Details
+- Model scoper fallback: Introduced `hasNonEmptyPattern` detection to differentiate between no patterns and patterns that matched nothing. Updated logic in `setupModelScoping`.
+- Tests: Used Vitest spies and mock implementations to validate CLI parsing and config path resolution.
+- No breaking changes; all existing tests still pass.
+
+### Verification
+- Ran full test suite: 841 total tests, 838 passing, 3 skipped.
+- Coverage check: 85.13% statements, 86% lines.
+- Build succeeds with 0 TypeScript errors.
+
+### Risks & Debt
+- Low risk; isolated changes. Remaining lower-coverage areas (team-manager, piclaw-package-manager, todos-tool) could be addressed in future iterations to push coverage further.
+
+### Next Steps (Phase 28)
+- Consider increasing coverage to ≥90% by targeting remaining modules.
+- Continue addressing any `as any` casts or type gaps.
+- Monitor user feedback and refine UX.
+
+### Trajectory
+Phase 28 complete: coverage target of ≥85% achieved with robust tests and stable build.
