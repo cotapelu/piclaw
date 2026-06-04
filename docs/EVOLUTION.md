@@ -1101,3 +1101,44 @@ Increase coverage for team-manager by testing critical error handling and lifecy
 
 ### Trajectory
 Phase 29 complete: covered key team-manager branches, increased overall coverage.
+
+## 2025-06-04 - Phase 30: Package-Manager Coverage Deep Dive
+
+### Objective
+Increase coverage for `piclaw-package-manager.ts` by adding tests for edge cases: parsing, retry logic, install/update failures, and resource filtering.
+
+### Changes Made
+1. Added `src/tests/package-manager-coverage.test.ts` with 17 focused tests covering:
+   - `parseSource` edge cases: scoped npm packages, version pins, git@ SSH URLs, https URLs with refs, simple git host/path, local paths
+   - `withRetry` behavior: success, retry success, exhaustion, jitter timing
+   - `installNpm` failure propagation
+   - `installGit` clone failure
+   - `uninstallNpm` failure
+   - `updateNpm` reinstall failure
+   - `updateGit` handling when pull, fetch, and reset all fail (error suppression)
+   - `runCommandCapture` errors
+   - `collectPackageResources` with filters (extension filtering)
+   - `runCommand` non-zero exit
+2. All tests: 872 passing, 3 skipped.
+3. Coverage: piclaw-package-manager.ts increased to 86.09% statements; overall coverage 85.97% statements, 86.89% lines.
+
+### Implementation Details
+- Most tests spy on internal methods (`runCommand`, `runNpmCommand`, etc.) to simulate failures without executing real commands.
+- For `collectPackageResources` test, created a real package root with files and verified filter application.
+- Updated `withRetry` tests to validate retry count and error propagation.
+
+### Verification
+- Full test suite passes (872 tests).
+- Coverage improved significantly.
+- Build clean.
+
+### Risks & Debt
+- Low risk; test-only changes.
+- Remaining uncovered branches in `piclaw-package-manager` involve integration scenarios (network timeouts, malformed npm output) that can be covered later if needed.
+
+### Next Steps (Phase 30)
+- Continue with Task 11: Improve `todos-tool` coverage for async operations and error paths.
+- Consider pushing overall coverage to ≥87% by addressing remaining low-coverage modules.
+
+### Trajectory
+Phase 30 complete: substantial coverage boost for package manager, maintaining green suite.

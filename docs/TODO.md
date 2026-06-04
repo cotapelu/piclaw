@@ -51,6 +51,7 @@
 - [x] **@plan support** - Recognize `@plan <file>` and expand into messages
 - [x] **Coverage ≥85%** - Fixed model-scoper fallback; added tests for CLI args (--contextLogFile, --message) and config-manager (getAgentDir, getBinDir); coverage 85.13%
 - [x] **Team-manager coverage** - Added tests for waitForTeam, handleAgentFailure, reclaimZombieAgents; coverage 85.51%
+- [x] **Package-manager coverage** - Added edge case tests (parsing, retry, install/update failures, filtering); coverage 85.97%
 
 ---
 

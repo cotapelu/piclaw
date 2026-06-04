@@ -132,6 +132,11 @@
 - All tests: 838 passing, 3 skipped (100% pass).
 - Coverage: 85.13% statements, 86% lines (≥85% target achieved).
 
+**2025-06-04 - Package-Manager Coverage Deep Dive**
+- Added comprehensive tests in `src/tests/package-manager-coverage.test.ts` covering `parseSource` edge cases, `withRetry` behavior, install/update failures, and resource filtering.
+- Tests: 872 passing, 3 skipped.
+- Coverage increased to 85.97% statements, 86.89% lines; `piclaw-package-manager.ts` now at 86.09% statements.
+
 ## Next Steps
 - Evaluate `execa` for subprocess management improvements
 - Consider performance optimizations for large team orchestrations
