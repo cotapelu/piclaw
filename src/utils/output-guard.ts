@@ -19,8 +19,8 @@ let buffer: string[] = [];
 export function takeOverStdout(): void {
   if (!originalWrite) {
     originalWrite = process.stdout.write.bind(process.stdout);
-    (process.stdout as typeof process.stdout).write = (chunk: unknown, encoding?: string | undefined, callback?: ((error: Error | null) => void) | undefined) => {
-      buffer.push(chunk.toString());
+    (process.stdout as any).write = (chunk: unknown, encoding?: string | undefined, callback?: ((error: Error | null) => void) | undefined) => {
+      buffer.push(String(chunk));
       return true;
     };
   }
