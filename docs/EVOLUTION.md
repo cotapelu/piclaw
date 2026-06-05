@@ -1183,3 +1183,38 @@ Increase test coverage for `todos-tool.ts` (previously ~82.66% statements) by ad
 
 ### Trajectory
 Phase 31 complete: expanded test suite for todos-tool edge cases, coverage increased; all tests passing. System stable.
+
+## 2025-06-05 - Phase 32: Todos-Tool Additional Coverage (Final)
+
+### Objective
+Complete the coverage push for `todos-tool.ts` by adding tests for remaining edge cases: normalizeParams string parsing (comma-separated, JSON), file operation successes, formatSummary with errors, remove_task success, list non-empty, add_task by phase name, update with mixed valid/unknown IDs, and reconstruction edge cases.
+
+### Changes Made
+1. Created `src/tests/todos-tool-more-coverage.test.ts` with 16 tests covering:
+   - `applyOp` success paths: remove_task, list (non-empty), add_task (by phase name), update (mixed IDs, all unknown), formatSummary with errors
+   - `normalizeParams` parsing for comma-separated tasks and JSON strings for add_phase, add_task, update, delete
+   - `getLatestTodoPhasesFromEntries` edge cases (empty, non-message, wrong tool, error, null message, missing details)
+2. Extended `src/tests/todos-tool-edge-additional.test.ts` with success tests for `TodoState.loadFromFile` and `TodoState.saveToFile`.
+3. All tests passing: 963 total, 3 skipped.
+4. Overall coverage: 86.63% statements, 87.42% lines (≥85% target maintained).
+
+### Implementation Details
+- Followed existing test patterns with proper fs mocking and cleanup.
+- Focused on uncovered branches identified from lcov report.
+- No production code changes.
+
+### Verification
+- Full test suite passes (963 tests).
+- Build clean.
+- Coverage remained stable; todos-tool coverage improved modestly; overall target achieved.
+
+### Risks & Debt
+- Low risk; test-only additions.
+- Some low-coverage modules remain (e.g., certain provider/index, tool-template branches) but not critical.
+
+### Next Steps (Phase 32)
+- Evaluate if further coverage pushes are worthwhile.
+- Consider addressing remaining type errors in test files for cleaner typecheck.
+
+### Trajectory
+Phase 32 complete: reached coverage target, all high-priority todos cleared. System stable.
