@@ -1218,3 +1218,44 @@ Complete the coverage push for `todos-tool.ts` by adding tests for remaining edg
 
 ### Trajectory
 Phase 32 complete: reached coverage target, all high-priority todos cleared. System stable.
+
+## 2025-06-05 - Phase 33: Todos-Tool Coverage Target Achieved
+
+### Objective
+Increase coverage for `todos-tool.ts` from 83.66% to ≥85% statements by adding targeted tests for missing branches identified from coverage analysis.
+
+### Changes Made
+1. Created `src/tests/todos-tool-final-gaps.test.ts` with 13 tests covering:
+   - TodoState file success operations (loadFromFile, saveToFile)
+   - applyOp scenarios: remove_task success, list multi-phase, update with single id, delete reset, formatSummary with details
+   - getLatestTodoPhasesFromEntries edge cases
+   - Tool execution full scenarios (add_phase→list, add_task→update, remove_task)
+2. Created `src/tests/todos-tool-type-errors.test.ts` with 4 tests covering non-object parameter type errors for add_phase, add_task, update, remove_task.
+3. No production code changes; tests only.
+
+### Results
+- Todos-tool coverage: **85.25% statements** (from 83.66%)
+- Overall coverage: **86.86% statements**, 87.67% lines
+- Test count: **980 passing** (up from 963, +17 new tests)
+- All tests pass; build stable.
+
+### Implementation Notes
+- Used targeted approach based on uncovered line analysis (coverage JSON).
+- Focused on error branches and success paths with low coverage.
+- Added helper script `scripts/analyze-todos-coverage.mjs` to extract uncovered lines for future use.
+
+### Verification
+- Full test suite passes (980 tests).
+- Coverage target met and maintained.
+- Build clean with 0 TypeScript errors.
+
+### Risks & Debt
+- Low risk; test-only additions.
+- Some low-coverage modules remain but are non-critical.
+
+### Next Steps
+- No pending high-priority tasks.
+- Consider periodic review of coverage gaps in other modules.
+
+### Trajectory
+Phase 33 complete: todos-tool coverage target achieved, overall target maintained. System stable and ready for feature work.

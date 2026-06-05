@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 38 (todos-tool coverage boost - final phase)
-- Tasks completed: Phase 31 added 42 tests for todos-tool edge cases; Phase 32 added 16 tests covering normalizeParams, file success, formatSummary variations, and additional execution scenarios; overall test count 963, coverage 86.63% statements; 100% test pass
-- Test failure rate: 0% (0 failing in 963 tests)
+- Iterations: 39 (Phase 33: todos-tool coverage target achieved)
+- Tasks completed: Phase 33 added 17 tests covering type error branches and remaining gaps in load/save operations, applyOp, formatSummary, and tool execution; todos-tool coverage increased from 83.66% to 85.25% statements; overall coverage now 86.86% statements, 87.67% lines; 100% test pass
+- Test failure rate: 0% (0 failing in 980 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,17 +14,17 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Total lines: ~6000 (includes todos-tool additional tests)
+- Total lines: ~6100 (includes todos-tool type error and final gap tests)
 - Complexity: Low-Medium (package manager ~950 lines, team-manager ~1021 lines)
 - Coverage: 86.63% statements, 87.42% lines (target ≥85% achieved)
 - Type safety: Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
 - Recent bug fix: getConfiguredEntries safely handles null entries
 
 ## Testing Status
-- Unit tests: 963 passing, 3 skipped (100% non-skipped pass rate)
-- New tests: todos-tool edge cases (58 total across two phases), normalizeParams scenarios, file success operations, formatSummary variations, plus earlier sets
-- Test files: 79+
-- Coverage: 86.63% statements, 87.42% lines (target ≥85% achieved)
+- Unit tests: 980 passing, 3 skipped (100% non-skipped pass rate)
+- New tests: Phase 33 - todos-tool type error handling (4), file operations success (2), applyOp edge cases (4), formatSummary variations (2), getLatestTodoPhasesFromEntries edge cases (2), full tool execution scenarios (3) - total 17 new tests
+- Test files: 80+
+- Coverage: 86.86% statements, 87.67% lines (target ≥85% achieved)
 - All tests pass continuously; build stable
 
 ## Recent Improvements
