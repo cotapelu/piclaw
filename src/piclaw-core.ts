@@ -17,6 +17,8 @@ import {
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 
+import { getResourceLoaderOptions } from "./extensionLoader.js";
+
 // Session resolution (our own implementation - inspired by reading llm-context)
 import { resolveSessionManager } from "./session-resolver.js";
 
@@ -117,7 +119,10 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
       cwd: effectiveCwd,
       agentDir: effectiveAgentDir,
       settingsManager,
-      resourceLoaderOptions: { packageManager },
+      resourceLoaderOptions: {
+        packageManager,
+        ...getResourceLoaderOptions(),
+      },
     });
 
     if (typeof services.cwd !== 'string') {
