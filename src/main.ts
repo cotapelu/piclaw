@@ -120,9 +120,7 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
       mode: opts.mode,
     });
 
-    // Set global runtime for extensions
-    const { setGlobalRuntime } = await import("./runtime-runner.js");
-    setGlobalRuntime(runtime);
+
 
     // 6. Prepare initial message from files + stdin if provided
     let initialMessage: string | undefined;
