@@ -11,7 +11,7 @@ import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
-import { registerSkillReaderExtension } from "./tools/skill-reader";
+import { registerSkillReaderExtension } from "./tools/skill-reader.js";
 import autoContinueExtension from "./hooks/auto-continue.js";
 import autoCompact85Extension from "./hooks/auto-compact-85.js";
 

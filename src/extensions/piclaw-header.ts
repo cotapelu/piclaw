@@ -1,8 +1,13 @@
 import { readFileSync, existsSync } from "fs";
 import { join } from "path";
+import { fileURLToPath } from "url";
 import type { ExtensionAPI, Theme } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 import { VERSION as PI_VERSION } from "@earendil-works/pi-coding-agent";
+
+// Convert import.meta.url to __dirname for ES modules compatibility
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = __filename.substring(0, __filename.lastIndexOf('/'));
 
 // Default values (fallback)
 let PICLAW_APP_NAME = "piclaw";

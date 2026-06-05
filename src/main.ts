@@ -3,7 +3,7 @@ import { logger } from "./utils/logger.js";
 
 import { parseOptions } from "./cli/args.js";
 import { loadConfig } from "./config/config-manager.js";
-import { validateApiKeys, ensurePiclawExtensionRegistered } from "./utils/helpers.js";
+import { validateApiKeys } from "./utils/helpers.js";
 import { getAgentDir } from "./config/config-manager.js";
 import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";
@@ -94,10 +94,8 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     // 3. Validate API keys
     validateApiKeys(config);
 
-    // 4. Ensure Piclaw extension is registered
+    // 4. Get agent directory
     const agentDir = getAgentDir();
-    const extensionPath = join(__dirname, "extensions", "index.js");
-    await ensurePiclawExtensionRegistered(agentDir, extensionPath);
 
     // 5. Boot the core runtime
     const runtime = await bootPiclaw({
