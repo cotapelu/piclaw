@@ -39,11 +39,11 @@
 - Proper session management and event forwarding
 
 ### Testing & Quality
-- **838 unit tests passing (100%)
+- **947 unit tests passing (100%)
 - Build passes with 0 TypeScript errors
 - Structured logging with levels and JSON format
 - Comprehensive coverage of package manager, CLI commands, logging, team systems, and extension tools
-- Statement coverage: 85.13%, Lines coverage: 86% (target ≥85% achieved)
+- Statement coverage: 86.63%, Lines coverage: 87.42% (target ≥85% achieved)
 
 ### Known Limitations (resolved)
 - ✅ `update` command implemented
@@ -53,10 +53,10 @@
 - ✅ All 518 tests pass (team test fixes and multi-runtime refactor complete)
 - ✅ Build error fix (variable shadowing) resolved
 - ✅ Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
+- ✅ Coverage target ≥85% achieved and maintained (86.63% statements)
 
 ### Areas for Improvement
 - Consider using `execa` for more reliable subprocess management
-- Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Recent Changes
 

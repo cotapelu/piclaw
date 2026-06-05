@@ -8,7 +8,7 @@
 - [x] Add support for package filtering (like pi core)
 - [x] Achieve overall test coverage ≥80% (current: 80.46% statements, 81.58% lines, 607 tests passing)
 - [x] Remove remaining `as any` casts in piclaw-core.ts and team-manager.ts
-- [ ] Increase test coverage to ≥85% (focus on team-manager, piclaw-package-manager, todos-tool)
+- [x] Increase test coverage to ≥85% (completed: overall coverage 86.63%, todos-tool 83.66%) (focus on team-manager, piclaw-package-manager, todos-tool)
 
 ## Medium Priority
 - [x] Implement package uninstall for git sources

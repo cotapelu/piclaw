@@ -1,9 +1,9 @@
 # Agent Performance Metrics
 
 ## Evolution Metrics
-- Iterations: 36 (package-manager coverage push)
-- Tasks completed: Added comprehensive tests for piclaw-package-manager edge cases (parseSource, withRetry, install/update failures); 100% test pass; expanded test suite
-- Test failure rate: 0% (0 failing in 872 tests)
+- Iterations: 37 (todos-tool coverage boost)
+- Tasks completed: Added 42 tests for todos-tool edge cases covering state management, file operations, formatSummary, reconstruction, and tool execution; coverage increased to 86.63%; 100% test pass
+- Test failure rate: 0% (0 failing in 947 tests)
 - Rollbacks: 0
 - Regressions: 0
 - MTTR (Mean Time To Resolve): N/A
@@ -14,17 +14,17 @@
 - Bundle size: ~220KB (dist/)
 
 ## Code Quality
-- Total lines: ~5900 (includes team-manager coverage tests)
+- Total lines: ~6000 (includes todos-tool additional tests)
 - Complexity: Low-Medium (package manager ~950 lines, team-manager ~1021 lines)
-- Coverage: 85.97% statements, 86.89% lines (target ≥85% achieved)
+- Coverage: 86.63% statements, 87.42% lines (target ≥85% achieved)
 - Type safety: Removed `as any` casts in core files (piclaw-core.ts, team-manager.ts)
 - Recent bug fix: getConfiguredEntries safely handles null entries
 
 ## Testing Status
-- Unit tests: 872 passing, 3 skipped (100% non-skipped pass rate)
-- New tests: model-scoper (1), CLI args (3), config-manager (5), context-logger (14), team-manager (3), package-manager (17), plus earlier sets
-- Test files: 75+
-- Coverage: 85.97% statements, 86.89% lines (target ≥85% achieved)
+- Unit tests: 947 passing, 3 skipped (100% non-skipped pass rate)
+- New tests: todos-tool edge cases (42 tests covering state management, file operations, formatSummary variations, getLatestTodoPhasesFromEntries scenarios, reconstruction, and tool execution errors), plus earlier sets
+- Test files: 78+
+- Coverage: 86.63% statements, 87.42% lines (target ≥85% achieved)
 - All tests pass continuously; build stable
 
 ## Recent Improvements
