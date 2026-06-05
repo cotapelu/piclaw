@@ -1,175 +1,143 @@
 #!/usr/bin/env node
 import { logger } from "../../utils/logger.js";
-/**
- * Auto Continue Extension
- *
- * Khi agent idle (sau khi trả lời xong) quá lâu, tự động gửi message để nhắc LLM tiếp tục.
- * Dùng /gnp để bật/tắt, và có thể set timeout: /gnp on 30 (30 giây) hoặc /gnp off.
- */
-
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
 
-const DEFAULT_IDLE_TIMEOUT_MS = 30_000; // 30 giây
+const DEFAULT_IDLE_TIMEOUT_MS = 30_000;
 const DEFAULT_IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
 const REMINDER_FILE = "AUTO-CONTINUE.md";
 
-// Find project root by looking for package.json, .git, or pi.config.json
 function findProjectRoot(startPath: string): string {
-  let current = startPath;
-  const root = path.parse(current).root;
-
-  while (current && current !== root) {
-    if (
-      existsSync(path.join(current, "package.json")) ||
-      existsSync(path.join(current, ".git")) ||
-      existsSync(path.join(current, "pi.config.json"))
-    ) {
-      return current;
-    }
-    const parent = path.dirname(current);
-    if (parent === current) break; // safety
-    current = parent;
-  }
-  // Fallback to startPath
-  return startPath;
+	let current = startPath;
+	const root = path.parse(current).root;
+	while (current && current !== root) {
+		if (
+			existsSync(path.join(current, "package.json")) ||
+			existsSync(path.join(current, ".git")) ||
+			existsSync(path.join(current, "pi.config.json"))
+		) {
+			return current;
+		}
+		const parent = path.dirname(current);
+		if (parent === current) break;
+		current = parent;
+	}
+	return startPath;
 }
 
-// Read reminder message from file in project root
 function loadReminderMessage(): string {
-  try {
-    const projectRoot = findProjectRoot(process.cwd());
-    const filePath = path.join(projectRoot, REMINDER_FILE);
-    if (existsSync(filePath)) {
-      const content = readFileSync(filePath, "utf-8");
-      // Take entire content (trim only leading/trailing whitespace)
-      const trimmed = content.trim();
-      if (trimmed) {
-        logger.log(`[AutoContinue] Loaded reminder from ${filePath}`);
-        return trimmed;
-      }
-    }
-  } catch (error) {
-    logger.error("[AutoContinue] Failed to load reminder file", { error });
-  }
-  logger.log("[AutoContinue] Using default message");
-  return DEFAULT_IDLE_MESSAGE;
+	try {
+		const projectRoot = findProjectRoot(process.cwd());
+		const filePath = path.join(projectRoot, REMINDER_FILE);
+		if (existsSync(filePath)) {
+			const content = readFileSync(filePath, "utf-8");
+			const trimmed = content.trim();
+			if (trimmed) {
+				logger.log(`[AutoContinue] Loaded reminder from ${filePath}`);
+				return trimmed;
+			}
+		}
+	} catch (error) {
+		logger.error("[AutoContinue] Failed to load reminder file", { error });
+	}
+	logger.log("[AutoContinue] Using default message");
+	return DEFAULT_IDLE_MESSAGE;
 }
 
 const IDLE_MESSAGE = loadReminderMessage();
 
 export default function (pi: ExtensionAPI) {
-  let enabled = false;
-  let idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS;
-  let idleTimer: ReturnType<typeof setTimeout> | null = null;
+	let enabled = false;
+	let idleTimeoutMs = DEFAULT_IDLE_TIMEOUT_MS;
+	let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
-  // Cleanup timer on shutdown
-  pi.on("session_shutdown", () => {
-    if (idleTimer) {
-      clearTimeout(idleTimer);
-      idleTimer = null;
-    }
-  });
+	pi.on("session_shutdown", () => {
+		if (idleTimer) {
+			clearTimeout(idleTimer);
+			idleTimer = null;
+		}
+	});
 
-  // Start idle timer
-  const startIdleTimer = () => {
-    if (!enabled) return;
-    if (idleTimer) return;
-    idleTimer = setTimeout(() => {
-      //logger.log("[AutoContinue] Timer fired, enabled:", enabled);
-      if (enabled) {
-        pi.sendMessage(
-          { customType: "auto-continue", content: IDLE_MESSAGE, display: false },
-          { triggerTurn: true, deliverAs: "followUp" }
-        );
-       // logger.log("[AutoContinue] Sent idle reminder. Message:", IDLE_MESSAGE);
-      }
-      idleTimer = null;
-    }, idleTimeoutMs);
-  };
+	const startIdleTimer = () => {
+		if (!enabled) return;
+		if (idleTimer) return;
+		idleTimer = setTimeout(() => {
+			if (enabled) {
+				pi.sendMessage(
+					{ customType: "auto-continue", content: IDLE_MESSAGE, display: false },
+					{ triggerTurn: true, deliverAs: "followUp" }
+				);
+			}
+			idleTimer = null;
+		}, idleTimeoutMs);
+	};
 
-  // Register /gnpi command
-  pi.registerCommand("gnpi", {
-    description: "Toggle auto-continue: /gnpi [on|off|seconds]. Bật/tắt hoặc set timeout (seconds)",
-    handler: async (args: string, ctx: ExtensionContext) => {
-      const parts = args.trim().split(/\s+/);
-      const command = parts[0].toLowerCase();
+	pi.registerCommand("gnpi", {
+		description: "Toggle auto-continue: /gnpi [on|off|seconds]",
+		handler: async (args: string, ctx: ExtensionContext) => {
+			const parts = args.trim().split(/\s+/);
+			const command = parts[0].toLowerCase();
 
-      if (command === "off" || command === "0") {
-        enabled = false;
-        if (idleTimer) {
-          clearTimeout(idleTimer);
-          idleTimer = null;
-        }
-        if (ctx.hasUI) {
-          ctx.ui.notify("Auto-continue đã TẮT", "info");
-        }
-        //logger.log("[AutoContinue] Disabled");
-        return;
-      }
+			if (command === "off" || command === "0") {
+				enabled = false;
+				if (idleTimer) {
+					clearTimeout(idleTimer);
+					idleTimer = null;
+				}
+				if (ctx.hasUI) {
+					ctx.ui.notify("Auto-continue đã TẮT", "info");
+				}
+				return;
+			}
 
-      if (command === "on" || command === "1") {
-        enabled = true;
-        if (ctx.hasUI) {
-          ctx.ui.notify(`Auto-continue đã BẬT - sẽ gửi reminder sau ${idleTimeoutMs / 1000} giây idle`, "info");
-        }
-        if (ctx.isIdle()) {
-          startIdleTimer();
-          //logger.log("[AutoContinue] Started timer immediately (was idle)");
-        }
-        //logger.log("[AutoContinue] Enabled");
-        return;
-      }
+			if (command === "on" || command === "1") {
+				enabled = true;
+				if (ctx.hasUI) {
+					ctx.ui.notify(`Auto-continue đã BẬT - ${idleTimeoutMs / 1000}s timeout`, "info");
+				}
+				if (ctx.isIdle()) {
+					startIdleTimer();
+				}
+				return;
+			}
 
-      // If args is a number, set timeout
-      const timeoutSec = parseInt(parts[0], 10);
-      if (!isNaN(timeoutSec) && timeoutSec > 0) {
-        idleTimeoutMs = timeoutSec * 1000;
-        if (ctx.hasUI) {
-          ctx.ui.notify(`Auto-continue timeout set to ${timeoutSec} giây`, "info");
-        }
-        //logger.log(`[AutoContinue] Timeout set to ${idleTimeoutMs}ms`);
-        return;
-      }
+			const timeoutSec = parseInt(parts[0], 10);
+			if (!isNaN(timeoutSec) && timeoutSec > 0) {
+				idleTimeoutMs = timeoutSec * 1000;
+				if (ctx.hasUI) {
+					ctx.ui.notify(`Auto-continue timeout set to ${timeoutSec} giây`, "info");
+				}
+				return;
+			}
 
-      // If no args, toggle
-      enabled = !enabled;
-      if (enabled) {
-        if (ctx.hasUI) {
-          ctx.ui.notify(`Auto-continue đã BẬT - timeout=${idleTimeoutMs / 1000}s`, "info");
-        }
-        if (ctx.isIdle()) {
-          startIdleTimer();
-        }
-        //logger.log("[AutoContinue] Enabled via toggle");
-      } else {
-        if (idleTimer) {
-          clearTimeout(idleTimer);
-          idleTimer = null;
-        }
-        if (ctx.hasUI) {
-          ctx.ui.notify("Auto-continue đã TẮT", "info");
-        }
-        //logger.log("[AutoContinue] Disabled via toggle");
-      }
-    },
-  });
+			enabled = !enabled;
+			if (enabled) {
+				if (ctx.hasUI) {
+					ctx.ui.notify(`Auto-continue đã BẬT - timeout=${idleTimeoutMs / 1000}s`, "info");
+				}
+				if (ctx.isIdle()) {
+					startIdleTimer();
+				}
+			} else {
+				if (idleTimer) {
+					clearTimeout(idleTimer);
+					idleTimer = null;
+				}
+				if (ctx.hasUI) {
+					ctx.ui.notify("Auto-continue đã TẮT", "info");
+				}
+			}
+		},
+	});
 
-  // Listen to agent_end using pi.on()
-  pi.on("agent_end", () => {
-    if (!enabled) return;
-    //logger.log("[AutoContinue] agent_end fired, enabled:", enabled);
-    startIdleTimer();
-  });
+	pi.on("agent_end", () => {
+		if (!enabled) return;
+		startIdleTimer();
+	});
 
-  // Also start timer on turn_end to handle cases where agent_end is missed (e.g., auto-compact disconnects)
-  pi.on("turn_end", (_event, ctx) => {
-    if (!enabled) return;
-    if (idleTimer) return; // already started
-    // Only start if truly idle and no pending messages
-    if (ctx.isIdle() && !ctx.hasPendingMessages()) {
-      startIdleTimer();
-    }
-  });
+	pi.on("session_compact", () => {
+		if (!enabled) return;
+		startIdleTimer();
+	});
 }
