@@ -10,6 +10,7 @@
 - [x] Remove remaining `as any` casts in piclaw-core.ts and team-manager.ts
 - [x] Increase test coverage to ≥85% (completed: overall coverage 86.63%, todos-tool 83.66%) (focus on team-manager, piclaw-package-manager, todos-tool)
 
+- [ ] Increase todos-tool coverage to ≥85% (current 83.66% statements)
 ## Medium Priority
 - [x] Implement package uninstall for git sources
 - [x] Add progress callback to install/remove commands
