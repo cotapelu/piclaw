@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { logger } from "../../utils/logger.js";
+import { createLogger } from "../utils/logger.js";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import * as path from "node:path";
 import { existsSync, readFileSync } from "node:fs";
@@ -7,6 +7,9 @@ import { existsSync, readFileSync } from "node:fs";
 const DEFAULT_IDLE_TIMEOUT_MS = 30_000;
 const DEFAULT_IDLE_MESSAGE = "Continue next task in docs/TODO.md, remember update done and git commit.";
 const REMINDER_FILE = "AUTO-CONTINUE.md";
+
+// Create logger for this hook
+const logger = createLogger('AutoContinue');
 
 function findProjectRoot(startPath: string): string {
 	let current = startPath;
