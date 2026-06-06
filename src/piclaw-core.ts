@@ -17,7 +17,7 @@ import {
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 
-import { getResourceLoaderOptions } from "./extensionLoader.js";
+import { getResourceLoaderOptions } from "./extensions/index.js";
 
 // Session resolution (our own implementation - inspired by reading llm-context)
 import { resolveSessionManager } from "./session-resolver.js";
