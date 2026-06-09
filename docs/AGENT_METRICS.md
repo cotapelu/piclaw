@@ -7,8 +7,8 @@
 ## 📊 CURRENT SESSION
 
 - **Started:** 2025-06-09
-- **Iteration:** 2
-- **Mode:** Continuous evolution (prompt templates, etc.)
+- **Iteration:** 3
+- **Mode:** Continuous evolution (team widget live, etc.)
 - **Status:** ✅ Complete (1002 tests passing)
 
 ---
@@ -148,6 +148,31 @@ Each iteration must pass:
 - [x] Backward compatible (no breaking changes without migration)
 - [x] Documentation updated (PROJECT_STATE.md, TODO.md)
 - [x] Evolution metrics recorded (this file)
+
+---
+
+### Iteration 3: Team Widget Live Integration
+**Duration:** 2025-06-09 (~1 hour)  
+**Goal:** Connect team widget to live team manager data.
+
+**Changes Made:**
+- Modified `team-widget.ts` to query `TeamRegistry` for active teams
+- Implemented periodic refresh (2-second interval) to update widget content
+- Display team ID (short), task progress (completed/pending/failed), agent statuses
+- Added cleanup on session shutdown to prevent interval leaks
+
+**Outcomes:**
+- ✅ Widget now shows real-time team status
+- ✅ No test regressions (1002 passing)
+- ✅ Low implementation complexity (<100 LOC)
+
+**Cost:** ~80 lines (including mocks for tests)  
+**Risk:** Low  
+**Rollback:** Easy (git revert)
+
+**Metrics:**
+- No new tests added for this UI change (manual testing via existing team tests)
+- Build time unchanged
 
 ---
 

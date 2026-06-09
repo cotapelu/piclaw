@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 2*  
+*Current Iteration: Evolution Round 3*  
 *Test Status: ✅ 1002 passed (3 skipped)*
 
 ---
@@ -16,7 +16,7 @@
 ### User Experience Polish
 - **Todos Renderer**: Beautiful UI with progress bar, status icons (✅ 🔄 ⏳ ❌), phase grouping
 - **Memory Renderer**: Tag display, search result formatting, memory details view
-- **Team Widget**: Persistent team status indicator in widget area
+- **Team Widget**: Live team status (teams, tasks, agents) with periodic refresh
 
 ### Code Quality
 - Reduced technical debt: replaced ad-hoc tool implementations with SDK factories
@@ -51,7 +51,8 @@
 ### In Progress
 - Git integration tool (planned)
 - Settings panel UI (planned)
-- Team widget live data integration (P0)
+- Custom renderer for system_info (P0)
+- Custom renderer for session tree (P0)
 
 ### Known Gaps
 - File mutation queue not yet integrated (todos/memory use custom mutex)
@@ -119,11 +120,10 @@ All dependencies up-to-date.
 
 ## 🚨 OPEN ISSUES
 
-1. **Team widget not connected to live team data** – shows static placeholder
-2. **No prompt templates** – users must craft prompts manually
-3. **No Git integration** – common VCS operations missing
-4. **Settings UI** – config only via JSON files
-5. **Provider UI** – add/remove providers requires CLI or editing
+1. **No Git integration** – common VCS operations missing
+2. **Settings UI** – config only via JSON files
+3. **Provider UI** – add/remove providers requires CLI or editing
+4. **Missing custom renderers** – system_info, git diffs, session tree need polished output
 
 ---
 

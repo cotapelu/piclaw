@@ -89,6 +89,46 @@
 
 ---
 
+## 🌀 EVOLUTION CYCLE 3 (2025-06-09)
+
+### Theme: Team Widget Live Integration
+
+**Trigger:** UX feedback: static team widget not useful.
+
+**Actions Taken:**
+1. Analyzed `TeamRegistry` as source of truth for active teams.
+2. Modified `team-widget.ts` to query registry and fetch `team.getTeamStatus()`.
+3. Implemented periodic refresh (2s interval) to keep widget up-to-date.
+4. Added cleanup on `session_shutdown` to prevent interval leaks.
+5. Switched to safe theme color `accent` (compatible) and removed unsupported `once` API usage.
+
+**Architectural Changes:**
+- Widget now displays per-team: short ID, tasks (completed/pending/failed), agent counts.
+- Uses async refresh; errors are caught and ignored to avoid disrupting UI.
+- No changes to `TeamRegistry` or `AgentTeam` – purely consumer.
+
+**Codebase Impact:**
+- Lines added: ~80 (widget + imports)
+- No breaking changes
+- Low risk
+
+**Outcomes:**
+- ✅ Live team visibility in widget area
+- ✅ No test regressions (1002 passing)
+- ✅ Clean resource handling
+
+**Learnings:**
+- Async operations in widget refresh need careful error handling.
+- Event `session_shutdown` is appropriate for cleanup (not `session_end`).
+- Theme color names limited; stick to known ones (`accent`, `muted`, `error`).
+
+**Next Cycle Predictions:**
+- Implement Git tool with diff and log viewing.
+- Build settings panel UI using TUI components.
+- Add custom renderer for system_info to improve readability.
+
+---
+
 ## 🔮 ANTICIPATED DEBT
 
 | Debt | Source | Plan |

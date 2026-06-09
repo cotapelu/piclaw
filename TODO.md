@@ -40,6 +40,15 @@
 
 ---
 
+## ✅ COMPLETED (Evolution Round 3)
+
+### Team Integration
+- [x] Connect team widget to live team manager data
+- [x] Add periodic refresh (2s interval) for team status
+- [x] Display team ID, task progress, agent statuses
+
+---
+
 ## 🔄 IN PROGRESS
 
 None currently.
@@ -49,8 +58,6 @@ None currently.
 ## 📋 BACKLOG (Prioritized)
 
 ### P0 - High Impact, Low Effort
-- [ ] Connect team widget to live team manager data
-- [ ] Add team status refresh on events
 - [ ] Custom renderer for system_info tool
 - [ ] Custom renderer for branch summary (session tree)
 
@@ -85,10 +92,9 @@ None currently.
 
 ## 🐛 KNOWN ISSUES
 
-1. **Team widget static** – Not connected to live team data (P0)
-2. **No Git tool** – Users must use bash (P1)
-3. **Settings only via JSON** – No interactive UI (P1)
-4. **Prompt template expansion** – Implemented (✅) but no UI autocomplete yet (P2)
+1. **No Git tool** – Users must use bash (P1)
+2. **Settings only via JSON** – No interactive UI (P1)
+3. **Prompt template expansion** – Implemented (✅) but no UI autocomplete yet (P2)
 
 ---
 
