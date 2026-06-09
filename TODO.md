@@ -78,7 +78,7 @@ None currently.
 - [x] Add test coverage for renderers (vitest)
 - [x] Implement prompt template caching
 - [ ] Add autocomplete for prompt template names (abandoned - complex types)
-- [ ] Export metrics to JSON (usage, performance)
+- [x] Export metrics to JSON (usage, performance)
 
 ### P3 - LowImpact, Low Effort
 - [x] Custom renderer for compaction summary (enhanced display in /tree)
