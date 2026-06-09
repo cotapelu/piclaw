@@ -10,6 +10,7 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { actions } from "./actions/index.js";
 
 // ==================== TOOL DEFINITION ====================
@@ -60,6 +61,28 @@ export function registerUniversalTool(api: ExtensionAPI): void {
       // Execute the action
       const result = await actionHandler.execute(params);
       return result;
+    },
+
+    // Custom renderer for system_info to display nicely
+    renderResult: (result: any, options: any, theme: any, context: any) => {
+      const details = result.details as any;
+      // Detect system_info output by presence of 'platform' field
+      if (details && typeof details === 'object' && 'platform' in details) {
+        const lines = [
+          theme.fg('accent', 'System Information'),
+          `OS: ${details.platform} (${details.arch})`,
+          `Node: ${details.nodeVersion}`,
+          `Uptime: ${details.uptime}s`,
+          `Memory: ${details.totalMemoryMB} MB total, ${details.freeMemoryMB} MB free`,
+          `CPU: ${details.cpuCores} cores - ${details.cpuModel}`,
+        ];
+        return new Text(lines.join('\n'), 0, 0);
+      }
+      // Fallback to default rendering for other actions
+      if (options.defaultRender) {
+        return options.defaultRender(result);
+      }
+      return new Text('', 0, 0);
     },
   };
 

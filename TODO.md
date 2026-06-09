@@ -49,6 +49,13 @@
 
 ---
 
+## ✅ COMPLETED (Evolution Round 4)
+
+### System Info
+- [x] Custom renderer for system_info tool (pretty display)
+
+---
+
 ## 🔄 IN PROGRESS
 
 None currently.
@@ -58,7 +65,6 @@ None currently.
 ## 📋 BACKLOG (Prioritized)
 
 ### P0 - High Impact, Low Effort
-- [ ] Custom renderer for system_info tool
 - [ ] Custom renderer for branch summary (session tree)
 
 ### P1 - High Impact, Medium Effort
@@ -95,6 +101,7 @@ None currently.
 1. **No Git tool** – Users must use bash (P1)
 2. **Settings only via JSON** – No interactive UI (P1)
 3. **Prompt template expansion** – Implemented (✅) but no UI autocomplete yet (P2)
+4. **Missing custom renderer** – session tree (branch summary) needs polished output (P0)
 
 ---
 

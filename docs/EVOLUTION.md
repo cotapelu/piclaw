@@ -169,6 +169,46 @@
 
 ---
 
+## 🌀 EVOLUTION CYCLE 4 (2025-06-09)
+
+### Theme: Custom Renderer for System Info
+
+**Trigger:** UX: system_info produced raw JSON, desired formatted output.
+
+**Actions Taken:**
+1. Analyzed universal tool's `renderResult` extension point.
+2. Imported `Text` component from pi-tui.
+3. Implemented conditional renderer based on `details.platform`.
+4. Formatted OS, Node version, uptime, memory, CPU with colors.
+5. Verified visual output manually; no test changes required.
+
+**Architectural Changes:**
+- Added `renderResult` property to universal tool definition.
+- No changes to actions or core.
+- Preserved default rendering for other actions.
+
+**Codebase Impact:**
+- Lines added: ~30
+- No breaking changes
+- Minimal risk
+
+**Outcomes:**
+- ✅ System info now shows as colored, multiline text
+- ✅ All tests passing (1002)
+- ✅ Easy to extend renderer for other actions in future
+
+**Learnings:**
+- Tool `renderResult` is powerful for per-action UI customization.
+- Theme functions (`fg`) available in render context.
+- Component construction (`new Text`) straightforward.
+
+**Next Cycle Predictions:**
+- Git tool with diff viewer.
+- Settings panel UI.
+- Branch summary renderer (session tree).
+
+---
+
 ## 📈 TRAJECTORY
 
 **Phase 1 (Complete):** Foundation – Security, basic UX, test stability  

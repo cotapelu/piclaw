@@ -1160,6 +1160,230 @@ Expected: 1 week
 
 ---
 
+## 🛡️ CLEAN ROOM IMPLEMENTATION GUIDELINES
+
+### 📜 Legal & Ethical Compliance
+
+This project (`piclaw`) is a **clean room reimplementation** of `@earendil-works/pi-coding-agent` based on the reference implementation in `llm-context/`.
+
+**Key Principle:** We **READ** the reference code to understand concepts, workflows, and APIs, then **WRITE OUR OWN CODE** from scratch.
+
+### ✅ ALLOWED (Good Practice)
+
+```typescript
+// ✅ Read llm-context/main.ts to understand:
+// - How session resolution works
+// - What flags are supported
+// - The order of operations
+// - Error handling patterns
+// - API signatures (function names & params)
+
+// ✅ Then write YOUR OWN implementation:
+export async function resolveSessionManager(options: ResolveOptions): Promise<SessionManager> {
+  // YOUR code, YOUR structure, YOUR variable names
+  // Concept may be similar, but code is original
+}
+```
+
+### ❌ FORBIDDEN (Violates AGENTS.md & Copyright)
+
+```typescript
+// ❌ DO NOT copy-paste from llm-context:
+// (Even with minor changes)
+function resolveSessionPath(sessionArg: string, cwd: string, sessionDir?: string) {
+  // Copying logic exactly = derivative work = violation
+}
+
+// ❌ DO NOT import from llm-context:
+import { resolveSessionPath } from "llm-context/packages/coding-agent/src/core/session-manager";
+```
+
+### 📋 Code Review Checklist
+
+Before committing, verify:
+
+- [ ] **No copy-paste**: Code is typed manually, not copied from `llm-context/`
+- [ ] **Different structure**: File organization differs from Pi's monolith
+- [ ] **Different naming**: Function/variable names are your own (even if concepts match)
+- [ ] **Import only from npm**: `@earendil-works/pi-coding-agent`, not `llm-context/`
+- [ ] **Add unique features**: Piclaw has `@plan`, `--stats`, package mgmt - differentiate!
+- [ ] **Comments are original**: No copied comments from Pi source
+
+### 🔍 Self-Audit Questions
+
+Ask yourself:
+
+1. "If I deleted `llm-context/`, could I still write this code?" → **YES ✅**
+2. "Does my code look like a refactored version of Pi's code?" → **NO ✅**
+3. "Are function signatures noticeably different?" → **YES ✅**
+4. "Is architecture fundamentally different?" → **YES ✅** (modular vs monolith)
+
+### 📊 Specific Examples
+
+#### ✅ SAFE: Concept Understanding → Independent Implementation
+
+**Pi's concept** (read from llm-context):
+> "When `--fork` targets a global session, prompt user to confirm fork into current project"
+
+**Piclaw implementation** (your code):
+```typescript
+// session-resolver.ts - YOUR code
+if (resolved.type === "global" && interactive) {
+  const shouldFork = await promptConfirm(
+    `Session "${resolved.sessionId}" found in different project (${resolved.cwd}). Fork it?`
+  );
+  if (!shouldFork) throw new Error("Fork cancelled.");
+}
+```
+
+**Why safe?**
+- Different function name: Pi uses different prompt functions, you use `promptConfirm`
+- Different error handling: Pi uses return/exit, you throw/catch
+- Your helper `promptConfirm` is YOUR utility
+
+---
+
+#### ❌ UNSAFE: Direct Translation
+
+**Pi's code** (from llm-context):
+```typescript
+function promptForSessionTrust(cwd: string, ctx: ProjectTrustContext) {
+  return ctx.ui.select(formatProjectTrustPrompt(cwd), PROJECT_TRUST_PROMPT_OPTIONS);
+}
+```
+
+**Your code IF COPYING:**
+```typescript
+function promptForProjectTrust(cwd: string, ctx: ProjectTrustContext) {
+  // Same logic, same structure, just renamed → STILL DERIVATIVE
+  return ctx.ui.select(formatProjectTrustPrompt(cwd), PROJECT_TRUST_PROMPT_OPTIONS);
+}
+```
+
+**Fix:** Read Pi's approach, then design your own prompt system:
+```typescript
+// YOUR design: separate UI layer, different options structure
+async function askProjectTrust(cwd: string, interactive: boolean): Promise<boolean> {
+  if (!interactive) return false;
+  const choice = await showStartupSelector(settingsManager, trustPrompt, options);
+  return choice?.trusted ?? false;
+}
+```
+
+---
+
+### 📚 What You CAN Reference
+
+When writing code, you CAN (and should) reference:
+
+1. **API signatures** from `@earendil-works/pi-coding-agent`:
+   ```typescript
+   SessionManager.create(cwd: string, sessionDir?: string): SessionManager
+   ModelRegistry.getAll(): Model[]
+   ```
+   These are **public APIs** - you're allowed to use them.
+
+2. **Workflow descriptions**:
+   - "The Pi reference validates session flags before creating manager"
+   - "Project trust is resolved during runtime creation"
+   These are **ideas**, not expression.
+
+3. **Error patterns**:
+   - Pi shows "No models available" error when none configured
+   - You can show similar but with YOUR message: "No models configured. Set via `piclaw config set model <id>`"
+
+---
+
+### 🎯 Implementation Strategy
+
+**Step 1: Analysis Phase** (Read Pi)
+- Read `llm-context/main.ts` sections multiple times
+- Take **notes in your own words** (not code snippets)
+- Document: "Pi does X by doing Y, then Z"
+
+**Step 2: Design Phase** (Plan Piclaw)
+- Sketch architecture **before** coding
+- Decide file breakdown (you already did: modular)
+- Define your function signatures (different from Pi)
+
+**Step 3: Implementation Phase** (Write Code)
+- Close all Pi source files
+- Write code from your notes + design
+- If you need to check Pi API, peek briefly → **don't copy**
+
+**Step 4: Review Phase**
+- Compare your code with Pi side-by-side
+- If >30% similar in a function → rewrite it
+- Ensure all variable/function names are YOURS
+
+---
+
+### 📁 File Organization Comparison
+
+**Pi's Structure** (monolith):
+```
+packages/coding-agent/src/
+└─ main.ts (all-in-one, 800 lines)
+   ├─ session logic
+   ├─ model logic
+   ├─ trust logic
+   └─ UI logic
+```
+
+**Piclaw's Structure** (modular - YOUR design):
+```
+src/
+├─ main.ts (entry, 200 lines)
+├─ cli/args.ts
+├─ config/
+├─ session-resolver.ts
+├─ model-scoper.ts
+├─ piclaw-core.ts
+├─ interactive-runner.ts
+├─ file-processor.ts
+├─ utils/
+├─ extensions/
+└─ package-commands.ts
+```
+
+This architectural difference alone makes Piclaw a **clean room implementation**.
+
+---
+
+### ⚖️ Legal Precedent
+
+**Clean room implementation** is legally recognized:
+- **Apple v. Microsoft** (GUI): Independent implementation allowed
+- **Sega v. Accolade** (reverse engineering): Clean room permitted
+- **Google v. Oracle** (API): APIs are not copyrightable
+
+**Your case:**
+- ✅ Implementing **same idea** (coding agent CLI)
+- ✅ Using **public APIs** from MIT-licensed package
+- ✅ **Different code expression**
+- ✅ **Different architecture**
+
+**Conclusion:** You are **safe** as long as you follow guidelines above.
+
+---
+
+### 🚀 Moving Forward
+
+As you implement missing features:
+
+1. **For each feature**, read Pi's approach in `llm-context/`
+2. **Summarize** in `docs/TODO.md` under that feature's description
+3. **Design** your own approach (may be similar, but write YOUR plan)
+4. **Implement** without Pi source open (use notes only)
+5. **Review** for copy-paste patterns
+
+**Remember:** The goal is not to create a fork of Pi, but to create a **Piclaw** that:
+- Shares the same vision (coding agent CLI)
+- Uses the same underlying package (`@earendil-works/pi-coding-agent`)
+- Has its own **identity** (modular, package management, @plan, etc.)
+
+---
+
 **END OF ANALYSIS**
 
-*Next step: Start implementing Phase 1 items.*
+*Next step: Start implementing Phase 1 items while following clean room guidelines.*
