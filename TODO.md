@@ -102,7 +102,7 @@ None currently.
 1. **No Git tool** - Users must use bash (P1)
 2. **Settings only via JSON** - No interactive UI (P1)
 3. **Prompt template expansion** - Implemented (✅) but no UI autocomplete yet (P2)
-4. **Missing custom renderer** - session tree (branch summary) needs polished output (P0)
+4. ~~Missing custom renderer~~ - ✅ Completed with branch-summary-renderer
 
 ---
 
