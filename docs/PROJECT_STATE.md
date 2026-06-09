@@ -2,11 +2,11 @@
 
 *Last Updated: 2025-06-09*  
 *Current Iteration: Evolution Round 7 (All Planned Complete)*  
-*Test Status: ✅ 1055 passed (3 skipped)*
+*Test Status: ✅ 1059 passed (3 skipped)*
 
 ---
 
-## ✅ COMPLETED IMPROVEMENTS (Iteration 5)
+## ✅ COMPLETED IMPROVEMENTS (Iteration 7)
 
 ### P0 - High Impact, Low Effort
 - **Branch Summary Renderer**: Custom UI for branch_summary entries
@@ -28,20 +28,29 @@
 - **Team Ops Renderer**: Custom UI for team_ops tool
   - Shows team status, tasks, workspace, messages
 - **Renderer Unit Tests**: Added `renderers.test.ts` (6 tests passing)
-- **Prompt Template Caching**: Already provided by ResourceLoader (no action needed)
+- **Prompt Template System**: Provided by ResourceLoader (caching) + default templates (default, explain, refactor, test, review)
 - **Autocomplete for Templates**: Abandoned (complex types, low value)
 
 ### P3 - Low Impact (Stretch)
 - **Git Tool Unit Tests**: Comprehensive tests for all git actions
   - 17 tests covering command building, error handling, escaping, rendering
   - Settings Command Unit Tests: 12 tests covering config conversion
-  - Tests: **1037 passing** (87 test files)
+  - Tests: **1059 passing** (90 test files)
 - **Git Diff Syntax Highlighting**: Already provided by SDK `renderDiff` (no extra work needed)
 - **Copy Command** (`/copy`): Copy last assistant response to clipboard using SDK `copyToClipboard`
+- **Compaction Summary Renderer**: Enhanced display in session tree view (`/tree`)
+- **Team Widget Toggle** (`/team`): Command to show/hide team status widget
+
+### P4 - Stretch Goals (Completed)
+- **Test Runner Integration** (`test-tool`): Wraps `npm test` with file filtering and watch mode
+- **Code Formatter Tool** (`formatter-tool`): Format files using Prettier
+- **Dependency Audit Tool** (`audit-tool`): Security audit via `npm audit --json`
+- **Build System Integration** (`build-tool`): Run `npm run build` from within agent
+- **Metrics Export** (`metrics-tool`): JSON output of system usage and performance
 
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1037 passed | 3 skipped** (87 test files)
+- Tests: **1059 passed | 3 skipped** (90 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -51,8 +60,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1058 |
-| Passed | 1055 |
+| Total Tests | 1062 |
+| Passed | 1059 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
@@ -156,7 +165,7 @@ All dependencies up-to-date, no vulnerabilities.
 2. ~~Settings UI~~ ✅ Completed
 3. ~~Provider UI~~ ✅ Completed
 4. ~~File mutation queue~~ ✅ Completed
-5. **Prompt templates** - Missing default templates in `.pi/prompts/`
+5. ~~Prompt templates~~ ✅ Completed (default templates added)
 
 ---
 

@@ -77,6 +77,7 @@ None currently.
 - [x] Custom renderer for team_ops tool (task cards, agent status)
 - [x] Add test coverage for renderers (vitest)
 - [x] Implement prompt template caching
+- [x] Add default prompt templates (default, explain, refactor, test, review)
 - [ ] Add autocomplete for prompt template names (abandoned - complex types)
 - [x] Export metrics to JSON (usage, performance)
 
