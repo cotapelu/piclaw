@@ -65,27 +65,27 @@ None currently.
 ## 📋 BACKLOG (Prioritized)
 
 ### P0 - High Impact, Low Effort
-- [ ] Custom renderer for branch summary (session tree)
+- [x] Custom renderer for branch summary (session tree)
 
 ### P1 - High Impact, Medium Effort
-- [ ] Build git tool (diff, log, status, commit) with renderDiff
-- [ ] Settings panel UI (using SettingsSelectorComponent)
-- [ ] Provider management command (`/providers list|add|remove|test`)
-- [ ] File mutation queue integration (withFileMutationQueue wrapper)
+- [x] Build git tool (diff, log, status, commit) with renderDiff
+- [x] Settings panel UI (using SettingsSelectorComponent)
+- [x] Provider management command (`/providers list|add|remove|test`)
+- [x] File mutation queue integration (withFileMutationQueue wrapper)
 
 ### P2 - Medium Impact, Medium Effort
-- [ ] Custom renderer for team_ops tool (task cards, agent status)
-- [ ] Add test coverage for renderers (vitest)
-- [ ] Implement prompt template caching
-- [ ] Add autocomplete for prompt template names (now that templates exist)
+- [x] Custom renderer for team_ops tool (task cards, agent status)
+- [x] Add test coverage for renderers (vitest)
+- [x] Implement prompt template caching
+- [ ] Add autocomplete for prompt template names (abandoned - complex types)
 - [ ] Export metrics to JSON (usage, performance)
 
 ### P3 - LowImpact, Low Effort
 - [ ] Custom renderer for compaction summary
 - [ ] Custom renderer for tool execution output (colorize)
-- [ ] Add keyboard shortcut to toggle team widget
-- [ ] Theme selector widget (quick theme switch)
-- [ ] Add “copy last assistant response” command
+- [x] Add keyboard shortcut to toggle team widget
+- [ ] Theme selector widget (abandoned - SDK API complexity)
+- [x] Add “copy last assistant response” command
 
 ### P4 - Stretch Goals
 - [ ] Git diff viewer with syntax highlighting (use highlightCode)

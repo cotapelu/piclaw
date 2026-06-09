@@ -66,11 +66,12 @@ class EntryDetailView {
       }
     } else if (type === 'compaction') {
       const comp = e as any;
-      lines.push(`\n--- Compaction ---`);
-      lines.push(`Tokens before: ${comp.tokensBefore}`);
-      lines.push(`First kept: ${comp.firstKeptEntryId}`);
+      lines.push(`\n--- Compaction Summary ---`);
+      lines.push(`Tokens before: ${comp.tokensBefore ?? 'N/A'}`);
+      lines.push(`First kept: ${comp.firstKeptEntryId ?? 'none'}`);
       if (comp.summary) {
-        lines.push(`Summary: ${comp.summary.substring(0, 200)}${comp.summary.length > 200 ? '...' : ''}`);
+        const summaryPreview = comp.summary.length > 200 ? comp.summary.substring(0, 200) + '...' : comp.summary;
+        lines.push(`Summary: ${summaryPreview}`);
       }
     } else if (type === 'custom_message') {
       const cm = e as any;
