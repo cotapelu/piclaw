@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 10 (Coverage Phase 2)*  
+*Current Iteration: Evolution Round 11 (Concurrency Safety)*  
 *Test Status: ✅ 1150 passed (3 skipped)*
 
 ---
@@ -64,6 +64,13 @@
 - **Total tests**: 1150 passing, 3 skipped, 0 failures
 - **Coverage**: 78.68% lines (↑ from 74.6%)
 
+### Round 11 (Concurrency Safety)
+- **Config Mutation Queue**: Added `withFileMutationQueue` to `config-manager.saveConfig`
+- Made `saveConfig` async to ensure atomic writes
+- Updated `settings-command` to await with error handling
+- Updated tests to async
+- No coverage change (config code already tested)
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1150 passed | 3 skipped** (96 test files)
@@ -82,7 +89,7 @@
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~78.7% (+4.1%) |
+| Code Coverage (est.) | ~78.6% (config manager unchanged coverage) |
 | SDK Utilization | ~80%+ (from ~40%) |
 
 ---

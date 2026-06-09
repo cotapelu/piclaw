@@ -76,6 +76,15 @@
 - [x] Increase overall coverage: 74.6% → 78.68% lines
 - [x] Total tests: 1150 passing, 3 skipped, 0 failures
 
+## ✅ COMPLETED (Evolution Round 11 - Concurrency Safety)
+
+### Concurrency & Stability
+- [x] Add `withFileMutationQueue` to `config-manager.saveConfig`
+- [x] Make `saveConfig` async for atomic writes
+- [x] Update `settings-command` to await `saveConfig` with error handling
+- [x] Update `config-manager.test.ts` to async tests
+- [x] Verify no regressions (1150 tests pass)
+
 ---
 
 ## 🔄 IN PROGRESS
@@ -155,7 +164,7 @@ None currently.
 
 | Target | Current | Goal |
 |--------|---------|------|
-| Test Coverage | ~78.7% | ≥80% (close) |
+| Test Coverage | ~78.6% | ≥80% (in progress) |
 | Functions ≤20 LOC | TBD | ≥80% |
 | Complexity ≤10 | TBD | ≥70% |
 | Zero TypeScript Errors | ✅ | Maintain |
