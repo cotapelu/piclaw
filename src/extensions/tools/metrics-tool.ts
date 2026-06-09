@@ -9,7 +9,7 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createBashTool } from "@earendil-works/pi-coding-agent";
 
-function createMetricsTool(cwd: string): any {
+export function createMetricsTool(cwd: string): any {
   const baseBashTool: any = createBashTool(cwd, {});
 
   return {

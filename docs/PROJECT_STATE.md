@@ -62,7 +62,7 @@
 
 ---
 
-## 🏗️ EXTENSIONS ADDED (19 total)
+## 🏗️ EXTENSIONS ADDED (21 total)
 
 | Extension | Type | Purpose |
 |-----------|------|---------|
@@ -80,11 +80,13 @@
 | `team-command.ts` | Command | Toggle team widget visibility |
 | `team-widget.ts` (updated) | Widget | Live team status with toggle support |
 | `todos-tool.ts` (updated) | Tool | File mutation queue integration |
+| `metrics-tool.ts` | Tool | Metrics export (usage, performance) |
 | `git-tool.test.ts` | Tests | 17 tests for git tool |
 | `settings-command.test.ts` | Tests | 12 tests for settings command |
 | `renderers.test.ts` | Tests | 6 tests for renderers |
 | `team-widget.test.ts` | Tests | 5 tests for team widget toggle |
 | `provider-command.test.ts` | Tests | 13 tests for provider command |
+| `metrics-tool.test.ts` | Tests | 4 tests for metrics tool |
 
 ---
 
@@ -173,4 +175,4 @@ All dependencies up-to-date, no vulnerabilities.
 
 *Prepared by: PiClaw Autonomous Agent*  
 *Workflow: AUTO-CONTINUE.md v2.1*  
-*Commit: 355b846 - feat: add build system integration (npm run build)*
+*Commit: 0f60bff - feat: add metrics tool (usage and performance export)*
