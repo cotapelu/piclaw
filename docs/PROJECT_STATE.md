@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 8 (Security Hardening)*  
-*Test Status: ✅ 1064 passed (3 skipped)*
+*Current Iteration: Evolution Round 9 (Coverage Boost)*  
+*Test Status: ✅ 1098 passed (3 skipped)*
 
 ---
 
@@ -48,9 +48,14 @@
 - **Build System Integration** (`build-tool`): Run `npm run build` from within agent
 - **Metrics Export** (`metrics-tool`): JSON output of system usage and performance
 
+### Round 9 - Coverage Boost
+- **Unit tests for low-coverage modules**: Added 34 tests covering trust-manager (19), copy-command (9), branch-summary-renderer (6)
+- **Coverage improvement**: Lines 72.15% → 74.6% (+2.45%)
+- **Total tests**: 1098 passing, 3 skipped, 0 failures
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1059 passed | 3 skipped** (90 test files)
+- Tests: **1098 passed | 3 skipped** (93 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -60,13 +65,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1062 |
-| Passed | 1059 |
+| Total Tests | 1098 |
+| Passed | 1098 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~86% (+6%) |
+| Code Coverage (est.) | ~74.6% (+2.5%) |
 | SDK Utilization | ~80%+ (from ~40%) |
 
 ---
@@ -112,7 +117,10 @@ None currently.
 
 | Priority | Task | Effort | Impact | Risk |
 |----------|------|--------|--------|------|
-| (None - all planned items completed)
+| P1 | Increase test coverage to ≥80% (target: 80-85%) | Medium | High (quality) | Low |
+| P2 | Add integration tests for command handlers | Medium | Medium | Low |
+| P3 | Improve renderer coverage (currently ~5-10%) | Small | Medium | Low |
+| P4 | Add prompts default set (templates) | Small | Low | Low |
 
 ---
 

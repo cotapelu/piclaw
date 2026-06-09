@@ -40,6 +40,7 @@
 | Renderers separate modules | Extensibility | Easy to add new renderers |
 | Tests expanded from 1002 → 1064 | Coverage target | ~86% coverage, all pass |
 | Secret scanner tool | Security hygiene | Detect leaked API keys/tokens with `/scan-secrets` command |
+| Unit tests for low-coverage modules | Coverage boost (72% → 74.6%) | Added 34 tests for trust-manager, copy-command, branch-summary-renderer; total 1098 tests |
 
 ---
 
