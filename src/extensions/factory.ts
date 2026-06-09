@@ -9,6 +9,7 @@
 
 import { registerKiloProvider } from "./providers/kilo-provider.js";
 import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./tools/index.js";
+import { registerGitTool } from "./tools/git-tool.js";
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
@@ -20,6 +21,9 @@ import piclawHeader from "./piclaw-header.js";
 import { registerTodosRenderer } from "./renderers/todos-renderer.js";
 import { registerTeamWidget } from "./team/team-widget.js";
 import { registerMemoryRenderer } from "./renderers/memory-renderer.js";
+import { registerBranchSummaryRenderer } from "./renderers/branch-summary-renderer.js";
+import { registerSessionTreeCommand } from "./commands/session-tree-command.js";
+import { registerSettingsCommand } from "./commands/settings-command.js";
 
 /**
  * Main extension aggregator function
@@ -40,6 +44,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
 
   // Register universal tool (replaces echo and system_info)
   registerUniversalTool(api);
+  // Register git tool
+  registerGitTool(api);
   // Register subtool loader extension
   registerSubToolLoaderExtension(api);
   // (subtool-loader replaced by skill-loader)
@@ -48,6 +54,11 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerTodosRenderer(api);
   registerMemoryRenderer(api);
   registerTeamWidget(api);
+  registerBranchSummaryRenderer(api);
+
+  // Register commands
+  registerSessionTreeCommand(api);
+  registerSettingsCommand(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);

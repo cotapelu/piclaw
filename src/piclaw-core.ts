@@ -35,6 +35,7 @@ import { getAgentDir } from "./config/config-manager.js";
 import { getDefaultContextLogFile } from "./config/config-manager.js";
 import { createContextLoggingStreamFn } from "./utils/context-logger.js";
 import { logger } from "./utils/logger.js";
+import { TrustManager } from "./trust-manager.js";
 
 // Augment DefaultResourceLoaderOptions to support custom package manager
 declare module "@earendil-works/pi-coding-agent/dist/core/resource-loader.js" {
@@ -60,6 +61,9 @@ export interface PiclawCoreOptions {
   thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
   verbose?: boolean;
   contextLogFile?: string;
+  // Resource loading flags
+  noExtensions?: boolean;
+  noContextFiles?: boolean;
   // Session flags
   session?: string;
   resume?: boolean;
@@ -70,6 +74,8 @@ export interface PiclawCoreOptions {
   files?: string[];
   messages?: string[];
   mode?: 'interactive' | 'print' | 'json' | 'rpc';
+  // Project trust override (for advanced usage)
+  projectTrustOverride?: boolean;
 }
 
 /**

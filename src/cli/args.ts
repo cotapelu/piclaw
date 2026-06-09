@@ -22,6 +22,8 @@ export interface Options {
   message?: string[];
   // Show usage statistics (tokens, cost) after completion
   stats?: boolean;
+  // Resource loading
+  noContextFiles?: boolean;
 }
 
 export interface PiclawConfig {
@@ -31,6 +33,7 @@ export interface PiclawConfig {
   sessionDir?: string;
   verbose?: boolean;
   contextLogFile?: string;
+  noContextFiles?: boolean;
   // Non-persisted flags
   session?: string;
   resume?: boolean;
@@ -68,6 +71,10 @@ export function parseOptions(args: string[]): { opts: Options; cliOverrides: Pic
         break;
       case '--contextLogFile':
         if (next) { opts.contextLogFile = next; cliOverrides.contextLogFile = opts.contextLogFile; i++; }
+        break;
+      case '--no-context-files':
+        opts.noContextFiles = true;
+        cliOverrides.noContextFiles = true;
         break;
       case '--session':
         if (next) { opts.session = next; i++; }
@@ -136,6 +143,7 @@ Options:
   --contextLogFile <p> Log LLM context to file
   --verbose            Show detailed logs
   --stats              Show usage statistics (tokens, cost) after completion
+  --no-context-files   Disable loading of context files (AGENTS.md, CLAUDE.md, .pi/)
   -h, --help           Show this help
 
 Session Management:
