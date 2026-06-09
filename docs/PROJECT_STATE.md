@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 5 (P0-P2 Complete)*  
+*Current Iteration: Evolution Round 5 (P0-P2 Complete, P3 Partial)*  
 *Test Status: ✅ 1008 passed (3 skipped)*
 
 ---
@@ -31,9 +31,15 @@
 - **Prompt Template Caching**: Already provided by ResourceLoader (no action needed)
 - **Autocomplete for Templates**: Abandoned (complex types, low value)
 
+### P3 - Low Impact (Stretch)
+- **Git Tool Unit Tests**: Comprehensive tests for all git actions
+  - 17 tests covering command building, error handling, escaping, rendering
+  - Tests: 1025 passing total (86 files)
+- **Git Diff Syntax Highlighting**: Already provided by SDK `renderDiff` (no extra work needed)
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1008 passed | 3 skipped** (85 test files)
+- Tests: **1025 passed | 3 skipped** (86 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -43,14 +49,14 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1011 |
-| Passed | 1008 |
+| Total Tests | 1028 |
+| Passed | 1025 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~78% (+2%) |
-| SDK Utilization | ~75%+ (from ~40%) |
+| Code Coverage (est.) | ~80% (+4%) |
+| SDK Utilization | ~80%+ (from ~40%) |
 
 ---
 
