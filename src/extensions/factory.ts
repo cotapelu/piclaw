@@ -17,6 +17,9 @@ import autoContinueExtension from "./hooks/auto-continue.js";
 import autoCompact85Extension from "./hooks/auto-compact-85.js";
 
 import piclawHeader from "./piclaw-header.js";
+import { registerTodosRenderer } from "./renderers/todos-renderer.js";
+import { registerTeamWidget } from "./team/team-widget.js";
+import { registerMemoryRenderer } from "./renderers/memory-renderer.js";
 
 /**
  * Main extension aggregator function
@@ -40,6 +43,11 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   // Register subtool loader extension
   registerSubToolLoaderExtension(api);
   // (subtool-loader replaced by skill-loader)
+
+  // Register custom message renderers
+  registerTodosRenderer(api);
+  registerMemoryRenderer(api);
+  registerTeamWidget(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);

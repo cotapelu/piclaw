@@ -6,7 +6,7 @@ import extensionsIndex from '../extensions/index.js';
 describe('extensions/index', () => {
   let mockApi: any;
   beforeEach(() => {
-    mockApi = { on: vi.fn(), registerCommand: vi.fn(), registerTool: vi.fn(), registerProvider: vi.fn() };
+    mockApi = { on: vi.fn(), registerCommand: vi.fn(), registerTool: vi.fn(), registerProvider: vi.fn(), registerMessageRenderer: vi.fn() };
   });
 
   it('should register all extensions without throwing', () => {

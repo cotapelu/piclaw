@@ -3,7 +3,7 @@ import { logger } from "./utils/logger.js";
 
 import { parseOptions } from "./cli/args.js";
 import { loadConfig } from "./config/config-manager.js";
-import { validateApiKeys } from "./utils/helpers.js";
+import { validateApiKeys, ensurePiclawExtensionRegistered } from "./utils/helpers.js";
 import { getAgentDir } from "./config/config-manager.js";
 import { bootPiclaw } from "./piclaw-core.js";
 import { runInteractive } from "./interactive-runner.js";
@@ -91,11 +91,18 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
     // 2. Load persistent config (merged with CLI overrides)
     config = loadConfig(cliOverrides);
 
-    // 3. Validate API keys
-    validateApiKeys(config);
-
-    // 4. Get agent directory
+    // 3. Get agent directory
     const agentDir = getAgentDir();
+
+    // 3.5. Ensure piclaw extension is registered globally (for out-of-box experience)
+    try {
+      await ensurePiclawExtensionRegistered(agentDir, join(agentDir, 'extensions', 'piclaw.js'));
+    } catch (e) {
+      logger.debug(`Extension registration skipped: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
+    // 4. Validate API keys
+    validateApiKeys(config);
 
     // 5. Boot the core runtime
     const runtime = await bootPiclaw({

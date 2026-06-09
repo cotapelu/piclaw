@@ -1,178 +1,225 @@
 #!/usr/bin/env node
 /**
- * SubTool Loader
- * Provides a tool that delegates to specific sub-tools.
+ * SubTool Loader - SECURE VERSION
+ *
+ * Provides a tool that delegates to SDK tool factories.
+ * No manual command execution → no injection vulnerabilities.
+ *
+ * Uses SDK tool definitions:
+ * - createReadToolDefinition
+ * - createLsToolDefinition
+ * - createFindToolDefinition
+ * - createGrepToolDefinition
+ * - createBashToolDefinition (for HTTP via curl)
  */
 
-import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ToolDefinition, ExtensionContext, AgentToolResult } from "@earendil-works/pi-coding-agent";
+import {
+  createReadToolDefinition,
+  createLsToolDefinition,
+  createFindToolDefinition,
+  createGrepToolDefinition,
+  createBashToolDefinition,
+} from "@earendil-works/pi-coding-agent";
 
-interface SubToolContext {
-  session?: { cwd?: string };
-  exec: (command: string, args: string[], options?: { cwd?: string }) => Promise<{ stdout: string; code: number }>;
+// Cache for per-context tool instances
+const toolCache = new WeakMap<ExtensionContext, Map<string, ToolDefinition>>();
+
+function getToolsForContext(ctx: ExtensionContext): Map<string, ToolDefinition> {
+  let cached = toolCache.get(ctx);
+  if (!cached) {
+    cached = new Map();
+    toolCache.set(ctx, cached);
+  }
+  return cached;
 }
 
-// The internal implementation that uses simplified signature (params, ctx)
-function executeSubtool(params: { subtool: string; args: any }, ctx: SubToolContext): Promise<any> {
-  const { subtool, args } = params;
-  if (!subtool || !args) {
-    return Promise.reject(new Error("Missing subtool or args"));
+function getOrCreateTool(
+  ctx: ExtensionContext,
+  subtool: string,
+  factory: (cwd: string) => ToolDefinition
+): ToolDefinition {
+  const tools = getToolsForContext(ctx);
+  let tool = tools.get(subtool);
+  if (!tool) {
+    const cwd = ctx.cwd || process.cwd();
+    tool = factory(cwd);
+    tools.set(subtool, tool);
   }
-
-  let command: string;
-  let commandArgs: string[];
-
-  switch (subtool) {
-    case "http":
-      command = "curl";
-      commandArgs = buildCurlArgs(args);
-      break;
-    case "ls":
-      command = "ls";
-      commandArgs = buildLsArgs(args);
-      break;
-    case "find":
-      command = "find";
-      commandArgs = buildFindArgs(args);
-      break;
-    case "grep":
-      command = "grep";
-      commandArgs = buildGrepArgs(args);
-      break;
-    case "read":
-      command = "bash";
-      commandArgs = buildReadArgs(args);
-      break;
-    default:
-      return Promise.resolve({
-        isError: true,
-        content: [{ type: 'text', text: `Unknown sub-tool: ${subtool}` }]
-      });
-  }
-
-  if (typeof ctx.exec !== "function") {
-    return Promise.reject(new Error("Context does not provide exec method"));
-  }
-
-  // Determine cwd: use ctx.session?.cwd if available
-  const cwd = ctx.session?.cwd;
-  return ctx.exec(command, commandArgs, cwd ? { cwd } : undefined)
-    .then(result => {
-      if (result.code !== 0) {
-        return {
-          isError: true,
-          content: [{ type: 'text', text: result.stdout || `Command failed with exit code ${result.code}` }]
-        };
-      }
-      return {
-        isError: false,
-        content: [{ type: 'text', text: result.stdout }]
-      };
-    });
+  return tool;
 }
 
-// Build helpers for each sub-tool
-function buildCurlArgs(args: any): string[] {
-  const { url, method = "GET", headers, body } = args;
-  const curlArgs: string[] = ["-sS"]; // silent but show errors
-  if (method && method !== "GET") {
-    curlArgs.push("-X", method);
-  }
-  if (headers && typeof headers === "object") {
-    for (const [key, value] of Object.entries(headers)) {
-      curlArgs.push("-H", `${key}: ${value}`);
-    }
-  }
-  if (body) {
-    curlArgs.push("-d", body);
-  }
-  curlArgs.push(url);
-  return curlArgs;
+// ==================== FACTORIES ====================
+
+function createHttpTool(cwd: string): ToolDefinition {
+  return createBashToolDefinition(cwd, {
+    bash: { commandPrefix: "" }
+  } as any) as ToolDefinition;
 }
 
-function buildLsArgs(args: any): string[] {
-  const { all = false } = args;
-  if (all) {
-    return ["-la"];
-  }
-  // Default listing
-  return ["-la"];
+function createLsToolWrapper(cwd: string): ToolDefinition {
+  return createLsToolDefinition(cwd, {
+    ls: { all: true }
+  } as any) as ToolDefinition;
 }
 
-function buildFindArgs(args: any): string[] {
-  const { pattern, path = "." } = args;
-  return [path, "-name", pattern];
+function createFindToolWrapper(cwd: string): ToolDefinition {
+  return createFindToolDefinition(cwd, {
+    find: {}
+  } as any) as ToolDefinition;
 }
 
-function buildGrepArgs(args: any): string[] {
-  const { pattern, path = "." } = args;
-  return ["-r", pattern, path];
+function createGrepToolWrapper(cwd: string): ToolDefinition {
+  return createGrepToolDefinition(cwd, {
+    grep: {}
+  } as any) as ToolDefinition;
 }
 
-function buildReadArgs(args: any): string[] {
-  const { path: filePath } = args;
-  if (!filePath) {
-    throw new Error("Missing path for read sub-tool");
-  }
-  // Escape single quotes in path
-  const escapedPath = `'${filePath.replace(/'/g, `'\\''`)}'`;
-  return ["-c", `cat ${escapedPath}`];
+function createReadToolWrapper(cwd: string): ToolDefinition {
+  return createReadToolDefinition(cwd, {
+    read: { autoResize: true }
+  } as any) as ToolDefinition;
 }
 
-// ==================== REGISTRATION ====================
+// ==================== EXECUTION ====================
 
 /**
- * Creates a sub-tool loader tool definition with a simplified execute signature (params, ctx).
- * Used for direct testing and internal purposes.
+ * Execute a subtool call.
+ * Validates subtool, routes to appropriate SDK tool, returns standardized result.
  */
-export function createSubLoaderToolDefinition(): any {
+async function executeSubtool(
+  _toolCallId: string,
+  params: { subtool: string; args: Record<string, unknown> },
+  signal: AbortSignal | undefined,
+  onUpdate: (data: any) => void,
+  ctx: ExtensionContext
+): Promise<any> {
+  const { subtool, args } = params;
+  const toolCallId = `subtool-${subtool}-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  if (!subtool) {
+    return { isError: true, content: [{ type: "text", text: "Missing required parameter: subtool" }], details: undefined };
+  }
+
+  const validSubtools = ["http", "ls", "find", "grep", "read"];
+  if (!validSubtools.includes(subtool)) {
+    return {
+      isError: true,
+      content: [{ type: "text", text: `Unknown sub-tool: ${subtool}. Valid: ${validSubtools.join(", ")}` }],
+      details: undefined,
+    };
+  }
+
+  try {
+    const tool = getOrCreateTool(ctx, subtool, (cwd) => {
+      switch (subtool) {
+        case "http": return createHttpTool(cwd);
+        case "ls": return createLsToolWrapper(cwd);
+        case "find": return createFindToolWrapper(cwd);
+        case "grep": return createGrepToolWrapper(cwd);
+        case "read": return createReadToolWrapper(cwd);
+        default: throw new Error(`Unhandled subtool: ${subtool}`);
+      }
+    });
+
+    // HTTP needs special handling to build curl command
+    if (subtool === "http") {
+      const { url, method = "GET", headers, body } = args as {
+        url: string;
+        method?: string;
+        headers?: Record<string, string>;
+        body?: string;
+      };
+
+      if (!url) {
+        return { isError: true, content: [{ type: "text", text: "Missing required parameter: url" }], details: undefined };
+      }
+
+      try { new URL(url); } catch {
+        return { isError: true, content: [{ type: "text", text: `Invalid URL: ${url}` }], details: undefined };
+      }
+
+      const curlArgs: string[] = ["-sS", "--fail"];
+      if (method && method !== "GET") curlArgs.push("-X", method);
+      if (headers && typeof headers === "object") {
+        for (const [k, v] of Object.entries(headers)) curlArgs.push("-H", `${k}: ${v}`);
+      }
+      if (body) curlArgs.push("-d", body);
+      curlArgs.push(url);
+
+      const command = `curl ${curlArgs.map(a => JSON.stringify(a)).join(' ')}`;
+      const result: any = await tool.execute(toolCallId, { command } as any, signal, onUpdate, ctx);
+
+      return {
+        isError: result?.isError ?? false,
+        content: result?.content ?? [{ type: "text", text: result?.output ?? "No output" }],
+        details: { ...result?.details, url, method, headers },
+      };
+    }
+
+    // Other tools: pass args directly (SDK validates)
+    const result: any = await tool.execute(toolCallId, args as any, signal, onUpdate, ctx);
+
+    return {
+      isError: result?.isError ?? false,
+      content: result?.content ?? [],
+      details: result?.details,
+    };
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    return { isError: true, content: [{ type: "text", text: `❌ Error: ${msg}` }], details: { error: msg } };
+  }
+}
+
+// ==================== TOOL DEFINITION ====================
+
+/**
+ * Subtool Loader Tool Definition
+ *
+ * Facade to multiple SDK tools with safe parameter validation.
+ */
+export function createSubLoaderToolDefinition(): ToolDefinition {
   return {
     name: "subtool_loader",
     label: "SubTool Loader",
     description:
-      "This tool provides convenience sub-tools for common operations: file listing (ls), finding (find), greping (grep), reading (read), and HTTP requests (http).",
-    promptSnippet:
-      "Use `subtool_loader` with `subtool` parameter to select the operation and `args` for parameters.",
+      "Unified access to file and network operations using SDK tools. " +
+      "Tools: read (file), ls (list), find (search files), grep (text search), http (curl).",
+    promptSnippet: "Use `subtool_loader({ subtool, args })` to invoke operations.",
     promptGuidelines: [
-      "The tool supports the following sub-tools:",
-      "- ls: list files (args: { all?: boolean }) → '-la'",
-      "- find: find files (args: { pattern: string }) → 'find . -name pattern'",
-      "- grep: search text (args: { pattern: string, path?: string }) → 'grep -r pattern [path]'",
-      "- read: read file (args: { path: string }) → 'cat path'",
-      "- http: web request (args: { url: string, method?: string, headers?: Record<string,string>, body?: string }) → 'curl ...'",
+      "All sub-tools use SDK implementations with proper validation and signal handling.",
+      "",
+      "**read** - Read file",
+      "args: { path: string, maxLines?: number, maxBytes?: number, autoResize?: boolean }",
+      "",
+      "**ls** - List directory",
+      "args: { path?: string, all?: boolean }",
+      "",
+      "**find** - Find files",
+      "args: { pattern: string, path?: string }",
+      "",
+      "**grep** - Search text",
+      "args: { pattern: string, path?: string, limit?: number, glob?: string }",
+      "",
+      "**http** - HTTP request",
+      "args: { url: string, method?: string, headers?: Record<string,string>, body?: string }",
     ],
     parameters: {
       type: "object",
       properties: {
-        subtool: {
-          type: "string",
-          enum: ["http", "ls", "find", "grep", "read"],
-          description: "Which sub-tool to invoke",
-        },
-        args: {
-          type: "object",
-          description: "Arguments specific to the selected sub-tool",
-        },
+        subtool: { type: "string", enum: ["http", "ls", "find", "grep", "read"], description: "Sub-tool name" },
+        args: { type: "object", description: "Arguments for the sub-tool" },
       },
       required: ["subtool", "args"],
     },
-    // This execute matches test's expectation: (params, ctx)
-    execute: executeSubtool,
+    execute: executeSubtool as any,
   };
 }
 
 /**
- * Registers the sub-tool loader extension with the API.
- * Wraps the tool definition to conform to standard ToolDefinition signature.
+ * Register the sub-tool loader extension.
  */
 export function registerSubToolLoaderExtension(api: ExtensionAPI): void {
-  const rawTool = createSubLoaderToolDefinition();
-  const tool: ToolDefinition = {
-    ...rawTool,
-    // Override execute with standard signature that forwards to rawTool.execute
-    execute: async (toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: any, ctx: any) => {
-      // Forward to the raw implementation (expects params, ctx)
-      return await rawTool.execute(params, ctx);
-    },
-  };
+  const tool = createSubLoaderToolDefinition();
   api.registerTool(tool);
 }

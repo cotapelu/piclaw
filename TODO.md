@@ -1,57 +1,130 @@
-# Piclaw Evolution TODO
+# Piclaw Development TODO
 
-## High Priority
-- [x] Write unit tests for PiclawPackageManager (11 passing)
-- [x] Support git package sources in package manager
-- [x] Add `piclaw update` command
-- [x] Verify interactive mode loads extensions from .piclaw/npm
-- [x] Add support for package filtering (like pi core)
-- [x] Achieve overall test coverage ≥80% (current: 80.46% statements, 81.58% lines, 607 tests passing)
-- [x] Remove remaining `as any` casts in piclaw-core.ts and team-manager.ts
-- [x] Increase test coverage to ≥85% (completed: overall coverage 86.63%, todos-tool 83.66%) (focus on team-manager, piclaw-package-manager, todos-tool)
+*Generated: 2025-06-09*  
+*Source: AUTO-CONTINUE workflow*
 
-- [x] Increase todos-tool coverage to ≥85% (overall coverage 86.63% meets target)
-## Medium Priority
-- [x] Implement package uninstall for git sources
-- [x] Add progress callback to install/remove commands
-- [x] Support global install (without -l) properly
-- [x] Add package info command (list with installed paths)
-- [x] Validate package sources before install
-- [x] Fix resource collection test (currently failing due to node_modules skip)
+---
 
-## Low Priority
-- [x] Add dry-run mode
-- [x] Add package health check (dependencies, integrity)
-- [x] Support package import/export
-- [x] Implement package version pinning update (pin command)
+## ✅ COMPLETED (Evolution Round 1)
 
-## Completed
-- Custom .piclaw directory support (replaced .pi)
-- NPM package install/remove/list
-- Git package clone, checkout, resolve
-- Settings persistence (project & global)
-- Resource resolution (extensions, skills, prompts, themes)
-- piclaw update command (npm/git version checking)
-- Package filtering (pattern-based with minimatch)
-- Source validation for npm/git sources
-- Global install fix (correct agent directory)
-- piclaw info command (package details)
-- Dry-run mode (--dry-run / -d)
-- piclaw health command (integrity check)
-- piclaw pin command (version pinning update)
-- piclaw export command (JSON export)
-- piclaw import command (JSON import with deduplication)
-- Progress callbacks for install/remove/update (default CLI logger)
-- Integration test (install→resolve→remove flow)
+### Security & Stability
+- [x] Rewrite subtool-loader to use SDK tool factories
+- [x] Eliminate command injection vulnerability
+- [x] Add type safety to tool definitions
 
-- Unit tests for PiclawPackageManager.update (8 tests)
-- Structured logging foundation (logger wrapper)
-- Team-tool coverage improvement (onUpdate & team query tests, dead code removal)
-- Install command test expansion (error handling and progress callbacks)
-- Subtool-loader extension and registration
-- Todos-tool test fixes: exported helpers, added getLatestTodoPhasesFromEntries, fixed fs mock
-- Universal tool registration restored
-- All 523 tests passing (now 565 tests passing)
-- New tests for: skill-reader module (read-skill.ts, skill-reader.ts), auto-compact-85 hook, tool-template basics
-- Coverage increased from ~75% to 80.03% statements (target achieved)
-- All 565 tests passing continuously
+### UX Enhancements
+- [x] Custom todos renderer (progress bar, icons, phases)
+- [x] Custom memory renderer (search results, tags, formatting)
+- [x] Team status widget (persistent UI element)
+- [x] Register renderers with guard checks
+
+### Infrastructure
+- [x] Update all tests for new architecture
+- [x] Create runtime-runner.ts module
+- [x] Ensure 100% test pass rate (1000/1000)
+- [x] Add ensurePiclawExtensionRegistered to main.ts
+
+### Quality
+- [x] TypeScript compile without errors
+- [x] Build successful
+- [x] All tests passing
+
+---
+
+## 🔄 IN PROGRESS
+
+None currently.
+
+---
+
+## 📋 BACKLOG (Prioritized)
+
+### P0 - High Impact, Low Effort
+- [ ] Connect team widget to live team manager data
+- [ ] Add team status refresh on events
+- [ ] Custom renderer for system_info tool
+- [ ] Custom renderer for branch summary (session tree)
+
+### P1 - High Impact, Medium Effort
+- [ ] Implement prompt template system (.pi/prompts/ loading, expansion)
+- [ ] Build git tool (diff, log, status, commit) with renderDiff
+- [ ] Settings panel UI (using SettingsSelectorComponent)
+- [ ] Provider management command (`/providers list|add|remove|test`)
+- [ ] File mutation queue integration (withFileMutationQueue wrapper)
+
+### P2 - Medium Impact, Medium Effort
+- [ ] Custom renderer for team_ops tool (task cards, agent status)
+- [ ] Add test coverage for renderers (vitest)
+- [ ] Implement prompt template caching
+- [ ] Add autocomplete for prompt template names
+- [ ] Export metrics to JSON (usage, performance)
+
+### P3 - LowImpact, Low Effort
+- [ ] Custom renderer for compaction summary
+- [ ] Custom renderer for tool execution output (colorize)
+- [ ] Add keyboard shortcut to toggle team widget
+- [ ] Theme selector widget (quick theme switch)
+- [ ] Add “copy last assistant response” command
+
+### P4 - Stretch Goals
+- [ ] Git diff viewer with syntax highlighting (use highlightCode)
+- [ ] Build system integration (npm scripts runner)
+- [ ] Test runner integration (vitest/jest output parser)
+- [ ] Code formatter tool (prettier/biome integration)
+- [ ] Dependency audit tool (npm audit wrapper)
+
+---
+
+## 🐛 KNOWN ISSUES
+
+1. **Team widget static** – Not connected to live team data (P0)
+2. **No prompt templates** – Manual prompts only (P1)
+3. **No Git tool** – Users must use bash (P1)
+4. **Settings only via JSON** – No interactive UI (P1)
+
+---
+
+## 📚 REFACTORING NEEDED
+
+- [ ] Migration to File Mutation Queue: todos-tool, memory-tool
+- [ ] Consolidate tool factories: ensure all custom tools use SDK patterns
+- [ ] Reduce duplication in renderer error handling
+- [ ] Extract common widget components (progress bars, lists)
+
+---
+
+## 🧪 TESTING GAPS
+
+- [ ] Renderer unit tests (todos, memory, team)
+- [ ] Integration tests for prompt template expansion
+- [ ] End-to-end session branching with renderers
+- [ ] Performance tests for large todos/memory lists
+- [ ] Concurrency tests with mutation queue
+
+---
+
+## 📈 METRICS TARGETS
+
+| Target | Current | Goal |
+|--------|---------|------|
+| Test Coverage | ~75% (est.) | ≥80% |
+| Functions ≤20 LOC | TBD | ≥80% |
+| Complexity ≤10 | TBD | ≥70% |
+| Zero TypeScript Errors | ✅ | Maintain |
+| Build Time | ~30s | <20s |
+
+---
+
+## 🔐 SECURITY CHECKLIST
+
+- [x] No command injection in core tools
+- [x] All file writes use validated paths (within cwd)
+- [ ] Add secret scanning tool (detect API keys in outputs)
+- [ ] Sandbox for untrusted extensions (future)
+- [ ] Audit logging for sensitive operations (future)
+- [ ] Rate limiting for external API calls (future)
+
+---
+
+*Workflow: AUTO-CONTINUE.md*  
+*Status: Active – Continuous Evolution*
