@@ -15,6 +15,7 @@ import { dirname, join } from "node:path";
 import type { ToolDefinition, ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 import { Mutex } from "../utils/mutex.js";
+import { withFileMutationQueue } from "@earendil-works/pi-coding-agent";
 import type {
   TodosParams,
   TodoPhase,
@@ -27,9 +28,6 @@ import type {
 
 // Re-export types for external use
 export type { TodoStatus, TodoItem, TodoPhase, TodoToolDetails, TodosParams };
-
-// Global mutex for file operations (serialize writes)
-const fileMutex = new Mutex();
 
 // Per-session state storage
 interface TodoSessionState {
@@ -721,16 +719,12 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
     try {
       const found = session.state.reconstructFromEntries(ctx.sessionManager.getBranch());
       if (!found) {
-        const fileRelease = await fileMutex.lock();
-        try {
-          const loaded = await session.state.loadFromFile(cwd);
-          if (!loaded) {
-            session.state.setStorageType("memory");
-          }
-          // If loaded, loadFromFile already set storage to "file"
-        } finally {
-          fileRelease();
+        // Load file without lock (read-only)
+        const loaded = await session.state.loadFromFile(cwd);
+        if (!loaded) {
+          session.state.setStorageType("memory");
         }
+        // If loaded, loadFromFile already set storage to "file"
       } else {
         session.state.setStorageType("session");
       }
@@ -746,16 +740,12 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
     try {
       const found = session.state.reconstructFromEntries(ctx.sessionManager.getBranch());
       if (!found) {
-        const fileRelease = await fileMutex.lock();
-        try {
-          const loaded = await session.state.loadFromFile(cwd);
-          if (!loaded) {
-            session.state.setStorageType("memory");
-          }
-          // If loaded, loadFromFile already set storage to "file"
-        } finally {
-          fileRelease();
+        // Load file without lock (read-only)
+        const loaded = await session.state.loadFromFile(cwd);
+        if (!loaded) {
+          session.state.setStorageType("memory");
         }
+        // If loaded, loadFromFile already set storage to "file"
       } else {
         session.state.setStorageType("session");
       }
@@ -862,13 +852,11 @@ function createTodoTool(api: ExtensionAPI): ToolDefinition<any, TodoToolDetails>
 
         if (errors.length === 0 && op !== "list") {
           try {
-            const fileRelease = await fileMutex.lock();
-            try {
+            const filePath = getProjectTodoFilePath(ctx.cwd);
+            await withFileMutationQueue(filePath, async () => {
               await session.state.saveToFile(ctx.cwd);
-              session.state.setStorageType("file");
-            } finally {
-              fileRelease();
-            }
+            });
+            session.state.setStorageType("file");
           } catch (e: any) {
             errors.push(`Save failed: ${e.message}`);
             session.state.setStorageType("memory");

@@ -22,8 +22,10 @@ import { registerTodosRenderer } from "./renderers/todos-renderer.js";
 import { registerTeamWidget } from "./team/team-widget.js";
 import { registerMemoryRenderer } from "./renderers/memory-renderer.js";
 import { registerBranchSummaryRenderer } from "./renderers/branch-summary-renderer.js";
+import { registerTeamOpsRenderer } from "./renderers/team-ops-renderer.js";
 import { registerSessionTreeCommand } from "./commands/session-tree-command.js";
 import { registerSettingsCommand } from "./commands/settings-command.js";
+import { registerProviderCommand } from "./commands/provider-command.js";
 
 /**
  * Main extension aggregator function
@@ -55,10 +57,12 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerMemoryRenderer(api);
   registerTeamWidget(api);
   registerBranchSummaryRenderer(api);
+  registerTeamOpsRenderer(api);
 
   // Register commands
   registerSessionTreeCommand(api);
   registerSettingsCommand(api);
+  registerProviderCommand(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);
