@@ -81,7 +81,7 @@ None currently.
 - [ ] Export metrics to JSON (usage, performance)
 
 ### P3 - LowImpact, Low Effort
-- [ ] Custom renderer for compaction summary
+- [x] Custom renderer for compaction summary (enhanced display in /tree)
 - [ ] Custom renderer for tool execution output (colorize)
 - [x] Add keyboard shortcut to toggle team widget
 - [ ] Theme selector widget (abandoned - SDK API complexity)
