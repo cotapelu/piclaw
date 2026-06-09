@@ -37,11 +37,11 @@ No recurring failures observed in this evolution cycle.
 
 | Area | Current State | Target |
 |------|---------------|--------|
-| Test Coverage | ~86% | ≥90% (add integration tests) |
+| Test Coverage | ~86% | ≥90% (optional: integration tests) |
 | Function Complexity | Mixed (some >20 LOC) | ≥80% functions ≤20 LOC |
 | Duplication | Some shared logic (command parsing) not extracted | Extract utils for common patterns |
-| Prompt Templates | No default templates in `.pi/prompts/` | Provide example templates |
-| Keybindings | No custom keybindings for commands | Add `/team` toggle shortcut? |
+| Prompt Templates | Default templates added in `.pi/prompts/` | N/A |
+| Keybindings | No custom keybindings for commands | Optional future work |
 
 ---
 
