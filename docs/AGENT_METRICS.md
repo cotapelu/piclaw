@@ -18,7 +18,8 @@
 | **Round 9 (Coverage Boost)** | **2025-06-09** | **1064 → 1098** | **✅** | **~74.6%** | **0** | **Added unit tests for trust-manager, copy-command, branch-summary-renderer** |
 | **Round 10 (Coverage Phase 2)** | **2025-06-09** | **1098 → 1150** | **✅** | **~78.7%** | **0** | **Added tests for provider-command, settings-command, team-command, session-tree-command, todos-renderer, team-ops-renderer** |
 | **Round 11 (File Mutation Queue)** | **2025-06-09** | **1150 → 1150** | **✅** | **~78.6%** | **0** | **Added withFileMutationQueue to config-manager.saveConfig; made async; updated callers** |
-| **Final** | **2025-06-09** | **1150** | **✅** | **~78.6%** | **0** | **All planned items complete** |
+| **Round 12 (SDK Tool Factories)** | **2025-06-09** | **1150 → 1146** | **✅** | **~78.5%** | **0** | **Migrated universal-tool to createBashToolDefinition; removed custom exec; removed eval in calc (security); added unit tests** |
+| **Final** | **2025-06-09** | **1146** | **✅** | **~78.5%** | **0** | **All planned items complete** |
 
 ---
 

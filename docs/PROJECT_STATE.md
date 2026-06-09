@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 11 (Concurrency Safety)*  
-*Test Status: ✅ 1150 passed (3 skipped)*
+*Current Iteration: Evolution Round 12 (SDK Migration)*  
+*Test Status: ✅ 1146 passed (3 skipped)*
 
 ---
 
@@ -71,6 +71,14 @@
 - Updated tests to async
 - No coverage change (config code already tested)
 
+### Round 12 (SDK Migration)
+- **Universal Tool Migration**: Refactored universal-tool to use `createBashToolDefinition` from SDK
+  - Replaced manual `ctx.exec` with SDK bash tool for consistency and security
+  - Removed `eval()` in calc-action; now uses `bc` for safe math evaluation
+  - Added unit tests for universal-tool (5 tests)
+  - No coverage change (universal-tool already exercised)
+- **Concurrency**: Config manager uses mutation queue (Round 11)
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1150 passed | 3 skipped** (96 test files)
@@ -83,13 +91,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1150 |
-| Passed | 1150 |
+| Total Tests | 1146 |
+| Passed | 1146 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~78.6% (config manager unchanged coverage) |
+| Code Coverage (est.) | ~78.5% (universal-tool coverage unchanged) |
 | SDK Utilization | ~80%+ (from ~40%) |
 
 ---

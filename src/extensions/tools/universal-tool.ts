@@ -1,22 +1,176 @@
 #!/usr/bin/env node
 
 /**
- * Universal Tool
+ * Universal Tool – Refactored to use SDK createBashToolDefinition
  *
- * A single tool with registry-based actions for extensibility.
- * Actions are loaded from the actions/ directory.
+ * All actions are executed via the SDK bash tool for consistency,
+ * proper signal handling, and security (no manual command injection).
  *
- * Currently supports: echo, system_info, date, uuid, random, calc
+ * Actions:
+ * - echo: Echo a message
+ * - system_info: OS, hardware, uptime
+ * - date: Current date/time
+ * - uuid: Generate UUID v4
+ * - random: Random integer (min/max)
+ * - calc: Evaluate math expression via bc
  */
 
-import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-agent";
+import { createBashToolDefinition } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { actions } from "./actions/index.js";
 
-// ==================== TOOL DEFINITION ====================
+// Cache per-context bash tool to avoid recreation
+const bashToolCache = new WeakMap<any, any>();
 
+function getBashTool(ctx: any): any {
+  let tool = bashToolCache.get(ctx);
+  if (!tool) {
+    const cwd = ctx.cwd || process.cwd();
+    tool = createBashToolDefinition(cwd, {
+      commandPrefix: "" // no prefix, we build full command
+    });
+    bashToolCache.set(ctx, tool);
+  }
+  return tool;
+}
+
+function buildCommand(action: string, params: any): string {
+  switch (action) {
+    case "echo": {
+      const message = params.message;
+      if (typeof message !== "string" || message.length === 0) {
+        throw new Error("Missing or invalid parameter: message (non-empty string)");
+      }
+      // Use JSON.stringify to safely escape quotes, newlines, etc.
+      return `echo ${JSON.stringify(message)}`;
+    }
+
+    case "system_info": {
+      // uname -a for system, df -h for disk
+      return "uname -a && df -h";
+    }
+
+    case "date": {
+      return "date";
+    }
+
+    case "uuid": {
+      // Try kernel UUID, fallback to uuidgen
+      return "cat /proc/sys/kernel/random/uuid 2>/dev/null || uuidgen";
+    }
+
+    case "random": {
+      const min = params.min != null ? params.min : 0;
+      const max = params.max != null ? params.max : 100;
+      if (typeof min !== "number" || typeof max !== "number") {
+        throw new Error("Invalid random parameters: min and max must be numbers");
+      }
+      if (min > max) {
+        throw new Error("Invalid random range: min > max");
+      }
+      return `echo $((RANDOM % (${max} - ${min} + 1) + ${min}))`;
+    }
+
+    case "calc": {
+      const expression = params.expression;
+      if (typeof expression !== "string" || expression.length === 0) {
+        throw new Error("Missing required parameter: expression");
+      }
+      // Validate: only digits, operators +-*/, parentheses, decimal points
+      const sanitized = expression.replace(/\s/g, '');
+      if (!/^[0-9+\-*/().]+$/.test(sanitized)) {
+        throw new Error('Invalid expression. Only numbers and operators (+, -, *, /) allowed.');
+      }
+      // Use bc for calculation, scale=6 for decimal precision
+      return `echo "scale=6; ${sanitized}" | bc -l`;
+    }
+
+    default:
+      throw new Error(`Unknown action: ${action}. Available: echo, system_info, date, uuid, random, calc`);
+  }
+}
+
+/**
+ * Execute universal tool action via bash tool.
+ */
+async function executeUniversal(
+  _toolCallId: string,
+  params: { action: string; [key: string]: any },
+  signal: AbortSignal | undefined,
+  onUpdate: (data: any) => void,
+  ctx: any
+): Promise<any> {
+  const { action } = params;
+
+  if (!action) {
+    return { isError: true, content: [{ type: "text", text: "Missing required parameter: action" }], details: undefined };
+  }
+
+  const validActions = ["echo", "system_info", "date", "uuid", "random", "calc"];
+  if (!validActions.includes(action)) {
+    return {
+      isError: true,
+      content: [{ type: "text", text: `Unknown action: ${action}. Valid: ${validActions.join(", ")}` }],
+      details: undefined,
+    };
+  }
+
+  try {
+    const bashTool = getBashTool(ctx);
+    const command = buildCommand(action, params);
+    const result: any = await bashTool.execute(_toolCallId, { command }, signal, onUpdate, ctx);
+
+    // Normalize: bash tool returns { isError?, content?, details?, ... }
+    return {
+      isError: result?.isError ?? false,
+      content: result?.content ?? (result?.output ? [{ type: "text", text: result.output }] : []),
+      details: { ...result?.details, action },
+    };
+  } catch (error: any) {
+    return {
+      isError: true,
+      content: [{ type: "text", text: `❌ Error: ${error.message}` }],
+      details: { error: error.message, action },
+    };
+  }
+}
+
+/**
+ * Render tool results.
+ * For system_info from the original action (if structured), format nicely.
+ * Otherwise fall back to default render or plain text.
+ */
+function renderUniversal(result: any, options: any, theme: any): any {
+  const details = result.details as any;
+
+  // If we have structured system_info details (platform, arch, etc.), format them
+  if (details && typeof details === 'object' && 'platform' in details) {
+    const lines = [
+      theme.fg('accent', 'System Information'),
+      `OS: ${details.platform} (${details.arch})`,
+      `Node: ${details.nodeVersion}`,
+      `Uptime: ${details.uptime}s`,
+      `Memory: ${details.totalMemoryMB} MB total, ${details.freeMemoryMB} MB free`,
+      `CPU: ${details.cpuCores} cores - ${details.cpuModel}`,
+    ];
+    return new Text(lines.join('\n'), 0, 0);
+  }
+
+  // Fallback #1: default renderer (from SDK)
+  if (options.defaultRender) {
+    return options.defaultRender(result);
+  }
+
+  // Fallback #2: plain text from first content item
+  const text = result.content?.[0]?.text || '';
+  return new Text(text, 0, 0);
+}
+
+/**
+ * Register the universal tool extension.
+ */
 export function registerUniversalTool(api: ExtensionAPI): void {
-  const tool: any = {
+  const tool: ToolDefinition = {
     name: "universal",
     label: "Universal Tool",
     description:
@@ -31,59 +185,22 @@ export function registerUniversalTool(api: ExtensionAPI): void {
       "- 'date': Get current date/time in ISO and locale formats (no parameters).",
       "- 'uuid': Generate a random UUID v4 (no parameters).",
       "- 'random': Generate a random integer (optional: `min`, `max`, default 0-100).",
-      "- 'calc': Evaluate a math expression (requires `expression`, e.g., '2 + 3 * 4')."
+      "- 'calc': Evaluate a math expression (requires `expression`, e.g., '2 + 3 * 4'). Uses bc for safe evaluation."
     ],
     parameters: {
       type: "object",
       properties: {
         action: {
           type: "string",
-          enum: Object.keys(actions),
+          enum: ["echo", "system_info", "date", "uuid", "random", "calc"],
           description: "Which action to perform",
         },
-        // Note: Additional parameters depend on the chosen action
-        // They are defined by each action's getParameters()
+        // Additional properties are dynamic based on action (no strict schema)
       },
       required: ["action"],
     },
-    execute: async (toolCallId: string, params: any, signal: AbortSignal | undefined, onUpdate: any, ctx: any) => {
-      const { action } = params;
-
-      if (!action) {
-        throw new Error("Missing required parameter: action");
-      }
-
-      const actionHandler = actions[action];
-      if (!actionHandler) {
-        throw new Error(`Unknown action: ${action}. Available actions: ${Object.keys(actions).join(", ")}`);
-      }
-
-      // Execute the action
-      const result = await actionHandler.execute(params);
-      return result;
-    },
-
-    // Custom renderer for system_info to display nicely
-    renderResult: (result: any, options: any, theme: any, context: any) => {
-      const details = result.details as any;
-      // Detect system_info output by presence of 'platform' field
-      if (details && typeof details === 'object' && 'platform' in details) {
-        const lines = [
-          theme.fg('accent', 'System Information'),
-          `OS: ${details.platform} (${details.arch})`,
-          `Node: ${details.nodeVersion}`,
-          `Uptime: ${details.uptime}s`,
-          `Memory: ${details.totalMemoryMB} MB total, ${details.freeMemoryMB} MB free`,
-          `CPU: ${details.cpuCores} cores - ${details.cpuModel}`,
-        ];
-        return new Text(lines.join('\n'), 0, 0);
-      }
-      // Fallback to default rendering for other actions
-      if (options.defaultRender) {
-        return options.defaultRender(result);
-      }
-      return new Text('', 0, 0);
-    },
+    execute: executeUniversal,
+    renderResult: renderUniversal,
   };
 
   api.registerTool(tool);

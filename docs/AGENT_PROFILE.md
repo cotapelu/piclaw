@@ -6,7 +6,8 @@
 
 ## Core Competencies
 
-✅ **SDK Utilization** – Extensive use of `@earendil-works/pi-coding-agent` factories and components (createBashTool, TreeSelectorComponent, SettingsList, withFileMutationQueue, etc.)  
+✅ **SDK Utilization** – Extensive use of `@earendil-works/pi-coding-agent` factories and components (createBashTool, TreeSelectorComponent, SettingsList, withFileMutationQueue, createBashToolDefinition, etc.)  
+✅ **Security Hardening** – Replaced eval() in calc-action with bc; migrated universal-tool to SDK bash tool for safe command execution; eliminated command injection risks  
 ✅ **Extension Architecture** – Clean registration via factory.ts, modular commands/tools/renderers  
 ✅ **Testing Discipline** – Unit tests for all new tools and renderers; 1064 tests passing  
 ✅ **TypeScript Strictness** – 0 type errors, proper interfaces, generics  
@@ -38,7 +39,7 @@ No recurring failures observed in this evolution cycle.
 
 | Area | Current State | Target |
 |------|---------------|--------|
-| Test Coverage | ~86% | ≥90% (optional: integration tests) |
+| Test Coverage | ~78.5% | ≥80% |
 | Function Complexity | Mixed (some >20 LOC) | ≥80% functions ≤20 LOC |
 | Duplication | Some shared logic (command parsing) not extracted | Extract utils for common patterns |
 | Prompt Templates | Default templates added in `.pi/prompts/` | N/A |

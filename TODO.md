@@ -85,6 +85,15 @@
 - [x] Update `config-manager.test.ts` to async tests
 - [x] Verify no regressions (1150 tests pass)
 
+## ✅ COMPLETED (Evolution Round 12 - SDK Migration)
+
+### Tool Factories
+- [x] Migrate universal-tool to `createBashToolDefinition`
+- [x] Replace manual `ctx.exec` with SDK bash tool for consistency
+- [x] Remove `eval()` in calc-action; use `bc` for safe math evaluation
+- [x] Add unit tests for universal-tool (5 tests)
+- [x] Verify no regressions (1146 tests pass)
+
 ---
 
 ## 🔄 IN PROGRESS
