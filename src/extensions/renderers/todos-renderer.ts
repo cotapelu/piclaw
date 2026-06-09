@@ -98,6 +98,6 @@ function getStatusColor(status: string, theme: any): (text: string) => string {
     case "completed": return (text: string) => theme.fg("success", text);
     case "in_progress": return (text: string) => theme.fg("warning", text);
     case "abandoned": return (text: string) => theme.fg("error", text);
-    default: return theme.fg("text");
+    default: return (text: string) => theme.fg("text", text);
   }
 }

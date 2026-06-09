@@ -16,7 +16,8 @@
 | Round 6 (P4-2) | 2025-06-09 | 1055 → 1059 | ✅ | ~86% | 0 | Test tool, formatter, audit, build, metrics |
 | Round 8 (Security) | 2025-06-09 | 1059 → 1064 | ✅ | ~86% | 0 | Added secret scanner tool and tests |
 | **Round 9 (Coverage Boost)** | **2025-06-09** | **1064 → 1098** | **✅** | **~74.6%** | **0** | **Added unit tests for trust-manager, copy-command, branch-summary-renderer** |
-| **Final** | **2025-06-09** | **1098** | **✅** | **~74.6%** | **0** | **All planned items complete** |
+| **Round 10 (Coverage Phase 2)** | **2025-06-09** | **1098 → 1150** | **✅** | **~78.7%** | **0** | **Added tests for provider-command, settings-command, team-command, session-tree-command, todos-renderer, team-ops-renderer** |
+| **Final** | **2025-06-09** | **1150** | **✅** | **~78.7%** | **0** | **All planned items complete** |
 
 ---
 

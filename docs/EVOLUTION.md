@@ -40,7 +40,9 @@
 | Renderers separate modules | Extensibility | Easy to add new renderers |
 | Tests expanded from 1002 → 1064 | Coverage target | ~86% coverage, all pass |
 | Secret scanner tool | Security hygiene | Detect leaked API keys/tokens with `/scan-secrets` command |
-| Unit tests for low-coverage modules | Coverage boost (72% → 74.6%) | Added 34 tests for trust-manager, copy-command, branch-summary-renderer; total 1098 tests |
+| Unit tests for low-coverage modules (Phase 1) | Coverage boost (72% → 74.6%) | Added 34 tests for trust-manager, copy-command, branch-summary-renderer; total 1098 tests |
+| Unit tests for commands & renderers (Phase 2) | Coverage boost (74.6% → 78.7%) | Added 52 tests for provider-command, settings-command, team-command, session-tree-command, todos-renderer, team-ops-renderer; total 1150 tests |
+| Fixed todos-renderer default color function | Bug fix (missing return) | getStatusColor now returns proper function for default case |
 
 ---
 

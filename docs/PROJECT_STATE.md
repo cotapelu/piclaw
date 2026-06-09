@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 9 (Coverage Boost)*  
-*Test Status: ✅ 1098 passed (3 skipped)*
+*Current Iteration: Evolution Round 10 (Coverage Phase 2)*  
+*Test Status: ✅ 1150 passed (3 skipped)*
 
 ---
 
@@ -53,9 +53,20 @@
 - **Coverage improvement**: Lines 72.15% → 74.6% (+2.45%)
 - **Total tests**: 1098 passing, 3 skipped, 0 failures
 
+### Round 10 - Coverage Phase 2 (Commands & Renderers)
+- **Provider Command Tests** (14 tests): list, add, remove, test actions with full error handling
+- **Settings Command Tests** (3 tests): TUI mode check, registration
+- **Team Command Tests** (5 tests): Toggle widget visibility
+- **Session Tree Command Tests** (6 tests): Interactive UI, selection, cancellation
+- **Todos Renderer Tests** (11 tests): Progress bar, phases, status icons
+- **Team Ops Renderer Tests** (13 tests): All actions (status, messages, workspace, claim/complete/release, errors)
+- **Bug fix**: `todos-renderer.ts` getStatusColor default case now returns function
+- **Total tests**: 1150 passing, 3 skipped, 0 failures
+- **Coverage**: 78.68% lines (↑ from 74.6%)
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1098 passed | 3 skipped** (93 test files)
+- Tests: **1150 passed | 3 skipped** (96 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -65,13 +76,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1098 |
-| Passed | 1098 |
+| Total Tests | 1150 |
+| Passed | 1150 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~74.6% (+2.5%) |
+| Code Coverage (est.) | ~78.7% (+4.1%) |
 | SDK Utilization | ~80%+ (from ~40%) |
 
 ---
@@ -121,6 +132,7 @@ None currently.
 | P2 | Add integration tests for command handlers | Medium | Medium | Low |
 | P3 | Improve renderer coverage (currently ~5-10%) | Small | Medium | Low |
 | P4 | Add prompts default set (templates) | Small | Low | Low |
+| P0 | **SDK Migration** (address critical gaps from SDK-GAP-ANALYSIS) | High | **Critical** | Medium |
 
 ---
 

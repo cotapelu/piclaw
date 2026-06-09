@@ -63,6 +63,19 @@
 - [x] Increase overall coverage: 72.15% → 74.6% lines
 - [x] Total tests: 1098 passing, 3 skipped, 0 failures
 
+## ✅ COMPLETED (Evolution Round 10 - Coverage Phase 2)
+
+### Testing
+- [x] Add unit tests for `provider-command.ts` (14 tests: list, add, remove, test)
+- [x] Add unit tests for `settings-command.ts` (3 tests: TUI mode, registration)
+- [x] Add unit tests for `team-command.ts` (5 tests: toggle widget)
+- [x] Add unit tests for `session-tree-command.ts` (6 tests: UI, selection, cancel)
+- [x] Add unit tests for `todos-renderer.ts` (11 tests: progress, phases, statuses)
+- [x] Add unit tests for `team-ops-renderer.ts` (13 tests: all actions, errors)
+- [x] Fix bug in `todos-renderer.ts`: getStatusColor default returns function
+- [x] Increase overall coverage: 74.6% → 78.68% lines
+- [x] Total tests: 1150 passing, 3 skipped, 0 failures
+
 ---
 
 ## 🔄 IN PROGRESS
@@ -142,7 +155,7 @@ None currently.
 
 | Target | Current | Goal |
 |--------|---------|------|
-| Test Coverage | ~74.6% | ≥80% (in progress) |
+| Test Coverage | ~78.7% | ≥80% (close) |
 | Functions ≤20 LOC | TBD | ≥80% |
 | Complexity ≤10 | TBD | ≥70% |
 | Zero TypeScript Errors | ✅ | Maintain |
