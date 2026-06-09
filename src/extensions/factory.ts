@@ -27,6 +27,7 @@ import { registerSessionTreeCommand } from "./commands/session-tree-command.js";
 import { registerSettingsCommand } from "./commands/settings-command.js";
 import { registerProviderCommand } from "./commands/provider-command.js";
 import { registerCopyCommand } from "./commands/copy-command.js";
+import { registerTeamCommand } from "./commands/team-command.js";
 
 /**
  * Main extension aggregator function
@@ -65,6 +66,7 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerSettingsCommand(api);
   registerProviderCommand(api);
   registerCopyCommand(api);
+  registerTeamCommand(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);
