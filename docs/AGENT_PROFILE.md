@@ -8,9 +8,10 @@
 
 ✅ **SDK Utilization** – Extensive use of `@earendil-works/pi-coding-agent` factories and components (createBashTool, TreeSelectorComponent, SettingsList, withFileMutationQueue, etc.)  
 ✅ **Extension Architecture** – Clean registration via factory.ts, modular commands/tools/renderers  
-✅ **Testing Discipline** – Unit tests for all new tools and renderers; 1059 tests passing  
+✅ **Testing Discipline** – Unit tests for all new tools and renderers; 1064 tests passing  
 ✅ **TypeScript Strictness** – 0 type errors, proper interfaces, generics  
 ✅ **TUI Integration** – Custom components, widgets, interactive commands  
+✅ **Security Scanning** – Secret scanning tool integrated with `/scan-secrets` command  
 
 ---
 

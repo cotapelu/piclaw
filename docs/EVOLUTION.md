@@ -38,7 +38,8 @@
 | Subtool loader → SDK factories | Security (injection) | All file tools use validated TypeBox schemas |
 | Todos tool → withFileMutationQueue | Concurrency safety | Per-file serialized writes |
 | Renderers separate modules | Extensibility | Easy to add new renderers |
-| Tests expanded from 1002 → 1059 | Coverage target | ~86% coverage, all pass |
+| Tests expanded from 1002 → 1064 | Coverage target | ~86% coverage, all pass |
+| Secret scanner tool | Security hygiene | Detect leaked API keys/tokens with `/scan-secrets` command |
 
 ---
 

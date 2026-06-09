@@ -145,7 +145,7 @@ None currently.
 
 - [x] No command injection in core tools
 - [x] All file writes use validated paths (within cwd)
-- [ ] Add secret scanning tool (detect API keys in outputs)
+- [x] Add secret scanning tool (detect API keys in outputs)
 - [ ] Sandbox for untrusted extensions (future)
 - [ ] Audit logging for sensitive operations (future)
 - [ ] Rate limiting for external API calls (future)

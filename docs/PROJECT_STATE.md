@@ -1,12 +1,12 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 7 (All Planned Complete)*  
-*Test Status: ✅ 1059 passed (3 skipped)*
+*Current Iteration: Evolution Round 8 (Security Hardening)*  
+*Test Status: ✅ 1064 passed (3 skipped)*
 
 ---
 
-## ✅ COMPLETED IMPROVEMENTS (Iteration 7)
+## ✅ COMPLETED IMPROVEMENTS (Iteration 8)
 
 ### P0 - High Impact, Low Effort
 - **Branch Summary Renderer**: Custom UI for branch_summary entries
@@ -71,7 +71,7 @@
 
 ---
 
-## 🏗️ EXTENSIONS ADDED (21 total)
+## 🏗️ EXTENSIONS ADDED (22 total)
 
 | Extension | Type | Purpose |
 |-----------|------|---------|
@@ -90,12 +90,14 @@
 | `team-widget.ts` (updated) | Widget | Live team status with toggle support |
 | `todos-tool.ts` (updated) | Tool | File mutation queue integration |
 | `metrics-tool.ts` | Tool | Metrics export (usage, performance) |
+| `secret-scanner-tool.ts` | Tool | Secret scanning for API keys/tokens (`/scan-secrets`) |
 | `git-tool.test.ts` | Tests | 17 tests for git tool |
 | `settings-command.test.ts` | Tests | 12 tests for settings command |
 | `renderers.test.ts` | Tests | 6 tests for renderers |
 | `team-widget.test.ts` | Tests | 5 tests for team widget toggle |
 | `provider-command.test.ts` | Tests | 13 tests for provider command |
 | `metrics-tool.test.ts` | Tests | 4 tests for metrics tool |
+| `secret-scanner-tool.test.ts` | Tests | 5 tests for secret scanner |
 
 ---
 

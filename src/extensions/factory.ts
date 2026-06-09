@@ -15,6 +15,7 @@ import { registerFormatterTool } from "./tools/formatter-tool.js";
 import { registerAuditTool } from "./tools/audit-tool.js";
 import { registerBuildTool } from "./tools/build-tool.js";
 import { registerMetricsTool } from "./tools/metrics-tool.js";
+import { registerSecretScannerTool } from "./tools/secret-scanner-tool.js";
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
@@ -65,6 +66,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerBuildTool(api);
   // Register metrics tool
   registerMetricsTool(api);
+  // Register secret scanner tool
+  registerSecretScannerTool(api);
   // Register subtool loader extension
   registerSubToolLoaderExtension(api);
   // (subtool-loader replaced by skill-loader)

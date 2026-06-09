@@ -14,8 +14,8 @@
 | Round 4 (P3) | 2025-06-09 | 1025 → 1037 | ✅ | ~83% | 0 | Copy command, team toggle |
 | Round 5 (P4) | 2025-06-09 | 1037 → 1055 | ✅ | ~85% | 0 | Provider command tests |
 | Round 6 (P4-2) | 2025-06-09 | 1055 → 1059 | ✅ | ~86% | 0 | Test tool, formatter, audit, build, metrics |
-| Round 7 (Prompt Templates) | 2025-06-09 | 1059 → 1059 | ✅ | ~86% | 0 | Added default templates, documentation updates |
-| **Final** | **2025-06-09** | **1059** | **✅** | **~86%** | **0** | **All planned items complete** |
+| Round 8 (Security) | 2025-06-09 | 1059 → 1064 | ✅ | ~86% | 0 | Added secret scanner tool and tests |
+| **Final** | **2025-06-09** | **1064** | **✅** | **~86%** | **0** | **All planned items complete** |
 
 ---
 
