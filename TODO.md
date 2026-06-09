@@ -1,6 +1,6 @@
 # Piclaw Development TODO
 
-*Generated: 2025-06-09*  
+*Generated: 2025-06-09*
 *Source: AUTO-CONTINUE workflow*
 
 ---
@@ -82,10 +82,10 @@ None currently.
 
 ### P3 - LowImpact, Low Effort
 - [x] Custom renderer for compaction summary (enhanced display in /tree)
-- [ ] Custom renderer for tool execution output (colorize)
+- [x] Custom renderer for tool execution output (colorize) - via renderDiff and tool output styling
 - [x] Add keyboard shortcut to toggle team widget
 - [ ] Theme selector widget (abandoned - SDK API complexity)
-- [x] Add “copy last assistant response” command
+- [x] Add "copy last assistant response" command
 
 ### P4 - Stretch Goals
 - [ ] Git diff viewer with syntax highlighting (use highlightCode)
@@ -98,10 +98,10 @@ None currently.
 
 ## 🐛 KNOWN ISSUES
 
-1. **No Git tool** – Users must use bash (P1)
-2. **Settings only via JSON** – No interactive UI (P1)
-3. **Prompt template expansion** – Implemented (✅) but no UI autocomplete yet (P2)
-4. **Missing custom renderer** – session tree (branch summary) needs polished output (P0)
+1. **No Git tool** - Users must use bash (P1)
+2. **Settings only via JSON** - No interactive UI (P1)
+3. **Prompt template expansion** - Implemented (✅) but no UI autocomplete yet (P2)
+4. **Missing custom renderer** - session tree (branch summary) needs polished output (P0)
 
 ---
 
@@ -147,5 +147,5 @@ None currently.
 
 ---
 
-*Workflow: AUTO-CONTINUE.md*  
-*Status: Active – Continuous Evolution*
+*Workflow: AUTO-CONTINUE.md*
+*Status: Active - Continuous Evolution*
