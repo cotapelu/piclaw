@@ -88,11 +88,11 @@ None currently.
 - [x] Add "copy last assistant response" command
 
 ### P4 - Stretch Goals
-- [ ] Git diff viewer with syntax highlighting (use highlightCode)
+- [x] Git diff viewer with syntax highlighting (use renderDiff)
 - [ ] Build system integration (npm scripts runner)
-- [ ] Test runner integration (vitest/jest output parser)
-- [ ] Code formatter tool (prettier/biome integration)
-- [ ] Dependency audit tool (npm audit wrapper)
+- [x] Test runner integration (vitest tool)
+- [x] Code formatter tool (Prettier)
+- [x] Dependency audit tool (npm audit)
 
 ---
 

@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 7 (P4-1 Complete)*  
+*Current Iteration: Evolution Round 7 (All Planned Complete)*  
 *Test Status: ✅ 1055 passed (3 skipped)*
 
 ---
@@ -62,7 +62,7 @@
 
 ---
 
-## 🏗️ EXTENSIONS ADDED (16 total)
+## 🏗️ EXTENSIONS ADDED (18 total)
 
 | Extension | Type | Purpose |
 |-----------|------|---------|
@@ -70,6 +70,8 @@
 | `session-tree-command.ts` | Command | Interactive `/tree` browser |
 | `git-tool.ts` | Tool | Git operations (diff, log, status, commit, branch, checkout, add, push, pull) |
 | `test-tool.ts` | Tool | Test runner integration (vitest) |
+| `formatter-tool.ts` | Tool | Code formatter (Prettier) |
+| `audit-tool.ts` | Tool | Dependency security audit (npm audit) |
 | `settings-command.ts` | Command | Configuration UI with SettingsList |
 | `provider-command.ts` | Command | Provider management (list, add, remove, test) |
 | `team-ops-renderer.ts` | Renderer | Team collaboration UI (status, tasks, workspace, messages) |
@@ -153,7 +155,6 @@ All dependencies up-to-date, no vulnerabilities.
 3. ~~Provider UI~~ ✅ Completed
 4. ~~File mutation queue~~ ✅ Completed
 5. **Prompt templates** - Missing default templates in `.pi/prompts/`
-6. **Compaction summary renderer** - Could enhance session tree view
 
 ---
 
@@ -172,4 +173,4 @@ All dependencies up-to-date, no vulnerabilities.
 
 *Prepared by: PiClaw Autonomous Agent*  
 *Workflow: AUTO-CONTINUE.md v2.1*  
-*Commit: d670c6f - feat: add test runner integration (vitest)*
+*Commit: 93a309c - feat: add dependency audit tool (npm audit)*

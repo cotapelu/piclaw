@@ -13,6 +13,7 @@ import { registerGitTool } from "./tools/git-tool.js";
 import { registerTestTool } from "./tools/test-tool.js";
 import { registerFormatterTool } from "./tools/formatter-tool.js";
 import { registerAuditTool } from "./tools/audit-tool.js";
+import { registerBuildTool } from "./tools/build-tool.js";
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
@@ -59,6 +60,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerFormatterTool(api);
   // Register audit tool
   registerAuditTool(api);
+  // Register build tool
+  registerBuildTool(api);
   // Register subtool loader extension
   registerSubToolLoaderExtension(api);
   // (subtool-loader replaced by skill-loader)
