@@ -17,6 +17,8 @@ import {
   SettingsManager,
 } from "@earendil-works/pi-coding-agent";
 
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 import { getResourceLoaderOptions } from "./extensions/index.js";
 
 // Session resolution (our own implementation - inspired by reading llm-context)
@@ -114,6 +116,15 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     // Custom package manager for Piclaw extensions
     const packageManager = new PiclawPackageManager({ cwd: effectiveCwd, agentDir: effectiveAgentDir });
 
+    // Ensure .pi/prompts directory exists for user prompt templates
+    const promptsDir = join(effectiveCwd, '.pi', 'prompts');
+    try {
+      mkdirSync(promptsDir, { recursive: true });
+    } catch (e) {
+      // Non-fatal: continue if directory creation fails (maybe permission issue)
+      logger.debug(`Failed to create prompts directory: ${e instanceof Error ? e.message : String(e)}`);
+    }
+
     // Create core services
     const services = await createAgentSessionServices({
       cwd: effectiveCwd,
@@ -121,6 +132,7 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
       settingsManager,
       resourceLoaderOptions: {
         packageManager,
+        additionalPromptTemplatePaths: [promptsDir],
         ...getResourceLoaderOptions(),
       },
     });

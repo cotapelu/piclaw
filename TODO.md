@@ -21,13 +21,22 @@
 ### Infrastructure
 - [x] Update all tests for new architecture
 - [x] Create runtime-runner.ts module
-- [x] Ensure 100% test pass rate (1000/1000)
+- [x] Ensure 100% test pass rate (1002/1002)
 - [x] Add ensurePiclawExtensionRegistered to main.ts
 
 ### Quality
 - [x] TypeScript compile without errors
 - [x] Build successful
 - [x] All tests passing
+
+---
+
+## ✅ COMPLETED (Evolution Round 2)
+
+### Productivity
+- [x] Implement prompt template system (.pi/prompts/ loading, auto expansion)
+- [x] Add unit tests for prompt template integration (2 tests)
+- [x] Automatic directory creation with fallback
 
 ---
 
@@ -46,7 +55,6 @@ None currently.
 - [ ] Custom renderer for branch summary (session tree)
 
 ### P1 - High Impact, Medium Effort
-- [ ] Implement prompt template system (.pi/prompts/ loading, expansion)
 - [ ] Build git tool (diff, log, status, commit) with renderDiff
 - [ ] Settings panel UI (using SettingsSelectorComponent)
 - [ ] Provider management command (`/providers list|add|remove|test`)
@@ -56,7 +64,7 @@ None currently.
 - [ ] Custom renderer for team_ops tool (task cards, agent status)
 - [ ] Add test coverage for renderers (vitest)
 - [ ] Implement prompt template caching
-- [ ] Add autocomplete for prompt template names
+- [ ] Add autocomplete for prompt template names (now that templates exist)
 - [ ] Export metrics to JSON (usage, performance)
 
 ### P3 - LowImpact, Low Effort
@@ -78,9 +86,9 @@ None currently.
 ## 🐛 KNOWN ISSUES
 
 1. **Team widget static** – Not connected to live team data (P0)
-2. **No prompt templates** – Manual prompts only (P1)
-3. **No Git tool** – Users must use bash (P1)
-4. **Settings only via JSON** – No interactive UI (P1)
+2. **No Git tool** – Users must use bash (P1)
+3. **Settings only via JSON** – No interactive UI (P1)
+4. **Prompt template expansion** – Implemented (✅) but no UI autocomplete yet (P2)
 
 ---
 

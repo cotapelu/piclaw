@@ -7,9 +7,9 @@
 ## 📊 CURRENT SESSION
 
 - **Started:** 2025-06-09
-- **Iteration:** 1
-- **Mode:** Full codebase analysis + implementation
-- **Status:** ✅ Complete (1000 tests passing)
+- **Iteration:** 2
+- **Mode:** Continuous evolution (prompt templates, etc.)
+- **Status:** ✅ Complete (1002 tests passing)
 
 ---
 
@@ -29,7 +29,7 @@
 
 ## 🔄 ITERATION HISTORY
 
-### Iteration 1: Security & UX Polish (Current)
+### Iteration 1: Security & UX Polish
 **Duration:** 2025-06-09 (~2 hours)  
 **Goal:** Address critical gaps identified in SDK analysis
 
@@ -56,6 +56,31 @@
 - Tests after: 1000 passing, 0 failing
 - Tests added: ~120 (subtool-loader + updated)
 - Build time: ~30s
+
+### Iteration 2: Prompt Template System
+**Duration:** 2025-06-09 (~1 hour)  
+**Goal:** Provide out-of-the-box prompt template loading from `.pi/prompts/`
+
+**Changes Made:**
+- Modified `piclaw-core.ts` to create prompts directory automatically
+- Added `additionalPromptTemplatePaths` to resource loader options
+- Implemented automatic directory creation with fallback handling
+- Added unit tests for prompt template system (2 tests)
+
+**Outcomes:**
+- ✅ All tests passing (1002)
+- ✅ Prompt templates automatically loaded from `.pi/prompts/`
+- ✅ Zero regressions
+
+**Cost:** ~50 lines new code, mostly test mocks  
+**Risk:** Low (read-only configuration)  
+**Rollback:** Easy (git revert)
+
+**Metrics:**
+- Tests before iteration: 1000 passing
+- Tests after: 1002 passing
+- New tests: 2 (prompt-templates.test.ts)
+- Coverage estimate increased by ~1%
 
 ---
 

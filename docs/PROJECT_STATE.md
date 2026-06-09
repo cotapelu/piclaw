@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 1*  
-*Test Status: ✅ 1000 passed (3 skipped)*
+*Current Iteration: Evolution Round 2*  
+*Test Status: ✅ 1002 passed (3 skipped)*
 
 ---
 
@@ -27,7 +27,8 @@
 - Added comprehensive test for subtool-loader (new behavior)
 - Updated existing tests (extensions-index, main, auto-compact-85)
 - Created `runtime-runner.ts` module to satisfy test dependencies
-- **Result:** 1000 tests passing, 3 skipped
+- Added tests for prompt template system (2 new tests)
+- **Result:** 1002 tests passing, 3 skipped
 
 ---
 
@@ -35,28 +36,28 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1003 |
-| Passed | 1000 |
+| Total Tests | 1005 |
+| Passed | 1002 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 (in source) |
-| Code Coverage (est.) | ~75% |
+| Code Coverage (est.) | ~76% |
 
 ---
 
 ## 🔄 ONGOING
 
 ### In Progress
-- Prompt template system design (planned)
 - Git integration tool (planned)
 - Settings panel UI (planned)
+- Team widget live data integration (P0)
 
 ### Known Gaps
 - File mutation queue not yet integrated (todos/memory use custom mutex)
-- No custom renderers for team status, system info, git diffs
+- No custom renderers for system info, git diffs
 - No provider management UI
-- No prompt template expansion
+- Prompt template system implemented (✅)
 
 ---
 

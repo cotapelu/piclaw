@@ -44,10 +44,48 @@
 - TypeScript generics in SDK are complex; using `any` casts acceptable short-term with documentation.
 
 **Next Cycle Predictions:**
-- Prompt template system will require careful integration with ResourceLoader.
+- Prompt template system implemented successfully.
 - Git tool should follow subtool-loader pattern (SDK-based with custom diff rendering).
 - Settings UI will need new extension commands and possibly custom components.
 - File mutation queue integration will need careful concurrency testing.
+
+## 🌀 EVOLUTION CYCLE 2 (2025-06-09)
+
+### Theme: Productivity Foundation – Prompt Templates
+
+**Trigger:** User experience improvement: reusable prompt snippets.
+
+**Actions Taken:**
+1. Analyzed SDK support for prompt templates (resource loader options)
+2. Added automatic `.pi/prompts/` directory creation
+3. Integrated `additionalPromptTemplatePaths` into resource loader
+4. Added unit tests to verify correct path passing and extension factory registration
+5. Verified full test suite still passing
+
+**Architectural Changes:**
+- `piclaw-core.ts`: prompts directory creation before services init
+- `resourceLoaderOptions` now includes `additionalPromptTemplatePaths`
+- No changes to SDK or core required; leverages existing expansion engine
+
+**Codebase Impact:**
+- Lines added: ~30 (core) + ~80 (tests)
+- No breaking changes
+- Minimal risk
+
+**Outcomes:**
+- ✅ Prompt templates loaded automatically from `.pi/prompts/`
+- ✅ All tests passing (1002)
+- ✅ First-class template support without extra commands
+
+**Learnings:**
+- Resource loader options can be extended safely.
+- Automatic directory creation improves first-run experience.
+- Testing boot process requires careful mocking; isolating factory is easier.
+
+**Next Cycle Predictions:**
+- Git tool: create with SDK bashtool and diff renderer.
+- Settings UI: use TUI components to edit configuration interactively.
+- Team widget: connect to live team manager for real-time updates.
 
 ---
 
