@@ -54,6 +54,15 @@
 ### System Info
 - [x] Custom renderer for system_info tool (pretty display)
 
+## ✅ COMPLETED (Evolution Round 9 - Coverage Boost)
+
+### Testing
+- [x] Add unit tests for `trust-manager.ts` (19 tests covering load/save/resolve/hasTrustInputs)
+- [x] Add unit tests for `copy-command.ts` (9 tests covering all handler edge cases)
+- [x] Add unit tests for `branch-summary-renderer.ts` (6 tests covering rendering logic)
+- [x] Increase overall coverage: 72.15% → 74.6% lines
+- [x] Total tests: 1098 passing, 3 skipped, 0 failures
+
 ---
 
 ## 🔄 IN PROGRESS
@@ -133,7 +142,7 @@ None currently.
 
 | Target | Current | Goal |
 |--------|---------|------|
-| Test Coverage | ~86% | ≥80% ✅ |
+| Test Coverage | ~74.6% | ≥80% (in progress) |
 | Functions ≤20 LOC | TBD | ≥80% |
 | Complexity ≤10 | TBD | ≥70% |
 | Zero TypeScript Errors | ✅ | Maintain |
