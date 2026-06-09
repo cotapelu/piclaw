@@ -120,8 +120,15 @@ export function registerSettingsCommand(api: ExtensionAPI): void {
             // Update in-memory config
             const updatedItems = items.map(item => item.id === id ? { ...item, currentValue: newValue } : item);
             currentConfig = itemsToConfig(currentConfig, updatedItems);
-            saveConfig(currentConfig);
-            ctx.ui.notify(`Saved ${id} = ${newValue}`, "info");
+            // Async save with error handling
+            (async () => {
+              try {
+                await saveConfig(currentConfig);
+                ctx.ui.notify(`Saved ${id} = ${newValue}`, "info");
+              } catch (err: any) {
+                ctx.ui.notify(`Failed to save ${id}: ${err.message}`, "error");
+              }
+            })();
           },
           () => {
             // Close

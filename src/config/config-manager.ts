@@ -7,9 +7,11 @@ import { logger } from "../utils/logger.js";
  * And essential path helpers.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
+import { withFileMutationQueue } from "@earendil-works/pi-coding-agent";
+import { promises as fs } from "fs";
 
 // ============================================================================
 // Constants
@@ -124,17 +126,19 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 }
 
 /**
- * Save configuration to disk.
+ * Save configuration to disk (with file mutation queue for concurrency safety).
  */
-export function saveConfig(config: PiclawConfig): void {
+export async function saveConfig(config: PiclawConfig): Promise<void> {
 	const configDir = getConfigDir();
 	const configPath = getConfigFilePath();
 
-	if (!existsSync(configDir)) {
-		mkdirSync(configDir, { recursive: true });
-	}
-	const content = JSON.stringify(config, null, 2);
-	writeFileSync(configPath, content, "utf-8");
+	await withFileMutationQueue(configPath, async () => {
+		if (!existsSync(configDir)) {
+			mkdirSync(configDir, { recursive: true });
+		}
+		const content = JSON.stringify(config, null, 2);
+		await fs.writeFile(configPath, content, "utf-8");
+	});
 }
 
 /**

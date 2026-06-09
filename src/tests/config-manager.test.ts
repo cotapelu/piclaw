@@ -115,7 +115,7 @@ describe("ConfigManager", () => {
   });
 
   describe("saveConfig", () => {
-    it("should save config to file", () => {
+    it("should save config to file", async () => {
       const configDir = join(tempHome, ".piclaw");
       mkdirSync(configDir, { recursive: true });
 
@@ -125,18 +125,18 @@ describe("ConfigManager", () => {
         tools: ["read", "grep"],
         verbose: true,
       };
-      saveConfig(testConfig);
+      await saveConfig(testConfig);
 
       const savedContent = readFileSync(join(configDir, "config.json"), "utf-8");
       const parsed = JSON.parse(savedContent);
       expect(parsed).toEqual(testConfig);
     });
 
-    it("should create config directory if missing", () => {
+    it("should create config directory if missing", async () => {
       const configDir = join(tempHome, ".piclaw");
       expect(existsSync(configDir)).toBe(false);
 
-      saveConfig({});
+      await saveConfig({});
 
       expect(existsSync(configDir)).toBe(true);
       expect(existsSync(join(configDir, "config.json"))).toBe(true);
