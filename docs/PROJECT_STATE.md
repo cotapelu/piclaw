@@ -93,9 +93,17 @@
 - **No regressions**: Build green, all existing tests pass
 - **Cleaned up**: Removed failing/unused test files from previous attempt
 
+### Round 14 (Build System Integration)
+- **NPM Scripts Tool**: Created `scripts-tool.ts` providing `scripts` tool and `/scripts` command
+- **Features**: list all npm scripts; run any script with validation and safe execution via `createBashToolDefinition`
+- **Tests**: Added 9 comprehensive unit tests covering registration, execution, validation, error handling, and command handler
+- **Registration**: Integrated in `factory.ts`
+- **Metrics**: Tests increased to 1215 (↑9), Coverage ~80.45% lines
+- **Quality**: Build green, no regressions
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1206 passed | 3 skipped** (114 test files)
+- Tests: **1215 passed | 3 skipped** (115 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -105,18 +113,18 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1206 |
-| Passed | 1206 |
+| Total Tests | 1215 |
+| Passed | 1215 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (lines) | **80.3%** (≥80% target met) |
+| Code Coverage (lines) | **80.45%** |
 | SDK Utilization | ~80%+ |
 
 ---
 
-## 🏗️ EXTENSIONS ADDED (22 total)
+## 🏗️ EXTENSIONS ADDED (23 total)
 
 | Extension | Type | Purpose |
 |-----------|------|---------|

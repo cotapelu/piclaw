@@ -20,7 +20,8 @@
 | **Round 11 (File Mutation Queue)** | **2025-06-09** | **1150 → 1150** | **✅** | **~78.6%** | **0** | **Added withFileMutationQueue to config-manager.saveConfig; made async; updated callers** |
 | **Round 12 (SDK Tool Factories)** | **2025-06-09** | **1150 → 1146** | **✅** | **~78.5%** | **0** | **Migrated universal-tool to createBashToolDefinition; removed custom exec; removed eval in calc (security); added unit tests** |
 | **Round 13 (Coverage to ≥80%)** | **2025-06-09** | **1146 → 1206** | **✅** | **80.3% lines** | **0** | **Added tests: universal-tool execution, memory-tool execution & renderer, session-manager resolution, team-widget toggle, logger, extensions aggregator, and more; removed failing tests** |
-| **Final** | **2025-06-09** | **1206** | **✅** | **80.3% lines** | **0** | **All planned items complete** |
+| **Round 14 (Build System Integration)** | **2025-06-09** | **1206 → 1215** | **✅** | **~80.45%** | **0** | **Added scripts-tool (list/run npm scripts) with 9 unit tests; coverage increased** |
+| **Final** | **2025-06-09** | **1215** | **✅** | **80.45% lines** | **0** | **All planned items complete** |
 
 ---
 

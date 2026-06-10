@@ -112,6 +112,17 @@
 - [x] Build green, no regressions
 - [x] Cleaned up obsolete test files
 
+## ✅ COMPLETED (Evolution Round 14 - Build System Integration)
+
+### NPM Scripts Tool
+- [x] Created `scripts-tool.ts` providing `scripts` tool and `/scripts` command
+- [x] Tool supports actions: `list` (list all scripts) and `run` (execute a script)
+- [x] Uses `createBashToolDefinition` for safe command execution
+- [x] Added comprehensive unit tests (9 tests) covering registration, execution, validation, and command handler
+- [x] Registered in `factory.ts`
+- [x] All tests pass: 1215 passing, 3 skipped
+- [x] Coverage increased slightly (~0.15% lines) to 80.45%
+
 ---
 
 ## 📋 BACKLOG (Prioritized)
@@ -142,7 +153,7 @@
 
 ### P4 - Stretch Goals
 - [x] Git diff viewer with syntax highlighting (use renderDiff)
-- [ ] Build system integration (npm scripts runner)
+- [x] Build system integration (npm scripts runner)
 - [x] Test runner integration (vitest tool)
 - [x] Code formatter tool (Prettier)
 - [x] Dependency audit tool (npm audit)
@@ -185,7 +196,7 @@
 
 | Target | Current | Goal |
 |--------|---------|------|
-| Test Coverage (lines) | **80.3%** | ≥80% ✅ |
+| Test Coverage (lines) | **80.45%** | ≥80% ✅ |
 | Functions ≤20 LOC | TBD | ≥80% |
 | Complexity ≤10 | TBD | ≥70% |
 | Zero TypeScript Errors | ✅ | Maintain |

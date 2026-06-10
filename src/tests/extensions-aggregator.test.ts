@@ -16,6 +16,7 @@ vi.mock("../extensions/tools/audit-tool.js", () => ({ registerAuditTool: vi.fn()
 vi.mock("../extensions/tools/build-tool.js", () => ({ registerBuildTool: vi.fn() }));
 vi.mock("../extensions/tools/metrics-tool.js", () => ({ registerMetricsTool: vi.fn() }));
 vi.mock("../extensions/tools/secret-scanner-tool.js", () => ({ registerSecretScannerTool: vi.fn() }));
+vi.mock("../extensions/tools/scripts-tool.js", () => ({ registerScriptsTool: vi.fn() }));
 vi.mock("../extensions/team/index.js", () => ({ registerTeamTool: vi.fn() }));
 vi.mock("../extensions/tools/subtool-loader.js", () => ({ registerSubToolLoaderExtension: vi.fn() }));
 vi.mock("../extensions/tools/tool-template.js", () => ({ registerToolTemplate: vi.fn() }));
@@ -62,6 +63,7 @@ import { registerSettingsCommand } from "../extensions/commands/settings-command
 import { registerProviderCommand } from "../extensions/commands/provider-command";
 import { registerCopyCommand } from "../extensions/commands/copy-command";
 import { registerTeamCommand } from "../extensions/commands/team-command";
+import { registerScriptsTool } from "../extensions/tools/scripts-tool";
 
 describe("Extensions Aggregator", () => {
   const mockApi: any = { registerTool: vi.fn(), on: vi.fn() };
@@ -84,6 +86,7 @@ describe("Extensions Aggregator", () => {
     expect(registerBuildTool).toHaveBeenCalledWith(mockApi);
     expect(registerMetricsTool).toHaveBeenCalledWith(mockApi);
     expect(registerSecretScannerTool).toHaveBeenCalledWith(mockApi);
+    expect(registerScriptsTool).toHaveBeenCalledWith(mockApi);
     expect(registerTeamTool).toHaveBeenCalledWith(mockApi);
     expect(registerSubToolLoaderExtension).toHaveBeenCalledWith(mockApi);
     expect(registerToolTemplate).toHaveBeenCalledWith(mockApi);
