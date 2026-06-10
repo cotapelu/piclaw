@@ -35,6 +35,74 @@ interface WorkspaceEntry {
 /**
  * Register the team_ops renderer.
  */
+function renderGetTeamStatus(details: any, theme: any): string[] {
+  const status = details as TeamStatusDetails;
+  const lines: string[] = [];
+  lines.push(`\nTeam: ${status.teamId}`);
+  lines.push(`Agents: ${status.activeAgents}/${status.totalAgents} active`);
+  lines.push(`Tasks: ${status.pendingTasks} pending, ${status.completedTasks} completed`);
+
+  if (status.agents && status.agents.length > 0) {
+    lines.push("\nAgents:");
+    for (const agent of status.agents) {
+      const statusIcon = agent.status === "working" ? "🔄" : "💤";
+      lines.push(`  ${statusIcon} ${agent.id}: ${agent.status}${agent.currentTask ? ` - ${agent.currentTask.substring(0, 40)}...` : ''}`);
+    }
+  }
+  return lines;
+}
+
+function renderGetMessages(details: any, theme: any): string[] {
+  const messages = details.messages as TeamMessage[] || [];
+  const lines: string[] = [];
+  lines.push(`\nMessages (${messages.length}):`);
+  for (const msg of messages.slice(0, 10)) {
+    lines.push(`  [${msg.channel}] ${theme.fg("accent", msg.from)}: ${msg.content.substring(0, 60)}${msg.content.length > 60 ? '...' : ''}`);
+  }
+  if (messages.length > 10) {
+    lines.push(`  ${theme.fg("dim", `...and ${messages.length - 10} more.`)}`);
+  }
+  return lines;
+}
+
+function renderWorkspaceRead(details: any, theme: any): string[] {
+  const lines: string[] = [];
+  lines.push(`\nWorkspace key: ${theme.fg("accent", details.key)}`);
+  if (details.value !== undefined) {
+    lines.push(`Value: ${theme.fg("text", details.value.substring(0, 200))}${details.value.length > 200 ? '...' : ''}`);
+  } else {
+    lines.push(theme.fg("dim", "No value set"));
+  }
+  return lines;
+}
+
+function renderWorkspaceWrite(details: any, theme: any): string[] {
+  return [`\n${theme.fg("success", "✓ Wrote to workspace")}: ${details.key}`];
+}
+
+function renderSendMessage(details: any, theme: any): string[] {
+  return [`\n${theme.fg("success", "✓ Message sent")} to ${details.channel || 'team.chat'}`];
+}
+
+function renderClaimTask(details: any, theme: any): string[] {
+  if (details.taskIndex !== undefined) {
+    return [`\n${theme.fg("success", "✓ Claimed task")} #${details.taskIndex}`];
+  }
+  return [`\n${theme.fg("warning", "No tasks available")}`];
+}
+
+function renderCompleteTask(details: any, theme: any): string[] {
+  return [`\n${theme.fg("success", "✓ Completed task")} #${details.taskIndex}`];
+}
+
+function renderReleaseTask(details: any, theme: any): string[] {
+  return [`\n${theme.fg("accent", "↩ Released task")} #${details.taskIndex}`];
+}
+
+function renderUpdateStatus(details: any, theme: any): string[] {
+  return [`\n${theme.fg("accent", "● Status updated")}: ${details.status}`];
+}
+
 export function registerTeamOpsRenderer(api: ExtensionAPI): void {
   if (typeof api.registerMessageRenderer !== 'function') {
     return;
@@ -63,52 +131,22 @@ export function registerTeamOpsRenderer(api: ExtensionAPI): void {
       return new Text(lines.join("\n"));
     }
 
-    // Type-specific rendering
-    if (details.action === "get_team_status") {
-      const status = details as TeamStatusDetails;
-      lines.push(`\nTeam: ${status.teamId}`);
-      lines.push(`Agents: ${status.activeAgents}/${status.totalAgents} active`);
-      lines.push(`Tasks: ${status.pendingTasks} pending, ${status.completedTasks} completed`);
-
-      if (status.agents && status.agents.length > 0) {
-        lines.push("\nAgents:");
-        for (const agent of status.agents) {
-          const statusIcon = agent.status === "working" ? "🔄" : "💤";
-          lines.push(`  ${statusIcon} ${agent.id}: ${agent.status}${agent.currentTask ? ` - ${agent.currentTask.substring(0, 40)}...` : ''}`);
-        }
-      }
-    } else if (details.action === "get_messages") {
-      const messages = details.messages as TeamMessage[] || [];
-      lines.push(`\nMessages (${messages.length}):`);
-      for (const msg of messages.slice(0, 10)) {
-        lines.push(`  [${msg.channel}] ${theme.fg("accent", msg.from)}: ${msg.content.substring(0, 60)}${msg.content.length > 60 ? '...' : ''}`);
-      }
-      if (messages.length > 10) {
-        lines.push(`  ${theme.fg("dim", `...and ${messages.length - 10} more.`)}`);
-      }
-    } else if (details.action === "workspace_read") {
-      lines.push(`\nWorkspace key: ${theme.fg("accent", details.key)}`);
-      if (details.value !== undefined) {
-        lines.push(`Value: ${theme.fg("text", details.value.substring(0, 200))}${details.value.length > 200 ? '...' : ''}`);
-      } else {
-        lines.push(theme.fg("dim", "No value set"));
-      }
-    } else if (details.action === "workspace_write") {
-      lines.push(`\n${theme.fg("success", "✓ Wrote to workspace")}: ${details.key}`);
-    } else if (details.action === "send_message") {
-      lines.push(`\n${theme.fg("success", "✓ Message sent")} to ${details.channel || 'team.chat'}`);
-    } else if (details.action === "claim_task") {
-      if (details.taskIndex !== undefined) {
-        lines.push(`\n${theme.fg("success", "✓ Claimed task")} #${details.taskIndex}`);
-      } else {
-        lines.push(`\n${theme.fg("warning", "No tasks available")}`);
-      }
-    } else if (details.action === "complete_task") {
-      lines.push(`\n${theme.fg("success", "✓ Completed task")} #${details.taskIndex}`);
-    } else if (details.action === "release_task") {
-      lines.push(`\n${theme.fg("accent", "↩ Released task")} #${details.taskIndex}`);
-    } else if (details.action === "update_status") {
-      lines.push(`\n${theme.fg("accent", "● Status updated")}: ${details.status}`);
+    const renderers: Record<string, (d: any, t: any) => string[]> = {
+      get_team_status: renderGetTeamStatus,
+      get_messages: renderGetMessages,
+      workspace_read: renderWorkspaceRead,
+      workspace_write: renderWorkspaceWrite,
+      send_message: renderSendMessage,
+      claim_task: renderClaimTask,
+      complete_task: renderCompleteTask,
+      release_task: renderReleaseTask,
+      update_status: renderUpdateStatus,
+    };
+    const renderer = renderers[details.action];
+    if (renderer) {
+      lines.push(...renderer(details, theme));
+    } else {
+      lines.push(`\n${theme.fg("warning", `Unknown action: ${details.action}`)}`);
     }
 
     return new Text(lines.join("\n"));

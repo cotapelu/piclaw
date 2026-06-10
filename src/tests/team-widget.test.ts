@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import { describe, it, expect, vi } from "vitest";
 
 // Mock TeamRegistry for any potential use

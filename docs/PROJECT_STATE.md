@@ -130,6 +130,10 @@
 - **Testing**: Added `src/tests/command-args.test.ts` with 11 unit tests covering parser behavior.
 - **Impact**: Cleaner command handlers, easier maintenance, increased test count.
 
+### Round 21 (Team Ops Renderer)
+- **Render Complexity Reduction**: Refactored `team-ops-renderer.ts` by extracting per-action helper functions (`renderGetTeamStatus`, `renderGetMessages`, `renderWorkspaceRead`, etc.) and using a dispatch map. Reduced the main render callback from ~80 lines to ~20.
+- **Impact**: No functional changes; all 16 renderer tests pass; code more maintainable.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1244 passed | 3 skipped** (119 test files)

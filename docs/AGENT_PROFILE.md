@@ -45,7 +45,7 @@ No recurring failures observed; testing expanded for session-tree-command.
 |------|---------------|--------|
 | Test Coverage | **≥80% (80.5%)** | ≥80% |
 | Function Complexity | Mixed (some >20 LOC; team-widget & session-tree-command improved) | ≥80% functions ≤20 LOC |
-| Duplication | Renderer duplication reduced (render-utils); widget header helper extracted; command parsing utils created (parseArgs) | No immediate duplication hotspots |
+| Duplication | Reduced (render-utils, widget helper, command args); team-ops renderer now uses helpers | No immediate duplication hotspots |
 | Prompt Templates | Default templates added in `.pi/prompts/` | N/A |
 | Keybindings | No custom keybindings for commands | Optional future work |
 

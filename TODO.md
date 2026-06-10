@@ -167,6 +167,13 @@
 - [x] Added `src/tests/command-args.test.ts` with 11 unit tests
 - [x] All tests pass; duplication reduced
 
+## ✅ COMPLETED (Evolution Round 21 - Team Ops Renderer Refactor)
+
+### Renderer Simplification
+- [x] Extracted per-action render helpers in `team-ops-renderer.ts`
+- [x] Simplified main callback to dispatch map; reduced function size
+- [x] All 16 renderer tests pass; no regressions
+
 ---
 
 ## 📋 BACKLOG (Prioritized)
