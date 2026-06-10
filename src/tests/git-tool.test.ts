@@ -7,6 +7,18 @@
  */
 
 import { describe, it, expect, vi } from "vitest";
+import { createBashTool, createLocalBashOperations } from "@earendil-works/pi-coding-agent";
+import { registerGitTool } from "../extensions/tools/git-tool";
+
+// Mock the SDK for execute tests
+vi.mock('@earendil-works/pi-coding-agent', async () => {
+  const actual = await vi.importActual('@earendil-works/pi-coding-agent');
+  return {
+    ...actual,
+    createBashTool: vi.fn(() => ({ execute: vi.fn() })),
+    createLocalBashOperations: vi.fn(() => ({}))
+  };
+});
 
 // Test command building logic extracted from git tool
 function buildGitCommand(action: string, args: any = {}): string {
@@ -171,5 +183,88 @@ describe("Git Tool Render Functions", () => {
     const result = { output: diffOutput, isError: false };
     expect(result.output).toContain("\x1b[31m");
     expect(result.output).toContain("\x1b[32m");
+  });
+});
+
+describe('Git Tool Execute', () => {
+  let mockBashExecute: any;
+  let mockTool: any;
+  let mockApi: any;
+
+  beforeEach(() => {
+    mockBashExecute = vi.fn();
+    (createBashTool as any).mockReturnValue({ execute: mockBashExecute });
+    mockApi = {
+      on: vi.fn(),
+      registerTool: vi.fn()
+    };
+    registerGitTool(mockApi);
+    // Trigger session_start to register the tool
+    const onCallback = mockApi.on.mock.calls.find(c => c[0] === 'session_start')?.[1];
+    if (onCallback) {
+      onCallback(null, { cwd: '/repo' });
+    }
+    // Capture the registered tool
+    mockTool = mockApi.registerTool.mock.calls[0]?.[0];
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it('should execute diff action successfully', async () => {
+    mockBashExecute.mockResolvedValue({ content: [{ type: 'text', text: 'diff output' }], isError: false });
+    const result = await mockTool.execute('call1', { action: 'diff', args: { revision: 'HEAD' } }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(false);
+    expect(result.content[0].text).toBe('diff output');
+    expect(mockBashExecute).toHaveBeenCalledWith('call1', { command: 'git diff HEAD' }, undefined, undefined, { cwd: '/repo' });
+  });
+
+  it('should execute log action with default count', async () => {
+    mockBashExecute.mockResolvedValue({ content: [{ type: 'text', text: 'log output' }], isError: false });
+    await mockTool.execute('call2', { action: 'log' }, undefined, undefined, { cwd: '/repo' });
+    expect(mockBashExecute).toHaveBeenCalledWith('call2', { command: 'git log -10 --oneline --graph --decorate' }, undefined, undefined, { cwd: '/repo' });
+  });
+
+  it('should execute status action', async () => {
+    mockBashExecute.mockResolvedValue({ content: [{ type: 'text', text: 'status output' }], isError: false });
+    await mockTool.execute('call3', { action: 'status' }, undefined, undefined, { cwd: '/repo' });
+    expect(mockBashExecute).toHaveBeenCalledWith('call3', { command: 'git status' }, undefined, undefined, { cwd: '/repo' });
+  });
+
+  it('should return error when commit message missing', async () => {
+    const result = await mockTool.execute('call4', { action: 'commit' }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('commit requires');
+    expect(mockBashExecute).not.toHaveBeenCalled();
+  });
+
+  it('should return error when checkout branch missing', async () => {
+    const result = await mockTool.execute('call5', { action: 'checkout' }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('checkout requires');
+    expect(mockBashExecute).not.toHaveBeenCalled();
+  });
+
+  it('should return error when branch action missing branch name', async () => {
+    const result = await mockTool.execute('call6', { action: 'branch', args: { action: 'create' } }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('branch create requires');
+    expect(mockBashExecute).not.toHaveBeenCalled();
+  });
+
+  it('should return error from bash tool', async () => {
+    mockBashExecute.mockResolvedValue({ content: [{ type: 'text', text: 'git error' }], isError: true });
+    const result = await mockTool.execute('call7', { action: 'status' }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toBe('git error');
+  });
+
+  it('should handle bash tool result with empty content', async () => {
+    mockBashExecute.mockResolvedValue({ content: [], isError: false });
+    const result = await mockTool.execute('call8', { action: 'status' }, undefined, undefined, { cwd: '/repo' });
+    expect(result.isError).toBe(false);
+    // content[0] will be {type:'text', text: ''} due to code logic
+    expect(result.content[0].text).toBe('');
   });
 });

@@ -98,7 +98,11 @@
 
 ## 🔄 IN PROGRESS
 
-None currently.
+### Evolution Round 13 - Coverage Boost
+- [ ] Add unit tests for `team-widget` (increase coverage)
+- [ ] Add unit tests for `git-tool` (increase coverage)
+- [ ] Target: ≥80% line coverage
+- [ ] Verify all tests pass (no regressions)
 
 ---
 
