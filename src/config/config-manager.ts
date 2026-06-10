@@ -57,6 +57,8 @@ export interface PiclawConfig {
 	verbose?: boolean;
 	/** Path to file where LLM context (system prompt, messages, tools) will be logged before each request */
 	contextLogFile?: string;
+	/** Custom keybindings: map command name (e.g., "team", "settings") to key string (e.g., "t", "ctrl+s") */
+	keybindings?: Record<string, string>;
 }
 
 function getConfigDir(): string {

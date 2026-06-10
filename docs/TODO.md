@@ -1,10 +1,10 @@
 # Piclaw TODO Roadmap
 
-*Last Updated: 2025-06-10 (Round 34)*
+*Last Updated: 2025-06-10 (Round 35)*
 
 ---
 
-## ✅ COMPLETED (Rounds 1–34)
+## ✅ COMPLETED (Rounds 1–35)
 
 ### P0 - High Impact, Low Effort
 - [x] Branch Summary Renderer
@@ -38,6 +38,7 @@
 - [x] Metrics export (`metrics-tool`)
 - [x] Secret scanner (`secret-scanner-tool`)
 - [x] Prompt Templates Default Set (enriched .pi/prompts/)
+- [x] Keybinding System (config-driven shortcuts for slash commands)
 
 ### P3 - Low Impact (Stretch)
 - [x] Copy command (`/copy`)
@@ -48,7 +49,7 @@
 ### P4 - Stretch Goals
 - [x] Build/Test/Format/Audit/Metrics all completed
 
-### Refactorings (Rounds 2–34)
+### Refactorings (Rounds 2–35)
 - [x] Subtool loader → SDK factories
 - [x] Todos tool → mutation queue
 - [x] Universal-tool → createBashToolDefinition
@@ -71,6 +72,7 @@
 - [x] Integration test for session tree command (Round 32)
 - [x] Documentation consistency pass (Round 34)
 - [x] Integration test suite for commands (Rounds 27–32)
+- [x] Keybinding extension (Round 35)
 
 ---
 

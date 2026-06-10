@@ -35,6 +35,7 @@ import { registerSettingsCommand } from "./commands/settings-command.js";
 import { registerProviderCommand } from "./commands/provider-command.js";
 import { registerCopyCommand } from "./commands/copy-command.js";
 import { registerTeamCommand } from "./commands/team-command.js";
+import { registerKeybindingExtension } from "./keybinding/keybinding-extension.js";
 
 /**
  * Main extension aggregator function
@@ -88,6 +89,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerProviderCommand(api);
   registerCopyCommand(api);
   registerTeamCommand(api);
+  // Register keybinding extension
+  registerKeybindingExtension(api);
 
   // Register Auto Continue Extension
   autoContinueExtension(api);

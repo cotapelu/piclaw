@@ -67,6 +67,7 @@
 | Integration tests: settings command (Round 31) | Testing | Added `settings-command.integration.test.ts` (2 tests) for registration and TUI mode check |
 | Integration tests: session tree command (Round 32) | Testing | Added `session-tree-command.integration.test.ts` (4 tests) covering registration, session manager check, TUI requirement, and UI invocation |
 | Documentation consistency (Round 34) | Documentation | Updated AGENT_PROFILE with recent metrics and module status; synchronized all evolution files; marked Integration Tests complete in TODO |
+| Keybinding extension (Round 35) | Feature | Added config-driven keybindings for slash commands; uses onTerminalInput to intercept keys; 4 unit tests
 
 ## Anticipated Technical Debt
 

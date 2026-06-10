@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 34 (Docs Consistency)*
-*Test Status: ✅ 1271 passed (3 skipped)*
+*Current Iteration: Round 35 (Keybinding System)*
+*Test Status: ✅ 1275 passed (3 skipped)*
 
 ---
 
@@ -182,9 +182,14 @@
 - **Cleanup**: Updated `AGENT_PROFILE` with latest metrics (1271 tests, 80.7% coverage, team widget refactor), removed outdated "No integration tests" debt; synchronized all evolution files; marked Integration Tests complete in `TODO`.
 - **Impact**: Documentation accurately reflects current state; roadmap aligned.
 
+### Round 35 (Keybinding System)
+- **Feature**: Added `keybinding-extension` with config-driven shortcuts (`keybindings` in config). Listens to terminal input via `onTerminalInput` and executes slash commands when agent idle.
+- **Tests**: Added 4 unit tests covering registration, key execution, idle check, unknown keys.
+- **Impact**: Users can personalize keys for commands; test count increased to 1275.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1271 passed | 3 skipped** (126 test files)
+- Tests: **1275 passed | 3 skipped** (127 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -194,8 +199,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1271 |
-| Passed | 1271 |
+| Total Tests | 1275 |
+| Passed | 1275 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
@@ -205,7 +210,7 @@
 
 ---
 
-## 🏗️ EXTENSIONS ADDED (23 total)
+## 🏗️ EXTENSIONS ADDED (24 total)
 
 | Extension | Type | Purpose |
 |-----------|------|---------|
@@ -225,6 +230,7 @@
 | `todos-tool.ts` (updated) | Tool | File mutation queue integration |
 | `metrics-tool.ts` | Tool | Metrics export (usage, performance) |
 | `secret-scanner-tool.ts` | Tool | Secret scanning for API keys/tokens (`/scan-secrets`) |
+| `keybinding-extension.ts` | Extension | Config-driven keyboard shortcuts for slash commands |
 | `git-tool.test.ts` | Tests | 17 tests for git tool |
 | `settings-command.test.ts` | Tests | 12 tests for settings command |
 | `renderers.test.ts` | Tests | 6 tests for renderers |
