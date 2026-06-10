@@ -288,5 +288,18 @@ describe("Team Ops Renderer", () => {
       const content = (result as Text).content;
       expect(content).toContain("Operation successful");
     });
+
+    it("should render warning for unknown action", () => {
+      registerTeamOpsRenderer(mockApi);
+
+      const mockTheme = { fg: (c: string, t: string) => t };
+      const details = { action: "unknown_action" };
+
+      const renderer = mockApi.registerMessageRenderer.mock.calls[0][1];
+      const result = renderer({ details } as any, {}, mockTheme);
+
+      const content = (result as Text).content;
+      expect(content).toContain("Unknown action: unknown_action");
+    });
   });
 });

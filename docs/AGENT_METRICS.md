@@ -28,7 +28,8 @@
 | **Round 19 (Session Tree Tests)** | **2025-06-09** | **1225 → 1233** | **✅** | **~80.6%** | **0** | **Added unit tests for EntryDetailView in session-tree-command (8 tests); increased test count** |
 | **Round 20 (Command Arg Utils)** | **2025-06-09** | **1233 → 1244** | **✅** | **~80.7%** | **0** | **Created command-args parser; refactored provider-command; added 11 unit tests** |
 | **Round 21 (Team Ops Renderer)** | **2025-06-09** | **1244** | **✅** | **~80.7%** | **0** | **Refactored large callback into per-action render helpers; reduced complexity** |
-| **Final** | **2025-06-09** | **1244** | **✅** | **80.7% lines** | **0** | **All planned items complete; renderer refactor done** |
+| **Round 22 (Missing Test)** | **2025-06-09** | **1244 → 1245** | **✅** | **~80.7%** | **0** | **Added test for unknown action warning in team-ops-renderer** |
+| **Final** | **2025-06-09** | **1245** | **✅** | **80.7% lines** | **0** | **All planned items complete; testing expanded** |
 
 ---
 

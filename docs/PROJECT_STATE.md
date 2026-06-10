@@ -134,6 +134,10 @@
 - **Render Complexity Reduction**: Refactored `team-ops-renderer.ts` by extracting per-action helper functions (`renderGetTeamStatus`, `renderGetMessages`, `renderWorkspaceRead`, etc.) and using a dispatch map. Reduced the main render callback from ~80 lines to ~20.
 - **Impact**: No functional changes; all 16 renderer tests pass; code more maintainable.
 
+### Round 22 (Renderer Test Completeness)
+- **Missing Test Addition**: Added a unit test to verify that `team-ops-renderer` displays a warning for unknown actions, ensuring fallback behavior is covered.
+- **Impact**: Test count increased to 1245; improved robustness of renderer tests.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1244 passed | 3 skipped** (119 test files)
@@ -146,8 +150,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1244 |
-| Passed | 1244 |
+| Total Tests | 1245 |
+| Passed | 1245 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
