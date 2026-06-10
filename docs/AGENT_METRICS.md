@@ -33,7 +33,8 @@
 | **Round 24 (Concurrency Safety)** | **2025-06-09** | **1248 → 1249** | **✅** | **~80.7%** | **0** | **Added concurrent save config test; verifies mutation queue serialization** |
 | **Round 25 (Prompt Templates)** | **2025-06-09** | **1249** | **✅** | **~80.7%** | **0** | **Enriched default prompt templates with detailed PiClaw-specific guidelines** |
 | **Round 26 (README Update)** | **2025-06-10** | **1249** | **✅** | **~80.7%** | **0** | **Modernized README; replaced SubTool Loader with Extension System and updated slash commands** |
-| **Final** | **2025-06-10** | **1249** | **✅** | **80.7% lines** | **0** | **All planned items complete; documentation updated** |
+| **Round 27 (Integration Tests)** | **2025-06-10** | **1249 → 1255** | **✅** | **~80.7%** | **0** | **Added integration test scaffold; providers-command integration test (6 tests)** |
+| **Final** | **2025-06-10** | **1255** | **✅** | **80.7% lines** | **0** | **Integration testing started** |
 
 ---
 

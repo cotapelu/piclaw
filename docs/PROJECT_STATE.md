@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 26 (README Update)*
-*Test Status: ✅ 1249 passed (3 skipped)*
+*Current Iteration: Round 27 (Integration Tests)*
+*Test Status: ✅ 1255 passed (3 skipped)*
 
 ---
 
@@ -154,9 +154,13 @@
 - **Modernization**: Updated README to reflect current extension architecture, tools, and slash commands; removed outdated SubTool Loader.
 - **Impact**: Documentation now accurately represents PiClaw's capabilities and helps users get started quickly.
 
+### Round 27 (Integration Tests)
+- **Scaffold**: Added `src/tests/integration/` directory; created `providers-command.integration.test.ts` (6 tests) covering command registration, list, add, remove, test, and unknown action.
+- **Impact**: Test count increased to 1255; establishes pattern for future E2E-style tests.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1249 passed | 3 skipped** (121 test files)
+- Tests: **1255 passed | 3 skipped** (122 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
