@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*
-*Current Iteration: Round 24 (Concurrency Safety)*
+*Current Iteration: Round 25 (Prompt Templates)*
 *Test Status: ✅ 1249 passed (3 skipped)*
 
 ---
@@ -145,6 +145,10 @@
 ### Round 24 (Concurrency Safety)
 - **Mutation Queue Test**: Added `src/tests/config-concurrency.test.ts` to verify that concurrent `saveConfig` calls are serialized and file remains valid.
 - **Impact**: Test count increased to 1249; ensures file mutation safety holds under concurrency.
+
+### Round 25 (Prompt Templates)
+- **Enrichment**: Expanded `.pi/prompts/` templates (`default`, `explain`, `refactor`, `test`, `review`) with detailed PiClaw-specific guidelines, tool references, and quality expectations.
+- **Impact**: Improved out-of-the-box UX; guides LLM to use available tools effectively.
 
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors

@@ -1,10 +1,10 @@
 # Piclaw TODO Roadmap
 
-*Last Updated: 2025-06-10 (Round 24)*
+*Last Updated: 2025-06-10 (Round 25)*
 
 ---
 
-## ✅ COMPLETED (Rounds 1–24)
+## ✅ COMPLETED (Rounds 1–25)
 
 ### P0 - High Impact, Low Effort
 - [x] Branch Summary Renderer
@@ -31,6 +31,7 @@
 - [x] Build system (`build-tool`)
 - [x] Metrics export (`metrics-tool`)
 - [x] Secret scanner (`secret-scanner-tool`)
+- [x] Prompt Templates Default Set (enriched .pi/prompts/)
 
 ### P3 - Low Impact (Stretch)
 - [x] Copy command (`/copy`)
@@ -40,7 +41,7 @@
 ### P4 - Stretch Goals
 - [x] Build/Test/Format/Audit/Metrics all completed
 
-### Refactorings (Rounds 2–24)
+### Refactorings (Rounds 2–25)
 - [x] Subtool loader → SDK factories
 - [x] Todos tool → mutation queue
 - [x] Universal-tool → createBashToolDefinition
@@ -53,6 +54,7 @@
 - [x] Team ops renderer helpers
 - [x] Increased test coverage to ≥80%
 - [x] Concurrency safety test
+- [x] Prompt templates enrichment (Round 25)
 
 ---
 
@@ -93,8 +95,7 @@
 
 | Priority | Task | Effort | Impact | Risk |
 |----------|------|--------|--------|------|
-| P1 | Prompt Templates Default Set | Small | Medium | Low |
-| P2 | Integration Tests (E2E) | Medium | Medium | Low |
+| P1 | Integration Tests (E2E) | Medium | Medium | Low |
 | P3 | Keybinding System | Medium | Low | Low |
 | P4 | Metrics Dashboard | Medium | Low | Low |
 | P5 | Multi-session isolation for team widget | Medium | Medium | Medium |

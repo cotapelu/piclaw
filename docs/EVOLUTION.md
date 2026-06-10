@@ -57,6 +57,7 @@
 | Team ops renderer unknown action test (Round 22) | Testing | Added test verifying unknown action renders warning; increased test count by 1 |
 | Team command unit tests (Round 23) | Testing | Added tests for /team command handler, covering toggle and notifications |
 | Config manager concurrency test (Round 24) | Reliability | Added test to verify mutation queue serializes concurrent writes correctly |
+| Prompt templates enrichment (Round 25) | Documentation/UX | Expanded `.pi/prompts/` templates with PiClaw-specific guidelines, improving out-of-the-box experience |
 
 ---
 
@@ -65,7 +66,6 @@
 | Debt Item | Description | Impact | Mitigation |
 |-----------|-------------|--------|------------|
 | Global state in team-widget | Mutable vars `teamWidgetEnabled`, `currentCtx` | Medium (multi-session conflict) | Document limitation; refactor to per-session storage if needed |
-| Missing prompt templates | `.pi/prompts/` empty | Low (feature incomplete) | Provide default templates in future |
 | No integration tests | Unit tests only | Medium (E2E coverage gap) | Suggest Vitest E2E or Playwright later |
 | Mixed tool patterns | Some tools use custom bash vs subprocess directly | Low (consistency) | All now use `createBashTool` – consistent |
 | Command parsing duplication | Each command parses args manually | Low (maintenance) | Could extract parse utility but not worth abstraction now |
@@ -74,11 +74,10 @@
 
 ## Future Considerations
 
-1. **Prompt Templates Default Set** – Add example prompts for common coding tasks (explain, refactor, test generation).
-2. **Integration Tests** – Test command handlers and tools in a simulated TUI environment.
-3. **Keybinding System** – Allow binding keys to commands like `/team`, `/settings`.
-4. **Metrics Dashboard** – TUI widget showing live metrics (usage, LLM calls, token count).
-5. **Session Compaction UI** – Show compaction progress and allow manual trigger.
+1. **Integration Tests** – Test command handlers and tools in a simulated TUI environment.
+2. **Keybinding System** – Allow binding keys to commands like `/team`, `/settings`.
+3. **Metrics Dashboard** – TUI widget showing live metrics (usage, LLM calls, token count).
+4. **Session Compaction UI** – Show compaction progress and allow manual trigger.
 
 ---
 

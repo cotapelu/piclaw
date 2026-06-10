@@ -31,7 +31,8 @@
 | **Round 22 (Missing Test)** | **2025-06-09** | **1244 → 1245** | **✅** | **~80.7%** | **0** | **Added test for unknown action warning in team-ops-renderer** |
 | **Round 23 (Team Command Tests)** | **2025-06-09** | **1245 → 1248** | **✅** | **~80.7%** | **0** | **Added unit tests for /team command handler (toggle and notify)** |
 | **Round 24 (Concurrency Safety)** | **2025-06-09** | **1248 → 1249** | **✅** | **~80.7%** | **0** | **Added concurrent save config test; verifies mutation queue serialization** |
-| **Final** | **2025-06-09** | **1249** | **✅** | **80.7% lines** | **0** | **All planned items complete; concurrency verified** |
+| **Round 25 (Prompt Templates)** | **2025-06-09** | **1249** | **✅** | **~80.7%** | **0** | **Enriched default prompt templates with detailed PiClaw-specific guidelines** |
+| **Final** | **2025-06-09** | **1249** | **✅** | **80.7% lines** | **0** | **All planned items complete; prompts enhanced** |
 
 ---
 
