@@ -64,6 +64,7 @@
 | Integration tests: copy command (Round 29) | Testing | Added `copy-command.integration.test.ts` (7 tests) covering success, errors, and empty text handling |
 ---
 | Team widget state encapsulation (Round 30) | Code Quality | Replaced global state variables with widgetState object; improved maintainability and clarity |
+| Integration tests: settings command (Round 31) | Testing | Added `settings-command.integration.test.ts` (2 tests) for registration and TUI mode check |
 
 ## Anticipated Technical Debt
 

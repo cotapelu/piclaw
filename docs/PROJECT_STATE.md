@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 30 (Code Refactor)*
-*Test Status: ✅ 1265 passed (3 skipped)*
+*Current Iteration: Round 31 (Integration Tests)*
+*Test Status: ✅ 1267 passed (3 skipped)*
 
 ---
 
@@ -170,9 +170,13 @@
 - **Encapsulation**: Refactored team widget state into a `widgetState` object; replaced global variables (`teamWidgetEnabled`, `currentCtx`, `intervalId`). No behavior change, improved maintainability.
 - **Impact**: Code cleaner, easier to adapt for multi-session if needed.
 
+### Round 31 (Settings Command Integration)
+- **Expansion**: Added `settings-command.integration.test.ts` (2 tests) covering command registration and TUI mode enforcement.
+- **Impact**: Integration coverage now includes settings command; test count increased to 1267.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1265 passed | 3 skipped** (124 test files)
+- Tests: **1267 passed | 3 skipped** (125 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -182,8 +186,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1265 |
-| Passed | 1265 |
+| Total Tests | 1267 |
+| Passed | 1267 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
