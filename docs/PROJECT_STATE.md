@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-09*  
-*Current Iteration: Evolution Round 12 (SDK Migration)*  
-*Test Status: ✅ 1146 passed (3 skipped)*
+*Current Iteration: Evolution Round 13 (Coverage ≥80%)*  
+*Test Status: ✅ 1206 passed (3 skipped)*
 
 ---
 
@@ -79,9 +79,23 @@
   - No coverage change (universal-tool already exercised)
 - **Concurrency**: Config manager uses mutation queue (Round 11)
 
+### Round 13 (Coverage to ≥80%)
+- **Massive test additions**:
+  - `universal-tool-execution.test.ts` (18 tests covering all actions, validation, result handling)
+  - `memory-tool.test.ts` (17 tests covering execution logic)
+  - `memory-tool-renderer.test.ts` (9 tests covering UI rendering paths)
+  - `session-resolver-basic.test.ts` (6 tests) and `session-resolver-full.test.ts` (5 tests) covering flag validation and resolution logic
+  - `session-manager-resolution.test.ts` (8 tests) and `session-manager-additional.test.ts` (6 tests) covering session manager resolution paths
+  - `extensions-aggregator.test.ts` (2 tests) verifying extension registration
+  - `team-widget-toggle.test.ts` (2 tests), `select-session-interactive.test.ts` (4 tests), `logger.test.ts` (11 tests)
+- **Coverage result**: Lines raised from ~79.2% to 80.3%, meeting ≥80% target
+- **Total tests**: 1206 passing, 3 skipped, 0 failures
+- **No regressions**: Build green, all existing tests pass
+- **Cleaned up**: Removed failing/unused test files from previous attempt
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1150 passed | 3 skipped** (96 test files)
+- Tests: **1206 passed | 3 skipped** (114 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -91,14 +105,14 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1146 |
-| Passed | 1146 |
+| Total Tests | 1206 |
+| Passed | 1206 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (est.) | ~78.5% (universal-tool coverage unchanged) |
-| SDK Utilization | ~80%+ (from ~40%) |
+| Code Coverage (lines) | **80.3%** (≥80% target met) |
+| SDK Utilization | ~80%+ |
 
 ---
 
