@@ -18,12 +18,12 @@
  * Shortcuts are active only in TUI mode and when the agent is idle.
  */
 
-import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { loadConfig } from "../../config/config-manager.js";
 
 export function registerKeybindingExtension(api: ExtensionAPI): void {
   // Listen for session start to set up keybindings
-  api.on("session_start", async (_event, ctx: ExtensionCommandContext) => {
+  api.on("session_start", async (_event, ctx: ExtensionContext) => {
     const config = loadConfig();
     const bindings = config.keybindings || {};
 
@@ -76,10 +76,12 @@ export function registerKeybindingExtension(api: ExtensionAPI): void {
 
       const cmd = keyToCmd.get(normalizedReceived);
       if (cmd) {
-        // Execute the command
-        api.executeCommand(cmd, "").catch((err: any) => {
+        // Execute slash command via sendUserMessage (handled synchronously by command system)
+        try {
+          api.sendUserMessage(`/${cmd}`);
+        } catch (err: any) {
           ctx.ui.notify(`Failed to execute ${cmd}: ${err?.message || "unknown error"}`, "error");
-        });
+        }
         // Consume the input so it doesn't go to editor
         return { consume: true };
       }

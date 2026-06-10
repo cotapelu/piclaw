@@ -40,7 +40,9 @@
 | **Round 31 (Settings Command Integration)** | **2025-06-10** | **1265 → 1267** | **✅** | **~80.7%** | **0** | **Added settings-command integration test (2 tests) verifying registration and TUI mode check** |
 | **Round 32 (Session Tree Integration)** | **2025-06-10** | **1267 → 1271** | **✅** | **~80.7%** | **0** | **Added session-tree-command integration test (4 tests) covering registration, missing sessionManager, TUI requirement, UI invocation** |
 | **Round 35 (Keybinding System)** | **2025-06-10** | **1271 → 1275** | **✅** | **~80.7%** | **0** | **Added keybinding extension with config-driven shortcuts; 4 unit tests** |
-| **Final** | **2025-06-10** | **1275** | **✅** | **80.7% lines** | **0** | **Keybindings implemented, tests passing** |
+| **Round 36 (Team Widget Isolation)** | **2025-06-10** | **1275 → 1277** | **✅** | **~80.7%** | **0** | **Per-session widget state via Symbol attachment; updated tests; multi-session safety** |
+| **Round 37 (Metrics Dashboard)** | **2025-06-10** | **1277 → 1284** | **✅** | **~80.7%** | **0** | **Added metrics widget with config-driven toggle (/metrics); per-session state; 7 new unit tests** |
+| **Final** | **2025-06-10** | **1284** | **✅** | **80.7% lines** | **0** | **Metrics UI available, tests stable** |
 
 ---
 

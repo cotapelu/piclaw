@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 35 (Keybinding System)*
-*Test Status: ✅ 1275 passed (3 skipped)*
+*Current Iteration: Round 37 (Metrics Dashboard)*
+*Test Status: ✅ 1284 passed (3 skipped)*
 
 ---
 
@@ -187,9 +187,19 @@
 - **Tests**: Added 4 unit tests covering registration, key execution, idle check, unknown keys.
 - **Impact**: Users can personalize keys for commands; test count increased to 1275.
 
+### Round 36 (Team Widget Isolation)
+- **Refactor**: Changed team widget from global state to per-session state using `Symbol` property on context (`ctx[TEAM_WIDGET_STATE]`). This prevents cross-session interference when multiple sessions are active.
+- **Tests**: Updated `team-widget.test.ts`, `team-widget-toggle.test.ts` to use per-session API; kept `team-widget-lifecycle.test.ts` working. Total tests now 1277.
+- **Impact**: Multi-session safety; no functional change for single-session use.
+
+### Round 37 (Metrics Dashboard)
+- **Feature**: Added `metrics-widget` displaying token usage, model, idle status; toggled via `/metrics` command. Uses per-session state.
+- **Tests**: Added `metrics-widget.test.ts` (4 tests) and `metrics-command.test.ts` (3 tests). Total tests now 1284.
+- **Impact**: Users get real-time resource metrics in TUI.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1275 passed | 3 skipped** (127 test files)
+- Tests: **1284 passed | 3 skipped** (129 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -199,8 +209,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1275 |
-| Passed | 1275 |
+| Total Tests | 1284 |
+| Passed | 1284 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |

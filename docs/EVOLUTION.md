@@ -68,6 +68,8 @@
 | Integration tests: session tree command (Round 32) | Testing | Added `session-tree-command.integration.test.ts` (4 tests) covering registration, session manager check, TUI requirement, and UI invocation |
 | Documentation consistency (Round 34) | Documentation | Updated AGENT_PROFILE with recent metrics and module status; synchronized all evolution files; marked Integration Tests complete in TODO |
 | Keybinding extension (Round 35) | Feature | Added config-driven keybindings for slash commands; uses onTerminalInput to intercept keys; 4 unit tests
+| Team widget multi-session isolation (Round 36) | Code Quality | Widget state now attached per-session via Symbol; prevents cross-session interference; updated tests
+| Metrics dashboard (Round 37) | Feature | Added per-session metrics widget (token usage, model, status) with /metrics toggle; 7 unit tests
 
 ## Anticipated Technical Debt
 

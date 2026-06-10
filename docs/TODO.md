@@ -1,10 +1,10 @@
 # Piclaw TODO Roadmap
 
-*Last Updated: 2025-06-10 (Round 35)*
+*Last Updated: 2025-06-10 (Round 36)*
 
 ---
 
-## ✅ COMPLETED (Rounds 1–35)
+## ✅ COMPLETED (Rounds 1–36)
 
 ### P0 - High Impact, Low Effort
 - [x] Branch Summary Renderer

@@ -10,12 +10,27 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { TeamRegistry } from "./team-manager.js";
 
-// Encapsulated widget state
-const widgetState = {
-  enabled: true as boolean,
-  ctx: null as any,
-  intervalId: null as NodeJS.Timeout | null,
-};
+// Unique symbol for per-session state attachment
+const TEAM_WIDGET_STATE = Symbol('teamWidgetState');
+
+interface TeamWidgetSessionState {
+  enabled: boolean;
+  ctx: any;
+  intervalId: NodeJS.Timeout | null;
+}
+
+function getState(ctx: any): TeamWidgetSessionState | undefined {
+  return ctx[TEAM_WIDGET_STATE];
+}
+
+function ensureState(ctx: any): TeamWidgetSessionState {
+  let state = getState(ctx);
+  if (!state) {
+    state = { enabled: true, ctx: ctx, intervalId: null };
+    (ctx as any)[TEAM_WIDGET_STATE] = state;
+  }
+  return state;
+}
 
 function buildHeaderLines(theme: any): string[] {
   return [
@@ -53,15 +68,22 @@ function refreshWidget(ui: any): Promise<void> {
         return;
       }
 
+      // Collect promises for all teams
+      let pending = teams.size;
       teams.forEach((team: any, teamId: string) => {
         team.getTeamStatus().then((status: any) => {
           lines.push(...buildTeamLines(ui, teamId, status));
-          ui.setWidget("team", lines);
-          resolve();
+          // Only set widget after all teams processed
+          if (--pending === 0) {
+            ui.setWidget("team", lines);
+            resolve();
+          }
         }).catch(() => {
           lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
-          ui.setWidget("team", lines);
-          resolve();
+          if (--pending === 0) {
+            ui.setWidget("team", lines);
+            resolve();
+          }
         });
       });
     } catch (e) {
@@ -71,26 +93,33 @@ function refreshWidget(ui: any): Promise<void> {
 }
 
 function startWidget(ctx: any) {
-  widgetState.ctx = ctx;
+  const state = ensureState(ctx);
+  // Prevent double start
+  if (state.intervalId) return;
+  state.ctx = ctx;
   const ui = ctx.ui;
-  // Initial refresh (fire and forget)
+  // Initial refresh
   refreshWidget(ui).catch(() => {});
   // Periodic refresh every 2 seconds
-  widgetState.intervalId = setInterval(() => {
-    if (widgetState.enabled && widgetState.ctx) {
-      refreshWidget(widgetState.ctx.ui).catch(() => {});
+  state.intervalId = setInterval(() => {
+    if (state.enabled && state.ctx) {
+      refreshWidget(state.ctx.ui).catch(() => {});
     }
   }, 2000);
 }
 
-function stopWidget() {
-  if (widgetState.intervalId) {
-    clearInterval(widgetState.intervalId);
-    widgetState.intervalId = null;
+function stopWidget(state: TeamWidgetSessionState) {
+  if (state.intervalId) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
   }
-  if (widgetState.ctx) {
-    widgetState.ctx.ui.setWidget("team", undefined);
-    widgetState.ctx = null;
+  if (state.ctx) {
+    try {
+      state.ctx.ui.setWidget("team", undefined);
+    } catch {
+      // ignore if UI gone
+    }
+    state.ctx = null; // break reference
   }
 }
 
@@ -98,35 +127,45 @@ function stopWidget() {
  * Toggle team widget visibility.
  * @returns new enabled state (true = visible)
  */
-export function toggleTeamWidget(): boolean {
-  widgetState.enabled = !widgetState.enabled;
-  if (widgetState.enabled) {
-    if (widgetState.ctx) {
-      startWidget(widgetState.ctx);
-    }
+export function toggleTeamWidget(ctx: any): boolean {
+  const state = ensureState(ctx);
+  state.enabled = !state.enabled;
+  if (state.enabled) {
+    startWidget(ctx);
   } else {
-    stopWidget();
+    stopWidget(state);
   }
-  return widgetState.enabled;
+  return state.enabled;
 }
 
 /**
- * Get current team widget enabled state.
+ * Get current team widget enabled state for a given session context.
  */
-export function getTeamWidgetEnabled(): boolean {
-  return widgetState.enabled;
+export function getTeamWidgetEnabled(ctx: any): boolean {
+  const state = getState(ctx);
+  return state?.enabled ?? true;
 }
 
 export function registerTeamWidget(api: ExtensionAPI): void {
   // Set up widget on session start
   api.on("session_start", async (_event, ctx) => {
-    if (widgetState.enabled) {
+    // Create per-session state (default enabled)
+    const state: TeamWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null };
+    (ctx as any)[TEAM_WIDGET_STATE] = state;
+
+    // If enabled by default, start the widget
+    if (state.enabled) {
       startWidget(ctx);
     }
 
     // Clean up on session shutdown
     api.on("session_shutdown", () => {
-      stopWidget();
+      stopWidget(state);
+      // Remove reference from ctx
+      delete (ctx as any)[TEAM_WIDGET_STATE];
     });
   });
+
+  // Also register the /team command through the command system? Actually team-command.ts registers separately.
+  // This function only registers the widget component and toggle logic.
 }
