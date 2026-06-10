@@ -93,7 +93,7 @@ function renderDetailsForType(entry: any): string[] {
 }
 
 
-class EntryDetailView {
+export class EntryDetailView {
   private entry: SessionEntry;
   private cachedLines: string[] = [];
   private cachedWidth: number | undefined;

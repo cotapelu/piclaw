@@ -145,6 +145,20 @@
 - [x] Reduced render function to ≤20 lines
 - [x] All tests pass; no functional changes
 
+## ✅ COMPLETED (Evolution Round 18 - Widget Helper)
+
+### Widget Header Utility
+- [x] Created `src/extensions/utils/widget-helpers.ts` with `addSectionHeader`
+- [x] Refactored `session-tree-command` to use `addSectionHeader`
+- [x] Reduced duplication in custom UI setup
+
+## ✅ COMPLETED (Evolution Round 19 - Session Tree Testing)
+
+### EntryDetailView Tests
+- [x] Added `src/tests/session-tree-command.test.ts`
+- [x] 8 unit tests covering rendering for all entry types and caching
+- [x] All tests pass; coverage increased
+
 ---
 
 ## 📋 BACKLOG (Prioritized)

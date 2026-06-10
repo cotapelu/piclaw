@@ -18,7 +18,11 @@
 
 ## Tasks That Often Fail (None)
 
-No recurring failures observed in this evolution cycle.
+No recurring failures observed; testing expanded for session-tree-command.
+
+## Weak Languages/Stacks
+
+- N/A – Project is TypeScript-only, handled well.
 
 ---
 

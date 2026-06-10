@@ -120,6 +120,10 @@
 - **Applied to Session Tree**: Refactored `session-tree-command` to use `addSectionHeader`, reducing duplication.
 - **Impact**: Cleaner code, easier future reuse.
 
+### Round 19 (Command Renderer Testing)
+- **Session Tree Command Tests**: Added `src/tests/session-tree-command.test.ts` with 8 unit tests covering `EntryDetailView` rendering for all entry types (message, branch_summary, compaction, custom_message, label, unknown) and cache behavior.
+- **Impact**: Increased test coverage for renderer, ensured correctness after refactor.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1215 passed | 3 skipped** (115 test files)
@@ -132,13 +136,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1225 |
-| Passed | 1225 |
+| Total Tests | 1233 |
+| Passed | 1233 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
 | TypeScript Errors | 0 |
-| Code Coverage (lines) | **~80.5%** |
+| Code Coverage (lines) | **~80.6%** |
 | SDK Utilization | ~80%+ |
 
 ---
