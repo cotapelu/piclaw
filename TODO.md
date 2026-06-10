@@ -180,6 +180,13 @@
 - [x] Added test for unknown action warning in `team-ops-renderer`
 - [x] Increased test count by 1; improved fallback coverage
 
+## ✅ COMPLETED (Evolution Round 23 - Team Command Tests)
+
+### Command Testing
+- [x] Created `src/tests/team-command.test.ts`
+- [x] Verified `/team` command registration and handler behavior (toggle and notifications)
+- [x] All tests pass; test count increased to 1248
+
 ---
 
 ## 📋 BACKLOG (Prioritized)

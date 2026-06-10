@@ -138,9 +138,13 @@
 - **Missing Test Addition**: Added a unit test to verify that `team-ops-renderer` displays a warning for unknown actions, ensuring fallback behavior is covered.
 - **Impact**: Test count increased to 1245; improved robustness of renderer tests.
 
+### Round 23 (Team Command Tests)
+- **Command Handler Tests**: Created `src/tests/team-command.test.ts` with tests for `/team` command registration and handler behavior (toggle and notifications).
+- **Impact**: Test count increased to 1248; greater confidence in command functionality.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1244 passed | 3 skipped** (119 test files)
+- Tests: **1248 passed | 3 skipped** (120 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -150,8 +154,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1245 |
-| Passed | 1245 |
+| Total Tests | 1248 |
+| Passed | 1248 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |

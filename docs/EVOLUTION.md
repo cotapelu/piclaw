@@ -55,6 +55,7 @@
 | Command argument parsing utilities (Round 20) | Deduplication | Created parseArgs, requireArgs, getArg; refactored provider-command; added 11 unit tests |
 | Team ops renderer function extraction (Round 21) | Complexity reduction | Split monolithic render callback into per-action helpers (`renderGetTeamStatus`, etc.); improved maintainability |
 | Team ops renderer unknown action test (Round 22) | Testing | Added test verifying unknown action renders warning; increased test count by 1 |
+| Team command unit tests (Round 23) | Testing | Added tests for /team command handler, covering toggle and notifications |
 
 ---
 
