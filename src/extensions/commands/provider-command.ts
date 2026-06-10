@@ -8,6 +8,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Container, Text, Spacer } from "@earendil-works/pi-tui";
+import { parseArgs } from "../utils/command-args.js";
 
 function getProviderInfo(ctx: any): Array<{ name: string; displayName: string; modelCount: number; baseUrl?: string }> {
   const modelRegistry = ctx.modelRegistry;
@@ -34,8 +35,8 @@ export function registerProviderCommand(api: ExtensionAPI): void {
   api.registerCommand("providers", {
     description: "Manage LLM providers: list, add, remove, test",
     handler: async (args: string, ctx) => {
-      const parts = args.trim().split(/\s+/);
-      const action = parts[0] || "list";
+      const parsed = parseArgs(args);
+      const action = parsed.action || "list";
 
       if (action === "list") {
         const infos = getProviderInfo(ctx);
@@ -69,9 +70,9 @@ export function registerProviderCommand(api: ExtensionAPI): void {
       }
 
       if (action === "add") {
-        const providerName = parts[1];
-        const baseUrl = parts[2];
-        const apiKey = parts[3];
+        const providerName = parsed.args[0];
+        const baseUrl = parsed.args[1];
+        const apiKey = parsed.args[2];
 
         if (!providerName || !baseUrl || !apiKey) {
           ctx.ui.notify("Usage: /providers add <name> <baseUrl> <apiKey>", "error");
@@ -92,7 +93,7 @@ export function registerProviderCommand(api: ExtensionAPI): void {
       }
 
       if (action === "remove") {
-        const providerName = parts[1];
+        const providerName = parsed.args[0];
         if (!providerName) {
           ctx.ui.notify("Usage: /providers remove <name>", "error");
           return;
@@ -103,7 +104,7 @@ export function registerProviderCommand(api: ExtensionAPI): void {
       }
 
       if (action === "test") {
-        const providerName = parts[1];
+        const providerName = parsed.args[0];
         if (!providerName) {
           ctx.ui.notify("Usage: /providers test <name>", "error");
           return;

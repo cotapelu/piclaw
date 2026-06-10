@@ -159,6 +159,14 @@
 - [x] 8 unit tests covering rendering for all entry types and caching
 - [x] All tests pass; coverage increased
 
+## ✅ COMPLETED (Evolution Round 20 - Command Arg Utils)
+
+### Command Arguments Parser
+- [x] Created `src/extensions/utils/command-args.ts` (parseArgs, requireArgs, getArg)
+- [x] Refactored `provider-command` to use parseArgs
+- [x] Added `src/tests/command-args.test.ts` with 11 unit tests
+- [x] All tests pass; duplication reduced
+
 ---
 
 ## 📋 BACKLOG (Prioritized)

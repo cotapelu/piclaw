@@ -52,6 +52,7 @@
 | Session tree command render refactoring (Round 17) | Complexity reduction | Extracted renderDetailsForType helpers; simplified EntryDetailView.render; improved maintainability |
 | Widget header helper (Round 18) | Deduplication | Created addSectionHeader utility; applied to session-tree-command; reduced repetitive container setup |
 | Session tree command unit tests (Round 19) | Testing | Added 8 tests covering EntryDetailView rendering and caching for all entry types |
+| Command argument parsing utilities (Round 20) | Deduplication | Created parseArgs, requireArgs, getArg; refactored provider-command; added 11 unit tests |
 
 ---
 
