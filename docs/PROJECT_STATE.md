@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
-*Last Updated: 2025-06-09*
-*Current Iteration: Round 25 (Prompt Templates)*
+*Last Updated: 2025-06-10*
+*Current Iteration: Round 26 (README Update)*
 *Test Status: ✅ 1249 passed (3 skipped)*
 
 ---
@@ -149,6 +149,10 @@
 ### Round 25 (Prompt Templates)
 - **Enrichment**: Expanded `.pi/prompts/` templates (`default`, `explain`, `refactor`, `test`, `review`) with detailed PiClaw-specific guidelines, tool references, and quality expectations.
 - **Impact**: Improved out-of-the-box UX; guides LLM to use available tools effectively.
+
+### Round 26 (README Update)
+- **Modernization**: Updated README to reflect current extension architecture, tools, and slash commands; removed outdated SubTool Loader.
+- **Impact**: Documentation now accurately represents PiClaw's capabilities and helps users get started quickly.
 
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors

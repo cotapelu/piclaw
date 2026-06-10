@@ -4,88 +4,34 @@ PiClaw is a professional AI coding agent built on [pi-coding-agent](https://gith
 
 ## Features
 
-- Persistent configuration management (`~/.piclaw/config.json`)
-- Custom slash commands:
-  - `/config` - Show current Piclaw configuration
-  - `/piclaw-set <key> <value>` - Set a config value (e.g., `/piclaw-set model anthropic:claude-opus-4-5`, `/piclaw-set thinking high`)
-  - `/tools` - List active tools
-  - `/piclaw-status` - Show Piclaw and session status
-- Automatic tool allowlist from config
-- Model and thinking level persistence across sessions
-- Extension system for custom commands
-- **SubTool Loader** – a single custom built-in tool exposing 50+ system operations (bash, git, docker, k8s, ssh, http, aws, terraform, db, kafka, redis, make, npm, systemctl, journalctl, ps, kill, crontab, apt, yum, df, du, ping, traceroute, nslookup, dig, wget, tail, jq, yq, xmllint, scp, rsync, ffmpeg, update, backup, password, weather, time, ufw, at, quota, iso, free, iostat, netstat, ss, ...). See [SubTool Loader](#subtool-loader) for details.
+- **Rich Extension Ecosystem**: 23+ extensions including tools, commands, renderers, and widgets.
+- **Integrated Tools**: `git` (full git operations), `test` (vitest runner), `formatter` (Prettier), `audit` (npm audit), `build` (npm run build), `metrics` (export stats), `memory` (persistent memories), `todos` (project todo management), `scripts` (npm scripts), `secret-scanner` (detect leaked keys).
+- **Interactive Slash Commands**: `/tree` (session browser), `/settings` (config UI), `/providers` (LLM provider management), `/copy` (clipboard), `/team` (toggle team widget), `/scan-secrets` (security scan), `/scripts` (run npm scripts).
+- **Custom Renderers**: Beautiful output for branch summaries, team ops, compaction summaries.
+- **Session Widgets**: Live team status widget with toggle.
+- **Secure by Default**: SDK factories, validated inputs, no eval; file writes use mutation queue.
+- **Prompt Templates**: Built-in defaults (`default`, `explain`, `refactor`, `test`, `review`).
+- **Highly Configurable**: `~/.piclaw/config.json` or CLI flags; thinking level and model persistence.
+- **Modular Architecture**: Easy to add new extensions; all registered via `factory.ts`.
 
-## SubTool Loader
+## Extension System
 
-The SubTool Loader is a unified interface for executing 50+ common system commands and tools. Instead of managing dozens of separate tools, it's exposed as a single `subtool_loader` tool that can execute any supported command.
+PiClaw loads extensions from `src/extensions/` automatically. Extensions can register:
+- **Tools**: Callable by the LLM (e.g., `git`, `test`, `formatter`).
+- **Commands**: Slash commands invoked by the user (e.g., `/tree`, `/team`).
+- **Renderers**: Custom UI for tool results and session entries.
+- **Widgets**: TUI components that display live information.
 
-### Available Sub-Tools
+All extensions follow the SDK patterns for consistency and safety.
 
-| Category | Tools |
-|----------|-------|
-| **Version Control** | git |
-| **Containers** | docker, k8s |
-| **Cloud** | aws, terraform |
-| **Databases** | db, kafka, redis |
-| **Package Managers** | npm, apt, yum |
-| **Systemd** | systemctl, journalctl |
-| **Processes** | ps, kill, crontab |
-| **System Info** | df, du, free, iostat, netstat, ss |
-| **Network** | ping, traceroute, nslookup, dig, wget |
-| **File Ops** | tail, scp, rsync |
-| **Data Processing** | jq, yq, xmllint |
-| **Media** | ffmpeg |
-| **Security** | ufw, ssh |
-| **Utilities** | update, backup, password, weather, time, at, quota, iso |
-| **Computer Use** | bash, ls, find, grep, read |
+## Security Model
 
-### Usage
+- No arbitrary `eval` or unsanitized command execution.
+- Tools that run shell commands use `createBashTool` with safe defaults.
+- File mutation operations use `withFileMutationQueue` to prevent race conditions.
+- Secret scanner helps detect accidental key leaks.
 
-The LLM can call `subtool_loader` with any sub-tool name and arguments:
-
-```json
-{
-  "subtool": "git",
-  "args": {
-    "command": "status"
-  }
-}
-```
-
-```json
-{
-  "subtool": "docker",
-  "args": {
-    "command": "ps -a",
-    "timeout": 30
-  }
-}
-```
-
-```json
-{
-  "subtool": "k8s",
-  "args": {
-    "command": "get pods -n default",
-    "context": "production"
-  }
-}
-```
-
-### Common Parameters
-
-All sub-tools support:
-- `command` (string, required) - The command to execute
-- `cwd` (string, optional) - Working directory
-- `timeout` (number, optional) - Timeout in seconds
-
-### Documentation
-
-For complete usage examples for all 50+ sub-tools, see [docs/subtool-usage.md](docs/subtool-usage.md).
-
-### Security Note
-
-⚠️ Sub-tools execute arbitrary shell commands. Only use in trusted environments.
+For more details, see [docs/AGENT_PROFILE.md](docs/AGENT_PROFILE.md).
 
 ## Installation
 
@@ -144,19 +90,35 @@ You can edit this file manually or use the `/piclaw-set` command inside the agen
 
 ## Slash Commands
 
-Built-in commands (from pi):
-- `/model` - Select model (opens UI)
-- `/thinking` - Change thinking level
-- `/settings` - Open settings menu
-- `/session` - Show session info
-- `/quit` - Exit
-... and many more. Press `/` in the app to see all commands.
+PiClaw adds several powerful slash commands to the standard pi set.
 
-Piclaw-specific commands:
-- `/config` - Show Piclaw config
-- `/piclaw-set <key> <value>` - Set a config key/value
-- `/tools` - Show active tools
-- `/piclaw-status` - Show Piclaw status
+### Configuration
+- `/settings` – Open interactive settings panel
+- `/config` – Display current Piclaw configuration
+- `/piclaw-set <key> <value>` – Set a configuration value (e.g., `/piclaw-set model anthropic:claude-opus-4-5`)
+- `/tools` – List the currently allowed tools
+- `/piclaw-status` – Show Piclaw and session status
+
+### Navigation & Inspection
+- `/tree` – Interactive session tree browser with entry details
+- `/session` – Show session information
+
+### Provider & Model Management
+- `/providers` – Manage LLM providers (`list`, `add <name> <baseUrl> <apiKey>`, `remove <name>`, `test <name>`)
+
+### Workspace Utilities
+- `/copy` – Copy the last assistant response to clipboard
+- `/scan-secrets` – Scan the workspace for leaked API keys and tokens
+- `/scripts` – List and run npm scripts (`/scripts` to list, `scripts({ action: 'run', script: 'name' })`)
+
+### Team & Collaboration
+- `/team` – Toggle the team status widget visibility
+
+### Standard pi Commands
+- `/model` – Select model (opens UI)
+- `/thinking` – Change thinking level
+- `/quit` – Exit
+- ... and many more. Press `/` in the app to see all commands.
 
 ## Development
 
