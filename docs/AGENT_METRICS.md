@@ -24,7 +24,8 @@
 | **Round 15 (Renderer Refactor)** | **2025-06-09** | **1215 → 1225** | **✅** | **~80.5%** | **0** | **Added render-utils (style helpers); refactored memory- and todos-renderers; 10 new unit tests** |
 | **Round 16 (Widget Complexity)** | **2025-06-09** | **1225** | **✅** | **~80.5%** | **0** | **Team widget refactor: extracted helpers; reduced function size; no test changes** |
 | **Round 17 (Renderer Reduction)** | **2025-06-09** | **1225** | **✅** | **~80.5%** | **0** | **Session-tree-command: extracted render helpers; simplified EntryDetailView.render** |
-| **Final** | **2025-06-09** | **1225** | **✅** | **80.5% lines** | **0** | **All planned items complete; renderer refactor done** |
+| **Round 18 (Widget Helper)** | **2025-06-09** | **1225** | **✅** | **~80.5%** | **0** | **Created addSectionHeader utility; applied to session-tree-command; reduced duplication** |
+| **Final** | **2025-06-09** | **1225** | **✅** | **80.5% lines** | **0** | **All planned items complete; widget helper done** |
 
 ---
 

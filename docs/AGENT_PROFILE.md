@@ -41,7 +41,7 @@ No recurring failures observed in this evolution cycle.
 |------|---------------|--------|
 | Test Coverage | **≥80% (80.5%)** | ≥80% |
 | Function Complexity | Mixed (some >20 LOC; team-widget & session-tree-command improved) | ≥80% functions ≤20 LOC |
-| Duplication | Renderer duplication reduced (render-utils); command parsing still candidate | Extract command parsing utils (optional) |
+| Duplication | Renderer duplication reduced (render-utils); widget header helper extracted; command parsing still candidate | Extract command parsing utils (optional) |
 | Prompt Templates | Default templates added in `.pi/prompts/` | N/A |
 | Keybindings | No custom keybindings for commands | Optional future work |
 

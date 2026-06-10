@@ -11,6 +11,7 @@ import { DynamicBorder, TreeSelectorComponent } from "@earendil-works/pi-coding-
 import { Container, Text, Spacer } from "@earendil-works/pi-tui";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import type { SessionTreeNode } from "@earendil-works/pi-coding-agent/dist/core/session-manager";
+import { addSectionHeader } from "../utils/widget-helpers";
 
 // Helper functions for rendering entry details (extracted to reduce function size)
 function renderMessageDetails(e: any): string[] {
@@ -172,8 +173,7 @@ export function registerSessionTreeCommand(api: ExtensionAPI): void {
         const borderColor = (s: string) => theme.fg("accent", s);
         container.addChild(new DynamicBorder(borderColor));
 
-        container.addChild(new Text(theme.fg("accent", theme.bold("📊 Session Tree")), 1, 0));
-        container.addChild(new Spacer(1));
+        addSectionHeader(container, theme, "📊 Session Tree");
 
         // TreeSelectorComponent: constructor(tree, currentLeaf, maxVisible, initialSelectedId, filterMode, onSelect, onCancel, onLabelChange?)
         const treeList = new TreeSelectorComponent(

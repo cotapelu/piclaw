@@ -196,7 +196,7 @@
 - [x] Migration to File Mutation Queue: todos-tool (done), memory-tool (partial)
 - [x] Consolidate tool factories (all custom tools use SDK patterns)
 - [x] Reduce duplication in renderer error handling (completed via render-utils)
-- [ ] Extract common widget components (deferred)
+- [x] Extract common widget components (deferred) – created addSectionHeader utility
 
 *Note: Most refactorings completed; minor items deferred for future.
 

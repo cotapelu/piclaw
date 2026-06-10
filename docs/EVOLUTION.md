@@ -50,6 +50,7 @@
 | Renderer error handling unification (Round 15) | Deduplication | Created render-utils with style helpers; refactored memory-renderer and todos-renderer to use them; added 10 unit tests |
 | Team widget function refactoring (Round 16) | Complexity reduction | Extracted buildHeaderLines and buildTeamLines; reduced refreshWidget to ≤20 lines |
 | Session tree command render refactoring (Round 17) | Complexity reduction | Extracted renderDetailsForType helpers; simplified EntryDetailView.render; improved maintainability |
+| Widget header helper (Round 18) | Deduplication | Created addSectionHeader utility; applied to session-tree-command; reduced repetitive container setup |
 
 ---
 
