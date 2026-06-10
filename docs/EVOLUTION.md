@@ -47,6 +47,7 @@
 | Universal tool → createBashToolDefinition | Security & consistency | Replaced manual bash execution with SDK tool; removed eval in calc; added unit tests; now uses createBashToolDefinition |
 | Comprehensive test suite expansion (Round 13) | Coverage target (≥80% lines) | Added 60+ new tests covering memory-tool, universal-tool execution, session resolution, team-widget, logger, extensions aggregator; raised lines coverage from 79.2% to 80.3%; total tests 1206 |
 | NPM Scripts Tool (Round 14) | Feature: Build system integration | Added `scripts-tool.ts` with `list` and `run` actions; 9 unit tests; coverage up to 80.45% lines; total tests 1215 |
+| Renderer error handling unification (Round 15) | Deduplication | Created render-utils with style helpers; refactored memory-renderer and todos-renderer to use them; added 10 unit tests |
 
 ---
 

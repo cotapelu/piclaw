@@ -8,6 +8,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
+import { styleError } from "../utils/render-utils";
 
 interface Memory {
   id: number;
@@ -65,7 +66,7 @@ export function registerMemoryRenderer(api: ExtensionAPI): void {
 
     // Error display
     if (details.error) {
-      lines.push(`\n${theme.fg("error", `❌ ${details.error}`)}`);
+      lines.push(`\n${styleError(theme, `❌ ${details.error}`)}`);
     }
 
     // Search results - show formatted list

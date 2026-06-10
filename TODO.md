@@ -173,7 +173,7 @@
 
 - [x] Migration to File Mutation Queue: todos-tool (done), memory-tool (partial)
 - [x] Consolidate tool factories (all custom tools use SDK patterns)
-- [ ] Reduce duplication in renderer error handling (deferred)
+- [x] Reduce duplication in renderer error handling (completed via render-utils)
 - [ ] Extract common widget components (deferred)
 
 *Note: Most refactorings completed; minor items deferred for future.
@@ -196,7 +196,7 @@
 
 | Target | Current | Goal |
 |--------|---------|------|
-| Test Coverage (lines) | **80.45%** | ≥80% ✅ |
+| Test Coverage (lines) | **~80.5%** | ≥80% ✅ |
 | Functions ≤20 LOC | TBD | ≥80% |
 | Complexity ≤10 | TBD | ≥70% |
 | Zero TypeScript Errors | ✅ | Maintain |
