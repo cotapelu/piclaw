@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 31 (Integration Tests)*
-*Test Status: ✅ 1267 passed (3 skipped)*
+*Current Iteration: Round 32 (Integration Tests)*
+*Test Status: ✅ 1271 passed (3 skipped)*
 
 ---
 
@@ -174,9 +174,13 @@
 - **Expansion**: Added `settings-command.integration.test.ts` (2 tests) covering command registration and TUI mode enforcement.
 - **Impact**: Integration coverage now includes settings command; test count increased to 1267.
 
+### Round 32 (Session Tree Integration)
+- **Expansion**: Added `session-tree-command.integration.test.ts` (4 tests) covering command registration, missing session manager, TUI requirement, and UI invocation check.
+- **Impact**: Test count increased to 1271; core navigation command now covered by integration tests.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1267 passed | 3 skipped** (125 test files)
+- Tests: **1271 passed | 3 skipped** (126 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -186,8 +190,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1267 |
-| Passed | 1267 |
+| Total Tests | 1271 |
+| Passed | 1271 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |

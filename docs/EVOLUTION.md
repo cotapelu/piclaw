@@ -65,6 +65,7 @@
 ---
 | Team widget state encapsulation (Round 30) | Code Quality | Replaced global state variables with widgetState object; improved maintainability and clarity |
 | Integration tests: settings command (Round 31) | Testing | Added `settings-command.integration.test.ts` (2 tests) for registration and TUI mode check |
+| Integration tests: session tree command (Round 32) | Testing | Added `session-tree-command.integration.test.ts` (4 tests) covering registration, session manager check, TUI requirement, and UI invocation |
 
 ## Anticipated Technical Debt
 

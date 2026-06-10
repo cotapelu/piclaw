@@ -38,7 +38,8 @@
 | **Round 29 (Copy Command Integration)** | **2025-06-10** | **1258 → 1265** | **✅** | **~80.7%** | **0** | **Added copy-command integration test (7 tests) covering success, errors, and empty text** |
 | **Round 30 (Team Widget Refactor)** | **2025-06-10** | **1265** | **✅** | **~80.7%** | **0** | **Encapsulated team widget state (widgetState object) to improve maintainability** |
 | **Round 31 (Settings Command Integration)** | **2025-06-10** | **1265 → 1267** | **✅** | **~80.7%** | **0** | **Added settings-command integration test (2 tests) verifying registration and TUI mode check** |
-| **Final** | **2025-06-10** | **1267** | **✅** | **80.7% lines** | **0** | **Integration tests expanded further** |
+| **Round 32 (Session Tree Integration)** | **2025-06-10** | **1267 → 1271** | **✅** | **~80.7%** | **0** | **Added session-tree-command integration test (4 tests) covering registration, missing sessionManager, TUI requirement, UI invocation** |
+| **Final** | **2025-06-10** | **1271** | **✅** | **80.7% lines** | **0** | **Integration tests coverage broadened** |
 
 ---
 
