@@ -59,6 +59,7 @@
 | Config manager concurrency test (Round 24) | Reliability | Added test to verify mutation queue serializes concurrent writes correctly |
 | Prompt templates enrichment (Round 25) | Documentation/UX | Expanded `.pi/prompts/` templates with PiClaw-specific guidelines, improving out-of-the-box experience |
 | README modernization (Round 26) | Documentation | Updated README to reflect current extension architecture, tools, and slash commands; removed outdated SubTool Loader |
+| Integration tests: team command (Round 28) | Testing | Added `team-command.integration.test.ts` (3 tests) verifying widget toggle and notifications |
 
 ---
 

@@ -34,7 +34,8 @@
 | **Round 25 (Prompt Templates)** | **2025-06-09** | **1249** | **✅** | **~80.7%** | **0** | **Enriched default prompt templates with detailed PiClaw-specific guidelines** |
 | **Round 26 (README Update)** | **2025-06-10** | **1249** | **✅** | **~80.7%** | **0** | **Modernized README; replaced SubTool Loader with Extension System and updated slash commands** |
 | **Round 27 (Integration Tests)** | **2025-06-10** | **1249 → 1255** | **✅** | **~80.7%** | **0** | **Added integration test scaffold; providers-command integration test (6 tests)** |
-| **Final** | **2025-06-10** | **1255** | **✅** | **80.7% lines** | **0** | **Integration testing started** |
+| **Round 28 (Team Command Integration)** | **2025-06-10** | **1255 → 1258** | **✅** | **~80.7%** | **0** | **Added team-command integration test (3 tests) covering toggle and notifications** |
+| **Final** | **2025-06-10** | **1258** | **✅** | **80.7% lines** | **0** | **Integration tests expanded** |
 
 ---
 

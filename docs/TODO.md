@@ -1,10 +1,10 @@
 # Piclaw TODO Roadmap
 
-*Last Updated: 2025-06-10 (Round 27)*
+*Last Updated: 2025-06-10 (Round 28)*
 
 ---
 
-## ✅ COMPLETED (Rounds 1–27)
+## ✅ COMPLETED (Rounds 1–28)
 
 ### P0 - High Impact, Low Effort
 - [x] Branch Summary Renderer
@@ -20,6 +20,7 @@
 - [x] Prompt template caching & defaults
 - [x] Template autocomplete (abandoned)
 - [x] Integration Tests scaffold (providers command)
+- [x] Integration Tests: team command
 
 ### P2 - Medium Impact, Medium Effort
 - [x] Git diff syntax highlighting (renderDiff)
@@ -42,7 +43,7 @@
 ### P4 - Stretch Goals
 - [x] Build/Test/Format/Audit/Metrics all completed
 
-### Refactorings (Rounds 2–27)
+### Refactorings (Rounds 2–28)
 - [x] Subtool loader → SDK factories
 - [x] Todos tool → mutation queue
 - [x] Universal-tool → createBashToolDefinition
@@ -56,6 +57,9 @@
 - [x] Increased test coverage to ≥80%
 - [x] Concurrency safety test
 - [x] Prompt templates enrichment (Round 25)
+- [x] README modernization (Round 26)
+- [x] Integration test scaffold (Round 27)
+- [x] Integration test for team command (Round 28)
 - [x] README modernization (Round 26)
 - [x] Integration test scaffold (Round 27)
 
