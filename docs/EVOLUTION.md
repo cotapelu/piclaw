@@ -66,13 +66,13 @@
 | Team widget state encapsulation (Round 30) | Code Quality | Replaced global state variables with widgetState object; improved maintainability and clarity |
 | Integration tests: settings command (Round 31) | Testing | Added `settings-command.integration.test.ts` (2 tests) for registration and TUI mode check |
 | Integration tests: session tree command (Round 32) | Testing | Added `session-tree-command.integration.test.ts` (4 tests) covering registration, session manager check, TUI requirement, and UI invocation |
+| Documentation consistency (Round 34) | Documentation | Updated AGENT_PROFILE with recent metrics and module status; synchronized all evolution files; marked Integration Tests complete in TODO |
 
 ## Anticipated Technical Debt
 
 | Debt Item | Description | Impact | Mitigation |
 |-----------|-------------|--------|------------|
 | Global state in team-widget | Mutable vars `teamWidgetEnabled`, `currentCtx` | Medium (multi-session conflict) | Document limitation; refactor to per-session storage if needed |
-| No integration tests | Unit tests only | Medium (E2E coverage gap) | Suggest Vitest E2E or Playwright later |
 | Mixed tool patterns | Some tools use custom bash vs subprocess directly | Low (consistency) | All now use `createBashTool` – consistent |
 | Command parsing duplication | Each command parses args manually | Low (maintenance) | Could extract parse utility but not worth abstraction now |
 

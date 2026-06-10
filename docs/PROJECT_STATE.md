@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 32 (Integration Tests)*
+*Current Iteration: Round 34 (Docs Consistency)*
 *Test Status: ✅ 1271 passed (3 skipped)*
 
 ---
@@ -177,6 +177,10 @@
 ### Round 32 (Session Tree Integration)
 - **Expansion**: Added `session-tree-command.integration.test.ts` (4 tests) covering command registration, missing session manager, TUI requirement, and UI invocation check.
 - **Impact**: Test count increased to 1271; core navigation command now covered by integration tests.
+
+### Round 34 (Docs Consistency)
+- **Cleanup**: Updated `AGENT_PROFILE` with latest metrics (1271 tests, 80.7% coverage, team widget refactor), removed outdated "No integration tests" debt; synchronized all evolution files; marked Integration Tests complete in `TODO`.
+- **Impact**: Documentation accurately reflects current state; roadmap aligned.
 
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors

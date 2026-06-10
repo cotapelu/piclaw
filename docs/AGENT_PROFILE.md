@@ -9,7 +9,7 @@
 ✅ **SDK Utilization** – Extensive use of `@earendil-works/pi-coding-agent` factories and components (createBashTool, TreeSelectorComponent, SettingsList, withFileMutationQueue, createBashToolDefinition, etc.)  
 ✅ **Security Hardening** – Replaced eval() in calc-action with bc; migrated universal-tool to SDK bash tool for safe command execution; eliminated command injection risks  
 ✅ **Extension Architecture** – Clean registration via factory.ts, modular commands/tools/renderers  
-✅ **Testing Discipline** – Unit tests for all new tools and renderers; 1064 tests passing  
+✅ **Testing Discipline** – Unit tests for all new tools and renderers; 1271 tests passing; integration test suite established (20 tests across 5 commands)  
 ✅ **TypeScript Strictness** – 0 type errors, proper interfaces, generics  
 ✅ **TUI Integration** – Custom components, widgets, interactive commands  
 ✅ **Security Scanning** – Secret scanning tool integrated with `/scan-secrets` command  
@@ -34,8 +34,9 @@ No recurring failures observed; testing expanded for session-tree-command.
 
 ## Fragile Modules
 
-- **team-widget.ts** – Uses global mutable state (`teamWidgetEnabled`, `currentCtx`, `intervalId`). Not multi-session safe but acceptable for single-session TUI use.
+- **team-widget.ts** – Global state refactored to `widgetState` object; still single‑session only but easier to adapt if multi‑session needed.
 - **compaction summary display** – Relies on SessionEntry structure; if schema changes, may break.
+- **secret-scanner patterns** – Regex patterns may need updates as new secret formats emerge.
 
 ---
 
@@ -43,9 +44,9 @@ No recurring failures observed; testing expanded for session-tree-command.
 
 | Area | Current State | Target |
 |------|---------------|--------|
-| Test Coverage | **≥80% (80.5%)** | ≥80% |
-| Function Complexity | Mixed (some >20 LOC; team-widget & session-tree-command improved) | ≥80% functions ≤20 LOC |
-| Duplication | Reduced (render-utils, widget helper, command args); team-ops renderer now uses helpers; command coverage improved | No immediate duplication hotspots |
+| Test Coverage | **≥80% (80.7%)** | ≥80% ✅ |
+| Function Complexity | Mixed (most ≤20 LOC; team-widget & session-tree-command improved) | ≥80% functions ≤20 LOC |
+| Duplication | Reduced (render-utils, widget helper, command args); team-ops renderer now uses helpers; integration tests for commands | No immediate duplication hotspots |
 | Prompt Templates | Default templates added in `.pi/prompts/` | N/A |
 | Keybindings | No custom keybindings for commands | Optional future work |
 
