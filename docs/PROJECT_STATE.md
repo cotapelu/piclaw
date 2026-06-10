@@ -1,7 +1,7 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 29 (Integration Tests)*
+*Current Iteration: Round 30 (Code Refactor)*
 *Test Status: ✅ 1265 passed (3 skipped)*
 
 ---
@@ -165,6 +165,10 @@
 ### Round 29 (Copy Command Integration)
 - **Expansion**: Added `copy-command.integration.test.ts` (7 tests) covering success path, session manager errors, tree empty, no assistant message, clipboard error, and empty text.
 - **Impact**: Test count increased to 1265; pattern for command integration tests is now proven.
+
+### Round 30 (Team Widget Refactor)
+- **Encapsulation**: Refactored team widget state into a `widgetState` object; replaced global variables (`teamWidgetEnabled`, `currentCtx`, `intervalId`). No behavior change, improved maintainability.
+- **Impact**: Code cleaner, easier to adapt for multi-session if needed.
 
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors

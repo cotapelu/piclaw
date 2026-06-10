@@ -36,7 +36,8 @@
 | **Round 27 (Integration Tests)** | **2025-06-10** | **1249 → 1255** | **✅** | **~80.7%** | **0** | **Added integration test scaffold; providers-command integration test (6 tests)** |
 | **Round 28 (Team Command Integration)** | **2025-06-10** | **1255 → 1258** | **✅** | **~80.7%** | **0** | **Added team-command integration test (3 tests) covering toggle and notifications** |
 | **Round 29 (Copy Command Integration)** | **2025-06-10** | **1258 → 1265** | **✅** | **~80.7%** | **0** | **Added copy-command integration test (7 tests) covering success, errors, and empty text** |
-| **Final** | **2025-06-10** | **1265** | **✅** | **80.7% lines** | **0** | **Integration tests expanded further** |
+| **Round 30 (Team Widget Refactor)** | **2025-06-10** | **1265** | **✅** | **~80.7%** | **0** | **Encapsulated team widget state (widgetState object) to improve maintainability** |
+| **Final** | **2025-06-10** | **1265** | **✅** | **80.7% lines** | **0** | **Integration tests expanded, code refactored** |
 
 ---
 
