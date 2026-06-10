@@ -107,6 +107,10 @@
 - **Unit Tests**: Added `src/tests/render-utils.test.ts` (4 tests) and `src/tests/render-utils-stylers.test.ts` (6 tests).
 - **Impact**: No coverage increase expected for existing code, but improved maintainability and consistency.
 
+### Round 16 (Function Complexity Reduction)
+- **Team Widget Refactor**: Extracted `buildHeaderLines` and `buildTeamLines` helpers from `refreshWidget` to improve readability and reduce function size to ≤20 lines.
+- **Impact**: No functional changes; all tests pass; code cleaner.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1215 passed | 3 skipped** (115 test files)

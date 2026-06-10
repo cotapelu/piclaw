@@ -15,6 +15,26 @@ let teamWidgetEnabled = true;
 let currentCtx: any = null;
 let intervalId: NodeJS.Timeout | null = null;
 
+function buildHeaderLines(theme: any): string[] {
+  return [
+    theme.fg("accent", "👥 Team").bold(),
+    ""
+  ];
+}
+
+function buildTeamLines(ui: any, teamId: string, status: any): string[] {
+  const shortId = teamId.slice(-6);
+  const lines: string[] = [];
+  lines.push(ui.theme.fg("accent", `Team ${shortId}`));
+  lines.push(`  Tasks: ${status.completedTasks}/${status.totalTasks} (pending: ${status.pendingTasks}, failed: ${status.failedTasks})`);
+  const agentCount = status.agents.length;
+  const idleAgents = status.agents.filter((a: any) => a.status === 'idle').length;
+  const workingAgents = status.agents.filter((a: any) => a.status === 'working' || a.status === 'in_progress').length;
+  lines.push(`  Agents: ${agentCount} (idle: ${idleAgents}, working: ${workingAgents})`);
+  lines.push(""); // spacer
+  return lines;
+}
+
 function refreshWidget(ui: any): Promise<void> {
   return new Promise((resolve) => {
     try {
@@ -22,8 +42,7 @@ function refreshWidget(ui: any): Promise<void> {
       const teams = registry.getAll();
       const lines: string[] = [];
 
-      lines.push(ui.theme.fg("accent", "👥 Team").bold());
-      lines.push(""); // spacer
+      lines.push(...buildHeaderLines(ui.theme));
 
       if (teams.size === 0) {
         lines.push(ui.theme.fg("muted", "No active teams"));
@@ -32,34 +51,18 @@ function refreshWidget(ui: any): Promise<void> {
         return;
       }
 
-      // Iterate each active team
       teams.forEach((team: any, teamId: string) => {
-        const shortId = teamId.slice(-6);
-        // Get status asynchronously
         team.getTeamStatus().then((status: any) => {
-          lines.push(ui.theme.fg("accent", `Team ${shortId}`));
-          lines.push(`  Tasks: ${status.completedTasks}/${status.totalTasks} (pending: ${status.pendingTasks}, failed: ${status.failedTasks})`);
-          const agentCount = status.agents.length;
-          const idleAgents = status.agents.filter((a: any) => a.status === 'idle').length;
-          const workingAgents = status.agents.filter((a: any) => a.status === 'working' || a.status === 'in_progress').length;
-          lines.push(`  Agents: ${agentCount} (idle: ${idleAgents}, working: ${workingAgents})`);
-          lines.push(""); // spacer between teams
+          lines.push(...buildTeamLines(ui, teamId, status));
           ui.setWidget("team", lines);
           resolve();
         }).catch(() => {
-          lines.push(ui.theme.fg("error", `Team ${shortId}: error fetching status`));
+          lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
           ui.setWidget("team", lines);
           resolve();
         });
       });
-
-      // If no teams (should not happen as we checked), but for safety
-      if (teams.size === 0) {
-        ui.setWidget("team", lines);
-        resolve();
-      }
     } catch (e) {
-      // Silently ignore refresh errors
       resolve();
     }
   });

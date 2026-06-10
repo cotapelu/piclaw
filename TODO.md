@@ -123,6 +123,21 @@
 - [x] All tests pass: 1215 passing, 3 skipped
 - [x] Coverage increased slightly (~0.15% lines) to 80.45%
 
+## ✅ COMPLETED (Evolution Round 15 - Renderer Refactor)
+
+### Renderer Utilities
+- [x] Created `src/extensions/utils/render-utils.ts` with text factories and inline stylers
+- [x] Refactored `memory-renderer.ts` and `todos-renderer.ts` to use style helpers
+- [x] Added 10 unit tests
+- [x] No coverage increase but improved maintainability
+
+## ✅ COMPLETED (Evolution Round 16 - Widget Complexity)
+
+### Team Widget Refactor
+- [x] Extracted `buildHeaderLines` and `buildTeamLines` helpers from `refreshWidget`
+- [x] Reduced function size to ≤20 lines
+- [x] All tests pass; no functional changes
+
 ---
 
 ## 📋 BACKLOG (Prioritized)

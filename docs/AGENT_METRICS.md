@@ -22,7 +22,8 @@
 | **Round 13 (Coverage to ≥80%)** | **2025-06-09** | **1146 → 1206** | **✅** | **80.3% lines** | **0** | **Added tests: universal-tool execution, memory-tool execution & renderer, session-manager resolution, team-widget toggle, logger, extensions aggregator, and more; removed failing tests** |
 | **Round 14 (Build System Integration)** | **2025-06-09** | **1206 → 1215** | **✅** | **~80.45%** | **0** | **Added scripts-tool (list/run npm scripts) with 9 unit tests; coverage increased** |
 | **Round 15 (Renderer Refactor)** | **2025-06-09** | **1215 → 1225** | **✅** | **~80.5%** | **0** | **Added render-utils (style helpers); refactored memory- and todos-renderers; 10 new unit tests** |
-| **Final** | **2025-06-09** | **1225** | **✅** | **80.5% lines** | **0** | **All planned items complete; renderer refactor done** |
+| **Round 16 (Widget Complexity)** | **2025-06-09** | **1225** | **✅** | **~80.5%** | **0** | **Team widget refactor: extracted helpers; reduced function size; no test changes** |
+| **Final** | **2025-06-09** | **1225** | **✅** | **80.5% lines** | **0** | **All planned items complete; widget refactor done** |
 
 ---
 
