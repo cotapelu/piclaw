@@ -49,6 +49,7 @@
 | NPM Scripts Tool (Round 14) | Feature: Build system integration | Added `scripts-tool.ts` with `list` and `run` actions; 9 unit tests; coverage up to 80.45% lines; total tests 1215 |
 | Renderer error handling unification (Round 15) | Deduplication | Created render-utils with style helpers; refactored memory-renderer and todos-renderer to use them; added 10 unit tests |
 | Team widget function refactoring (Round 16) | Complexity reduction | Extracted buildHeaderLines and buildTeamLines; reduced refreshWidget to ≤20 lines |
+| Session tree command render refactoring (Round 17) | Complexity reduction | Extracted renderDetailsForType helpers; simplified EntryDetailView.render; improved maintainability |
 
 ---
 

@@ -12,6 +12,86 @@ import { Container, Text, Spacer } from "@earendil-works/pi-tui";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import type { SessionTreeNode } from "@earendil-works/pi-coding-agent/dist/core/session-manager";
 
+// Helper functions for rendering entry details (extracted to reduce function size)
+function renderMessageDetails(e: any): string[] {
+  const msgEntry = e;
+  const msg = msgEntry.message;
+  const lines: string[] = [];
+  lines.push('\n--- Message ---');
+  lines.push(`Role: ${msg.role}`);
+  if ('content' in msg && msg.content) {
+    const content = msg.content as any[];
+    if (Array.isArray(content)) {
+      for (const c of content) {
+        if (c.type === 'text') {
+          lines.push(`Text: ${c.text?.substring(0, 200) || ''}${c.text && c.text.length > 200 ? '...' : ''}`);
+        } else if (c.type === 'image') {
+          lines.push(`[Image: ${c.source?.mediaType || 'unknown'}]`);
+        }
+      }
+    }
+  }
+  return lines;
+}
+
+function renderBranchSummaryDetails(e: any): string[] {
+  const bs = e;
+  const lines: string[] = [];
+  lines.push('\n--- Branch Summary ---');
+  lines.push(`From: ${bs.fromId}`);
+  if (bs.summary) {
+    lines.push(`Summary: ${bs.summary.substring(0, 200)}${bs.summary.length > 200 ? '...' : ''}`);
+  }
+  return lines;
+}
+
+function renderCompactionDetails(e: any): string[] {
+  const comp = e;
+  const lines: string[] = [];
+  lines.push('\n--- Compaction Summary ---');
+  lines.push(`Tokens before: ${comp.tokensBefore ?? 'N/A'}`);
+  lines.push(`First kept: ${comp.firstKeptEntryId ?? 'none'}`);
+  if (comp.summary) {
+    const summaryPreview = comp.summary.length > 200 ? comp.summary.substring(0, 200) + '...' : comp.summary;
+    lines.push(`Summary: ${summaryPreview}`);
+  }
+  return lines;
+}
+
+function renderCustomMessageDetails(e: any): string[] {
+  const cm = e;
+  const lines: string[] = [];
+  lines.push('\n--- Custom Message ---');
+  lines.push(`Custom type: ${cm.customType}`);
+  lines.push(`Display: ${cm.display}`);
+  if (typeof cm.content === 'string') {
+    lines.push(`Content: ${cm.content.substring(0, 200)}${cm.content.length > 200 ? '...' : ''}`);
+  }
+  return lines;
+}
+
+function renderLabelDetails(e: any): string[] {
+  const label = e;
+  const lines: string[] = [];
+  lines.push('\n--- Label ---');
+  lines.push(`Target: ${label.targetId}`);
+  lines.push(`Label: ${label.label ?? "<empty>"}`);
+  return lines;
+}
+
+function renderDetailsForType(entry: any): string[] {
+  const type = entry.type;
+  switch (type) {
+    case 'message': return renderMessageDetails(entry);
+    case 'branch_summary': return renderBranchSummaryDetails(entry);
+    case 'compaction': return renderCompactionDetails(entry);
+    case 'custom_message': return renderCustomMessageDetails(entry);
+    case 'label': return renderLabelDetails(entry);
+    default: return [`Unknown entry type: ${type}`];
+  }
+}
+
+
 class EntryDetailView {
   private entry: SessionEntry;
   private cachedLines: string[] = [];
@@ -31,63 +111,17 @@ class EntryDetailView {
       return this.cachedLines;
     }
 
-    const lines: string[] = [];
     const e = this.entry;
-    const type = e.type;
+    const common: string[] = [
+      `Entry ID: ${e.id}`,
+      `Parent ID: ${e.parentId ?? "<root>"}`,
+      `Type: ${e.type}`,
+      `Timestamp: ${new Date(e.timestamp).toLocaleString()}`,
+    ];
+    const specific = renderDetailsForType(e);
+    const lines = [...common, ...specific];
 
-    lines.push(`Entry ID: ${e.id}`);
-    lines.push(`Parent ID: ${e.parentId ?? "<root>"}`);
-    lines.push(`Type: ${type}`);
-    lines.push(`Timestamp: ${new Date(e.timestamp).toLocaleString()}`);
-
-    if (type === 'message') {
-      const msgEntry = e as any;
-      const msg = msgEntry.message;
-      lines.push(`\n--- Message ---`);
-      lines.push(`Role: ${msg.role}`);
-      if ('content' in msg && msg.content) {
-        const content = msg.content as any[];
-        if (Array.isArray(content)) {
-          for (const c of content) {
-            if (c.type === 'text') {
-              lines.push(`Text: ${c.text?.substring(0, 200) || ''}${c.text && c.text.length > 200 ? '...' : ''}`);
-            } else if (c.type === 'image') {
-              lines.push(`[Image: ${c.source?.mediaType || 'unknown'}]`);
-            }
-          }
-        }
-      }
-    } else if (type === 'branch_summary') {
-      const bs = e as any;
-      lines.push(`\n--- Branch Summary ---`);
-      lines.push(`From: ${bs.fromId}`);
-      if (bs.summary) {
-        lines.push(`Summary: ${bs.summary.substring(0, 200)}${bs.summary.length > 200 ? '...' : ''}`);
-      }
-    } else if (type === 'compaction') {
-      const comp = e as any;
-      lines.push(`\n--- Compaction Summary ---`);
-      lines.push(`Tokens before: ${comp.tokensBefore ?? 'N/A'}`);
-      lines.push(`First kept: ${comp.firstKeptEntryId ?? 'none'}`);
-      if (comp.summary) {
-        const summaryPreview = comp.summary.length > 200 ? comp.summary.substring(0, 200) + '...' : comp.summary;
-        lines.push(`Summary: ${summaryPreview}`);
-      }
-    } else if (type === 'custom_message') {
-      const cm = e as any;
-      lines.push(`\n--- Custom Message ---`);
-      lines.push(`Custom type: ${cm.customType}`);
-      lines.push(`Display: ${cm.display}`);
-      if (typeof cm.content === 'string') {
-        lines.push(`Content: ${cm.content.substring(0, 200)}${cm.content.length > 200 ? '...' : ''}`);
-      }
-    } else if (type === 'label') {
-      const label = e as any;
-      lines.push(`\n--- Label ---`);
-      lines.push(`Target: ${label.targetId}`);
-      lines.push(`Label: ${label.label ?? "<empty>"}`);
-    }
-
+    // Wrap lines to width
     const wrapped: string[] = [];
     for (const line of lines) {
       if (line.length <= width) {

@@ -111,6 +111,10 @@
 - **Team Widget Refactor**: Extracted `buildHeaderLines` and `buildTeamLines` helpers from `refreshWidget` to improve readability and reduce function size to ≤20 lines.
 - **Impact**: No functional changes; all tests pass; code cleaner.
 
+### Round 17 (Function Complexity Reduction)
+- **Session Tree Command**: Refactored `EntryDetailView.render` in `session-tree-command.ts` by extracting type-specific render helpers (`renderMessageDetails`, `renderBranchSummaryDetails`, `renderCompactionDetails`, `renderCustomMessageDetails`, `renderLabelDetails`) and using a common/line pattern.
+- **Impact**: Function now ≤20 lines; improved readability; tests unchanged.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
 - Tests: **1215 passed | 3 skipped** (115 test files)

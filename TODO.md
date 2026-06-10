@@ -138,6 +138,13 @@
 - [x] Reduced function size to ≤20 lines
 - [x] All tests pass; no functional changes
 
+## ✅ COMPLETED (Evolution Round 17 - Renderer Complexity Reduction)
+
+### Session Tree Command Refactor
+- [x] Extracted renderDetailsForType helpers from EntryDetailView.render
+- [x] Reduced render function to ≤20 lines
+- [x] All tests pass; no functional changes
+
 ---
 
 ## 📋 BACKLOG (Prioritized)
