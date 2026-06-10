@@ -61,6 +61,7 @@
 | README modernization (Round 26) | Documentation | Updated README to reflect current extension architecture, tools, and slash commands; removed outdated SubTool Loader |
 | Integration tests: team command (Round 28) | Testing | Added `team-command.integration.test.ts` (3 tests) verifying widget toggle and notifications |
 
+| Integration tests: copy command (Round 29) | Testing | Added `copy-command.integration.test.ts` (7 tests) covering success, errors, and empty text handling |
 ---
 
 ## Anticipated Technical Debt

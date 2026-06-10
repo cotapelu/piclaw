@@ -1,8 +1,8 @@
 # Project State - Piclaw Coding Agent
 
 *Last Updated: 2025-06-10*
-*Current Iteration: Round 28 (Integration Tests)*
-*Test Status: ✅ 1258 passed (3 skipped)*
+*Current Iteration: Round 29 (Integration Tests)*
+*Test Status: ✅ 1265 passed (3 skipped)*
 
 ---
 
@@ -162,9 +162,13 @@
 - **Expansion**: Added `team-command.integration.test.ts` (3 tests) covering toggle and notifications using spies on team-widget module.
 - **Impact**: Test count increased to 1258; integration coverage now includes both provider and team commands.
 
+### Round 29 (Copy Command Integration)
+- **Expansion**: Added `copy-command.integration.test.ts` (7 tests) covering success path, session manager errors, tree empty, no assistant message, clipboard error, and empty text.
+- **Impact**: Test count increased to 1265; pattern for command integration tests is now proven.
+
 ### Code Quality
 - Build: ✅ Success, 0 TypeScript errors
-- Tests: **1258 passed | 3 skipped** (123 test files)
+- Tests: **1265 passed | 3 skipped** (124 test files)
 - No regressions introduced
 - All new extensions registered in `factory.ts`
 
@@ -174,8 +178,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Tests | 1258 |
-| Passed | 1258 |
+| Total Tests | 1265 |
+| Passed | 1265 |
 | Skipped | 3 |
 | Failed | 0 |
 | Build Status | ✅ Success |
