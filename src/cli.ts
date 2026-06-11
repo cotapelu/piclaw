@@ -1,31 +1,22 @@
 #!/usr/bin/env node
-import { logger } from "./utils/logger.js";
+import { main as upstreamMain } from "@earendil-works/pi-coding-agent";
+import { handleCustomCommands } from "./custom-commands.js";
+import { getExtensionFactories } from "./extensions/index.js";
 
-/**
- * Piclaw CLI Entry Point
- *
- * Minimal wrapper that delegates to main.ts.
- * Sets basic process metadata and environment.
- */
+// Wrapper main
+async function main() {
+  const args = process.argv.slice(2);
 
-import { main } from "./main.js";
+  // Custom commands (pin, export, import, health)
+  if (await handleCustomCommands(args)) return;
 
-// Set process title
-process.title = "piclaw";
+  // Upstream handles everything else (including @file for including file content)
+  await upstreamMain(args, {
+    extensionFactories: getExtensionFactories()
+  });
+}
 
-// Mark as pi-based
-process.env.PI_CODING_AGENT = "true";
-
-// Simple error handlers (avoid crashing without logs)
-process.on("unhandledRejection", (err) => {
-  logger.error("Unhandled rejection", { error: err });
+main().catch(err => {
+  console.error("Fatal error:", err);
   process.exit(1);
 });
-
-process.on("uncaughtException", (err) => {
-  logger.error("Uncaught exception", { error: err });
-  process.exit(1);
-});
-
-// Run the application
-await main(process.argv.slice(2));
