@@ -114,16 +114,6 @@ export function getExtensionFactories() {
   return [extensionsAggregator];
 }
 
-/**
- * Returns resource loader options
- * Used by AgentSessionServices configuration
- */
-export function getResourceLoaderOptions() {
-  return {
-    extensionFactories: getExtensionFactories(),
-  };
-}
-
 // Re-export aggregator with clear name
 export { extensionsAggregator };
 

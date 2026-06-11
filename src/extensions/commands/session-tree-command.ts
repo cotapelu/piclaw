@@ -155,7 +155,7 @@ export function registerSessionTreeCommand(api: ExtensionAPI): void {
         return;
       }
 
-      if (ctx.mode !== "tui") {
+      if (!ctx.hasUI) {
         ctx.ui.notify("/tree requires TUI mode", "error");
         return;
       }

@@ -96,7 +96,7 @@ export function registerSettingsCommand(api: ExtensionAPI): void {
   api.registerCommand("settings", {
     description: "Configure Piclaw settings (model, thinking, logs, etc.)",
     handler: async (_args: string, ctx) => {
-      if (ctx.mode !== "tui") {
+      if (!ctx.hasUI) {
         ctx.ui.notify("/settings requires TUI mode", "error");
         return;
       }

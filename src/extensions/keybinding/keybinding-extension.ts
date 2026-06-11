@@ -46,7 +46,7 @@ export function registerKeybindingExtension(api: ExtensionAPI): void {
     // Register a terminal input listener
     const unsubscribe = ctx.ui.onTerminalInput((data) => {
       // Only process if agent idle and in TUI mode (to avoid interfering with streaming output)
-      if (!ctx.isIdle() || ctx.mode !== "tui") {
+      if (!ctx.isIdle() || !ctx.hasUI) {
         return; // don't consume
       }
 

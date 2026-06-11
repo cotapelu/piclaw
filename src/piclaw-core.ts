@@ -19,7 +19,7 @@ import {
 
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { getResourceLoaderOptions } from "./extensions/index.js";
+import { getExtensionFactories } from "./extensions/index.js";
 
 // Session resolution (our own implementation - inspired by reading llm-context)
 import { resolveSessionManager } from "./session-resolver.js";
@@ -139,7 +139,7 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
       resourceLoaderOptions: {
         packageManager,
         additionalPromptTemplatePaths: [promptsDir],
-        ...getResourceLoaderOptions(),
+        extensionFactories: getExtensionFactories(),
       },
     });
 

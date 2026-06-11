@@ -88,12 +88,10 @@ vi.mock('../piclaw-package-manager.js', async () => {
 });
 
 vi.mock('../extensions/index.js', async () => {
-  const getResourceLoaderOptions = vi.fn().mockReturnValue({
-    extensionFactories: [],
-  });
+  const getExtensionFactories = vi.fn().mockReturnValue([]);
   return {
-    default: getResourceLoaderOptions,
-    getResourceLoaderOptions,
+    default: getExtensionFactories,
+    getExtensionFactories,
   };
 });
 
