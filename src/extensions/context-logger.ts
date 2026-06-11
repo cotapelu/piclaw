@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, appendFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
 import type { ExtensionAPI, BeforeProviderRequestEvent } from "@earendil-works/pi-coding-agent";
+import { CONFIG_DIR_NAME } from "../config/config-manager.js";
 
 /**
  * Context Logger Extension
@@ -12,7 +13,7 @@ import type { ExtensionAPI, BeforeProviderRequestEvent } from "@earendil-works/p
  * Output format: JSON lines (one JSON object per request)
  */
 
-const DEFAULT_LOG_PATH = ".piclaw/context/context.log";
+const DEFAULT_LOG_PATH = join(CONFIG_DIR_NAME, "context", "context.log");
 
 export default function (pi: ExtensionAPI) {
 	// Register CLI flags for this extension

@@ -14,6 +14,7 @@ import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { minimatch } from "minimatch";
 import { logger } from "./utils/logger.js";
+import { CONFIG_DIR_NAME } from "./config/config-manager.js";
 
 interface PiclawSettings {
   packages?: Array<string | { source: string; filter?: PackageFilter }>;
@@ -139,7 +140,7 @@ export class PiclawPackageManager {
   // ============================================================================
 
   private getProjectSettingsPath(): string {
-    return join(this.cwd, ".piclaw", "settings.json");
+    return join(this.cwd, CONFIG_DIR_NAME, "settings.json");
   }
 
   private getGlobalSettingsPath(): string {
@@ -627,7 +628,7 @@ export class PiclawPackageManager {
 
   private getNpmInstallPath(source: { type: "npm"; name: string; pinned: boolean }, scope: "user" | "project"): string {
     if (scope === "project") {
-      return join(this.cwd, ".piclaw", "npm", "node_modules", source.name);
+      return join(this.cwd, CONFIG_DIR_NAME, "npm", "node_modules", source.name);
     }
     const root = this.getGlobalNpmRoot();
     return join(root, source.name);
@@ -635,7 +636,7 @@ export class PiclawPackageManager {
 
   private getGitInstallRoot(scope: "user" | "project"): string {
     if (scope === "project") {
-      return join(this.cwd, ".piclaw", "git");
+      return join(this.cwd, CONFIG_DIR_NAME, "git");
     }
     return join(this.agentDir, "git");
   }
@@ -711,7 +712,7 @@ export class PiclawPackageManager {
   }
 
   private getProjectNpmRoot(): string {
-    return join(this.cwd, ".piclaw", "npm");
+    return join(this.cwd, CONFIG_DIR_NAME, "npm");
   }
 
   private getGlobalNpmRoot(): string {

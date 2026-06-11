@@ -2,7 +2,7 @@
 import chalk from "chalk";
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from "fs";
 import { dirname, join, resolve } from "path";
-import { getAgentDir } from "./config/config-manager.js";
+import { getAgentDir, CONFIG_DIR_NAME } from "./config/config-manager.js";
 import { PiclawPackageManager } from "./piclaw-package-manager.js";
 import { logger } from "./utils/logger.js";
 
@@ -66,7 +66,7 @@ Example:
   const agentDir = getAgentDir();
   const scope = local ? "project" : "user";
   const settingsPath = scope === "project"
-    ? join(cwd, ".piclaw", "settings.json")
+    ? join(cwd, CONFIG_DIR_NAME, "settings.json")
     : join(agentDir, "settings.json");
 
   if (!existsSync(settingsPath)) {
@@ -157,7 +157,7 @@ Examples:
   const agentDir = getAgentDir();
   const scope = local ? "project" : "user";
   const settingsPath = scope === "project"
-    ? join(cwd, ".piclaw", "settings.json")
+    ? join(cwd, CONFIG_DIR_NAME, "settings.json")
     : join(agentDir, "settings.json");
 
   try {
@@ -242,7 +242,7 @@ Examples:
   const agentDir = getAgentDir();
   const scope = local ? "project" : "user";
   const settingsPath = scope === "project"
-    ? join(cwd, ".piclaw", "settings.json")
+    ? join(cwd, CONFIG_DIR_NAME, "settings.json")
     : join(agentDir, "settings.json");
 
   try {
