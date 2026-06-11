@@ -8,7 +8,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
-import { styleError } from "../utils/render-utils";
+import { styleError } from "../utils/render-utils.js";
 
 interface Memory {
   id: number;
