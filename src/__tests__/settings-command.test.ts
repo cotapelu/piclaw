@@ -33,8 +33,12 @@ const createMockCtx = (overrides = {}) => ({
   ui: {
     notify: mockNotify,
     custom: mockCustom,
+    get getAllThemes() { return []; },
+    getTheme: () => undefined,
+    setTheme: () => ({ success: false }),
   },
   mode: "tui",
+  hasUI: true,
   ...overrides,
 });
 
@@ -54,8 +58,7 @@ describe("Settings Command", () => {
   it("should require TUI mode", async () => {
     const api = createMockApi();
     registerSettingsCommand(api);
-    const ctx = createMockCtx();
-    ctx.mode = "print";
+    const ctx = createMockCtx({ hasUI: false });
 
     const handler = api.registerCommand.mock.calls[0][1].handler;
     await handler("", ctx);

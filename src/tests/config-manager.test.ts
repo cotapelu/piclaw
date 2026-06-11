@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { loadConfig, saveConfig, getConfigPath, getDefaultContextLogFile, getAgentDir, getBinDir, type PiclawConfig } from "../config/config-manager.js";
+import { loadConfig, saveConfig, getConfigPath, getAgentDir, getBinDir, type PiclawConfig } from "../config/config-manager.js";
 import { mkdirSync, rmSync, existsSync, writeFileSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { homedir } from "node:os";
@@ -149,17 +149,6 @@ describe("ConfigManager", () => {
       expect(path).toContain(".piclaw");
       expect(path).toContain("config.json");
       expect(path).toContain(tempHome);
-    });
-  });
-
-  describe("getDefaultContextLogFile", () => {
-    it("should return path in .piclaw/context directory", () => {
-      const cwd = join(tempHome, "myproject");
-      const path = getDefaultContextLogFile(cwd);
-      expect(path).toContain(".piclaw");
-      expect(path).toContain("context");
-      expect(path).toContain("context.log");
-      expect(path).toContain(cwd);
     });
   });
 

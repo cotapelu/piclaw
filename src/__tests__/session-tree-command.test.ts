@@ -29,6 +29,7 @@ const createMockCtx = (overrides = {}) => ({
     getLeafId: () => "e1",
   },
   mode: "tui",
+  hasUI: true,
   ui: {
     notify: mockNotify,
     custom: mockCustom,
@@ -52,7 +53,7 @@ describe("Session Tree Command", () => {
   it("should require TUI mode", async () => {
     const api = createMockApi();
     registerSessionTreeCommand(api);
-    const ctx = createMockCtx({ mode: "print" });
+    const ctx = createMockCtx({ hasUI: false });
     const handler = api.registerCommand.mock.calls[0][1].handler;
     await handler("", ctx);
     expect(mockNotify).toHaveBeenCalledWith("/tree requires TUI mode", "error");

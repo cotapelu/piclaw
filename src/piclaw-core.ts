@@ -32,8 +32,6 @@ import { PiclawPackageManager } from "./piclaw-package-manager.js";
 
 // Config & logging
 import { getAgentDir } from "./config/config-manager.js";
-import { getDefaultContextLogFile } from "./config/config-manager.js";
-import { createContextLoggingStreamFn } from "./utils/context-logger.js";
 import { logger } from "./utils/logger.js";
 import { TrustManager } from "./trust-manager.js";
 
@@ -60,7 +58,6 @@ export interface PiclawCoreOptions {
   model?: string;
   thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
   verbose?: boolean;
-  contextLogFile?: string;
   // Resource loading flags
   noExtensions?: boolean;
   noContextFiles?: boolean;
@@ -86,7 +83,7 @@ export interface PiclawCoreOptions {
 export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<AgentSessionRuntime> {
   const cwd = options.cwd ?? process.cwd();
   const agentDir = options.agentDir ?? getAgentDir();
-  const contextLogFile = options.contextLogFile ?? getDefaultContextLogFile(cwd);
+
   const interactive = options.interactive ?? true;
 
   logger.debug("Bootstrapping Piclaw", { cwd, agentDir, interactive });
@@ -180,18 +177,6 @@ export async function bootPiclaw(options: PiclawCoreOptions = {}): Promise<Agent
     sessionId: sessionManager.getSessionId(),
     cwd: runtime.cwd,
   });
-
-  // ============================================
-  // 4. CONTEXT LOGGING (optional)
-  // ============================================
-  if (contextLogFile && runtime.session?.agent?.streamFn) {
-    const originalStreamFn = runtime.session.agent.streamFn;
-    runtime.session.agent.streamFn = createContextLoggingStreamFn(
-      originalStreamFn,
-      contextLogFile
-    ) as typeof originalStreamFn;
-    logger.debug(`Context logging enabled: ${contextLogFile}`);
-  }
 
   // Store parent runtime reference in session manager (for extensions)
   const sessionMgr = runtime.session.sessionManager as SessionManagerWithParent;

@@ -46,14 +46,6 @@ function configToItems(config: PiclawConfig): SettingItem[] {
     values: ["on", "off"],
   });
 
-  // Context log file
-  items.push({
-    id: "contextLogFile",
-    label: "Context Log File",
-    currentValue: config.contextLogFile || "<default>",
-    values: ["<default>", "<unset>"],
-  });
-
   // Session dir
   items.push({
     id: "sessionDir",
@@ -80,11 +72,8 @@ function itemsToConfig(config: PiclawConfig, items: SettingItem[]): PiclawConfig
       case "verbose":
         newConfig.verbose = value === "on";
         break;
-      case "contextLogFile":
-        newConfig.contextLogFile = value === "<default>" ? undefined : value === "<unset>" ? undefined : value;
-        break;
       case "sessionDir":
-        newConfig.sessionDir = value === "<default>" ? undefined : value;
+        newConfig.sessionDir = (value === "<default>" || value === "<unset>") ? undefined : value;
         break;
     }
   }

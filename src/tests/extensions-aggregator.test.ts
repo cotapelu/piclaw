@@ -70,7 +70,7 @@ import { registerMetricsWidget } from "../extensions/metrics/metrics-widget";
 import { registerScriptsTool } from "../extensions/tools/scripts-tool";
 
 describe("Extensions Aggregator", () => {
-  const mockApi: any = { registerTool: vi.fn(), on: vi.fn() };
+  const mockApi: any = { registerTool: vi.fn(), on: vi.fn(), registerFlag: vi.fn(), getFlag: vi.fn() };
 
   beforeEach(() => {
     vi.clearAllMocks();

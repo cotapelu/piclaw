@@ -23,6 +23,7 @@ import { registerToolTemplate } from "./tools/tool-template.js";
 import { registerSkillReaderExtension } from "./tools/skill-reader.js";
 import autoContinueExtension from "./hooks/auto-continue.js";
 import autoCompact85Extension from "./hooks/auto-compact-85.js";
+import contextLoggerExtension from "./context-logger.js";
 
 import piclawHeader from "./piclaw-header.js";
 import { registerTodosRenderer } from "./renderers/todos-renderer.js";
@@ -104,6 +105,9 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
 
   // Register Piclaw Header
   piclawHeader(api);
+
+  // Register Context Logger Extension
+  contextLoggerExtension(api);
 }
 
 /**

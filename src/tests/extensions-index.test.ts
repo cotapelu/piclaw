@@ -53,6 +53,7 @@ describe('extensions/index', () => {
     registerProvider: vi.fn(),
     registerMessageRenderer: vi.fn(),
     on: vi.fn(),
+    registerFlag: vi.fn(),
     getFlag: vi.fn(),
   }) as any;
 

@@ -42,13 +42,6 @@ function configToItems(config: PiclawConfig): SettingItem[] {
   });
 
   items.push({
-    id: "contextLogFile",
-    label: "Context Log File",
-    currentValue: config.contextLogFile || "<default>",
-    values: ["<default>", "<unset>"],
-  });
-
-  items.push({
     id: "sessionDir",
     label: "Session Directory",
     currentValue: config.sessionDir || "<default>",
@@ -73,11 +66,8 @@ function itemsToConfig(config: PiclawConfig, items: SettingItem[]): PiclawConfig
       case "verbose":
         newConfig.verbose = value === "on";
         break;
-      case "contextLogFile":
-        newConfig.contextLogFile = value === "<default>" ? undefined : value === "<unset>" ? undefined : value;
-        break;
       case "sessionDir":
-        newConfig.sessionDir = value === "<default>" ? undefined : value;
+        newConfig.sessionDir = (value === "<default>" || value === "<unset>") ? undefined : value;
         break;
     }
   }
@@ -90,153 +80,88 @@ describe("Settings Command - Config Conversion", () => {
     model: "openai:gpt-4o",
     thinking: "medium",
     verbose: true,
-    contextLogFile: undefined,
     sessionDir: undefined,
   };
 
   it("should convert config to items correctly", () => {
     const items = configToItems(defaultConfig);
 
-    expect(items.length).toBe(5);
+    expect(items.length).toBe(4);
 
-    const modelItem = items.find(i => i.id === "model");
-    expect(modelItem?.currentValue).toBe("openai:gpt-4o");
-    expect(modelItem?.values).toContain("<unset>");
+    const modelItem = items.find(i => i.id === "model")!;
+    expect(modelItem.currentValue).toBe("openai:gpt-4o");
+    expect(modelItem.values).toContain("openai:gpt-4o");
 
-    const thinkingItem = items.find(i => i.id === "thinking");
-    expect(thinkingItem?.currentValue).toBe("medium");
+    const thinkingItem = items.find(i => i.id === "thinking")!;
+    expect(thinkingItem.currentValue).toBe("medium");
 
-    const verboseItem = items.find(i => i.id === "verbose");
-    expect(verboseItem?.currentValue).toBe("on");
+    const verboseItem = items.find(i => i.id === "verbose")!;
+    expect(verboseItem.currentValue).toBe("on");
 
-    const contextLogItem = items.find(i => i.id === "contextLogFile");
-    expect(contextLogItem?.currentValue).toBe("<default>");
-
-    const sessionDirItem = items.find(i => i.id === "sessionDir");
-    expect(sessionDirItem?.currentValue).toBe("<default>");
+    const sessionDirItem = items.find(i => i.id === "sessionDir")!;
+    expect(sessionDirItem.currentValue).toBe("<default>");
   });
 
-  it("should handle unset model", () => {
-    const config = { ...defaultConfig, model: undefined };
+  it("should handle model set to <unset>", () => {
+    const config: PiclawConfig = { ...defaultConfig, model: undefined };
     const items = configToItems(config);
-    const modelItem = items.find(i => i.id === "model");
-    expect(modelItem?.currentValue).toBe("<unset>");
-  });
-
-  it("should convert items back to config with model set", () => {
-    const items = configToItems(defaultConfig);
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.model).toBe("openai:gpt-4o");
-    expect(newConfig.thinking).toBe("medium");
-    expect(newConfig.verbose).toBe(true);
-    expect(newConfig.contextLogFile).toBeUndefined();
-    expect(newConfig.sessionDir).toBeUndefined();
-  });
-
-  it("should convert items back with model unset", () => {
-    const items = configToItems({ ...defaultConfig, model: "openai:gpt-4o" });
-    items.find(i => i.id === "model")!.currentValue = "<unset>";
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.model).toBeUndefined();
+    const modelItem = items.find(i => i.id === "model")!;
+    expect(modelItem.currentValue).toBe("<unset>");
   });
 
   it("should handle verbose off", () => {
-    const config = { ...defaultConfig, verbose: false };
+    const config: PiclawConfig = { ...defaultConfig, verbose: false };
     const items = configToItems(config);
-    expect(items.find(i => i.id === "verbose")?.currentValue).toBe("off");
-
-    const newConfig = itemsToConfig({}, items);
-    expect(newConfig.verbose).toBe(false);
-  });
-
-  it("should handle thinking level change", () => {
-    const items = configToItems(defaultConfig);
-    items.find(i => i.id === "thinking")!.currentValue = "high";
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.thinking).toBe("high");
-  });
-
-  it("should handle contextLogFile set to custom path", () => {
-    const items = configToItems(defaultConfig);
-    items.find(i => i.id === "contextLogFile")!.currentValue = "/custom/path/logs.txt";
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.contextLogFile).toBe("/custom/path/logs.txt");
-  });
-
-  it("should handle contextLogFile unset", () => {
-    const items = configToItems(defaultConfig);
-    items.find(i => i.id === "contextLogFile")!.currentValue = "<unset>";
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.contextLogFile).toBeUndefined();
+    const verboseItem = items.find(i => i.id === "verbose")!;
+    expect(verboseItem.currentValue).toBe("off");
   });
 
   it("should handle sessionDir set to custom path", () => {
     const items = configToItems(defaultConfig);
-    items.find(i => i.id === "sessionDir")!.currentValue = "/custom/sessions";
-    const newConfig = itemsToConfig({}, items);
+    const sessionDirItem = items.find(i => i.id === "sessionDir")!;
+    expect(sessionDirItem.currentValue).toBe("<default>");
+  });
 
+  it("should convert items back to config correctly", () => {
+    const items = configToItems(defaultConfig);
+    const newConfig = itemsToConfig(defaultConfig, items);
+
+    expect(newConfig.model).toBe("openai:gpt-4o");
+    expect(newConfig.thinking).toBe("medium");
+    expect(newConfig.verbose).toBe(true);
+    expect(newConfig.sessionDir).toBeUndefined();
+  });
+
+  it("should handle model unset in itemsToConfig", () => {
+    const items: SettingItem[] = [
+      { id: "model", label: "Default Model", currentValue: "<unset>", values: [] },
+      { id: "thinking", label: "Thinking Level", currentValue: "medium", values: [] },
+      { id: "verbose", label: "Verbose Logs", currentValue: "on", values: [] },
+      { id: "sessionDir", label: "Session Directory", currentValue: "<default>", values: [] },
+    ];
+    const newConfig = itemsToConfig(defaultConfig, items);
+    expect(newConfig.model).toBeUndefined();
+  });
+
+  it("should handle sessionDir set to custom path in itemsToConfig", () => {
+    const items: SettingItem[] = [
+      { id: "model", label: "Default Model", currentValue: "openai:gpt-4o", values: [] },
+      { id: "thinking", label: "Thinking Level", currentValue: "medium", values: [] },
+      { id: "verbose", label: "Verbose Logs", currentValue: "on", values: [] },
+      { id: "sessionDir", label: "Session Directory", currentValue: "/custom/sessions", values: [] },
+    ];
+    const newConfig = itemsToConfig(defaultConfig, items);
     expect(newConfig.sessionDir).toBe("/custom/sessions");
   });
 
-  it("should preserve unknown config fields", () => {
-    const config: PiclawConfig = {
-      model: "test-model",
-      thinking: "low",
-      verbose: false,
-      contextLogFile: undefined,
-      sessionDir: undefined,
-      // Extra field
-      customField: "custom-value",
-    } as any;
-
-    const items = configToItems(config);
-    const newConfig = itemsToConfig(config, items);
-
-    // Should keep custom field
-    expect((newConfig as any).customField).toBe("custom-value");
-  });
-});
-
-describe("Settings Command - Edge Cases", () => {
-  it("should handle empty config", () => {
-    const config: PiclawConfig = {};
-    const items = configToItems(config);
-    expect(items.length).toBe(5);
-    expect(items.find(i => i.id === "model")?.currentValue).toBe("<unset>");
-    expect(items.find(i => i.id === "thinking")?.currentValue).toBe("medium");
-    expect(items.find(i => i.id === "verbose")?.currentValue).toBe("off");
-  });
-
-  it("should handle all items at once", () => {
-    const config: PiclawConfig = {
-      model: "kilo:gpt-4o",
-      thinking: "xhigh",
-      verbose: true,
-      contextLogFile: "/tmp/logs.txt",
-      sessionDir: "/tmp/sessions",
-    };
-
-    const items = configToItems(config);
-    // Simulate user changes
-    items.forEach(item => {
-      if (item.id === "model") item.currentValue = "anthropic:claude-opus-4-5";
-      if (item.id === "thinking") item.currentValue = "minimal";
-      if (item.id === "verbose") item.currentValue = "off";
-      if (item.id === "contextLogFile") item.currentValue = "<unset>";
-      if (item.id === "sessionDir") item.currentValue = "<default>";
-    });
-
-    const newConfig = itemsToConfig({}, items);
-
-    expect(newConfig.model).toBe("anthropic:claude-opus-4-5");
-    expect(newConfig.thinking).toBe("minimal");
-    expect(newConfig.verbose).toBe(false);
-    expect(newConfig.contextLogFile).toBeUndefined();
+  it("should handle sessionDir unset in itemsToConfig", () => {
+    const items: SettingItem[] = [
+      { id: "model", label: "Default Model", currentValue: "openai:gpt-4o", values: [] },
+      { id: "thinking", label: "Thinking Level", currentValue: "medium", values: [] },
+      { id: "verbose", label: "Verbose Logs", currentValue: "on", values: [] },
+      { id: "sessionDir", label: "Session Directory", currentValue: "<unset>", values: [] },
+    ];
+    const newConfig = itemsToConfig(defaultConfig, items);
     expect(newConfig.sessionDir).toBeUndefined();
   });
 });

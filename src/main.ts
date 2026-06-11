@@ -113,7 +113,6 @@ async function main(args: string[] = process.argv.slice(2)): Promise<void> {
       model: config.model,
       thinking: config.thinking,
       verbose: config.verbose,
-      contextLogFile: config.contextLogFile ?? opts.contextLogFile,
       // Session flags
       session: opts.session,
       resume: opts.resume,

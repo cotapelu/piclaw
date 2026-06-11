@@ -41,6 +41,7 @@ describe("Keybinding Extension", () => {
     const ctx = {
       isIdle: () => true,
       mode: "tui",
+      hasUI: true,
       ui: { onTerminalInput: mockOnTerminal },
     } as any;
 
@@ -70,6 +71,7 @@ describe("Keybinding Extension", () => {
     const ctx = {
       isIdle: () => false,
       mode: "tui",
+      hasUI: true,
       ui: { onTerminalInput: mockOnTerminal },
     } as any;
 

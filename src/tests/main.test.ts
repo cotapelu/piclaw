@@ -19,7 +19,6 @@ vi.mock('../config/config-manager.js', () => {
     tools: overrides.tools ?? ['read', 'bash', 'edit', 'write', 'todos', 'memory', 'echo', 'system-info', 'http'],
     sessionDir: overrides.sessionDir,
     verbose: overrides.verbose ?? false,
-    contextLogFile: overrides.contextLogFile,
   }));
   return {
     loadConfig: mockLoadConfig,
@@ -144,7 +143,7 @@ describe('main()', () => {
     expect(actualArg.model).toBe('openai:gpt-4o');
     expect(actualArg.thinking).toBe('high');
     expect(actualArg.verbose).toBe(false);
-    expect(actualArg.contextLogFile).toBeUndefined();
+
   });
 
   it('should expand @plan file into messages', async () => {
@@ -200,7 +199,6 @@ describe('main()', () => {
       tools: overrides.tools ?? ['read', 'bash', 'edit', 'write', 'todos', 'memory', 'echo', 'system-info', 'http'],
       sessionDir: overrides.sessionDir,
       verbose: true,
-      contextLogFile: overrides.contextLogFile,
     }));
     (bootPiclaw as any).mockRejectedValueOnce(new Error('test error'));
     await expect(main([])).rejects.toThrow('process.exit');

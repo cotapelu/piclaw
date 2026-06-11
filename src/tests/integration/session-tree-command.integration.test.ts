@@ -65,6 +65,7 @@ describe("Session Tree Command Integration", () => {
     const ctx = {
       sessionManager: mockSessionManager,
       mode: "tui",
+      hasUI: true,
       ui: { notify: mockNotify, custom: mockCustom },
     };
 
