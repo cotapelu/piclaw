@@ -11,7 +11,7 @@ import { DynamicBorder, TreeSelectorComponent } from "@earendil-works/pi-coding-
 import { Container, Text, Spacer } from "@earendil-works/pi-tui";
 import type { SessionEntry } from "@earendil-works/pi-coding-agent";
 import type { SessionTreeNode } from "@earendil-works/pi-coding-agent/dist/core/session-manager";
-import { addSectionHeader } from "../utils/widget-helpers";
+import { addSectionHeader } from "../utils/widget-helpers.js";
 
 // Helper functions for rendering entry details (extracted to reduce function size)
 function renderMessageDetails(e: any): string[] {
