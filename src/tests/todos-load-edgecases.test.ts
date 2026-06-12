@@ -18,7 +18,7 @@ describe('Todos Load Edge Cases', () => {
 
   it('loadFromFile returns false when version is not 1', async () => {
     const state = new TodoState();
-    const todosDir = join(tmpDir, '.pi', 'agent');
+    const todosDir = join(tmpDir, '.piclaw', 'agent');
     mkdirSync(todosDir, { recursive: true });
     const filePath = join(todosDir, 'todos.json');
     writeFileSync(filePath, JSON.stringify({ version: 2, phases: [], nextTaskId: 1, nextPhaseId: 1 }));
@@ -30,7 +30,7 @@ describe('Todos Load Edge Cases', () => {
 
   it('loadFromFile returns false and logs error on parse failure', async () => {
     const state = new TodoState();
-    const todosDir = join(tmpDir, '.pi', 'agent');
+    const todosDir = join(tmpDir, '.piclaw', 'agent');
     mkdirSync(todosDir, { recursive: true });
     const filePath = join(todosDir, 'todos.json');
     writeFileSync(filePath, 'invalid json');

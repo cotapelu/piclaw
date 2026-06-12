@@ -231,7 +231,7 @@ describe('TodosTool Edge Cases', () => {
       expect(result.details.phases[0].name).toBe('Phase1');
       // No tasks yet => summary says cleared
       expect(result.content[0].text).toBe('Todo list cleared.');
-      expect(existsSync(join(cwd, '.pi', 'agent', 'todos.json'))).toBe(true);
+      expect(existsSync(join(cwd, '.piclaw', 'agent', 'todos.json'))).toBe(true);
       expect(api.sendMessage).toHaveBeenCalled();
     });
 

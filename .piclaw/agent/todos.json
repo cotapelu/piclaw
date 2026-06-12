@@ -1,7 +1,39 @@
 {
   "version": 1,
-  "phases": [],
-  "nextTaskId": 1,
-  "nextPhaseId": 1,
-  "updatedAt": "2026-05-30T08:11:01.662Z"
+  "phases": [
+    {
+      "id": "phase-1",
+      "name": "Chạy test và dọn file test thừa",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Chạy npm test để xem kết quả",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-2",
+          "content": "Liệt kê tất cả file test trong project",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Xác định file source tương ứng cho mỗi file test",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Xóa những file test không có source tương ứng",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Chạy test lại để xác nhận",
+          "status": "pending"
+        }
+      ]
+    }
+  ],
+  "nextTaskId": 6,
+  "nextPhaseId": 2,
+  "updatedAt": "2026-06-12T00:29:35.481Z"
 }
