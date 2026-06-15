@@ -115,4 +115,26 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 **Outcome**: Initial memory leak check complete; package manager shows stable memory usage. Continuous monitoring recommended.
 
-*Next iteration: Expand fuzzing coverage to other tools; maintain coverage; reduce TUI re-renders.*
+### Iteration 8 — 2026-06-15 (Prometheus Metrics Export)
+
+**Observability (P4):**
+- Added `src/extensions/tools/prometheus-metrics-tool.ts` that reads `.piclaw/metrics.json` and exports metrics in Prometheus text format.
+- Supports gauges and counters with `team_id` label.
+- Completes P4 milestone: "Export metrics in Prometheus format".
+- Easy integration with Prometheus/Grafana; improved operational observability.
+
+**Outcome**: Metrics can now be scraped by Prometheus; system monitoring enhanced.
+
+### Iteration 9 — 2026-06-15 (Fuzzing Expansion & Debug Enhancements)
+
+**Fuzzing (P5):**
+- Added `src/tests/test-tool-security.test.ts` (9 tests) covering `escapeShellArg` injection vectors.
+- Expanded fuzzing coverage to include test-tool file arguments.
+
+**Debug Mode (P4):**
+- Enhanced `logger.error` to automatically include stack trace when the first argument is an `Error` object.
+- Improves troubleshooting in production without extra code changes.
+
+**Outcome**: Security testing broadened; debugging capabilities strengthened.
+
+*Next iteration: address remaining P4/P5 items: TUI performance dashboard, long-running stability test, session health checks.*

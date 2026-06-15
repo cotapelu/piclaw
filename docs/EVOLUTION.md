@@ -162,6 +162,27 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 **Outcome**: Initial memory leak check complete; package manager shows stable memory usage. Continuous monitoring recommended.
 
+### Iteration 8 — 2026-06-15 (Prometheus Metrics Export)
+
+**Observability (P4):**
+- Added `src/extensions/tools/prometheus-metrics-tool.ts` for Prometheus-formatted metrics export.
+- Reads `.piclaw/metrics.json` and exposes counters/gauges with `team_id` label.
+- Completes P4 milestone.
+
+**Outcome**: Integration-ready metrics for monitoring stacks.
+
+### Iteration 9 — 2026-06-15 (Fuzzing Expansion & Debug Enhancements)
+
+**Fuzzing (P5):**
+- Added `src/tests/test-tool-security.test.ts` (9 tests) for `escapeShellArg`.
+- Expanded fuzzing coverage to test-tool file args.
+
+**Debug Mode (P4):**
+- Enhanced `logger.error` to include `Error.stack` automatically.
+- Better error visibility in production.
+
+**Outcome**: Security and debugging improved.
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
