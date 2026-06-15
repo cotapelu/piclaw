@@ -1,0 +1,37 @@
+[
+  {
+    "packages": 100,
+    "totalTimeMs": 2.470052000000578,
+    "avgMsPerPkg": 0.02470052000000578,
+    "opsPerSecond": 40484.97764418587,
+    "memoryDeltaMB": 0.815288
+  },
+  {
+    "packages": 500,
+    "totalTimeMs": 1.1477759999997943,
+    "avgMsPerPkg": 0.0022955519999995886,
+    "opsPerSecond": 435625.0697000892,
+    "memoryDeltaMB": 14.701608
+  },
+  {
+    "packages": 1000,
+    "totalTimeMs": 0.8968510000013339,
+    "avgMsPerPkg": 0.0008968510000013338,
+    "opsPerSecond": 1115012.41566159,
+    "memoryDeltaMB": 27.640944
+  },
+  {
+    "packages": 2500,
+    "totalTimeMs": 1.840725999994902,
+    "avgMsPerPkg": 0.0007362903999979608,
+    "opsPerSecond": 1358159.7695729425,
+    "memoryDeltaMB": -31.92416
+  },
+  {
+    "packages": 5000,
+    "totalTimeMs": 1.980756000004476,
+    "avgMsPerPkg": 0.0003961512000008952,
+    "opsPerSecond": 2524288.705922739,
+    "memoryDeltaMB": -5.441056
+  }
+]

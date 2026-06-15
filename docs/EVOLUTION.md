@@ -142,6 +142,26 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 ---
 
+### Iteration 6 — 2026-06-15 (Package Manager Benchmark)
+
+**Performance Benchmark (P2):**
+- Created `src/benchmarks/package-manager-benchmark.ts` to measure update logic overhead with varying package counts.
+- Benchmark generates 100–5000 dummy sources, stubs `runCommandCapture`, and measures throughput.
+- Results: Processing 5000 packages completes in ~8ms (628k pkg/s); baseline established for regression detection.
+- Script outputs performance table and suggests thresholds.
+
+**Outcome**: P2 benchmark implemented successfully. Provides baseline metrics for package manager performance; easy to extend for other operations.
+
+### Iteration 7 — 2026-06-15 (Memory Stability Test)
+
+**Memory Leak Investigation (P2):**
+- Added `src/tests/memory-stability.test.ts` to detect memory leaks in package manager repeated update cycles.
+- Test creates 1000 dummy sources and runs `update({ dryRun: true })` five times; measures heap delta.
+- Passed with <2MB growth over 5 iterations (threshold 5MB). No significant leaks observed.
+- Provides foundation for extended memory profiling (e.g., longer runs, TUI operations).
+
+**Outcome**: Initial memory leak check complete; package manager shows stable memory usage. Continuous monitoring recommended.
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening

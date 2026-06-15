@@ -10,6 +10,7 @@
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { mkdirSync, rmSync, existsSync, writeFileSync } from "node:fs";
+import { performance } from "node:perf_hooks";
 import { PiclawPackageManager } from "../piclaw-package-manager.js";
 
 async function benchmarkUpdate(packageCount: number, concurrency: number): Promise<{
@@ -17,7 +18,9 @@ async function benchmarkUpdate(packageCount: number, concurrency: number): Promi
   totalTimeMs: number;
   avgMsPerPkg: number;
   opsPerSecond: number;
+  memoryDeltaMB: number;
 }> {
+  const memoryBefore = process.memoryUsage().heapUsed;
   const sessionDir = join(tmpdir(), `piclaw-pm-bench-${Date.now()}`);
   mkdirSync(sessionDir, { recursive: true });
 
@@ -49,11 +52,15 @@ async function benchmarkUpdate(packageCount: number, concurrency: number): Promi
   // Cleanup
   if (existsSync(sessionDir)) rmSync(sessionDir, { recursive: true, force: true });
 
+  // Measure memory after cleanup to see net allocation
+  const memoryAfter = process.memoryUsage().heapUsed;
+
   return {
     packages: packageCount,
     totalTimeMs,
     avgMsPerPkg,
     opsPerSecond,
+    memoryDeltaMB: (memoryAfter - memoryBefore) / 1e6,
   };
 }
 
