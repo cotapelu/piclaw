@@ -46,7 +46,7 @@ describe("Universal Tool Execution", () => {
     expect(result.isError).toBe(false);
     expect(mockBashExecute).toHaveBeenCalledWith(
       "call1",
-      expect.objectContaining({ command: 'echo "Hello World"' }),
+      expect.objectContaining({ command: "echo 'Hello World'" }),
       undefined,
       undefined,
       { cwd: "/repo" }

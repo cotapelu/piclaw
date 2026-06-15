@@ -34,7 +34,7 @@ describe("Test Tool", () => {
     await tool.execute("call1", { files: ["src/tests/foo.test.ts", "src/tests/bar.test.ts"] }, undefined, undefined, { cwd: "/repo" });
     expect(mockExecute).toHaveBeenCalledWith(
       "call1",
-      { command: 'npm test -- "src/tests/foo.test.ts" "src/tests/bar.test.ts"' },
+      { command: "npm test -- 'src/tests/foo.test.ts' 'src/tests/bar.test.ts'" },
       undefined,
       undefined,
       { cwd: "/repo" }

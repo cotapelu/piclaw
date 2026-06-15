@@ -89,6 +89,48 @@ function getHomeDir(): string {
   return process.env.HOME || homedir();
 }
 
+/**
+ * Validates a local source path to prevent path traversal attacks.
+ * Ensures the resolved path stays within the allowed base directory.
+ *
+ * @param baseDir - The base directory (cwd or agentDir) that the path must stay within
+ * @param userPath - The user-provided path (relative or absolute)
+ * @returns The resolved absolute path if valid
+ * @throws Error if path traversal is detected
+ */
+function validateLocalPath(baseDir: string, userPath: string): string {
+  const canonicalBase = resolve(baseDir);
+  let resolved: string;
+
+  // Allow absolute paths, but ensure they are within baseDir
+  if (pathIsAbsolute(userPath)) {
+    resolved = resolve(userPath);
+  } else {
+    resolved = resolve(baseDir, userPath);
+  }
+
+  const canonicalResolved = resolve(resolved);
+
+  // Ensure resolved path is within baseDir (allow exact match for baseDir itself)
+  if (!canonicalResolved.startsWith(canonicalBase + sep) && canonicalResolved !== canonicalBase) {
+    throw new Error(`Path traversal detected: ${userPath} resolves outside allowed directory`);
+  }
+
+  return resolved;
+}
+
+/**
+ * Check if a path is absolute (cross-platform)
+ */
+function pathIsAbsolute(p: string): boolean {
+  if (process.platform === 'win32') {
+    // Windows: starts with drive letter like C:\ or UNC paths like \\server\share
+    return /^[a-zA-Z]:\\/.test(p) || /^\\\\.*/.test(p);
+  }
+  // Unix: starts with /
+  return p.startsWith('/');
+}
+
 // ============================================================================
 
 interface ResourceAccumulator {
@@ -214,8 +256,12 @@ export class PiclawPackageManager {
     }
     if (parsed.type === "local") {
       const baseDir = scope === "project" ? this.cwd : this.agentDir;
-      const path = resolve(baseDir, parsed.path);
-      return existsSync(path) ? path : undefined;
+      try {
+        const resolved = validateLocalPath(baseDir, parsed.path);
+        return existsSync(resolved) ? resolved : undefined;
+      } catch {
+        return undefined;
+      }
     }
     return undefined;
   }
@@ -238,7 +284,8 @@ export class PiclawPackageManager {
         return;
       }
       if (parsed.type === "local") {
-        const resolved = resolve(this.cwd, parsed.path);
+        const baseDir = scope === "project" ? this.cwd : this.agentDir;
+        const resolved = validateLocalPath(baseDir, parsed.path);
         if (!existsSync(resolved)) throw new Error(`Path does not exist: ${resolved}`);
         return;
       }
@@ -616,12 +663,25 @@ export class PiclawPackageManager {
       if (!parsed.name || parsed.name.trim() === "") {
         throw new Error("Invalid npm source: missing package name");
       }
+      // Disallow path traversal and absolute paths in package name
+      if (parsed.name.includes('..') || parsed.name.startsWith('/') || parsed.name.includes('\\') || /^[a-zA-Z]:$/.test(parsed.name.substring(0, 2))) {
+        throw new Error("Invalid npm source: path traversal not allowed");
+      }
     } else if (parsed.type === "git") {
       if (!parsed.host || !parsed.path) {
         throw new Error("Invalid git source: missing host or path");
       }
+      // Validate host: should be a hostname or IP (alphanumeric, dot, hyphen)
+      if (!/^[a-zA-Z0-9.-]+$/.test(parsed.host)) {
+        throw new Error("Invalid git source: host contains invalid characters");
+      }
       if (!parsed.path.includes("/")) {
         throw new Error("Invalid git source: path must be in the form host/path (e.g., github.com/user/repo)");
+      }
+      // Prevent path traversal: reject '..' and empty path components
+      const gitComponents = parsed.path.split('/');
+      if (gitComponents.some(c => c === '' || c === '..')) {
+        throw new Error("Invalid git source: path contains empty components or '..' (path traversal not allowed)");
       }
     }
   }

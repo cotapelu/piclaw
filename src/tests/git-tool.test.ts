@@ -10,6 +10,11 @@ import { describe, it, expect, vi } from "vitest";
 import { createBashTool, createLocalBashOperations } from "@earendil-works/pi-coding-agent";
 import { registerGitTool } from "../extensions/tools/git-tool";
 
+function escapeShellArg(arg: string): string {
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
 // Mock the SDK for execute tests
 vi.mock('@earendil-works/pi-coding-agent', async () => {
   const actual = await vi.importActual('@earendil-works/pi-coding-agent');
@@ -25,7 +30,7 @@ function buildGitCommand(action: string, args: any = {}): string {
   let command = "";
   switch (action) {
     case "diff":
-      command = `git diff ${args.revision || "HEAD"}`;
+      command = `git diff ${args.revision ? escapeShellArg(args.revision) : 'HEAD'}`;
       break;
     case "log":
       command = `git log -${args.count || 10} --oneline --graph --decorate`;
@@ -35,32 +40,34 @@ function buildGitCommand(action: string, args: any = {}): string {
       break;
     case "commit":
       if (!args.message) throw new Error("commit requires 'message'");
-      command = `git commit -m "${args.message.replace(/"/g, '\\"')}"`;
+      command = `git commit -m ${escapeShellArg(args.message)}`;
       break;
     case "branch":
       const branchAction = args.action || "list";
       if (branchAction === "list") command = "git branch -a";
       else if (branchAction === "create") {
         if (!args.branch) throw new Error("branch create requires 'branch'");
-        command = `git branch ${args.branch}`;
+        command = `git branch ${escapeShellArg(args.branch)}`;
       } else if (branchAction === "delete") {
         if (!args.branch) throw new Error("branch delete requires 'branch'");
-        command = `git branch -d ${args.branch}`;
+        command = `git branch -d ${escapeShellArg(args.branch)}`;
       } else throw new Error(`unknown branch action: ${branchAction}`);
       break;
     case "checkout":
       if (!args.branch) throw new Error("checkout requires 'branch'");
-      command = `git checkout ${args.branch}`;
+      command = `git checkout ${escapeShellArg(args.branch)}`;
       break;
     case "add":
       if (!args.files?.length) throw new Error("add requires 'files' array");
-      command = `git add ${args.files.map((f: string) => `\"${f.replace(/"/g, '\\\"')}\"`).join(" ")}`;
+      command = `git add ${args.files.map(escapeShellArg).join(' ')}`;
       break;
     case "push":
-      command = `git push ${args.remote || "origin"}${args.branch ? ` ${args.branch}` : ""}`;
+      const remote = args.remote || 'origin';
+      command = `git push ${escapeShellArg(remote)}` + (args.branch ? ` ${escapeShellArg(args.branch)}` : '');
       break;
     case "pull":
-      command = `git pull ${args.remote || "origin"}${args.branch ? ` ${args.branch}` : ""}`;
+      const rremote = args.remote || 'origin';
+      command = `git pull ${escapeShellArg(rremote)}` + (args.branch ? ` ${escapeShellArg(args.branch)}` : '');
       break;
     default:
       throw new Error(`unknown git action: ${action}`);
@@ -71,8 +78,8 @@ function buildGitCommand(action: string, args: any = {}): string {
 describe("Git Tool Command Construction", () => {
   it("should build diff command", () => {
     expect(buildGitCommand("diff")).toBe("git diff HEAD");
-    expect(buildGitCommand("diff", { revision: "main" })).toBe("git diff main");
-    expect(buildGitCommand("diff", { revision: "feature/abc" })).toBe("git diff feature/abc");
+    expect(buildGitCommand("diff", { revision: "main" })).toBe("git diff 'main'");
+    expect(buildGitCommand("diff", { revision: "feature/abc" })).toBe("git diff 'feature/abc'");
   });
 
   it("should build log command", () => {
@@ -86,9 +93,9 @@ describe("Git Tool Command Construction", () => {
   });
 
   it("should build commit command with escaping", () => {
-    expect(buildGitCommand("commit", { message: "fix: bug" })).toBe('git commit -m "fix: bug"');
-    expect(buildGitCommand("commit", { message: 'Fix "quoted" bug' })).toBe('git commit -m "Fix \\"quoted\\" bug"');
-    expect(buildGitCommand("commit", { message: 'Multiple "quotes" and "double"' })).toBe('git commit -m "Multiple \\"quotes\\" and \\"double\\""');
+    expect(buildGitCommand("commit", { message: "fix: bug" })).toBe('git commit -m \'fix: bug\'');
+    expect(buildGitCommand("commit", { message: 'Fix "quoted" bug' })).toBe('git commit -m \'Fix "quoted" bug\'');
+    expect(buildGitCommand("commit", { message: 'Multiple "quotes" and "double"' })).toBe('git commit -m \'Multiple "quotes" and "double"\'');
   });
 
   it("should throw for commit without message", () => {
@@ -97,8 +104,8 @@ describe("Git Tool Command Construction", () => {
 
   it("should build branch commands", () => {
     expect(buildGitCommand("branch")).toBe("git branch -a");
-    expect(buildGitCommand("branch", { action: "create", branch: "feature-x" })).toBe("git branch feature-x");
-    expect(buildGitCommand("branch", { action: "delete", branch: "old-branch" })).toBe("git branch -d old-branch");
+    expect(buildGitCommand("branch", { action: "create", branch: "feature-x" })).toBe("git branch 'feature-x'");
+    expect(buildGitCommand("branch", { action: "delete", branch: "old-branch" })).toBe("git branch -d 'old-branch'");
   });
 
   it("should throw for branch create/delete without branch name", () => {
@@ -107,8 +114,8 @@ describe("Git Tool Command Construction", () => {
   });
 
   it("should build checkout command", () => {
-    expect(buildGitCommand("checkout", { branch: "main" })).toBe("git checkout main");
-    expect(buildGitCommand("checkout", { branch: "feature/test" })).toBe("git checkout feature/test");
+    expect(buildGitCommand("checkout", { branch: "main" })).toBe("git checkout 'main'");
+    expect(buildGitCommand("checkout", { branch: "feature/test" })).toBe("git checkout 'feature/test'");
   });
 
   it("should throw for checkout without branch", () => {
@@ -116,9 +123,9 @@ describe("Git Tool Command Construction", () => {
   });
 
   it("should build add command with file escaping", () => {
-    expect(buildGitCommand("add", { files: ["file1.ts", "file2.ts"] })).toBe('git add "file1.ts" "file2.ts"');
-    expect(buildGitCommand("add", { files: ["file with spaces.ts"] })).toBe('git add "file with spaces.ts"');
-    expect(buildGitCommand("add", { files: ['file"quote.ts'] })).toBe('git add "file\\"quote.ts"');
+    expect(buildGitCommand("add", { files: ["file1.ts", "file2.ts"] })).toBe("git add 'file1.ts' 'file2.ts'");
+    expect(buildGitCommand("add", { files: ["file with spaces.ts"] })).toBe("git add 'file with spaces.ts'");
+    expect(buildGitCommand("add", { files: ['file\"quote.ts'] })).toBe('git add \'file"quote.ts\'');
   });
 
   it("should throw for add without files", () => {
@@ -127,17 +134,17 @@ describe("Git Tool Command Construction", () => {
   });
 
   it("should build push command", () => {
-    expect(buildGitCommand("push")).toBe("git push origin");
-    expect(buildGitCommand("push", { branch: "main" })).toBe("git push origin main");
-    expect(buildGitCommand("push", { remote: "upstream" })).toBe("git push upstream");
-    expect(buildGitCommand("push", { remote: "upstream", branch: "dev" })).toBe("git push upstream dev");
+    expect(buildGitCommand("push")).toBe("git push 'origin'");
+    expect(buildGitCommand("push", { branch: "main" })).toBe("git push 'origin' 'main'");
+    expect(buildGitCommand("push", { remote: "upstream" })).toBe("git push 'upstream'");
+    expect(buildGitCommand("push", { remote: "upstream", branch: "dev" })).toBe("git push 'upstream' 'dev'");
   });
 
   it("should build pull command", () => {
-    expect(buildGitCommand("pull")).toBe("git pull origin");
-    expect(buildGitCommand("pull", { branch: "develop" })).toBe("git pull origin develop");
-    expect(buildGitCommand("pull", { remote: "upstream" })).toBe("git pull upstream");
-    expect(buildGitCommand("pull", { remote: "upstream", branch: "dev" })).toBe("git pull upstream dev");
+    expect(buildGitCommand("pull")).toBe("git pull 'origin'");
+    expect(buildGitCommand("pull", { branch: "develop" })).toBe("git pull 'origin' 'develop'");
+    expect(buildGitCommand("pull", { remote: "upstream" })).toBe("git pull 'upstream'");
+    expect(buildGitCommand("pull", { remote: "upstream", branch: "dev" })).toBe("git pull 'upstream' 'dev'");
   });
 
   it("should throw for unknown action", () => {
@@ -217,7 +224,7 @@ describe('Git Tool Execute', () => {
     const result = await mockTool.execute('call1', { action: 'diff', args: { revision: 'HEAD' } }, undefined, undefined, { cwd: '/repo' });
     expect(result.isError).toBe(false);
     expect(result.content[0].text).toBe('diff output');
-    expect(mockBashExecute).toHaveBeenCalledWith('call1', { command: 'git diff HEAD' }, undefined, undefined, { cwd: '/repo' });
+    expect(mockBashExecute).toHaveBeenCalledWith('call1', { command: "git diff 'HEAD'" }, undefined, undefined, { cwd: '/repo' });
   });
 
   it('should execute log action with default count', async () => {

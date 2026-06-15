@@ -19,6 +19,12 @@ import type { ExtensionAPI, ToolDefinition } from "@earendil-works/pi-coding-age
 import { createBashToolDefinition } from "@earendil-works/pi-coding-agent";
 import { Text } from "@earendil-works/pi-tui";
 
+// Escape shell argument to prevent command injection
+function escapeShellArg(arg: string): string {
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
 // Cache per-context bash tool to avoid recreation
 const bashToolCache = new WeakMap<any, any>();
 
@@ -41,8 +47,8 @@ function buildCommand(action: string, params: any): string {
       if (typeof message !== "string" || message.length === 0) {
         throw new Error("Missing or invalid parameter: message (non-empty string)");
       }
-      // Use JSON.stringify to safely escape quotes, newlines, etc.
-      return `echo ${JSON.stringify(message)}`;
+      // Use shell escaping to prevent injection
+      return `echo ${escapeShellArg(message)}`;
     }
 
     case "system_info": {

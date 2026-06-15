@@ -22,6 +22,14 @@ interface GitParams {
   };
 }
 
+/** Escape a string for safe inclusion in a shell command (single-quote style). */
+function escapeShellArg(arg: string): string {
+  if (arg === undefined) return '';
+  // Replace any single quote with the close-open-escape-close pattern
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
 function createGitTool(cwd: string): ToolDefinition<any, any> {
   const bashOperations = createLocalBashOperations();
   const baseBashTool: any = createBashTool(cwd, { operations: bashOperations });
@@ -58,7 +66,7 @@ function createGitTool(cwd: string): ToolDefinition<any, any> {
       try {
         switch (action) {
           case "diff":
-            command = `git diff ${args.revision || "HEAD"}`;
+            command = `git diff ${args.revision ? escapeShellArg(args.revision) : 'HEAD'}`;
             break;
           case "log":
             command = `git log -${args.count || 10} --oneline --graph --decorate`;
@@ -68,32 +76,32 @@ function createGitTool(cwd: string): ToolDefinition<any, any> {
             break;
           case "commit":
             if (!args.message) throw new Error("commit requires 'message'");
-            command = `git commit -m "${args.message.replace(/"/g, '\\"')}"`;
+            command = `git commit -m ${escapeShellArg(args.message)}`;
             break;
           case "branch":
             const branchAction = args.action || "list";
             if (branchAction === "list") command = "git branch -a";
             else if (branchAction === "create") {
               if (!args.branch) throw new Error("branch create requires 'branch'");
-              command = `git branch ${args.branch}`;
+              command = `git branch ${escapeShellArg(args.branch)}`;
             } else if (branchAction === "delete") {
               if (!args.branch) throw new Error("branch delete requires 'branch'");
-              command = `git branch -d ${args.branch}`;
+              command = `git branch -d ${escapeShellArg(args.branch)}`;
             } else throw new Error(`unknown branch action: ${branchAction}`);
             break;
           case "checkout":
             if (!args.branch) throw new Error("checkout requires 'branch'");
-            command = `git checkout ${args.branch}`;
+            command = `git checkout ${escapeShellArg(args.branch)}`;
             break;
           case "add":
             if (!args.files?.length) throw new Error("add requires 'files' array");
-            command = `git add ${args.files.map((f: string) => `\"${f.replace(/"/g, '\\\"')}\"`).join(" ")}`;
+            command = `git add ${args.files.map(escapeShellArg).join(' ')}`;
             break;
           case "push":
-            command = `git push ${args.remote || "origin"}${args.branch ? ` ${args.branch}` : ""}`;
+            command = `git push ${escapeShellArg(args.remote || 'origin')}${args.branch ? ' ' + escapeShellArg(args.branch) : ''}`;
             break;
           case "pull":
-            command = `git pull ${args.remote || "origin"}${args.branch ? ` ${args.branch}` : ""}`;
+            command = `git pull ${escapeShellArg(args.remote || 'origin')}${args.branch ? ' ' + escapeShellArg(args.branch) : ''}`;
             break;
           default:
             throw new Error(`unknown git action: ${action}`);

@@ -10,6 +10,12 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createBashTool } from "@earendil-works/pi-coding-agent";
 
+/** Escape a string for safe inclusion in a shell command (single-quote style). */
+function escapeShellArg(arg: string): string {
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
 function createTestTool(cwd: string): any {
   const baseBashTool: any = createBashTool(cwd, {});
 
@@ -35,8 +41,7 @@ function createTestTool(cwd: string): any {
       // Build command string
       let cmd = "npm test";
       if (params.files && params.files.length > 0) {
-        // Escape file names with quotes
-        const fileStr = params.files.map(f => `"${f.replace(/"/g, '\\"')}"`).join(" ");
+        const fileStr = params.files.map(escapeShellArg).join(' ');
         cmd += ` -- ${fileStr}`;
       }
       if (params.watch) {

@@ -96,7 +96,7 @@ describe("Scripts Tool", () => {
     expect(result.isError).toBe(false);
     expect(mockBashExecute).toHaveBeenCalledWith(
       "call5",
-      { command: "npm run build" },
+      { command: "npm run 'build'" },
       undefined,
       undefined,
       { cwd: "/repo" }

@@ -3,47 +3,54 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Bootstrap Evolution Tracking",
+      "name": "Security Audit & Hardening (Iteration 1)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Create docs/ directory structure",
-          "status": "completed"
+          "content": "Audit all tool implementations for injection vulnerabilities",
+          "status": "completed",
+          "details": "Documented in SECURITY_AUDIT_V1.md"
         },
         {
           "id": "task-2",
-          "content": "Write docs/PROJECT_STATE.md with current capabilities snapshot",
-          "status": "completed"
+          "content": "Validate file path operations prevent traversal attacks",
+          "status": "completed",
+          "details": "Added validateLocalPath in piclaw-package-manager.ts, git path validation"
         },
         {
           "id": "task-3",
-          "content": "Write TODO.md with current prioritized tasks",
-          "status": "completed"
+          "content": "Expand secret scanner patterns for modern token formats",
+          "status": "completed",
+          "details": "Added 7 new patterns: Azure, Heroku, DO, Cloudflare, Datadog, New Relic, Twilio"
         },
         {
           "id": "task-4",
-          "content": "Write docs/AGENT_METRICS.md with baseline metrics",
-          "status": "completed"
+          "content": "Sanitize command building in git-tool, test-tool, formatter-tool",
+          "status": "completed",
+          "details": "Added escapeShellArg and applied to all user parameters"
         },
         {
           "id": "task-5",
-          "content": "Write docs/AGENT_PROFILE.md with current strengths/weaknesses",
-          "status": "completed"
+          "content": "Validate script names in scripts-tool",
+          "status": "completed",
+          "details": "Reject non-alphanumeric names, proper escaping"
         },
         {
           "id": "task-6",
-          "content": "Write docs/EVOLUTION.md with planned refactors and trajectory",
-          "status": "completed"
+          "content": "Add fuzzing tests for edge-case inputs",
+          "status": "in_progress",
+          "details": "Property-based testing for critical tools"
         },
         {
           "id": "task-7",
-          "content": "Run git commit for bootstrap",
-          "status": "in_progress"
+          "content": "Document security model and validation rules",
+          "status": "pending",
+          "details": "Write docs/SECURITY.md"
         }
       ]
     }
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-15T14:36:08.036Z"
+  "updatedAt": "2026-06-15T15:46:21.806Z"
 }

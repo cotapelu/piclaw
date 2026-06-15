@@ -12,6 +12,19 @@ import { createBashToolDefinition } from "@earendil-works/pi-coding-agent";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
+/** Escape a string for safe inclusion in a shell command (single-quote style). */
+function escapeShellArg(arg: string): string {
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
+/** Validate npm script name to prevent injection. */
+function isValidScriptName(name: string): boolean {
+  // NPM script names typically allow alphanumerics, spaces, hyphens, underscores, and slashes (for nested? but not typical).
+  // For security, we restrict to a safe subset.
+  return /^[a-zA-Z0-9 _-]+$/.test(name);
+}
+
 async function getScripts(cwd: string): Promise<Record<string, string>> {
   try {
     const pkgJson = await readFile(join(cwd, "package.json"), "utf-8");
@@ -81,6 +94,15 @@ const tool: ToolDefinition = {
         };
       }
 
+      // Validate script name for security (alphanumeric, spaces, hyphens, underscores)
+      if (!isValidScriptName(script)) {
+        return {
+          content: [{ type: "text", text: `Error: invalid script name '${script}'. Only alphanumerics, spaces, hyphens, underscores allowed.` }],
+          details: { action: "run", script, error: "invalid script name" },
+          isError: true,
+        };
+      }
+
       const scripts = await getScripts(cwd);
       if (!scripts[script]) {
         return {
@@ -91,7 +113,7 @@ const tool: ToolDefinition = {
       }
 
       const bashTool = createBashToolDefinition(cwd, { commandPrefix: "" });
-      const command = `npm run ${script}`;
+      const command = `npm run ${escapeShellArg(script)}`;
       const result = await bashTool.execute(toolCallId, { command }, signal, onUpdate, ctx);
       // Merge action into details
       return {

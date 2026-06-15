@@ -340,7 +340,8 @@ describe('PiclawPackageManager Edge Cases', () => {
       writeFileSync(localFile, 'content');
       const installNpmSpy = vi.spyOn(anyPm, 'installNpm');
       const installGitSpy = vi.spyOn(anyPm, 'installGit');
-      await pm.install(localFile);
+      // Use local:true to install from project directory, ensuring path is within cwd
+      await pm.install(localFile, { local: true });
       expect(installNpmSpy).not.toHaveBeenCalled();
       expect(installGitSpy).not.toHaveBeenCalled();
     });

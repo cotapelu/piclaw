@@ -10,6 +10,11 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createBashTool } from "@earendil-works/pi-coding-agent";
 
+function escapeShellArg(arg: string): string {
+  const escaped = arg.replace(/'/g, "'\\''");
+  return `'${escaped}'`;
+}
+
 function createFormatterTool(cwd: string): any {
   const baseBashTool: any = createBashTool(cwd, {});
 
@@ -40,7 +45,7 @@ function createFormatterTool(cwd: string): any {
         };
       }
       // Build command: npx prettier --write <files>
-      const fileArgs = params.files.map(f => `"${f.replace(/"/g, '\\"')}"`).join(" ");
+      const fileArgs = params.files.map(escapeShellArg).join(' ');
       const command = `npx prettier --write ${fileArgs}`;
       const bashInput = { command };
       return baseBashTool.execute(toolCallId, bashInput, signal, undefined, ctx);

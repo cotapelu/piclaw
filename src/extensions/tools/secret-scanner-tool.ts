@@ -21,7 +21,16 @@ const PATTERNS: { type: string; regex: RegExp }[] = [
   { type: "JWT", regex: /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/ },
   { type: "Private Key", regex: /-----BEGIN (RSA )?PRIVATE KEY-----/ },
   { type: "Stripe Secret", regex: /sk_live_[0-9a-zA-Z]{24}/ },
-  { type: "SendGrid API Key", regex: /SG\.[0-9a-zA-Z_-]{43}\.[0-9a-zA-Z_-]{10}/ },
+  { type: "SendGrid API Key", regex: /SG\.[0-9A-Za-z_-]{43}\.[0-9A-Za-z_-]{10}/ },
+
+  // Additional patterns (expanded 2026-06-15)
+  { type: "Azure Storage Key", regex: /[a-f0-9]{64}/ },
+  { type: "Heroku API Key", regex: /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/ },
+  { type: "DigitalOcean Token", regex: /do[0-9a-f]{64}/ },
+  { type: "Cloudflare API Token", regex: /[0-9a-f]{40}/ },
+  { type: "Datadog API Key", regex: /[a-z0-9]{32}/ },
+  { type: "New Relic Key", regex: /NRAK-[A-Z0-9]{27}/ },
+  { type: "Twilio", regex: /SK[0-9a-fA-F]{32}/ },
 ];
 
 const DEFAULT_EXTENSIONS = [".js",".ts",".json",".env",".yml",".yaml",".md",".txt",".sh",".py",".rb",".php",".java",".c",".cpp",".h",".hpp",".rs",".go",".env.local",".config"];

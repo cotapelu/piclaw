@@ -34,7 +34,7 @@ describe("Formatter Tool", () => {
     const result = await tool.execute("call1", { files: ["src/index.ts", "lib/util.ts"] }, undefined, undefined, { cwd: "/proj" });
     expect(mockExecute).toHaveBeenCalledWith(
       "call1",
-      { command: 'npx prettier --write "src/index.ts" "lib/util.ts"' },
+      { command: "npx prettier --write 'src/index.ts' 'lib/util.ts'" },
       undefined,
       undefined,
       { cwd: "/proj" }
