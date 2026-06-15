@@ -26,6 +26,9 @@ import type {
   TodoTaskInput,
   TodoPhaseInput,
 } from "../utils/tool-types.js";
+import { createLogger } from "../utils/logger.js";
+
+const logger = createLogger();
 
 // Re-export types for external use
 export type { TodoStatus, TodoItem, TodoPhase, TodoToolDetails, TodosParams };
@@ -92,7 +95,7 @@ async function loadTodoFromFile(cwd: string): Promise<TodoFile | null> {
     if (parsed.version !== 1) return null;
     return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
   } catch (e) {
-    console.error("Load todos failed:", e);
+    logger.error("Load todos failed:", e);
     return null;
   }
 }

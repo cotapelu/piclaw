@@ -20,6 +20,11 @@ import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { SharedWorkspace, type WorkspaceEntry } from "./workspace.js";
 import { createTeamOpsTool } from "./team-ops-tool.js";
 import * as path from "node:path";
+import { createLogger } from "../utils/logger.js";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+const registryLogger = createLogger("TeamRegistry");
 
 const MAX_TEAM_SIZE = 4;
 const DEFAULT_MAX_RETRIES = 3;
@@ -54,9 +59,23 @@ export class AgentTeam implements AgentTeamRuntime {
   roles: string[] = [];
   size = 0;
   dispose: () => Promise<void>;
+  private logger = createLogger();
   childPromises: Promise<void>[] = [];
   private childControllers: Map<string, AbortController> = new Map();
   private disposed = false;
+
+  // Metrics collection
+  private metrics: {
+    taskDurations: number[];
+    agentTaskCounts: Map<string, number>;
+    messageCounts: Map<string, number>;
+    startTime: number;
+  } = {
+    taskDurations: [],
+    agentTaskCounts: new Map(),
+    messageCounts: new Map(),
+    startTime: Date.now()
+  };
 
   // State
   tasks: string[] = [];
@@ -66,6 +85,7 @@ export class AgentTeam implements AgentTeamRuntime {
     result: string;
     retryCount: number;
     retryAvailableAt?: number; // timestamp when task becomes claimable again after backoff
+    claimedAt?: number; // timestamp when task was claimed
   }> = new Map();
   private pendingIndices: number[] = []; // sorted list of indices with status 'pending' (including backoff)
   agentStatuses: Map<string, { currentTaskIndex: number | null; status: string }> = new Map();
@@ -84,7 +104,7 @@ export class AgentTeam implements AgentTeamRuntime {
         this.onUpdate(update);
       } catch (e) {
         // Ignore update errors - don't break team execution
-        console.warn('Failed to send update:', e);
+        this.logger.warn('Failed to send update:', e);
       }
     }
   }
@@ -121,7 +141,7 @@ export class AgentTeam implements AgentTeamRuntime {
       await Promise.allSettled(
         this.runtimes.map(rt =>
           (rt.dispose ? rt.dispose() : Promise.resolve()).catch(err =>
-            console.error("Failed to dispose agent runtime:", err)
+            this.logger.error("Failed to dispose agent runtime:", err)
           )
         )
       );
@@ -133,7 +153,7 @@ export class AgentTeam implements AgentTeamRuntime {
           registry.unregister(this.id);
         }
       } catch (e) {
-        console.warn('Failed to unregister team from registry:', e);
+        this.logger.warn('Failed to unregister team from registry:', e);
       }
     };
     this.workspace = new SharedWorkspace();
@@ -253,6 +273,9 @@ export class AgentTeam implements AgentTeamRuntime {
         this.messageBus.set(channel, []);
       }
       this.messageBus.get(channel)!.push({ from, content, timestamp: Date.now() });
+      // Increment message count metric
+      const count = this.metrics.messageCounts.get(channel) || 0;
+      this.metrics.messageCounts.set(channel, count + 1);
       // Notify message sent
       this.notifyUpdate(this.createUpdate(
         `📢 [${channel}] ${from}: ${content.substring(0, 100)}`,
@@ -331,6 +354,7 @@ export class AgentTeam implements AgentTeamRuntime {
         task.retryAvailableAt = undefined; // clear any backoff
         task.assignee = role;
         task.status = 'in_progress';
+        task.claimedAt = Date.now();
         this.agentStatuses.set(role, { currentTaskIndex: idx, status: 'working' });
         // Efficient removal: use shift() if at start
         if (i === 0) {
@@ -474,6 +498,15 @@ export class AgentTeam implements AgentTeamRuntime {
       task.status = 'completed';
       task.result = result;
       task.assignee = null; // Clear assignment if any
+      // Metrics: record duration and agent task count
+      if (task.claimedAt) {
+        const duration = Date.now() - task.claimedAt;
+        this.metrics.taskDurations.push(duration);
+      }
+      if (agentId) {
+        const count = this.metrics.agentTaskCounts.get(agentId) || 0;
+        this.metrics.agentTaskCounts.set(agentId, count + 1);
+      }
       if (agentId) {
         const status = this.agentStatuses.get(agentId);
         if (status) {
@@ -494,6 +527,14 @@ export class AgentTeam implements AgentTeamRuntime {
       task.status = 'completed';
       task.result = result;
       task.assignee = null; // Clear assignment on completion
+      // Record task duration metric
+      if (task.claimedAt) {
+        const duration = Date.now() - task.claimedAt;
+        this.metrics.taskDurations.push(duration);
+      }
+      // Increment agent task count
+      const count = this.metrics.agentTaskCounts.get(role) || 0;
+      this.metrics.agentTaskCounts.set(role, count + 1);
       // Remove from pendingIndices if present
       const pendingIdx = this.pendingIndices.indexOf(taskIndex);
       if (pendingIdx !== -1) {
@@ -643,7 +684,7 @@ export class AgentTeam implements AgentTeamRuntime {
         const controller = new AbortController();
         this.childControllers.set(role, controller);
         const p = (this.runAgentLoop(role, runtime, controller) as Promise<void>).catch(err => {
-          console.error(`Agent ${role} loop crashed:`, err);
+          this.logger.error(`Agent ${role} loop crashed:`, err);
         });
         this.childPromises.push(p);
       }
@@ -693,7 +734,7 @@ export class AgentTeam implements AgentTeamRuntime {
 
         await runtime.session.prompt(prompt);
       } catch (error: any) {
-        console.error(`Agent ${role} prompt error:`, error);
+        this.logger.error(`Agent ${role} prompt error:`, error);
         this.notifyUpdate(this.createUpdate(
           `❌ Agent ${role} error: ${error.message}`,
           { role, error: error.message },
@@ -816,7 +857,38 @@ Use team_ops to continue. If all tasks done, finish up.`;
   }
 
   // Extend dispose to wait for child loops and dispose child runtimes
+
+  /**
+   * Get collected metrics for this team.
+   * Call after team completion to retrieve performance stats.
+   */
+  getMetrics(): any {
+    const totalDuration = Date.now() - this.metrics.startTime;
+    const completedCount = this.metrics.taskDurations.length;
+    const totalTaskDuration = this.metrics.taskDurations.reduce((sum, d) => sum + d, 0);
+    const avgTaskDuration = completedCount > 0 ? totalTaskDuration / completedCount : 0;
+    const totalMessages = Array.from(this.metrics.messageCounts.values()).reduce((sum, c) => sum + c, 0);
+    // Count failed tasks: any task status === 'failed'
+    let failedCount = 0;
+    for (const t of this.taskStatuses.values()) {
+      if (t.status === 'failed') failedCount++;
+    }
+    return {
+      teamId: this.id,
+      totalTasks: this.tasks.length,
+      completedTasks: completedCount,
+      failedTasks: failedCount,
+      pendingTasks: this.pendingIndices.length,
+      avgTaskDurationMs: Math.round(avgTaskDuration),
+      totalTaskDurationMs: totalTaskDuration,
+      agentTaskCounts: Object.fromEntries(this.metrics.agentTaskCounts),
+      messageCounts: Object.fromEntries(this.metrics.messageCounts),
+      totalMessages,
+      teamRuntimeMs: totalDuration,
+    };
+  }
 }
+
 
 // ============================================
 // TEAM REGISTRY
@@ -844,13 +916,13 @@ export class TeamRegistry {
 
   register(teamId: string, team: AgentTeam): void {
     this.teams.set(teamId, team);
-    console.log(`[TeamRegistry] Registered team ${teamId}`);
+    registryLogger.info(`Registered team ${teamId}`);
   }
 
   unregister(teamId: string): void {
     this.clearAutoDisposeTimer(teamId);
     this.teams.delete(teamId);
-    console.log(`[TeamRegistry] Unregistered team ${teamId}`);
+    registryLogger.info(`Unregistered team ${teamId}`);
   }
 
   get(teamId: string): AgentTeam | undefined {
@@ -892,10 +964,27 @@ export class TeamRegistry {
     if (team) {
       try {
         await team.dispose();
+        // Export metrics to .piclaw/metrics.json
+        try {
+          const metrics = team.getMetrics();
+          const metricsDir = join(process.cwd(), ".piclaw");
+          const metricsFile = join(metricsDir, "metrics.json");
+          await mkdir(metricsDir, { recursive: true });
+          const existing: any[] = [];
+          try {
+            const existingData = await readFile(metricsFile, "utf-8");
+            existing.push(JSON.parse(existingData));
+          } catch {}
+          existing.push(metrics);
+          await writeFile(metricsFile, JSON.stringify(existing, null, 2));
+          registryLogger.info(`Exported metrics for team ${teamId} to .piclaw/metrics.json`);
+        } catch (e) {
+          registryLogger.warn(`Failed to export metrics for team ${teamId}:`, e);
+        }
         this.unregister(teamId);
-        console.log(`[TeamRegistry] Auto-disposed team ${teamId} after inactivity`);
+        registryLogger.info(`Auto-disposed team ${teamId} after inactivity`);
       } catch (e) {
-        console.error(`[TeamRegistry] Failed to auto-dispose team ${teamId}:`, e);
+        registryLogger.error(`Failed to auto-dispose team ${teamId}:`, e);
       }
     }
   }
@@ -979,6 +1068,7 @@ export async function executeTeamTasks(
   // Start autonomous agent loops
   team.startAgentLoops();
   // Setup monitor for completion and auto-dispose
+  const logger = createLogger('ExecuteTeamTasks');
   team.monitorInterval = setInterval(async () => {
     await team.withLock(() => {
       team.reclaimZombieAgents();
@@ -991,7 +1081,7 @@ export async function executeTeamTasks(
         const registry = TeamRegistry.getInstance();
         registry.resetAutoDisposeTimer(team.id);
       } catch (e) {
-        console.warn('Failed to schedule auto-dispose:', e);
+        logger.warn('Failed to schedule auto-dispose:', e);
       }
     }
   }, 1000);

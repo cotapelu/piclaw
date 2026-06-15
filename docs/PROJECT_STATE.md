@@ -4,7 +4,7 @@
 **Version**: 0.0.1
 **Commit**: (working tree)
 **Build Status**: ✅ Successful
-**Test Status**: ✅ 968 passed, 3 skipped (102 test files)
+**Test Status**: ✅ 975 passed, 3 skipped (103 test files)
 
 ---
 
@@ -15,6 +15,8 @@
 - **Agent Runtime**: Multi-session support, message streams, tool execution
 - **Configuration**: Global (`~/.piclaw/config.json`) and project (`.pi/config.json`)
 - **Extensions**: Modular system with 23+ built-in extensions
+  - All production extensions now use structured logging (`logger` abstraction)
+  - Team auto-dispose exports metrics to `.piclaw/metrics.json`
 
 ### 1.2 Tools Implemented
 | Tool | Status | Description |
@@ -70,10 +72,12 @@
 - `auto-continue` - Evolve system automatically (AUTO-CONTINUE.md protocol)
 - `auto-compact-85` - Auto-compact session when tree size > 85%
 - `context-logger` - Capture full context for debugging
+- **Structured Logger**: `createLogger()` for extension use with optional prefix, configuration via `~/.piclaw/config.json`
 
 ### 1.7 Custom Provider Support
 - Kilo Gateway integration (259 models from models.dev)
 - Custom model generation script (`scripts/generate-custom-models.ts`)
+- Auto-loads generated custom models on startup
 
 ---
 
@@ -188,13 +192,18 @@ Based on AUTO-CONTINUE.md workflow, priority order:
 ## 6. RECENT CHANGES (Last Build)
 
 - Kilo custom model generation (259 models)
+- Structured logging system (core + extension logger)
+- Complete replacement of `console.*` with `logger` in all extensions
+- Metrics export on team auto-dispose (JSON lines)
+- Improved logger compatibility with tests (no prefix by default)
+- Fixed logger-related test failure in `todos-load-edgecases`
 - Team auto-recovery enhancements (zombie task reclamation)
 - Team workspace concurrency improvements (lock-free reads)
 - Performance optimization for task claiming (O(1) average)
 - Auto-compact at 85% threshold
 - Context logger extension for debugging
 - Tool-template enhancements
-- 102 test files, 968 passing tests
+- 103 test files, 975 passing tests, 3 skipped
 
 ---
 

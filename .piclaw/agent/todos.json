@@ -3,54 +3,48 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Security Audit & Hardening (Iteration 1)",
+      "name": "Observability Foundation (Iteration 2)",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Audit all tool implementations for injection vulnerabilities",
-          "status": "completed",
-          "details": "Documented in SECURITY_AUDIT_V1.md"
+          "content": "Create structured logger utility (trace/debug/info/warn/error)",
+          "status": "in_progress",
+          "details": "Replace console.log with logger throughout codebase"
         },
         {
           "id": "task-2",
-          "content": "Validate file path operations prevent traversal attacks",
-          "status": "completed",
-          "details": "Added validateLocalPath in piclaw-package-manager.ts, git path validation"
+          "content": "Add metrics collection to team operations",
+          "status": "pending",
+          "details": "Track task completion times, agent workload, message counts"
         },
         {
           "id": "task-3",
-          "content": "Expand secret scanner patterns for modern token formats",
-          "status": "completed",
-          "details": "Added 7 new patterns: Azure, Heroku, DO, Cloudflare, Datadog, New Relic, Twilio"
+          "content": "Export metrics to JSON file per session",
+          "status": "pending",
+          "details": "Write metrics to .piclaw/metrics.json on session end"
         },
         {
           "id": "task-4",
-          "content": "Sanitize command building in git-tool, test-tool, formatter-tool",
-          "status": "completed",
-          "details": "Added escapeShellArg and applied to all user parameters"
+          "content": "Replace remaining console.log calls in production code",
+          "status": "pending",
+          "details": "Ensure no raw console.log in tools/extensions"
         },
         {
           "id": "task-5",
-          "content": "Validate script names in scripts-tool",
-          "status": "completed",
-          "details": "Reject non-alphanumeric names, proper escaping"
+          "content": "Add log level configuration (via settings)",
+          "status": "pending",
+          "details": "Allow users to set log level (debug, info, warn, error)"
         },
         {
           "id": "task-6",
-          "content": "Add fuzzing tests for edge-case inputs",
-          "status": "in_progress",
-          "details": "Property-based testing for critical tools"
-        },
-        {
-          "id": "task-7",
-          "content": "Document security model and validation rules",
+          "content": "Document logging and metrics in developer guide",
           "status": "pending",
-          "details": "Write docs/SECURITY.md"
+          "details": "Add to docs/DEVELOPER.md or create docs/OBSERVABILITY.md"
         }
       ]
     }
   ],
-  "nextTaskId": 8,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-15T15:46:21.806Z"
+  "updatedAt": "2026-06-15T16:12:33.440Z"
 }

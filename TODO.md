@@ -6,11 +6,11 @@
 ---
 
 ## P0 — Evolution Infrastructure (Bootstrap)
-- [ ] Write `docs/AGENT_METRICS.md` with baseline metrics (iterations, MTTR, test failure rate)
-- [ ] Write `docs/AGENT_PROFILE.md` with strengths/weaknesses assessment
-- [ ] Write `docs/EVOLUTION.md` with planned trajectory and refactors
-- [ ] Commit all evolution tracking files to git
-- [ ] First evolution round: Analyze test results and identify quick wins
+- [x] Write `docs/AGENT_METRICS.md` with baseline metrics (iterations, MTTR, test failure rate)
+- [x] Write `docs/AGENT_PROFILE.md` with strengths/weaknesses assessment
+- [x] Write `docs/EVOLUTION.md` with planned trajectory and refactors
+- [x] Commit all evolution tracking files to git
+- [x] First evolution round: Analyze test results and identify quick wins
 
 ## P1 — Security Hardening
 - [ ] Audit all tool inputs for injection vulnerabilities
@@ -34,7 +34,7 @@
 - [ ] Improve error messages with actionable suggestions
 
 ## P4 — Observability & Reliability
-- [ ] Add structured logging (trace/debug/info/warn/error)
+- [x] Add structured logging (trace/debug/info/warn/error)
 - [ ] Export metrics in Prometheus format
 - [ ] TUI performance dashboard widget
 - [ ] Debug mode with full trace on errors

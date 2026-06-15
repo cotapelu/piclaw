@@ -3,6 +3,9 @@ import { existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import type { ExtensionAPI, BeforeProviderRequestEvent } from "@earendil-works/pi-coding-agent";
 import { CONFIG_DIR_NAME } from "../config/config-manager.js";
+import { createLogger } from "./utils/logger.js";
+
+const logger = createLogger("ContextLogger");
 
 /**
  * Context Logger Extension
@@ -60,7 +63,7 @@ export default function (pi: ExtensionAPI) {
 			appendFileSync(effectiveLogFile, logEntry);
 		} catch (err) {
 			// Log error but don't break the request flow
-			console.error("[ContextLogger] Failed to write log:", err);
+			logger.error("Failed to write log:", err);
 		}
 	});
 }

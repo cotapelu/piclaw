@@ -10,6 +10,9 @@
 import { join, relative } from "node:path";
 import { readdir, stat, readFile } from "node:fs/promises";
 import type { ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
+import { createLogger } from "../utils/logger.js";
+
+const logger = createLogger("SecretScanner");
 
 // Patterns
 const PATTERNS: { type: string; regex: RegExp }[] = [
@@ -183,7 +186,7 @@ export function registerSecretScannerTool(api: any) {
         ctx.ui.notify(result.message!, "info");
       } else {
         ctx.ui.notify(`Found ${result.count} potential secret(s) in ${result.files!.length} file(s). Check console for details.`, "warning");
-        console.log(result.output);
+        logger.info(result.output);
       }
     },
   });
