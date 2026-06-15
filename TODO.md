@@ -16,8 +16,8 @@
 - [x] Audit all tool inputs for injection vulnerabilities (initial audit complete; verify fixes)
 - [x] Validate file paths prevent traversal attacks (executeRead, PiclawPackageManager fixed)
 - [x] Add fuzzing tests for edge-case inputs (added security tests for package manager, git-tool, scripts-tool)
-- [ ] Check session persistence doesn't leak secrets (next)
-- [ ] Implement secret pattern updates (detect new token formats)
+- [x] Check session persistence doesn't leak secrets (set restrictive umask 0o077)
+- [x] Implement secret pattern updates (detect new token formats: OpenAI, Anthropic, Replicate, Hugging Face)
 
 ## P2 — Performance Optimization
 - [ ] Profile team workspace concurrency under 50-agent load
