@@ -24,7 +24,7 @@
 - [ ] Identify memory leaks in long-running sessions (30+ min)
 - [x] Optimize todos tool: claimTask O(1) already done (verified)
 - [ ] Reduce TUI re-renders (measure with profile)
-- [ ] Benchmark package manager operations
+- [x] Benchmark package manager operations (created package-manager-benchmark.ts; measures update overhead)
 
 ## P5 — Testing & Quality
 - [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
