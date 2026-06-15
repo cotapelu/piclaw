@@ -3,37 +3,47 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Chạy test và dọn file test thừa",
+      "name": "Bootstrap Evolution Tracking",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Chạy npm test để xem kết quả",
-          "status": "in_progress"
+          "content": "Create docs/ directory structure",
+          "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Liệt kê tất cả file test trong project",
-          "status": "pending"
+          "content": "Write docs/PROJECT_STATE.md with current capabilities snapshot",
+          "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Xác định file source tương ứng cho mỗi file test",
-          "status": "pending"
+          "content": "Write TODO.md with current prioritized tasks",
+          "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "Xóa những file test không có source tương ứng",
-          "status": "pending"
+          "content": "Write docs/AGENT_METRICS.md with baseline metrics",
+          "status": "completed"
         },
         {
           "id": "task-5",
-          "content": "Chạy test lại để xác nhận",
-          "status": "pending"
+          "content": "Write docs/AGENT_PROFILE.md with current strengths/weaknesses",
+          "status": "completed"
+        },
+        {
+          "id": "task-6",
+          "content": "Write docs/EVOLUTION.md with planned refactors and trajectory",
+          "status": "completed"
+        },
+        {
+          "id": "task-7",
+          "content": "Run git commit for bootstrap",
+          "status": "in_progress"
         }
       ]
     }
   ],
-  "nextTaskId": 6,
+  "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-12T00:29:35.481Z"
+  "updatedAt": "2026-06-15T14:36:08.036Z"
 }
