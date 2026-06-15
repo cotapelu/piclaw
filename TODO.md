@@ -26,8 +26,8 @@
 - [ ] Reduce TUI re-renders (measure with profile)
 - [ ] Benchmark package manager operations
 
-## P5 — Testing & Quality (NEXT HIGHEST IMPACT)
-- [ ] Increase coverage to ≥80% (current ~78.97%) — find critical untested paths and add tests
+## P5 — Testing & Quality
+- [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
 - [ ] Chaos engineering: random network failures
 - [ ] Long-running stability test (24h+)
 - [ ] Reproducible integration test environments
@@ -65,6 +65,7 @@
 ## Completed Tasks
 - P1 Security Hardening (full) — all security mitigations implemented and tested
 - P2 Concurrency Profiling — team workspace concurrency threshold added and passing
+- P5 Coverage Milestone — increased coverage to >80% with comprehensive tests for subtool-loader and core logger
 
 ---
 
