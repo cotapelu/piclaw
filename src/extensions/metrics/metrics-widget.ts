@@ -7,6 +7,8 @@
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const METRICS_WIDGET_STATE = Symbol('metricsWidgetState');
 
@@ -36,7 +38,19 @@ function buildHeaderLines(theme: any): string[] {
   ];
 }
 
-function buildMetricsLines(ctx: ExtensionContext, theme: any): string[] {
+async function getLatestTeamMetrics(): Promise<any | null> {
+  try {
+    const metricsPath = join(process.cwd(), ".piclaw", "metrics.json");
+    const data = await readFile(metricsPath, "utf-8");
+    const entries = JSON.parse(data);
+    if (!Array.isArray(entries) || entries.length === 0) return null;
+    return entries[entries.length - 1]; // latest
+  } catch {
+    return null;
+  }
+}
+
+function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any | null): string[] {
   const lines: string[] = [];
 
   // Context usage (tokens)
@@ -61,6 +75,35 @@ function buildMetricsLines(ctx: ExtensionContext, theme: any): string[] {
   const idle = ctx.isIdle();
   lines.push(`${theme.fg("muted", "Status:")} ${idle ? theme.fg("green", "idle") : theme.fg("yellow", "working")}`);
 
+  // Separator
+  lines.push("");
+
+  // Performance section
+  lines.push(theme.fg("accent", "⚡ Performance").bold());
+  const mem = process.memoryUsage();
+  const rssMB = (mem.rss / 1024 / 1024).toFixed(1);
+  const heapMB = (mem.heapUsed / 1024 / 1024).toFixed(1);
+  const uptime = process.uptime();
+  const days = Math.floor(uptime / 86400);
+  const hrs = Math.floor((uptime % 86400) / 3600);
+  const mins = Math.floor((uptime % 3600) / 60);
+  const secs = Math.floor(uptime % 60);
+  const uptimeStr = days > 0 ? `${days}d ${hrs}h ${mins}m ${secs}s` : `${hrs}h ${mins}m ${secs}s`;
+  lines.push(`${theme.fg("muted", "Uptime:")} ${uptimeStr}`);
+  lines.push(`${theme.fg("muted", "Memory:")} RSS ${rssMB} MB, Heap ${heapMB} MB`);
+
+  // Team metrics (if available)
+  if (teamMetrics) {
+    lines.push("");
+    lines.push(theme.fg("accent", "👥 Team").bold());
+    lines.push(`${theme.fg("muted", "Total tasks:")} ${teamMetrics.totalTasks ?? 0}`);
+    lines.push(`${theme.fg("muted", "Completed:")} ${teamMetrics.completedTasks ?? 0}`);
+    lines.push(`${theme.fg("muted", "Failed:")} ${teamMetrics.failedTasks ?? 0}`);
+    if (teamMetrics.avgTaskDurationMs != null) {
+      lines.push(`${theme.fg("muted", "Avg task:")} ${teamMetrics.avgTaskDurationMs} ms`);
+    }
+  }
+
   return lines;
 }
 
@@ -69,7 +112,10 @@ async function refreshWidget(ctx: ExtensionContext): Promise<void> {
   const lines: string[] = [];
 
   lines.push(...buildHeaderLines(ui.theme));
-  lines.push(...buildMetricsLines(ctx, ui.theme));
+
+  // Fetch latest team metrics in the background
+  const teamMetrics = await getLatestTeamMetrics();
+  lines.push(...buildMetricsLines(ctx, ui.theme, teamMetrics));
 
   ui.setWidget("metrics", lines);
 }

@@ -213,6 +213,25 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 *Next iteration: address remaining P4 items (session health checks, TUI performance), and P5 property-based testing.*
 
+### Iteration 13 — 2026‑06‑15 (Session Health Checks)
+
+**Health Checks (P4):**
+- Implemented `session-health-tool.ts` to scan `~/.piclaw/agent/` JSON files for corruption.
+- Auto‑repair strategy: backup corrupted file, recreate with default content based on filename.
+- Integrated into factory; runs on demand or can be scheduled.
+
+**Outcome**: Corrupted session data can be recovered automatically; improves system reliability.
+
+### Iteration 14 — 2026‑06‑15 (TUI Performance Dashboard)
+
+**Observability (P4):**
+- Enhanced `metrics-widget.ts` to include real‑time performance data: process uptime, memory (RSS, heap), and latest team metrics (tasks completed, avg duration).
+- Data refreshes every 5 seconds; provides at‑a‑glance system health in TUI.
+
+**Outcome**: Users can monitor performance without leaving the TUI. Dashboard shows key metrics for sessions and teams.
+
+*Next iteration: P5 property‑based testing and reproducible integration environments.*
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
