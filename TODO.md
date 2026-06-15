@@ -46,7 +46,7 @@
 - [x] Export metrics in Prometheus format (added prometheus-metrics-tool)
 - [ ] TUI performance dashboard widget
 - [x] Debug mode with full trace on errors (logger.error now includes Error.stack)
-- [ ] Session health checks (auto-repair corrupted sessions)
+- [x] Session health checks (auto-repair corrupted sessions) — added session-health-tool
 
 ## P5 — Testing & Quality
 - [ ] Increase coverage to ≥80% (current ~70%)
@@ -70,6 +70,7 @@
 - P2 Benchmark Package Manager — created benchmark script for performance regression detection
 - P4 Prometheus Metrics Export — added prometheus-metrics-tool for observability
 - P4 Debug Mode Enhancement — logger.error now includes Error.stack
+- P4 Session Health Checks — added session-health-tool with auto-repair for corrupted JSON files
 - P5 Coverage Milestone — increased coverage to >80% with comprehensive tests for subtool-loader and core logger
 - P5 Fuzzing Expansion — added security tests for test-tool file args
 - P5 Chaos Engineering — added chaos utility with env-controlled failure injection
