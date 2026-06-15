@@ -21,6 +21,7 @@ import {
   createGrepToolDefinition,
   createBashToolDefinition,
 } from "@earendil-works/pi-coding-agent";
+import { chaos } from "../utils/chaos.js";
 
 // Cache for per-context tool instances
 const toolCache = new WeakMap<ExtensionContext, Map<string, ToolDefinition>>();
@@ -111,6 +112,7 @@ async function executeSubtool(
   }
 
   try {
+    chaos('subtool_loader');
     const tool = getOrCreateTool(ctx, subtool, (cwd) => {
       switch (subtool) {
         case "http": return createHttpTool(cwd);

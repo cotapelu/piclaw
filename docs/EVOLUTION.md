@@ -202,6 +202,17 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 **Outcome**: Additional robustness for command injection prevention.
 
+### Iteration 12 — 2026-06-15 (Chaos Engineering Implementation)
+
+**Chaos (P5):**
+- Created `src/utils/chaos.ts` utility to inject random failures based on `PICLAW_CHAOS_RATE`.
+- Integrated chaos into `PiclawPackageManager.runCommandCapture` and `subtool_loader.executeSubtool`.
+- Added unit tests for chaos utility (`src/tests/chaos.test.ts`) verifying probabilistic failure.
+
+**Outcome**: System now supports controlled failure injection for resilience testing. Enables chaos experiments.
+
+*Next iteration: address remaining P4 items (session health checks, TUI performance), and P5 property-based testing.*
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
