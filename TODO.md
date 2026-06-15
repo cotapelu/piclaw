@@ -15,8 +15,8 @@
 ## P1 — Security Hardening
 - [x] Audit all tool inputs for injection vulnerabilities (initial audit complete; verify fixes)
 - [x] Validate file paths prevent traversal attacks (executeRead, PiclawPackageManager fixed)
-- [ ] Check session persistence doesn't leak secrets
-- [ ] Add fuzzing tests for edge-case inputs (partial: added path traversal tests)
+- [x] Add fuzzing tests for edge-case inputs (added security tests for package manager, git-tool, scripts-tool)
+- [ ] Check session persistence doesn't leak secrets (next)
 - [ ] Implement secret pattern updates (detect new token formats)
 
 ## P2 — Performance Optimization

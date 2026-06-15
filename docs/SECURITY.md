@@ -84,7 +84,7 @@ function validateLocalPath(baseDir: string, userPath: string): string {
 ### 3.4 Script Names (`scripts` tool)
 
 **Acceptable**:
-- `^[a-zA-Z0-9 _-]+$` (alphanumerics, spaces, hyphens, underscores)
+- `^[a-zA-Z0-9 _:-]+$` (alphanumerics, spaces, hyphens, underscores, **colons** for namespaced scripts like `test:unit`)
 
 **Rejected**:
 - Semicolons, pipes, ampersands, backticks, `$()`, etc.
