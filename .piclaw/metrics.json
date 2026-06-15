@@ -20,6 +20,96 @@
                                       [
                                         [
                                           [
+                                            [
+                                              [
+                                                [
+                                                  [
+                                                    [
+                                                      [
+                                                        {
+                                                          "teamId": "team-3",
+                                                          "totalTasks": 0,
+                                                          "completedTasks": 0,
+                                                          "failedTasks": 0,
+                                                          "pendingTasks": 0,
+                                                          "avgTaskDurationMs": 0,
+                                                          "totalTaskDurationMs": 0,
+                                                          "agentTaskCounts": {},
+                                                          "messageCounts": {},
+                                                          "totalMessages": 0,
+                                                          "teamRuntimeMs": 57
+                                                        }
+                                                      ],
+                                                      {
+                                                        "teamId": "team-6",
+                                                        "totalTasks": 1,
+                                                        "completedTasks": 0,
+                                                        "failedTasks": 0,
+                                                        "pendingTasks": 0,
+                                                        "avgTaskDurationMs": 0,
+                                                        "totalTaskDurationMs": 0,
+                                                        "agentTaskCounts": {},
+                                                        "messageCounts": {},
+                                                        "totalMessages": 0,
+                                                        "teamRuntimeMs": 51
+                                                      }
+                                                    ],
+                                                    {
+                                                      "teamId": "team-3",
+                                                      "totalTasks": 0,
+                                                      "completedTasks": 0,
+                                                      "failedTasks": 0,
+                                                      "pendingTasks": 0,
+                                                      "avgTaskDurationMs": 0,
+                                                      "totalTaskDurationMs": 0,
+                                                      "agentTaskCounts": {},
+                                                      "messageCounts": {},
+                                                      "totalMessages": 0,
+                                                      "teamRuntimeMs": 51
+                                                    }
+                                                  ],
+                                                  {
+                                                    "teamId": "team-6",
+                                                    "totalTasks": 1,
+                                                    "completedTasks": 0,
+                                                    "failedTasks": 0,
+                                                    "pendingTasks": 0,
+                                                    "avgTaskDurationMs": 0,
+                                                    "totalTaskDurationMs": 0,
+                                                    "agentTaskCounts": {},
+                                                    "messageCounts": {},
+                                                    "totalMessages": 0,
+                                                    "teamRuntimeMs": 51
+                                                  }
+                                                ],
+                                                {
+                                                  "teamId": "team-3",
+                                                  "totalTasks": 0,
+                                                  "completedTasks": 0,
+                                                  "failedTasks": 0,
+                                                  "pendingTasks": 0,
+                                                  "avgTaskDurationMs": 0,
+                                                  "totalTaskDurationMs": 0,
+                                                  "agentTaskCounts": {},
+                                                  "messageCounts": {},
+                                                  "totalMessages": 0,
+                                                  "teamRuntimeMs": 51
+                                                }
+                                              ],
+                                              {
+                                                "teamId": "team-6",
+                                                "totalTasks": 1,
+                                                "completedTasks": 0,
+                                                "failedTasks": 0,
+                                                "pendingTasks": 0,
+                                                "avgTaskDurationMs": 0,
+                                                "totalTaskDurationMs": 0,
+                                                "agentTaskCounts": {},
+                                                "messageCounts": {},
+                                                "totalMessages": 0,
+                                                "teamRuntimeMs": 52
+                                              }
+                                            ],
                                             {
                                               "teamId": "team-3",
                                               "totalTasks": 0,
@@ -31,7 +121,7 @@
                                               "agentTaskCounts": {},
                                               "messageCounts": {},
                                               "totalMessages": 0,
-                                              "teamRuntimeMs": 57
+                                              "teamRuntimeMs": 53
                                             }
                                           ],
                                           {
@@ -45,7 +135,7 @@
                                             "agentTaskCounts": {},
                                             "messageCounts": {},
                                             "totalMessages": 0,
-                                            "teamRuntimeMs": 51
+                                            "teamRuntimeMs": 56
                                           }
                                         ],
                                         {
@@ -73,7 +163,7 @@
                                         "agentTaskCounts": {},
                                         "messageCounts": {},
                                         "totalMessages": 0,
-                                        "teamRuntimeMs": 51
+                                        "teamRuntimeMs": 1187
                                       }
                                     ],
                                     {
@@ -87,7 +177,7 @@
                                       "agentTaskCounts": {},
                                       "messageCounts": {},
                                       "totalMessages": 0,
-                                      "teamRuntimeMs": 51
+                                      "teamRuntimeMs": 52
                                     }
                                   ],
                                   {
@@ -101,7 +191,7 @@
                                     "agentTaskCounts": {},
                                     "messageCounts": {},
                                     "totalMessages": 0,
-                                    "teamRuntimeMs": 52
+                                    "teamRuntimeMs": 53
                                   }
                                 ],
                                 {
@@ -115,7 +205,7 @@
                                   "agentTaskCounts": {},
                                   "messageCounts": {},
                                   "totalMessages": 0,
-                                  "teamRuntimeMs": 53
+                                  "teamRuntimeMs": 50
                                 }
                               ],
                               {
@@ -129,7 +219,7 @@
                                 "agentTaskCounts": {},
                                 "messageCounts": {},
                                 "totalMessages": 0,
-                                "teamRuntimeMs": 56
+                                "teamRuntimeMs": 51
                               }
                             ],
                             {
@@ -143,7 +233,7 @@
                               "agentTaskCounts": {},
                               "messageCounts": {},
                               "totalMessages": 0,
-                              "teamRuntimeMs": 51
+                              "teamRuntimeMs": 57
                             }
                           ],
                           {
@@ -157,7 +247,7 @@
                             "agentTaskCounts": {},
                             "messageCounts": {},
                             "totalMessages": 0,
-                            "teamRuntimeMs": 1187
+                            "teamRuntimeMs": 51
                           }
                         ],
                         {
@@ -171,7 +261,7 @@
                           "agentTaskCounts": {},
                           "messageCounts": {},
                           "totalMessages": 0,
-                          "teamRuntimeMs": 52
+                          "teamRuntimeMs": 60
                         }
                       ],
                       {
@@ -185,7 +275,7 @@
                         "agentTaskCounts": {},
                         "messageCounts": {},
                         "totalMessages": 0,
-                        "teamRuntimeMs": 53
+                        "teamRuntimeMs": 50
                       }
                     ],
                     {
@@ -199,7 +289,7 @@
                       "agentTaskCounts": {},
                       "messageCounts": {},
                       "totalMessages": 0,
-                      "teamRuntimeMs": 50
+                      "teamRuntimeMs": 52
                     }
                   ],
                   {
@@ -213,7 +303,7 @@
                     "agentTaskCounts": {},
                     "messageCounts": {},
                     "totalMessages": 0,
-                    "teamRuntimeMs": 51
+                    "teamRuntimeMs": 70
                   }
                 ],
                 {
@@ -227,7 +317,7 @@
                   "agentTaskCounts": {},
                   "messageCounts": {},
                   "totalMessages": 0,
-                  "teamRuntimeMs": 57
+                  "teamRuntimeMs": 52
                 }
               ],
               {
@@ -255,7 +345,7 @@
               "agentTaskCounts": {},
               "messageCounts": {},
               "totalMessages": 0,
-              "teamRuntimeMs": 60
+              "teamRuntimeMs": 50
             }
           ],
           {
@@ -269,7 +359,7 @@
             "agentTaskCounts": {},
             "messageCounts": {},
             "totalMessages": 0,
-            "teamRuntimeMs": 50
+            "teamRuntimeMs": 59
           }
         ],
         {
@@ -283,7 +373,7 @@
           "agentTaskCounts": {},
           "messageCounts": {},
           "totalMessages": 0,
-          "teamRuntimeMs": 52
+          "teamRuntimeMs": 51
         }
       ],
       {
@@ -297,7 +387,7 @@
         "agentTaskCounts": {},
         "messageCounts": {},
         "totalMessages": 0,
-        "teamRuntimeMs": 70
+        "teamRuntimeMs": 50
       }
     ],
     {
@@ -311,7 +401,7 @@
       "agentTaskCounts": {},
       "messageCounts": {},
       "totalMessages": 0,
-      "teamRuntimeMs": 52
+      "teamRuntimeMs": 57
     }
   ],
   {

@@ -13,16 +13,16 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 /** Escape a string for safe inclusion in a shell command (single-quote style). */
-function escapeShellArg(arg: string): string {
+export function escapeShellArg(arg: string): string {
   const escaped = arg.replace(/'/g, "'\\''");
   return `'${escaped}'`;
 }
 
 /** Validate npm script name to prevent injection. */
-function isValidScriptName(name: string): boolean {
-  // NPM script names typically allow alphanumerics, spaces, hyphens, underscores, and slashes (for nested? but not typical).
+export function isValidScriptName(name: string): boolean {
+  // NPM script names typically allow alphanumerics, spaces, hyphens, underscores, and colons (for namespacing like "test:unit").
   // For security, we restrict to a safe subset.
-  return /^[a-zA-Z0-9 _-]+$/.test(name);
+  return /^[a-zA-Z0-9 _:-]+$/.test(name);
 }
 
 async function getScripts(cwd: string): Promise<Record<string, string>> {

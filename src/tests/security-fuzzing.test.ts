@@ -19,6 +19,8 @@ vi.mock("child_process", () => ({
 import { spawn, spawnSync } from "child_process";
 import { existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { escapeShellArg as gitEscape } from "../extensions/tools/git-tool.js";
+import { escapeShellArg as scriptsEscape, isValidScriptName } from "../extensions/tools/scripts-tool.js";
 
 describe("Security Fuzzing: Path Traversal Prevention", () => {
   let pm: PiclawPackageManager;

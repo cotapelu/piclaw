@@ -23,7 +23,7 @@ interface GitParams {
 }
 
 /** Escape a string for safe inclusion in a shell command (single-quote style). */
-function escapeShellArg(arg: string): string {
+export function escapeShellArg(arg: string): string {
   if (arg === undefined) return '';
   // Replace any single quote with the close-open-escape-close pattern
   const escaped = arg.replace(/'/g, "'\\''");
