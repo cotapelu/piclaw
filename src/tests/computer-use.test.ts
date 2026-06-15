@@ -110,5 +110,46 @@ describe('computer-use sub-tools', () => {
       await executeRead({ path: 'file.txt', limit: 10 }, '/cwd', undefined, ctx);
       expect(ctx.exec).toHaveBeenCalledWith('bash', expect.arrayContaining(['-c', expect.stringMatching(/head -n 10/)]), expect.anything());
     });
+
+    it('should return error result on path traversal outside cwd', async () => {
+      const result = await executeRead({ path: '../../../etc/passwd' }, '/cwd', undefined, ctx);
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('Path traversal detected');
+      expect(ctx.exec).not.toHaveBeenCalled();
+    });
+
+    it('should return error result on absolute path outside cwd', async () => {
+      const result = await executeRead({ path: '/etc/passwd' }, '/cwd', undefined, ctx);
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('Path traversal detected');
+      expect(ctx.exec).not.toHaveBeenCalled();
+    });
+
+    it('should escape single quotes in path', async () => {
+      ctx.exec.mockResolvedValue(mockExecResult('content'));
+      await executeRead({ path: "file'name.txt" }, '/cwd', undefined, ctx);
+      expect(ctx.exec).toHaveBeenCalledWith('bash', ['-c', "cat 'file'\\''name.txt'"], expect.anything());
+    });
+
+    it('should combine offset and limit correctly', async () => {
+      ctx.exec.mockResolvedValue(mockExecResult(''));
+      await executeRead({ path: 'file.txt', offset: 10, limit: 5 }, '/cwd', undefined, ctx);
+      const cmd = expect.arrayContaining(['-c', expect.stringMatching(/cat 'file.txt' \| tail -n \+10 \| head -n 5/)]);
+      expect(ctx.exec).toHaveBeenCalledWith('bash', cmd, expect.anything());
+    });
+
+    it('should pass signal to exec', async () => {
+      const signal = new AbortController().signal;
+      ctx.exec.mockResolvedValue(mockExecResult(''));
+      await executeRead({ path: 'file.txt' }, '/cwd', signal, ctx);
+      expect(ctx.exec).toHaveBeenCalledWith('bash', expect.anything(), expect.objectContaining({ signal }));
+    });
+
+    it('should return error result when exec fails', async () => {
+      ctx.exec.mockResolvedValue({ stdout: '', stderr: 'No such file', code: 1 });
+      const result = await executeRead({ path: 'missing.txt' }, '/cwd', undefined, ctx);
+      expect(result.isError).toBe(true);
+      expect(result.content[0].text).toContain('No such file');
+    });
   });
 });

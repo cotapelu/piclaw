@@ -9,6 +9,7 @@
  */
 
 import { Type } from "typebox";
+import { resolve } from "node:path";
 
 // ============================================================================
 // Schemas
@@ -136,6 +137,7 @@ export async function executeGrep(
 
 /**
  * Read file contents with optional offset/limit
+ * Uses cat + tail/head with proper escaping and path validation.
  */
 export async function executeRead(
   args: any,
@@ -143,17 +145,25 @@ export async function executeRead(
   signal?: AbortSignal,
   ctx?: any,
 ) {
-  const { path, offset, limit } = args as { path: string; offset?: number; limit?: number };
+  const { path: filePath, offset, limit } = args as { path: string; offset?: number; limit?: number };
   try {
-    // Use bash + cat + tail/head for streaming
-    let cmd = `cat '${path}'`;
+    // Validate path: prevent traversal outside cwd
+    const baseDir = resolve(cwd);
+    const resolved = resolve(cwd, filePath);
+    if (!resolved.startsWith(baseDir + "/") && resolved !== baseDir) {
+      throw new Error(`Path traversal detected: ${filePath}`);
+    }
+    // Escape single quotes for safe bash usage
+    const escapedPath = filePath.replace(/'/g, "'\\''");
+    // Build command using cat with escaped path
+    let cmd = `cat '${escapedPath}'`;
     if (offset && offset > 0) cmd += ` | tail -n +${offset}`;
     if (limit !== undefined) cmd += ` | head -n ${limit}`;
 
     const result = await ctx!.exec("bash", ["-c", cmd], { cwd, signal });
     return {
       content: [{ type: "text", text: result.stdout || result.stderr }],
-      details: { exitCode: result.code, killed: result.killed, path, offset, limit },
+      details: { exitCode: result.code, killed: result.killed, path: filePath, offset, limit },
       isError: result.code !== 0,
     } as const;
   } catch (error: any) {
