@@ -29,7 +29,7 @@
 ## P5 — Testing & Quality
 - [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
 - [x] Expand fuzzing coverage to other tools (test-tool file args) — added test-tool-security.test.ts
-- [ ] Chaos engineering: random network failures
+- [x] Chaos engineering: random network failures — added chaos utility and integrated into runCommandCapture
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
 - [ ] Property-based testing for core algorithms
@@ -69,9 +69,10 @@
 - P2 Memory Stability — basic memory leak test for package manager added and passing
 - P2 Benchmark Package Manager — created benchmark script for performance regression detection
 - P4 Prometheus Metrics Export — added prometheus-metrics-tool for observability
-- P4 Debug Mode Enhancement — logger.error now includes stack traces for Error objects
+- P4 Debug Mode Enhancement — logger.error now includes Error.stack
 - P5 Coverage Milestone — increased coverage to >80% with comprehensive tests for subtool-loader and core logger
 - P5 Fuzzing Expansion — added security tests for test-tool file args
+- P5 Chaos Engineering — added chaos utility with env-controlled failure injection
 - P5 Long-Running Stability Test — added long-running-stability.test.ts validating no resource leaks over many cycles
 
 ---

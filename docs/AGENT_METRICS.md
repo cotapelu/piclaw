@@ -146,4 +146,12 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 **Outcome**: System stability validated over simulated extended operation.
 
-*Next iteration: focus on remaining P4/P5 items: TUI performance dashboard, session health checks, and chaos engineering.*
+### Iteration 11 — 2026-06-15 (Stress Testing for escapeShellArg)
+
+**Fuzzing Expansion (P5):**
+- Added `src/tests/escapeShellArg-stress.test.ts` generating 1000 random strings containing shell metacharacters.
+- Validates wrapping and single-quote escaping invariants; catches potential regressions in escapeShellArg implementations.
+
+**Outcome**: Additional robustness testing for command injection prevention.
+
+*Next iteration: continue with remaining P4 items (session health checks), and P5 chaos engineering.*

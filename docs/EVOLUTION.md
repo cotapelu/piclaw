@@ -194,6 +194,14 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 **Outcome**: Stability validated; confidence in long-running sessions improved.
 
 
+### Iteration 11 — 2026-06-15 (Stress Testing for escapeShellArg)
+
+**Fuzzing Expansion (P5):**
+- Added `src/tests/escapeShellArg-stress.test.ts` generating 1000 random strings containing shell metacharacters.
+- Validates wrapping and single-quote escaping invariants; catches potential regressions.
+
+**Outcome**: Additional robustness for command injection prevention.
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening

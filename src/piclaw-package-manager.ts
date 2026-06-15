@@ -14,6 +14,7 @@ import { homedir } from "os";
 import { basename, dirname, join, relative, resolve, sep } from "node:path";
 import { minimatch } from "minimatch";
 import { logger } from "./utils/logger.js";
+import { chaos } from "./utils/chaos.js";
 import { CONFIG_DIR_NAME } from "./config/config-manager.js";
 
 interface PiclawSettings {
@@ -591,6 +592,7 @@ export class PiclawPackageManager {
   }
 
   private runCommandCapture(command: string, args: string[], options?: { cwd?: string }): Promise<string> {
+    chaos('runCommandCapture');
     return new Promise((resolve, reject) => {
       const child = spawn(command, args, {
         cwd: options?.cwd,
