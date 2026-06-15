@@ -137,4 +137,13 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 **Outcome**: Security testing broadened; debugging capabilities strengthened.
 
-*Next iteration: address remaining P4/P5 items: TUI performance dashboard, long-running stability test, session health checks.*
+### Iteration 10 — 2026-06-15 (Long-Running Stability Test)
+
+**Stability (P5):**
+- Added `src/tests/long-running-stability.test.ts` performing 20 cycles of package manager updates with 1000 sources and 50 team lifecycle iterations.
+- Verified memory growth stays <5MB for package manager and <2MB for team; total time within bounds.
+- Confirms no progressive resource leaks or degradation.
+
+**Outcome**: System stability validated over simulated extended operation.
+
+*Next iteration: focus on remaining P4/P5 items: TUI performance dashboard, session health checks, and chaos engineering.*

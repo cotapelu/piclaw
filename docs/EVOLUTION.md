@@ -183,6 +183,17 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 **Outcome**: Security and debugging improved.
 
+
+### Iteration 10 — 2026-06-15 (Long-Running Stability Test)
+
+**Stability (P5):**
+- Created `src/tests/long-running-stability.test.ts` simulating extended operation: 20 cycles of 1000-source PM updates and 50 team initializations.
+- Memory growth thresholds enforced (<5MB for PM, <2MB for team) and time bounds checked.
+- Test passes, confirming no progressive resource leaks.
+
+**Outcome**: Stability validated; confidence in long-running sessions improved.
+
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
