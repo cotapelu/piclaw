@@ -80,7 +80,14 @@ export const logger = {
 
   error: (...args: any[]) => {
     if (['trace', 'debug', 'info', 'warn', 'error'].includes(currentLevel) && !quietMode) {
-      console.error(formatLog('ERROR', args));
+      // Include stack trace if first argument is an Error
+      let logArgs = args;
+      if (args[0] instanceof Error) {
+        const err = args[0];
+        const errMsg = err.message + (err.stack ? '\n' + err.stack : '');
+        logArgs = [errMsg, ...args.slice(1)];
+      }
+      console.error(formatLog('ERROR', logArgs));
     }
   },
 
