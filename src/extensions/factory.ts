@@ -17,6 +17,7 @@ import { registerBuildTool } from "./tools/build-tool.js";
 import { registerMetricsTool } from "./tools/metrics-tool.js";
 import { registerSecretScannerTool } from "./tools/secret-scanner-tool.js";
 import { registerScriptsTool } from "./tools/scripts-tool.js";
+import { registerPrometheusMetricsTool } from "./tools/prometheus-metrics-tool.js";
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
@@ -71,6 +72,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerBuildTool(api);
   // Register metrics tool
   registerMetricsTool(api);
+  // Register Prometheus metrics tool (P4 Observability)
+  registerPrometheusMetricsTool(api);
   // Register secret scanner tool
   registerSecretScannerTool(api);
   // Register scripts tool

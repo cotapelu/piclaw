@@ -43,7 +43,7 @@
 
 ## P4 — Observability & Reliability
 - [x] Add structured logging (trace/debug/info/warn/error)
-- [ ] Export metrics in Prometheus format
+- [x] Export metrics in Prometheus format (added prometheus-metrics-tool)
 - [ ] TUI performance dashboard widget
 - [ ] Debug mode with full trace on errors
 - [ ] Session health checks (auto-repair corrupted sessions)
@@ -68,7 +68,9 @@
 - P2 Concurrency Profiling — team workspace concurrency threshold added and passing
 - P2 Memory Stability — basic memory leak test for package manager added and passing
 - P2 Benchmark Package Manager — created benchmark script for performance regression detection
+- P4 Prometheus Metrics Export — added prometheus-metrics-tool for observability
 - P5 Coverage Milestone — increased coverage to >80% with comprehensive tests for subtool-loader and core logger
+- P5 Fuzzing Expansion — added security tests for test-tool file args
 
 ---
 
