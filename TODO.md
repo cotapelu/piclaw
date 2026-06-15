@@ -28,6 +28,7 @@
 
 ## P5 — Testing & Quality
 - [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
+- [x] Expand fuzzing coverage to other tools (test-tool file args) — added test-tool-security.test.ts
 - [ ] Chaos engineering: random network failures
 - [ ] Long-running stability test (24h+)
 - [ ] Reproducible integration test environments

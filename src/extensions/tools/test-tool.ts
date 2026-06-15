@@ -11,7 +11,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { createBashTool } from "@earendil-works/pi-coding-agent";
 
 /** Escape a string for safe inclusion in a shell command (single-quote style). */
-function escapeShellArg(arg: string): string {
+export function escapeShellArg(arg: string): string {
   const escaped = arg.replace(/'/g, "'\\''");
   return `'${escaped}'`;
 }
