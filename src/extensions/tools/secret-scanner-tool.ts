@@ -34,6 +34,11 @@ const PATTERNS: { type: string; regex: RegExp }[] = [
   { type: "Datadog API Key", regex: /[a-z0-9]{32}/ },
   { type: "New Relic Key", regex: /NRAK-[A-Z0-9]{27}/ },
   { type: "Twilio", regex: /SK[0-9a-fA-F]{32}/ },
+  // New patterns (2026-06-15)
+  { type: "OpenAI API Key", regex: /sk-[A-Za-z0-9]{48}/ },
+  { type: "Anthropic API Key", regex: /sk-ant-[A-Za-z0-9]{32,}/ },
+  { type: "Replicate API Token", regex: /r8_[0-9a-zA-Z]{40}/ },
+  { type: "Hugging Face Token", regex: /hf_[0-9a-zA-Z]{34,}/ },
 ];
 
 const DEFAULT_EXTENSIONS = [".js",".ts",".json",".env",".yml",".yaml",".md",".txt",".sh",".py",".rb",".php",".java",".c",".cpp",".h",".hpp",".rs",".go",".env.local",".config"];

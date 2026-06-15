@@ -9,6 +9,8 @@ const logger = createLogger("CLI");
 
 // Wrapper main
 async function main() {
+  // Set restrictive umask so session files (and other sensitive files) are created with 0600 permissions
+  try { process.umask(0o077); } catch {}
   // Initialize structured logging early
   await initLogger();
 
