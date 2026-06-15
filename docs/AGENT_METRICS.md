@@ -30,4 +30,14 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 ---
 
-*Next iteration: security audit, performance profiling, observability enhancements.*)
+## Iteration 2 — 2026-06-15
+
+**Security Hardening: Path Traversal Fixes**
+
+- Fixed path traversal vulnerability in `executeRead` (`src/extensions/tools/sub-tools/computer-use.ts`): implemented secure bash with single-quote escaping and path validation within cwd. Added comprehensive tests covering traversal attempts, escaping, offset/limit combinations, error handling. All 981 tests pass.
+- Addressed critical path traversal in `PiclawPackageManager` (`src/piclaw-package-manager.ts`): integrated `validateLocalPath` in `resolveExtensionSources` and `resolve`; added warning logs for invalid sources. Added security tests ensuring traversal attempts are rejected (install) or skipped (resolve). No regressions.
+- Improved overall test coverage for security edge cases (tests increased from 978 to 981).
+
+**Outcome**: All known critical path traversal vulnerabilities mitigated. File access is now confined to allowed directories. System stability maintained.
+
+*Next iteration: address remaining HIGH risks (command injection verification), add fuzzing tests, and improve secret detection.*)

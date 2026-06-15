@@ -42,7 +42,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 1. **Refactor test spies**: Replace direct `console` spies with a logger mock that can intercept logger method calls.
-2. **Security audit**: Input validation, path traversal, secret leakage.
+2. **Security hardening**: Verify command injection mitigations in git-tool and scripts-tool; add fuzzing tests for all tools.
 3. **Performance profiling**: Under 50-agent load; identify memory leaks.
 4. **Observability**: Add structured contexts (trace IDs), export metrics in open format.
 5. **Coverage**: Increase to ≥80% with focus on error paths and concurrency.

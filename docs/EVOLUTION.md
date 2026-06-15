@@ -66,6 +66,10 @@ The codebase widely used raw `console.log`/`error`/`warn` throughout production 
 - Scan persisted session files for secrets; implement encryption at rest.
 - Add fuzzing tests using `@faker-js/faker`.
 
+#### Completed: Path Traversal Fixes (Iteration 2)
+- Secured `executeRead` with proper escaping and validation; added tests.
+- Fixed `PiclawPackageManager` local source handling with `validateLocalPath`; added tests.
+
 ### P2 — Performance
 - Profile team workspace under 50 agents, 1000 ops; optimize lock contention.
 - Investigate memory leaks in long-lived sessions (2+ hours).

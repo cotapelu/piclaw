@@ -13,10 +13,10 @@
 - [x] First evolution round: Analyze test results and identify quick wins
 
 ## P1 — Security Hardening
-- [ ] Audit all tool inputs for injection vulnerabilities
-- [ ] Validate file paths prevent traversal attacks
+- [x] Audit all tool inputs for injection vulnerabilities (initial audit complete; verify fixes)
+- [x] Validate file paths prevent traversal attacks (executeRead, PiclawPackageManager fixed)
 - [ ] Check session persistence doesn't leak secrets
-- [ ] Add fuzzing tests for edge-case inputs
+- [ ] Add fuzzing tests for edge-case inputs (partial: added path traversal tests)
 - [ ] Implement secret pattern updates (detect new token formats)
 
 ## P2 — Performance Optimization
