@@ -80,7 +80,12 @@ describe('AgentTeam Workspace Concurrency', () => {
       }
     }
 
+    const start = Date.now();
     await Promise.all(promises);
+    const elapsed = Date.now() - start;
+    console.log(`[Perf] Team workspace concurrency: ${agentCount} agents x ${opsPerAgent} ops = ${totalOps} ops in ${elapsed}ms (${(totalOps/(elapsed/1000)).toFixed(1)} ops/sec)`);
+    // Performance threshold: should complete within 5 seconds (generous)
+    expect(elapsed).toBeLessThan(5000);
 
     const keys = await team.workspaceList();
     expect(keys.length).toBeGreaterThanOrEqual(totalOps - agentCount); // allow some overwrites
