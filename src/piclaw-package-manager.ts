@@ -400,14 +400,18 @@ export class PiclawPackageManager {
         }
       } else if (parsed.type === "local") {
         const baseDir = scope === "project" ? this.cwd : this.agentDir;
-        const resolved = resolve(baseDir, parsed.path);
-        if (existsSync(resolved)) {
-          this.collectPackageResources(resolved, accumulator, undefined, {
-            source,
-            scope,
-            origin: "package",
-            baseDir: resolved,
-          });
+        try {
+          const resolved = validateLocalPath(baseDir, parsed.path);
+          if (existsSync(resolved)) {
+            this.collectPackageResources(resolved, accumulator, undefined, {
+              source,
+              scope,
+              origin: "package",
+              baseDir: resolved,
+            });
+          }
+        } catch (error) {
+          logger.log(chalk.yellow(`[WARN] Invalid local source '${parsed.path}' for ${source}: ${error instanceof Error ? error.message : String(error)}`));
         }
       }
     }
@@ -451,10 +455,14 @@ export class PiclawPackageManager {
         }
       } else if (parsed.type === "local") {
         const base = entry.scope === "project" ? this.cwd : this.agentDir;
-        const resolved = resolve(base, parsed.path);
-        if (existsSync(resolved)) {
-          metadata.baseDir = resolved;
-          this.collectPackageResources(resolved, accumulator, entry.filter, metadata);
+        try {
+          const resolved = validateLocalPath(base, parsed.path);
+          if (existsSync(resolved)) {
+            metadata.baseDir = resolved;
+            this.collectPackageResources(resolved, accumulator, entry.filter, metadata);
+          }
+        } catch (error) {
+          logger.log(chalk.yellow(`[WARN] Invalid local source '${parsed.path}' for ${entry.source}: ${error instanceof Error ? error.message : String(error)}`));
         }
       }
     }

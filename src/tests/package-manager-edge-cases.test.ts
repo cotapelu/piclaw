@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import chalk from 'chalk';
 
 // Mock child_process before importing the manager
 vi.mock('child_process', () => ({
@@ -368,6 +369,34 @@ describe('PiclawPackageManager Edge Cases', () => {
       const updateNpmSpy = vi.spyOn(anyPm, 'updateNpm');
       await pm.update('npm:testpkg', { dryRun: true });
       expect(updateNpmSpy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Security: Local Path Traversal', () => {
+    it('should reject install with relative path traversal', async () => {
+      await expect(pm.install('../../../etc/passwd', { local: true })).rejects.toThrow('Path traversal detected');
+    });
+
+    it('should reject install with absolute path outside cwd', async () => {
+      await expect(pm.install('/etc/passwd', { local: true })).rejects.toThrow('Path traversal detected');
+    });
+
+    it('should skip malicious local source in resolveExtensionSources', async () => {
+      const result = await pm.resolveExtensionSources(['../../../etc/passwd'], { local: true });
+      expect(result.extensions).toHaveLength(0);
+      expect(result.skills).toHaveLength(0);
+      expect(result.prompts).toHaveLength(0);
+      expect(result.themes).toHaveLength(0);
+    });
+
+    it('should skip malicious local entry in resolve() without throwing', async () => {
+      pm.addSourceToSettings('../../../etc/passwd', { local: true });
+      const result = await pm.resolve();
+      // All resource arrays should be empty (or at least not include any from the malicious path)
+      expect(result.extensions).toHaveLength(0);
+      expect(result.skills).toHaveLength(0);
+      expect(result.prompts).toHaveLength(0);
+      expect(result.themes).toHaveLength(0);
     });
   });
 
