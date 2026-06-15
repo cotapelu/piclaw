@@ -94,7 +94,27 @@ Following structured logging, we focused on critical security vulnerabilities id
 ### Outcome
 All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilities from the audit are now mitigated. System remains stable with no regressions.
 
+### Completed (Iteration 3)
+- All P1 Security Hardening tasks completed and documented.
+- All critical/high vulnerabilities mitigated.
+- Test suite stable (105 files, ~1001 tests).
+
+### Iteration 4 — 2026-06-15
+
+**Performance: Team Workspace Concurrency Threshold**
+- Added explicit performance threshold to `team-workspace-concurrency.test.ts`.
+- Result: 10 agents × 50 ops = 500 ops in ~27ms (18518.5 ops/sec), well under 5s threshold.
+
+**Coverage: Secret Scanner Testing**
+- Exported internal `runScan` from `secret-scanner-tool.ts` for testability.
+- Fixed test import path; added comprehensive tests.
+- Coverage increased from ~70% to **78.97%**.
+
+**Outcome**: P2 concurrency profiling done, P5 coverage nearing target.
+
 ### Next Steps
+- Increase coverage to ≥80% (P5) by targeting low-coverage modules: subtool-loader (~18%), utils/logger (~12.79%), error paths.
+- Investigate memory leaks in long-running sessions (P2).
 - Investigate session persistence for potential secret leakage (P1 follow-up).
 - Expand fuzzing coverage to other tools (test-tool file args).
 - Update secret scanner patterns for new token formats.

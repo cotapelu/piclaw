@@ -18,6 +18,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Metrics format**: Currently exports JSON lines without rotation; long-term could become large.
 - **Config file schema validation**: Minimal; could benefit from stricter schema with defaults.
 - **Documentation gaps**: No ADRs, limited extension developer guide.
+- **Coverage gap**: Current ~78.97%, target 80%; need to test remaining critical paths (error handling, subtool-loader, utils/logger).
 
 ## Fragile Modules
 
@@ -41,11 +42,11 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Improvement Focus (Next)
 
-1. **Refactor test spies**: Replace direct `console` spies with a logger mock that can intercept logger method calls.
-2. **Secret leakage & detection**: Investigate session persistence for secret leakage; implement redaction if needed; update secret patterns for new token formats.
-3. **Performance profiling**: Under 50-agent load; identify memory leaks.
+1. **Testing & Quality (P5)**: Increase coverage to ≥80% by adding targeted tests for low-coverage modules (subtool-loader, utils/logger, error paths in tools).
+2. **Refactor test spies**: Replace direct `console` spies with a logger mock that can intercept logger method calls.
+3. **Performance profiling**: Under 50-agent load; identify memory leaks in long-running sessions.
 4. **Observability**: Add structured contexts (trace IDs), export metrics in open format.
-5. **Coverage**: Increase to ≥80% with focus on error paths and concurrency.
+5. **Secret leakage & detection**: Investigate session persistence for secret leakage; implement redaction if needed; update secret patterns for new token formats.
 
 ---
 

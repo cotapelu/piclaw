@@ -103,7 +103,7 @@ async function scanDirectory(root: string, options: { path: string; extensions: 
 }
 
 // Shared scan runner
-async function runScan(args: {
+export async function runScan(args: {
   path?: string;
   extensions?: string;
   exclude?: string;
