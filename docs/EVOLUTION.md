@@ -58,6 +58,49 @@ The codebase widely used raw `console.log`/`error`/`warn` throughout production 
 
 ---
 
+## 2026-06-15 — Round 2: Security Hardening & Test Expansion
+
+### Context
+Following structured logging, we focused on critical security vulnerabilities identified in the audit: path traversal, command injection, and unsafe arithmetic evaluation.
+
+### Goals
+- Eliminate path traversal in file operations (executeRead, piclaw-package-manager).
+- Replace unsafe `eval` in calc-action with a safe parser.
+- Ensure proper shell escaping for file arguments and script names.
+- Add comprehensive security tests (unit and fuzzing) for vulnerable tools.
+- Update security documentation and TODO.
+
+### Changes
+
+#### Path Traversal Mitigations
+- `sub-tools/computer-use.ts`: `executeRead` now uses `bash -c` with single-quote escaping and resolves paths within cwd; rejects traversal attempts with error.
+- `piclaw-package-manager.ts`: Added `validateLocalPath` used in `resolveExtensionSources` and `resolve`; invalid sources logged and skipped. Tests added in `src/tests/package-manager-edge-cases.test.ts`.
+
+#### Calculation Safety
+- `actions/calc-action.ts`: Replaced `eval()` with `parse-english-calculator`; added input trimming and error logging.
+
+#### Script & Git Tool Hardening
+- `scripts-tool.ts`: Extended `isValidScriptName` regex to include colon (`:`) for namespaced scripts (e.g., `test:unit`). Exported `escapeShellArg` and `isValidScriptName` for testing.
+- `git-tool.ts`: Already escaped file args using `escapeShellArg`; now exported for tests.
+
+#### Security Test Suite
+- Created `src/tests/git-tool-security.test.ts` (7 tests) and `src/tests/scripts-tool-security.test.ts` (6 tests) covering escaping and validation.
+- Extended `security-fuzzing.test.ts` with imports for these functions and path traversal tests.
+
+#### Documentation
+- Updated `SECURITY.md` (script name validation) and `SECURITY_AUDIT_V1.md` (marked all critical/high vulnerabilities fixed).
+- Updated `TODO.md` to reflect completed P1 tasks and set next focus on session persistence secret leakage.
+
+### Outcome
+All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilities from the audit are now mitigated. System remains stable with no regressions.
+
+### Next Steps
+- Investigate session persistence for potential secret leakage (P1 follow-up).
+- Expand fuzzing coverage to other tools (test-tool file args).
+- Update secret scanner patterns for new token formats.
+
+---
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening

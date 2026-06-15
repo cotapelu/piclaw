@@ -4,12 +4,12 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Strengths
 
-- **Comprehensive test suite**: 978 tests covering most modules with high coverage.
+- **Comprehensive test suite**: 1001 tests (998 passing, 3 skipped) with good coverage across core, tools, and team modules.
 - **Modular architecture**: Clear separation between core, extensions, and tools.
 - **Robust team collaboration**: Multi-agent teams with task assignment, workspace isolation, and zombie recovery.
 - **TypeScript strict mode**: Strong typing, early error detection.
 - **Persistent state management**: Todos, configuration, and metrics are safely stored.
-- **Extensible tool system**: Easy to add new tools with standardized API.
+- **Extensible tool system**: Standardized API with input validation and security best practices (command escaping, path confinement).
 
 ## Weaknesses
 
@@ -42,7 +42,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 1. **Refactor test spies**: Replace direct `console` spies with a logger mock that can intercept logger method calls.
-2. **Security hardening**: Verify command injection mitigations in git-tool and scripts-tool; add fuzzing tests for all tools.
+2. **Secret leakage & detection**: Investigate session persistence for secret leakage; implement redaction if needed; update secret patterns for new token formats.
 3. **Performance profiling**: Under 50-agent load; identify memory leaks.
 4. **Observability**: Add structured contexts (trace IDs), export metrics in open format.
 5. **Coverage**: Increase to ≥80% with focus on error paths and concurrency.

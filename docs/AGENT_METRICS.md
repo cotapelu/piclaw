@@ -40,4 +40,20 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 **Outcome**: All known critical path traversal vulnerabilities mitigated. File access is now confined to allowed directories. System stability maintained.
 
-*Next iteration: address remaining HIGH risks (command injection verification), add fuzzing tests, and improve secret detection.*)
+## Iteration 3 — 2026-06-15 (Security Completion)
+
+**Security Hardening: Finalization and Test Expansion**
+- Total tests: 1001 (998 passing, 3 skipped)
+- Completed P1 Security Hardening across multiple tools:
+  - `calc-action.ts`: replaced unsafe `eval()` with `parse-english-calculator`; added input validation and detailed logging.
+  - `sub-tools/computer-use.ts`: secure bash implementation with proper single-quote escaping and path validation; removed `fs.readFile` dependency; 21 tests passing.
+  - `piclaw-package-manager.ts`: integrated `validateLocalPath` in `resolveExtensionSources` and `resolve`; traversal attempts now logged and skipped.
+  - `git-tool.ts`: exported `escapeShellArg` for testability; file arguments already use proper single-quote escaping; 25 tests passing.
+  - `scripts-tool.ts`: extended `isValidScriptName` to allow colons (e.g., `test:unit`); exported validation functions; added 6 dedicated security tests.
+- Added dedicated security test suites: `git-tool-security.test.ts` (7 tests) and `scripts-tool-security.test.ts` (6 tests).
+- Updated documentation: SECURITY.md, SECURITY_AUDIT_V1.md to reflect mitigations; TODO.md updated.
+- All 105 test files passed with no regressions.
+
+**Outcome**: All critical and high-risk vulnerabilities from the initial audit are now mitigated. Input validation and command escaping are consistently applied. System remains stable.
+
+*Next iteration: investigate session persistence for potential secret leakage; update secret patterns for better detection.*)
