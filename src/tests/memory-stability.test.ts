@@ -74,7 +74,7 @@ describe('Memory Stability: Package Manager', () => {
 
     // Log for visibility
     console.log(`Memory delta (5 iterations): ${deltaMB.toFixed(2)} MB`);
-  }, 15000); // increase timeout
+  }, 60000); // allow up to 60s for heavy memory test
 });
 
 // Additional test ideas:

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { describe, it, expect, vi } from 'vitest';
-import extensionsIndex from '../extensions/index.js';
+import extensionsIndex from '../extensions';
 
 describe('extensions/index', () => {
   let mockApi: any;

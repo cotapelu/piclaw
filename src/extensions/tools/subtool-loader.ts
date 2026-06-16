@@ -21,7 +21,7 @@ import {
   createGrepToolDefinition,
   createBashToolDefinition,
 } from "@earendil-works/pi-coding-agent";
-import { chaos } from "../utils/chaos.js";
+import { chaos } from "../../utils/chaos.js";
 
 // Cache for per-context tool instances
 const toolCache = new WeakMap<ExtensionContext, Map<string, ToolDefinition>>();

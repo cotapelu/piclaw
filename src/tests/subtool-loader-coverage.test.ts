@@ -5,7 +5,6 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { createSubLoaderToolDefinition } from '../extensions/tools/subtool-loader';
 
 // Mock the SDK factories to capture calls and allow configuration
 vi.mock("@earendil-works/pi-coding-agent", async () => {
@@ -20,6 +19,9 @@ vi.mock("@earendil-works/pi-coding-agent", async () => {
   };
   return { ...actual, ...factories };
 });
+
+// Import after mock
+import { createSubLoaderToolDefinition } from '../extensions/tools/subtool-loader';
 
 // Import mocked factories after vi.mock
 import {

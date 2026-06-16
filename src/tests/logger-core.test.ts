@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 // Mock node:fs/promises to avoid file system access in initLogger
 vi.mock('node:fs/promises', () => ({
   readFile: vi.fn(),
+  // Provide noop for any other potential imports
 }));
 
 // Now import the logger module
