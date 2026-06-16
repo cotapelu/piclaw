@@ -294,10 +294,23 @@ export class AgentTeam implements AgentTeamRuntime {
     isComplete: boolean; // true when all tasks are either completed or failed
   }> {
     return this.withLock(() => {
-      const tasksArray = Array.from(this.taskStatuses.entries()).map(([idx, status]) => ({ index: idx, ...status }));
-      const completed = Array.from(this.taskStatuses.values()).filter(t => t.status === 'completed').length;
-      const failed = Array.from(this.taskStatuses.values()).filter(t => t.status === 'failed').length;
-      const pending = Array.from(this.taskStatuses.values()).filter(t => t.status === 'pending').length;
+      let completed = 0;
+      let failed = 0;
+      let pending = 0;
+      // Pre-size array for tasks
+      const tasksArray: Array<{ index: number; assignee: string | null; status: 'pending' | 'in_progress' | 'completed' | 'failed'; result: string; retryCount: number; retryAvailableAt?: number }> = new Array(this.tasks.length);
+
+      for (const [idx, status] of this.taskStatuses.entries()) {
+        // Count by status in a single pass
+        switch (status.status) {
+          case 'completed': completed++; break;
+          case 'failed': failed++; break;
+          case 'pending': pending++; break;
+        }
+        // Build task entry at exact index
+        tasksArray[idx] = { index: idx, ...status };
+      }
+
       const total = this.tasks.length;
       return {
         agents: Array.from(this.agentStatuses.entries()).map(([id, status]) => ({ id, ...status })),
