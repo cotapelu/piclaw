@@ -195,4 +195,16 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
 
+### Iteration 16 — 2026-06-16 (Extension Template)
+
+**P3 — Ecosystem & DX:**
+- Created `extension-template/` directory with a minimal example extension.
+- Includes `src/my-extension.ts` that registers a simple tool (`my-greeting`) and a slash command (`/hello`).
+- Includes `README.md` with instructions on how to copy, customize, and register the extension.
+- Updated `TODO.md` to mark "Create extension template repository" as completed.
+
+**Outcome**: Provides a ready-to-use starter kit for extension developers, lowering the barrier to entry. Documentation included.
+
+*Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
+
 ### Planned Refactors (Upcoming Iterations)

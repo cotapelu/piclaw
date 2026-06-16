@@ -35,7 +35,7 @@
 - [ ] Property-based testing for core algorithms
 
 ## P3 — Ecosystem & DX
-- [ ] Create extension template repository
+- [x] Create extension template repository (provided starter template in extension-template/)
 - [x] Add more built-in tools: http-client (done), db-client, cache-manager
 - [ ] Write contribution guide (CONTRIBUTING.md)
 - [ ] Document extension API with examples

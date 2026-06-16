@@ -265,6 +265,28 @@ P3 — Ecosystem & DX calls for expanding built-in tools to improve user product
 
 *Next iteration: Decide between implementing `db-client` (P3) or addressing TUI re‑render optimization (P2) based on user feedback and impact.*
 
+## Iteration 16 — 2026‑06‑16 (Extension Template)
+
+### Context
+P3 — Ecosystem & DX aims to make extension development easier. A template repository provides a standardized starting point.
+
+### Goals
+- Create a minimal, well‑documented extension template.
+- Include example tool and command.
+- Provide clear instructions for integration.
+
+### Changes
+
+- Added `extension-template/` directory with:
+  - `src/my-extension.ts`: Exports `extensionsAggregator` that registers `my-greeting` tool and `/hello` command.
+  - `README.md`: Step‑by‑step guide to copy, customize, register, build, and test.
+- Template code is TypeScript‑clean and demonstrates best practices (use of ExtensionAPI, proper typing).
+- Updated `TODO.md` to mark the template task as completed.
+
+**Outcome**: New extension authors can now bootstrap quickly, reducing onboarding friction.
+
+*Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
