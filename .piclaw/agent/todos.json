@@ -3,11 +3,47 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Current Evolution Cycle — 2026-06-15",
-      "tasks": []
+      "name": "Fix TypeScript errors in evo project",
+      "tasks": [
+        {
+          "id": "task-1",
+          "content": "Fix plugin-loader.ts spread type error at line 225",
+          "status": "in_progress"
+        },
+        {
+          "id": "task-2",
+          "content": "Fix session-tree-command.ts missing module import",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Fix todos-renderer.ts import extension",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Fix team-manager.ts isError and related issues",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Fix team-ops-tool.ts parameter ordering and params typing",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Fix team-tool.ts ctx type and content type issues",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Verify build",
+          "status": "pending"
+        }
+      ]
     }
   ],
-  "nextTaskId": 1,
+  "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-15T18:57:26.318Z"
+  "updatedAt": "2026-06-16T10:54:03.928Z"
 }

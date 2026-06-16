@@ -13,6 +13,17 @@ import { mkdirSync, rmSync, existsSync, writeFileSync } from "node:fs";
 import { performance } from "node:perf_hooks";
 import { PiclawPackageManager } from "../piclaw-package-manager.js";
 
+// Stub all command-executing methods to avoid real installs during benchmark
+const piclawPMProto = PiclawPackageManager.prototype as any;
+piclawPMProto.runCommandCapture = async function() { return ''; };
+piclawPMProto.runCommand = async function() {};
+piclawPMProto.installNpm = async function() {};
+piclawPMProto.installGit = async function() {};
+piclawPMProto.uninstallNpm = async function() {};
+piclawPMProto.uninstallGit = async function() {};
+piclawPMProto.updateNpm = async function() {};
+piclawPMProto.updateGit = async function() {};
+
 async function benchmarkUpdate(packageCount: number, concurrency: number): Promise<{
   packages: number;
   totalTimeMs: number;
@@ -27,22 +38,19 @@ async function benchmarkUpdate(packageCount: number, concurrency: number): Promi
   // Create a PiclawPackageManager
   const pm = new PiclawPackageManager({ cwd: sessionDir, agentDir: sessionDir });
 
-  // Stub runCommandCapture to avoid real installs and speed up benchmark
-  const stubResult = { stdout: '', stderr: '' };
-  pm.runCommandCapture = async () => stubResult;
 
   // Generate many dummy npm packages and add to settings
   const sourceName = `benchmark-${Date.now()}`;
   for (let i = 0; i < packageCount; i++) {
     // add source to settings
-    pm.addSourceToSettings(`npm:dummy-pkg-${i}`, { sourceGroup: sourceName });
+    pm.addSourceToSettings(`npm:dummy-pkg-${i}`);
   }
 
   console.log(`\n🚀 Benchmarking update with ${packageCount} packages (concurrency=${concurrency})`);
 
   const start = performance.now();
   // Run update with dryRun to avoid side-effects (but we stub anyway)
-  await pm.update({ dryRun: true });
+  await pm.update(undefined, { dryRun: true });
   const end = performance.now();
 
   const totalTimeMs = end - start;
