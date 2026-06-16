@@ -36,7 +36,7 @@
 
 ## P3 — Ecosystem & DX
 - [ ] Create extension template repository
-- [ ] Add more built-in tools: http-client, db-client, cache-manager
+- [x] Add more built-in tools: http-client (done), db-client, cache-manager
 - [ ] Write contribution guide (CONTRIBUTING.md)
 - [ ] Document extension API with examples
 - [ ] Improve error messages with actionable suggestions

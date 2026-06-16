@@ -182,4 +182,17 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next iteration: P5 property‑based testing and reproducible integration environments.*
 
+### Iteration 15 — 2026-06-16 (Ecosystem Expansion: HTTP Client)
+
+**P3 — Ecosystem & DX:**
+- Implemented `http-client` tool (`src/extensions/tools/http-client-tool.ts`) with support for GET, POST, PUT, DELETE, PATCH.
+- Uses Node.js fetch with timeout (default 30s), custom headers, and optional body for POST/PUT/PATCH.
+- Includes comprehensive test suite (`src/tests/http-client-tool.test.ts`, 10 tests covering success, validation, errors, timeout) — all passing.
+- Registered tool in `src/extensions/factory.ts`.
+- Updated TODO.md to mark http-client item as completed.
+
+**Outcome**: Users can now perform HTTP requests directly from the agent, expanding integration capabilities. P3 item "Add more built-in tools: http-client" is complete. No regressions; build and test suite healthy.
+
+*Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
+
 ### Planned Refactors (Upcoming Iterations)

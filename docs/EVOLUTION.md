@@ -232,6 +232,39 @@ All 1001 tests pass (998 passing, 3 skipped). All critical and high vulnerabilit
 
 *Next iteration: P5 property‑based testing and reproducible integration environments.*
 
+## Iteration 15 — 2026‑06‑16 (HTTP Client Tool)
+
+### Context
+P3 — Ecosystem & DX calls for expanding built-in tools to improve user productivity. The HTTP client is a high‑impact addition that enables the agent to interact with web APIs directly.
+
+### Goals
+- Implement an `http-client` tool using Node.js fetch.
+- Support common methods, headers, body, and timeout.
+- Provide comprehensive tests for reliability.
+- Integrate without breaking existing functionality.
+
+### Changes
+
+- Created `src/extensions/tools/http-client-tool.ts` with:
+  - Parameter validation (URL, method, body restrictions, timeout).
+  - AbortController for timeout handling.
+  - Readable response summary including status, headers, and body.
+  - Error handling for network issues and non‑2xx status codes.
+- Wrote `src/tests/http-client-tool.test.ts` (10 tests):
+  - Successful GET/POST with headers.
+  - Invalid URL, method, body misuse.
+  - Timeout and network error scenarios.
+- Registered tool in `src/extensions/factory.ts`.
+- Updated `TODO.md` to mark `http-client` as done.
+
+**Metrics**
+- Tests: +10 (all passing)
+- No regressions; build passes.
+
+**Outcome**: Agent can now perform HTTP requests natively. This resolves a common need and reduces reliance on external scripts. Next: consider adding `db-client` and `cache-manager` as planned in P3.
+
+*Next iteration: Decide between implementing `db-client` (P3) or addressing TUI re‑render optimization (P2) based on user feedback and impact.*
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening
