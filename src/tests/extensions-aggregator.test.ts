@@ -15,7 +15,7 @@ vi.mock("../extensions/tools/formatter-tool.js", () => ({ registerFormatterTool:
 vi.mock("../extensions/tools/audit-tool.js", () => ({ registerAuditTool: vi.fn() }));
 vi.mock("../extensions/tools/build-tool.js", () => ({ registerBuildTool: vi.fn() }));
 vi.mock("../extensions/tools/metrics-tool.js", () => ({ registerMetricsTool: vi.fn() }));
-vi.mock("../extensions/tools/secret-scanner-tool.js", () => ({ registerSecretScannerTool: vi.fn() }));
+// vi.mock("../extensions/tools/secret-scanner-tool.js", () => ({ registerSecretScannerTool: vi.fn() })); // REMOVED
 vi.mock("../extensions/tools/scripts-tool.js", () => ({ registerScriptsTool: vi.fn() }));
 vi.mock("../extensions/team/index.js", () => ({ registerTeamTool: vi.fn() }));
 vi.mock("../extensions/tools/subtool-loader.js", () => ({ registerSubToolLoaderExtension: vi.fn() }));
@@ -47,7 +47,6 @@ import { registerFormatterTool } from "../extensions/tools/formatter-tool";
 import { registerAuditTool } from "../extensions/tools/audit-tool";
 import { registerBuildTool } from "../extensions/tools/build-tool";
 import { registerMetricsTool } from "../extensions/tools/metrics-tool";
-import { registerSecretScannerTool } from "../extensions/tools/secret-scanner-tool";
 import { registerTeamTool } from "../extensions/team/index";
 import { registerSubToolLoaderExtension } from "../extensions/tools/subtool-loader";
 import { registerToolTemplate } from "../extensions/tools/tool-template";
@@ -89,7 +88,7 @@ describe("Extensions Aggregator", () => {
     expect(registerAuditTool).toHaveBeenCalledWith(mockApi);
     expect(registerBuildTool).toHaveBeenCalledWith(mockApi);
     expect(registerMetricsTool).toHaveBeenCalledWith(mockApi);
-    expect(registerSecretScannerTool).toHaveBeenCalledWith(mockApi);
+    // registerSecretScannerTool removed (memory leak tool)
     expect(registerScriptsTool).toHaveBeenCalledWith(mockApi);
     expect(registerTeamTool).toHaveBeenCalledWith(mockApi);
     expect(registerSubToolLoaderExtension).toHaveBeenCalledWith(mockApi);

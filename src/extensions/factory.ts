@@ -15,7 +15,7 @@ import { registerFormatterTool } from "./tools/formatter-tool.js";
 import { registerAuditTool } from "./tools/audit-tool.js";
 import { registerBuildTool } from "./tools/build-tool.js";
 import { registerMetricsTool } from "./tools/metrics-tool.js";
-import { registerSecretScannerTool } from "./tools/secret-scanner-tool.js";
+// import { registerSecretScannerTool } from "./tools/secret-scanner-tool.js"; // REMOVED: memory leak tool
 import { registerScriptsTool } from "./tools/scripts-tool.js";
 import { registerHttpClientTool } from "./tools/http-client-tool.js";
 import { registerPrometheusMetricsTool } from "./tools/prometheus-metrics-tool.js";
@@ -78,8 +78,6 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerPrometheusMetricsTool(api);
   // Register session health check tool (P4)
   registerSessionHealthTool(api);
-  // Register secret scanner tool
-  registerSecretScannerTool(api);
   // Register scripts tool
   registerScriptsTool(api);
   // Register HTTP client tool (P3 Ecosystem)

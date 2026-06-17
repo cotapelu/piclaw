@@ -4,6 +4,8 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
     exclude: ["node_modules", "dist", "llm-context"],
+    pool: "forks",
+    workers: 2,
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],
