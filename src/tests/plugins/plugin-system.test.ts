@@ -198,6 +198,17 @@ describe('PluginManager', () => {
     // No crash, and no worker construct calls
     expect(mockWorkerInstance).toBeUndefined();
   });
+
+  it('unloadExtension removes commandWorkers mapping for that worker', async () => {
+    // Simulate having a worker with a registered command
+    await manager.loadExtension('/dummy/ext.js', 'myext');
+    const worker = manager.getWorker('myext')!;
+    // Manually register a command mapping (simulating handleWorkerMessage behavior)
+    (manager as any).commandWorkers.set('cmd1', worker);
+    // unload
+    manager.unloadExtension('myext');
+    expect((manager as any).commandWorkers.has('cmd1')).toBe(false);
+  });
 });
 
 describe('PluginManager with mainApi (isolated extension)', () => {
@@ -207,7 +218,7 @@ describe('PluginManager with mainApi (isolated extension)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockWorkerInstance = undefined;
-    mockMainApi = { registerTool: vi.fn() };
+    mockMainApi = { registerTool: vi.fn(), registerCommand: vi.fn() };
     manager = new PluginManager(mockMainApi);
   });
 
@@ -235,5 +246,29 @@ describe('PluginManager with mainApi (isolated extension)', () => {
     });
     expect(result).toEqual({ result: 'ok' });
     expect(originalExecute).not.toHaveBeenCalled();
+  });
+
+  it('forwards command registration to mainApi and wraps execute to proxy to worker', async () => {
+    await manager.loadExtension('/dummy/ext.js', 'myext');
+    const worker = manager.getWorker('myext')!;
+    const mockCommandDef = { name: 'testcmd', execute: vi.fn() };
+    const originalExecute = mockCommandDef.execute;
+    (manager as any).handleWorkerMessage('myext', { type: 'register_command', name: 'testcmd', command: mockCommandDef });
+
+    expect(mockMainApi.registerCommand).toHaveBeenCalledTimes(1);
+    expect(mockMainApi.registerCommand).toHaveBeenCalledWith('testcmd', expect.objectContaining({ name: 'testcmd' }));
+    const registeredCommand = mockMainApi.registerCommand.mock.calls[0][1];
+
+    const invokeSpy = vi.spyOn(worker, 'invoke').mockResolvedValue({ result: 'cmd-ok' });
+    const result = await registeredCommand.execute({ arg: 456 }, { cwd: '/tmp' });
+    expect(invokeSpy).toHaveBeenCalledWith('execute_command', {
+      commandName: 'testcmd',
+      params: { arg: 456 },
+      ctx: { cwd: '/tmp' },
+    });
+    expect(result).toEqual({ result: 'cmd-ok' });
+    expect(originalExecute).not.toHaveBeenCalled();
+    // check commandWorkers mapping
+    expect((manager as any).commandWorkers.get('testcmd')).toBe(worker);
   });
 });
