@@ -58,68 +58,105 @@ import { registerKeybindingExtension } from "./keybinding/keybinding-extension.j
  * Called by the extension factory system.
  */
 export default async function extensionsAggregator(api: import("@earendil-works/pi-coding-agent").ExtensionAPI) {
+  // Register provider first
+  registerKiloProvider(api);
+
   const config = loadConfig();
   const isolatePlugins = (config as any).plugins?.isolate ?? false;
   let pluginManager: PluginManager | null = null;
 
+  // List of simple tool modules that can be isolated
+  const toolModules = [
+    'universal-tool',
+    'git-tool',
+    'test-tool',
+    'formatter-tool',
+    'audit-tool',
+    'build-tool',
+    'metrics-tool',
+    'prometheus-metrics-tool',
+    'session-health-tool',
+    'scripts-tool',
+    'http-client-tool',
+    'cache-manager-tool',
+    'db-client-tool',
+    'memory-tool'
+  ];
+
   if (isolatePlugins) {
     pluginManager = new PluginManager(api);
     const __dirname = dirname(fileURLToPath(import.meta.url));
-    const universalPath = join(__dirname, 'tools', 'universal-tool.js');
-    await pluginManager.loadExtension(universalPath, 'universal-tool');
-    const worker = pluginManager.getWorker('universal-tool')!;
-    // Wait for worker ready event
-    await new Promise<void>((resolve, reject) => {
-      const onMessage = (msg: any) => {
-        if (msg.type === 'event' && msg.event === 'ready') {
-          worker.underlying.removeListener('message', onMessage);
-          resolve();
-        }
-      };
-      worker.underlying.on('message', onMessage);
-      worker.underlying.once('error', (err: any) => reject(err));
-    });
+    for (const name of toolModules) {
+      const modulePath = join(__dirname, 'tools', name + '.js');
+      await pluginManager.loadExtension(modulePath, name);
+      const worker = pluginManager.getWorker(name)!;
+      // Wait for worker ready event
+      await new Promise<void>((resolve, reject) => {
+        const onMessage = (msg: any) => {
+          if (msg.type === 'event' && msg.event === 'ready') {
+            worker.underlying.removeListener('message', onMessage);
+            resolve();
+          }
+        };
+        worker.underlying.on('message', onMessage);
+        worker.underlying.once('error', reject);
+      });
+    }
+  } else {
+    // Direct registration for all simple tools
+    for (const name of toolModules) {
+      switch (name) {
+        case 'universal-tool':
+          registerUniversalTool(api);
+          break;
+        case 'git-tool':
+          registerGitTool(api);
+          break;
+        case 'test-tool':
+          registerTestTool(api);
+          break;
+        case 'formatter-tool':
+          registerFormatterTool(api);
+          break;
+        case 'audit-tool':
+          registerAuditTool(api);
+          break;
+        case 'build-tool':
+          registerBuildTool(api);
+          break;
+        case 'metrics-tool':
+          registerMetricsTool(api);
+          break;
+        case 'prometheus-metrics-tool':
+          registerPrometheusMetricsTool(api);
+          break;
+        case 'session-health-tool':
+          registerSessionHealthTool(api);
+          break;
+        case 'scripts-tool':
+          registerScriptsTool(api);
+          break;
+        case 'http-client-tool':
+          registerHttpClientTool(api);
+          break;
+        case 'cache-manager-tool':
+          registerCacheManagerTool(api);
+          break;
+        case 'db-client-tool':
+          registerDbClientTool(api);
+          break;
+        case 'memory-tool':
+          registerMemoryTool(api);
+          break;
+      }
+    }
   }
 
-  // Register non-isolated built-in extensions
-  if (!isolatePlugins) {
-    registerUniversalTool(api);
-  }
-
-  // Register providers
-  registerKiloProvider(api);
-
-  // Register custom tools (others remain direct)
+  // Non-tool extensions (always direct)
   registerTodosTool(api);
-  registerMemoryTool(api);
   registerTeamTool(api);
   registerToolTemplate(api);
   registerSkillReaderExtension(api);
-
-  // Git tool
-  registerGitTool(api);
-  // Test tool
-  registerTestTool(api);
-  // Formatter tool
-  registerFormatterTool(api);
-  // Audit tool
-  registerAuditTool(api);
-  // Build tool
-  registerBuildTool(api);
-  // Metrics tool
-  registerMetricsTool(api);
-  // Prometheus metrics tool
-  registerPrometheusMetricsTool(api);
-  // Session health check tool
-  registerSessionHealthTool(api);
-  // Scripts tool
-  registerScriptsTool(api);
-  // HTTP client tool
-  registerHttpClientTool(api);
-  // Cache manager tool
-  registerCacheManagerTool(api);
-  // Database client tool
-  registerDbClientTool(api);
   // Subtool loader extension
   registerSubToolLoaderExtension(api);
 
@@ -138,7 +175,6 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   registerCopyCommand(api);
   registerTeamCommand(api);
   registerMetricsCommand(api);
-  // Keybinding extension
   registerKeybindingExtension(api);
 
   // Hooks

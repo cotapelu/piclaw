@@ -475,4 +475,18 @@ Validated plugin isolation infrastructure with a real extension. `universal-tool
 **Next**
 Expand proxy to support commands, renderers, hooks; migrate additional built-in extensions; consider making isolation the default for all built-ins.
 
+### Iteration 33 — 2026-06-19 (Plugin Isolation Phase 3: Isolate All Simple Tools)
+
+**P6 — Architecture (Phase 3 Implementation):**
+- Extended plugin isolation to all simple built‑in tools (universal, git, test, formatter, audit, build, metrics, prometheus, session health, scripts, http client, cache, db client, memory).
+- Refactored `extensionsAggregator` to conditionally load tools via workers when `plugins.isolate` is true; non‑tool extensions remain direct.
+- Provided robust wait‑for‑ready logic for each worker.
+- Tests remain at 1112 passing; build successful; no regressions.
+
+**Outcome**
+The majority of tool extensions now run isolated, significantly improving system robustness. Isolation is toggleable via config, enabling incremental rollout.
+
+**Next**
+Add support for other extension types (commands, renderers, hooks) to the proxy; migrate them; evaluate making isolation default for all built‑ins.
+
 ### Planned Refactors (Upcoming Iterations)
