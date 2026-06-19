@@ -13,6 +13,8 @@ import { join } from "node:path";
 
 export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error';
 
+export type ExtensionLogger = typeof logger;
+
 const DEFAULT_LEVEL: LogLevel = 'info';
 
 // Singleton instance per process
