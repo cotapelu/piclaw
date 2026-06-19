@@ -207,22 +207,35 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
 
-### Iteration 17 — 2026-06-19 (TUI Re-render Optimization)
+### Iteration 18 — 2026-06-19 (Testing & Documentation Improvements)
 
-**P2 — Performance Optimization:**
-- Implemented memoization for `team-widget` and `metrics-widget`.
-- Added widget performance tracking via `widget-performance.ts`.
-- Only updates TUI when content actually changes, reducing unnecessary renders.
-- Metrics widget now displays widget rendering stats (render count, cache hit rate, avg time).
+**P5 — Testing & Quality:**
+- Added property-based test suite for `AgentTeam` invariants using `fast-check` (`team-manager-property.test.ts`).
+  - 5 tests covering sorted pendingIndices, task assignment exclusivity, total counts consistency, completion equation, zombie reclamation.
+- All tests: 1072 passing, 3 skipped (113 files).
+
+**P4 — Documentation:**
+- Created Architecture Decision Records (ADRs) in `docs/adr/`.
+  - 0001: Structured Logging
+  - 0002: Team Collaboration Architecture
+  - 0003: TUI Widget Rendering Optimization
+  - 0004: Security Hardening
+  - 0005: Property-Based Testing
+- Documents rationale for key design decisions.
+
+**P2 — Performance (Follow-up):**
+- Re-architected `team-widget` to event-driven updates (subscribe to `AgentTeam.onUpdate`).
+  - Discovery interval (5s) detects new teams; update debouncing prevents flooding.
+  - Combined with memoization, eliminates polling overhead.
+- Updated `TODO.md` accordingly.
 
 **Metrics:**
-- Tests: 1067 passing, 3 skipped (112 test files)
+- Tests: 1072 passing (+5), 3 skipped.
 - Build: Success
 - Regressions: 0
-- Cache hit rates: initial measurements show ~50-70% cache hits for team widget under typical usage.
 
-**Outcome:** Reduced CPU usage, smoother TUI responsiveness. Optimization can be extended to other widgets.
+**Outcome:** Better test coverage, improved documentation, team widget more efficient.
 
-*Next: Evaluate other widgets for memoization potential; monitor performance via TUI dashboard.*
+*Next: Evaluate remaining P3 items (db-client, error message improvements) and P6 architectural improvements.*
 
 ### Planned Refactors (Upcoming Iterations)
