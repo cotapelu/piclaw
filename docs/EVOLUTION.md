@@ -609,6 +609,20 @@ Core infrastructure for plugin isolation is in place. Extensions can now be load
 **Next**
 Phase 2: Adapt a built-in extension (e.g., secret-scanner) to run in a worker; validate functionality and performance. Continue expanding test coverage (e.g., timeout handling, worker crashes).
 
+### Iteration 31 — 2026-06-19 (PluginWorker Timeout Support)
+
+**P6 — Reliability:**
+- Added optional timeout parameter to `PluginWorker`. Calls to `invoke` can now specify `timeoutMs`; if the worker does not reply within the time limit, the promise rejects with a clear timeout error.
+- Timers are correctly cleared on normal completion, errors, termination, and unexpected worker exit.
+- Added tests to verify timeout behavior and early response using fake timers.
+- Tests: 1111 passing (+2), 0 skipped.
+
+**Outcome**
+Extensions running in isolated workers can no longer cause indefinite hangs; the system remains responsive even if a plugin becomes unresponsive.
+
+**Next**
+Proceed with Phase 2 of plugin isolation: migrate a built‑in extension (e.g., `test-tool`) to run in a worker, verify functionality, and gather performance data.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

@@ -109,6 +109,45 @@ describe('PluginWorker', () => {
   });
 });
 
+describe('PluginWorker timeouts', () => {
+  let worker: PluginWorker;
+  let instance: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockWorkerInstance = undefined;
+    vi.useFakeTimers();
+    worker = new PluginWorker('dummy-entry.js');
+    instance = mockWorkerInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    worker.terminate();
+  });
+
+  it('times out if no response within given timeout', async () => {
+    const promise = worker.invoke('method', {}, 1000);
+    // Attach an early catch to avoid unhandled rejection warnings
+    promise.catch(() => {});
+    await vi.runAllTimersAsync();
+    await expect(promise).rejects.toThrow('Plugin invocation timed out after 1000ms');
+  });
+
+  it('does not time out if response arrives before timeout', async () => {
+    const promise = worker.invoke('method', {}, 1000);
+    // Fast-forward less than timeout
+    await vi.advanceTimersByTimeAsync(500);
+    const messageCb = instance.on.mock.calls.find((c: any) => c[0] === 'message')[1];
+    messageCb({ type: 'response', id: '0', result: 'ok' });
+    // Attach catch to be safe
+    promise.catch(() => {});
+    await expect(promise).resolves.toBe('ok');
+    // Advance timers to clear any remaining tasks
+    await vi.runAllTimersAsync();
+  });
+});
+
 describe('PluginManager', () => {
   let manager: PluginManager;
   let capturedInstance: any;
