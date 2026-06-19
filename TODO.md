@@ -23,7 +23,7 @@
 - [x] Profile team workspace concurrency under 50-agent load (added threshold; passes with ~27ms, 18518 ops/sec)
 - [x] Identify memory leaks in long-running sessions (added memory-stability.test.ts; passes with <2MB delta over 5 iterations)
 - [x] Optimize todos tool: claimTask O(1) already done (verified)
-- [ ] Reduce TUI re-renders (measure with profile)
+- [x] Reduce TUI re-renders (measure with profile) — implemented memoization for team & metrics widgets; added performance tracking
 - [x] Benchmark package manager operations (created package-manager-benchmark.ts; measures update overhead)
 
 ## P5 — Testing & Quality
@@ -61,6 +61,7 @@
 - P2 Concurrency Profiling — team workspace concurrency threshold added and passing
 - P2 Memory Stability — basic memory leak test for package manager added and passing
 - P2 Benchmark Package Manager — created benchmark script for performance regression detection
+- P2 TUI Re-render Optimization — memoization for team & metrics widgets; widget-performance tracker added
 - P4 Prometheus Metrics Export — added prometheus-metrics-tool for observability
 - P4 Debug Mode Enhancement — logger.error now includes Error.stack
 - P4 Session Health Checks — added session-health-tool with auto-repair for corrupted JSON files

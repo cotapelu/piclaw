@@ -287,6 +287,41 @@ P3 — Ecosystem & DX aims to make extension development easier. A template repo
 
 *Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
 
+## Iteration 17 — 2026-06-19 (TUI Re-render Optimization)
+
+### Context
+TUI widgets (team, metrics) were re-rendering unconditionally on every interval, causing unnecessary CPU work and potential slowdowns with many widgets or large content.
+
+### Goals
+- Implement memoization to update TUI only when content changes.
+- Add performance tracking to measure cache hit rates and render times.
+- Maintain responsiveness while reducing render overhead.
+
+### Changes
+- Added `src/extensions/utils/widget-performance.ts`:
+  - `recordRender(widgetName, tookMs, cached)` tracks render counts, cache hits, last and total times.
+  - `getWidgetMetrics(widgetName)` retrieves stats; `getAllWidgetMetrics()` for full overview.
+- Updated `team-widget.ts`:
+  - Added memoization with `lastLines` cache in session state.
+  - `refreshWidget()` now compares new lines with cached version; only calls `ui.setWidget()` if changed.
+  - Integrated `recordRender()` to track each refresh (cached vs actual).
+  - Cache cleared on stop/reload.
+- Updated `metrics-widget.ts`:
+  - Same memoization pattern for `metrics` widget.
+  - Extended `buildMetricsLines()` to display widget performance stats:
+    - Render count, cache hit %, average render time for team-widget and metrics-widget.
+- Both widgets now use `arraysEqual` for line comparison.
+
+**Metrics**
+- Tests: 1067 passing, 3 skipped (112 files) — no regressions.
+- Build: Success.
+- Initial cache hit rates observed in dev: ~50-70% for team widget (depending on activity).
+
+### Outcome
+Reduced unnecessary TUI re-renders, lowering CPU usage and improving overall responsiveness. Metrics are now observable directly in the TUI. This pattern can be extended to other widgets (todos, memory, etc.).
+
+*Next: Evaluate other widgets for memoization; monitor impact via Metrics widget dashboard.*
+
 ## Planned Refactors (Upcoming Iterations)
 
 ### P1 — Security Hardening

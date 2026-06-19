@@ -9,6 +9,7 @@
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { TeamRegistry } from "./team-manager.js";
+import { recordRender } from "../utils/widget-performance.js";
 
 // Unique symbol for per-session state attachment
 const TEAM_WIDGET_STATE = Symbol('teamWidgetState');
@@ -17,6 +18,7 @@ interface TeamWidgetSessionState {
   enabled: boolean;
   ctx: any;
   intervalId: NodeJS.Timeout | null;
+  lastLines: string[] | null; // memoization cache
 }
 
 function getState(ctx: any): TeamWidgetSessionState | undefined {
@@ -26,7 +28,7 @@ function getState(ctx: any): TeamWidgetSessionState | undefined {
 function ensureState(ctx: any): TeamWidgetSessionState {
   let state = getState(ctx);
   if (!state) {
-    state = { enabled: true, ctx: ctx, intervalId: null };
+    state = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
     (ctx as any)[TEAM_WIDGET_STATE] = state;
   }
   return state;
@@ -52,44 +54,64 @@ function buildTeamLines(ui: any, teamId: string, status: any): string[] {
   return lines;
 }
 
-function refreshWidget(ui: any): Promise<void> {
-  return new Promise((resolve) => {
-    try {
-      const registry = TeamRegistry.getInstance();
-      const teams = registry.getAll();
-      const lines: string[] = [];
+async function refreshWidget(ctx: any): Promise<void> {
+  const startTime = performance.now();
+  const ui = ctx.ui;
+  const state = ensureState(ctx);
+  const lines: string[] = [];
 
-      lines.push(...buildHeaderLines(ui.theme));
+  lines.push(...buildHeaderLines(ui.theme));
 
-      if (teams.size === 0) {
-        lines.push(ui.theme.fg("muted", "No active teams"));
+  try {
+    const registry = TeamRegistry.getInstance();
+    const teams = registry.getAll();
+
+    if (teams.size === 0) {
+      lines.push(ui.theme.fg("muted", "No active teams"));
+      // Memoization: only update if changed
+      const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
+      if (!cached) {
         ui.setWidget("team", lines);
-        resolve();
-        return;
+        state.lastLines = lines;
       }
-
-      // Collect promises for all teams
-      let pending = teams.size;
-      teams.forEach((team: any, teamId: string) => {
-        team.getTeamStatus().then((status: any) => {
-          lines.push(...buildTeamLines(ui, teamId, status));
-          // Only set widget after all teams processed
-          if (--pending === 0) {
-            ui.setWidget("team", lines);
-            resolve();
-          }
-        }).catch(() => {
-          lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
-          if (--pending === 0) {
-            ui.setWidget("team", lines);
-            resolve();
-          }
-        });
-      });
-    } catch (e) {
-      resolve();
+      const elapsed = performance.now() - startTime;
+      recordRender("team-widget", elapsed, cached);
+      return;
     }
-  });
+
+    // Collect status for all teams (sequential to preserve order)
+    const teamEntries = Array.from(teams.entries());
+    for (const [teamId, team] of teamEntries) {
+      try {
+        const status = await team.getTeamStatus();
+        lines.push(...buildTeamLines(ui, teamId, status));
+      } catch {
+        lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
+      }
+    }
+
+    // Memoization: only update if changed
+    const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
+    if (!cached) {
+      ui.setWidget("team", lines);
+      state.lastLines = lines;
+    }
+    const elapsed = performance.now() - startTime;
+    recordRender("team-widget", elapsed, cached);
+  } catch (e) {
+    const elapsed = performance.now() - startTime;
+    recordRender("team-widget", elapsed, false);
+    // Ignore errors
+  }
+}
+
+// Helper: compare arrays for equality
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 function startWidget(ctx: any) {
@@ -97,13 +119,13 @@ function startWidget(ctx: any) {
   // Prevent double start
   if (state.intervalId) return;
   state.ctx = ctx;
-  const ui = ctx.ui;
+  state.lastLines = null; // reset cache
   // Initial refresh
-  refreshWidget(ui).catch(() => {});
+  refreshWidget(ctx).catch(() => {});
   // Periodic refresh every 2 seconds
   state.intervalId = setInterval(() => {
     if (state.enabled && state.ctx) {
-      refreshWidget(state.ctx.ui).catch(() => {});
+      refreshWidget(state.ctx).catch(() => {});
     }
   }, 2000);
 }
@@ -121,6 +143,7 @@ function stopWidget(state: TeamWidgetSessionState) {
     }
     state.ctx = null; // break reference
   }
+  state.lastLines = null; // clear cache
 }
 
 /**
@@ -131,6 +154,8 @@ export function toggleTeamWidget(ctx: any): boolean {
   const state = ensureState(ctx);
   state.enabled = !state.enabled;
   if (state.enabled) {
+    // Clear cache to force fresh render when re-enabling
+    state.lastLines = null;
     startWidget(ctx);
   } else {
     stopWidget(state);
@@ -150,7 +175,7 @@ export function registerTeamWidget(api: ExtensionAPI): void {
   // Set up widget on session start
   api.on("session_start", async (_event, ctx) => {
     // Create per-session state (default enabled)
-    const state: TeamWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null };
+    const state: TeamWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
     (ctx as any)[TEAM_WIDGET_STATE] = state;
 
     // If enabled by default, start the widget

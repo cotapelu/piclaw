@@ -9,6 +9,7 @@
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { recordRender, getWidgetMetrics } from "../utils/widget-performance.js";
 
 const METRICS_WIDGET_STATE = Symbol('metricsWidgetState');
 
@@ -16,6 +17,7 @@ interface MetricsWidgetSessionState {
   enabled: boolean;
   ctx: ExtensionContext | null;
   intervalId: NodeJS.Timeout | null;
+  lastLines: string[] | null; // memoization cache
 }
 
 function getState(ctx: any): MetricsWidgetSessionState | undefined {
@@ -25,7 +27,7 @@ function getState(ctx: any): MetricsWidgetSessionState | undefined {
 function ensureState(ctx: any): MetricsWidgetSessionState {
   let state = getState(ctx);
   if (!state) {
-    state = { enabled: true, ctx: ctx, intervalId: null };
+    state = { enabled: true, ctx: ctx as ExtensionContext, intervalId: null, lastLines: null };
     (ctx as any)[METRICS_WIDGET_STATE] = state;
   }
   return state;
@@ -92,6 +94,24 @@ function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any |
   lines.push(`${theme.fg("muted", "Uptime:")} ${uptimeStr}`);
   lines.push(`${theme.fg("muted", "Memory:")} RSS ${rssMB} MB, Heap ${heapMB} MB`);
 
+  // Widget performance stats (from memoization)
+  const teamMetricsPerf = getWidgetMetrics("team-widget");
+  const metricsPerf = getWidgetMetrics("metrics-widget");
+  if (teamMetricsPerf || metricsPerf) {
+    lines.push("");
+    lines.push(theme.fg("accent", "📈 Widget Rendering").bold());
+    if (teamMetricsPerf) {
+      const hitRate = ((teamMetricsPerf.cacheHits / teamMetricsPerf.renderCount) * 100).toFixed(1);
+      const avg = teamMetricsPerf.renderCount > 0 ? (teamMetricsPerf.totalRenderTimeMs / teamMetricsPerf.renderCount).toFixed(2) : "0";
+      lines.push(`${theme.fg("muted", "Team widget:")} ${teamMetricsPerf.renderCount} renders, ${theme.fg(teamMetricsPerf.cacheHits > 0 ? "green" : "muted", hitRate + "% cache")}, avg ${avg} ms`);
+    }
+    if (metricsPerf) {
+      const hitRate = ((metricsPerf.cacheHits / metricsPerf.renderCount) * 100).toFixed(1);
+      const avg = metricsPerf.renderCount > 0 ? (metricsPerf.totalRenderTimeMs / metricsPerf.renderCount).toFixed(2) : "0";
+      lines.push(`${theme.fg("muted", "Metrics widget:")} ${metricsPerf.renderCount} renders, ${theme.fg(metricsPerf.cacheHits > 0 ? "green" : "muted", hitRate + "% cache")}, avg ${avg} ms`);
+    }
+  }
+
   // Team metrics (if available)
   if (teamMetrics) {
     lines.push("");
@@ -108,7 +128,9 @@ function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any |
 }
 
 async function refreshWidget(ctx: ExtensionContext): Promise<void> {
+  const startTime = performance.now();
   const ui = ctx.ui;
+  const state = getState(ctx) || ensureState(ctx);
   const lines: string[] = [];
 
   lines.push(...buildHeaderLines(ui.theme));
@@ -117,13 +139,30 @@ async function refreshWidget(ctx: ExtensionContext): Promise<void> {
   const teamMetrics = await getLatestTeamMetrics();
   lines.push(...buildMetricsLines(ctx, ui.theme, teamMetrics));
 
-  ui.setWidget("metrics", lines);
+  // Memoization: only update if changed
+  const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
+  if (!cached) {
+    ui.setWidget("metrics", lines);
+    state.lastLines = lines;
+  }
+  const elapsed = performance.now() - startTime;
+  recordRender("metrics-widget", elapsed, cached);
+}
+
+// Helper: compare arrays for equality
+function arraysEqual<T>(a: T[], b: T[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
 }
 
 function startWidget(ctx: ExtensionContext): void {
   const state = ensureState(ctx);
   if (state.intervalId) return;
   state.ctx = ctx;
+  state.lastLines = null; // reset cache
 
   refreshWidget(ctx).catch(() => {});
 
@@ -145,6 +184,7 @@ function stopWidget(state: MetricsWidgetSessionState): void {
     } catch {}
     state.ctx = null;
   }
+  state.lastLines = null; // clear cache
 }
 
 /**
@@ -154,6 +194,8 @@ export function toggleMetricsWidget(ctx: any): boolean {
   const state = ensureState(ctx);
   state.enabled = !state.enabled;
   if (state.enabled) {
+    // Clear cache to force fresh render when re-enabling
+    state.lastLines = null;
     startWidget(ctx);
   } else {
     stopWidget(state);
@@ -172,7 +214,7 @@ export function getMetricsWidgetEnabled(ctx: any): boolean {
 export function registerMetricsWidget(api: ExtensionAPI): void {
   api.on("session_start", async (_event, ctx: any) => {
     // Create per-session state, default enabled
-    const state: MetricsWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null };
+    const state: MetricsWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
     (ctx as any)[METRICS_WIDGET_STATE] = state;
     startWidget(ctx);
 

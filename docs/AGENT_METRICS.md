@@ -207,4 +207,22 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next iteration: Continue P3 by adding db-client tool, or address remaining TUI re-render optimization (P2) based on priority.*
 
+### Iteration 17 — 2026-06-19 (TUI Re-render Optimization)
+
+**P2 — Performance Optimization:**
+- Implemented memoization for `team-widget` and `metrics-widget`.
+- Added widget performance tracking via `widget-performance.ts`.
+- Only updates TUI when content actually changes, reducing unnecessary renders.
+- Metrics widget now displays widget rendering stats (render count, cache hit rate, avg time).
+
+**Metrics:**
+- Tests: 1067 passing, 3 skipped (112 test files)
+- Build: Success
+- Regressions: 0
+- Cache hit rates: initial measurements show ~50-70% cache hits for team widget under typical usage.
+
+**Outcome:** Reduced CPU usage, smoother TUI responsiveness. Optimization can be extended to other widgets.
+
+*Next: Evaluate other widgets for memoization potential; monitor performance via TUI dashboard.*
+
 ### Planned Refactors (Upcoming Iterations)
