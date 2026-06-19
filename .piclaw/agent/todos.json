@@ -3,36 +3,36 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "P2 — TUI Re-render Optimization",
+      "name": "P3 — Cache Manager Tool",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Profile current TUI re-render behavior to identify hotspots",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "Analyze component update triggers and dependencies",
-          "status": "completed"
-        },
-        {
-          "id": "task-3",
-          "content": "Implement memoization for expensive selectors",
-          "status": "completed"
-        },
-        {
-          "id": "task-4",
-          "content": "Add performance metrics to TUI dashboard",
+          "content": "Design cache-manager tool API and storage strategy",
           "status": "in_progress"
         },
         {
+          "id": "task-2",
+          "content": "Implement in-memory cache with TTL and persistence options",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Add cache operations: set, get, delete, clear, keys",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Integrate with http-client for response caching",
+          "status": "pending"
+        },
+        {
           "id": "task-5",
-          "content": "Test responsiveness improvements with large workspaces",
+          "content": "Write comprehensive tests (unit + integration)",
           "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Run full test suite and verify no regressions",
+          "content": "Update TODO and docs; commit changes",
           "status": "pending"
         }
       ]
@@ -40,5 +40,5 @@
   ],
   "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-19T13:22:33.261Z"
+  "updatedAt": "2026-06-19T14:05:10.035Z"
 }

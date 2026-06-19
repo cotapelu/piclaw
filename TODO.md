@@ -38,7 +38,7 @@
 - [x] Create extension template repository (provided starter template in extension-template/)
 - [x] Add HTTP client tool (http-client)
 - [ ] Add DB client tool (Postgres/MySQL)
-- [ ] Add cache manager tool
+- [x] Add cache manager tool (cache_manager with TTL, persistence, and stats)
 - [x] Write contribution guide (CONTRIBUTING.md) — comprehensive with extension examples
 - [x] Document extension API with examples (included in CONTRIBUTING.md)
 - [x] Improve error messages with actionable suggestions — added suggestions to http-client network/timeout errors; other tools already provide clear context
