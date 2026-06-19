@@ -405,4 +405,26 @@ Potential extensions: Postgres/MySQL support, connection pooling improvements, q
 
 ---
 
+### Iteration 21 — 2026-06-19 (Logger Mock Migration)
+
+**Context**
+Many tests use `vi.spyOn(console)` which are brittle and don't play well with logger abstractions. A dedicated mock logger would improve test stability and allow better control over log assertions.
+
+**Changes**
+- Implemented `src/tests/utils/logger-mock.ts` providing `ExtensionLogger` mock with call capture and assertions.
+- Refactored `AgentTeam` to accept an optional `logger` in constructor (dependency injection).
+- Refactored `PiclawPackageManager` similarly; all internal logger references changed to `this.logger`.
+- Migrated tests:
+  - `team-manager-additional.test.ts`: now injects mock logger; removed console spies.
+  - `update-method.test.ts`: injects mock logger; asserts via `mockLogger.log`.
+- `logger.test.ts` and `logger-core.test.ts` unchanged (they test logger output itself, so they legitimately need console spies).
+
+**Outcome**
+Test suite remains at 1091 passing tests. Logger mock utility ready for future migrations, reducing brittleness. Improved design: core classes now have testable logging.
+
+**Next**
+Consider further migration of remaining console-spy tests where feasible, or move to P6 architectural work (team workspace decoupling).
+
+---
+
 *This file will be updated after each major iteration to reflect new trajectory changes.*

@@ -1,14 +1,25 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { PiclawPackageManager } from "../piclaw-package-manager.js";
+import type { ExtensionLogger } from "../extensions/utils/logger.js";
+
+function createMockLogger(): { log: any; warn: any; error: any } {
+  return {
+    log: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  };
+}
 
 describe("PiclawPackageManager.update", () => {
   let pm: PiclawPackageManager;
   let getEntriesSpy: any;
   let updateNpmSpy: any;
   let updateGitSpy: any;
+  let mockLogger: ReturnType<typeof createMockLogger>;
 
   beforeEach(() => {
-    pm = new PiclawPackageManager({ cwd: "/tmp/cwd", agentDir: "/tmp/agent" });
+    mockLogger = createMockLogger();
+    pm = new PiclawPackageManager({ cwd: "/tmp/cwd", agentDir: "/tmp/agent" }, mockLogger as any);
     getEntriesSpy = vi.spyOn(pm, 'getConfiguredEntries');
     updateNpmSpy = vi.spyOn(pm, 'updateNpm').mockResolvedValue(undefined);
     updateGitSpy = vi.spyOn(pm, 'updateGit').mockResolvedValue(undefined);
@@ -20,20 +31,18 @@ describe("PiclawPackageManager.update", () => {
 
   it("should log 'No packages to update.' when no configured packages", async () => {
     getEntriesSpy.mockReturnValue([]);
-    const logSpy = vi.spyOn(console, 'log');
     await pm.update();
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("No packages to update."));
+    expect(mockLogger.log).toHaveBeenCalledWith(expect.stringContaining("No packages to update."));
   });
 
   it("should perform dry-run without calling updateNpm/updateGit", async () => {
     getEntriesSpy.mockReturnValue([{ source: "npm:dummy", scope: "user" }]);
-    const logSpy = vi.spyOn(console, 'log');
 
     await pm.update(undefined, { dryRun: true });
 
     expect(updateNpmSpy).not.toHaveBeenCalled();
     expect(updateGitSpy).not.toHaveBeenCalled();
-    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("[DRY-RUN]"));
+    expect(mockLogger.log).toHaveBeenCalledWith(expect.stringContaining("[DRY-RUN]"));
   });
 
   it("should call updateNpm for npm package", async () => {
@@ -63,14 +72,13 @@ describe("PiclawPackageManager.update", () => {
       { source: "/local/path", scope: "user" },
       { source: "npm:valid", scope: "user" }
     ]);
-    const logSpy = vi.spyOn(console, 'log');
 
     await pm.update();
 
     expect(updateNpmSpy).toHaveBeenCalledTimes(1);
     const [source] = updateNpmSpy.mock.calls[0] as [any];
     expect(source.name).toBe("valid");
-    const warningMsgs = logSpy.mock.calls
+    const warningMsgs = mockLogger.log.mock.calls
       .map(args => args[0] as string)
       .filter(msg => msg.includes('Skipping'));
     expect(warningMsgs.length).toBeGreaterThan(0);

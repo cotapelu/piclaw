@@ -258,4 +258,41 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Consider Postgres/MySQL support as follow-up, or continue with architectural improvements (P6).*
 
+### Iteration 20 — 2026-06-19 (Testability & Config Validation)
+
+**P5 — Quality & Reliability:**
+- Made `AgentTeam` logger injectable for testability (dependency injection).
+- Migrated `team-manager-notifyupdate.test.ts` to use injected mock logger (no more console spies).
+- Added config validation for `verbose` (boolean) and `tools` (array) in `loadConfig` with warnings for invalid types.
+- Metrics rotation: switched to daily files (`metrics-YYYY-MM-DD.json`) to prevent unbounded growth.
+- Updated `prometheus-metrics` tool to read latest daily metrics file.
+
+**Metrics:**
+- Tests: 1093 passing (+13), 3 skipped (115 files)
+- Build: Success
+- Regressions: 0
+
+**Outcome:** Improved testability and config robustness; metrics storage now bounded per day.
+
+*Next: Continue migrating console-spy tests to logger mocks; consider team workspace decoupling (P6).*
+
+### Iteration 21 — 2026-06-19 (Logger Mock Migration)
+
+**P5 — Testing Quality:**
+- Created `src/tests/utils/logger-mock.ts` with `createMockLogger()` and helper functions.
+- Migrated key tests to use injected mock loggers:
+  - `team-manager-additional.test.ts` – fully migrated to inject mock logger into `AgentTeam`.
+  - `update-method.test.ts` – migrated `PiclawPackageManager` to accept optional logger dependency; test now injects mock.
+- `logger.test.ts` and `logger-core.test.ts` remain unchanged (they test the logger itself and require console spies).
+- All tests passing: 1091 tests, 115 files.
+
+**Changes Made:**
+- `AgentTeam` constructor: `constructor(logger?: ExtensionLogger)` – default `createLogger()`.
+- `PiclawPackageManager` constructor: `constructor(options, logger?: ExtensionLogger)` – default `createLogger()`.
+- Replaced all internal `logger` references with `this.logger` in both classes.
+
+**Outcome:** Improved test isolation and stability. New logger-mock utility available for future migrations.
+
+*Next: Consider P6 architectural improvements (team workspace decoupling) or further test migrations.*
+
 ### Planned Refactors (Upcoming Iterations)

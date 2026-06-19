@@ -33,7 +33,7 @@
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
 - [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
-- [ ] Provide logger-aware test utilities and migrate console-spy tests
+- [x] Provide logger-aware test utilities and migrate console-spy tests — created logger-mock.ts; migrated AgentTeam and PiclawPackageManager tests
 
 ## P3 — Ecosystem & DX
 - [x] Create extension template repository (provided starter template in extension-template/)

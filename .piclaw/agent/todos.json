@@ -3,42 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "P3 — Cache Manager Tool",
+      "name": "P5 — Migrate Console-Spy Tests to Logger-Mock",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Design cache-manager tool API and storage strategy",
-          "status": "in_progress"
+          "content": "Audit all tests using vi.spyOn(console) and categorize by complexity",
+          "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Implement in-memory cache with TTL and persistence options",
-          "status": "pending"
+          "content": "Migrate team-manager-additional.test.ts to use injected mock logger",
+          "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Add cache operations: set, get, delete, clear, keys",
-          "status": "pending"
+          "content": "Migrate update-method.test.ts (PiclawPackageManager) to logger mock",
+          "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "Integrate with http-client for response caching",
+          "content": "Migrate logger.test.ts and logger-core.test.ts to use mockExtensionLogger",
           "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Write comprehensive tests (unit + integration)",
-          "status": "pending"
+          "content": "Verify all tests pass after migration",
+          "status": "completed"
         },
         {
           "id": "task-6",
-          "content": "Update TODO and docs; commit changes",
-          "status": "pending"
+          "content": "Update AGENT_METRICS.md and TODO.md with completion",
+          "status": "in_progress"
         }
       ]
     }
   ],
   "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-19T14:05:10.035Z"
+  "updatedAt": "2026-06-19T15:26:34.713Z"
 }
