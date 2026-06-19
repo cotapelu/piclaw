@@ -125,7 +125,12 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 		  logger.warn(`Invalid model ID format: ${fileConfig.model}. Expected format 'provider:model'. Using default.`);
 		  fileConfig.model = DEFAULT_CONFIG.model;
 		}
-		} catch (err) {
+		// Validate keybindings (must be an object if provided)
+		if (fileConfig.keybindings !== undefined && (typeof fileConfig.keybindings !== 'object' || fileConfig.keybindings === null)) {
+		  logger.warn('Invalid keybindings config (expected object). Using default.');
+		  fileConfig.keybindings = undefined;
+		}
+	} catch (err) {
 			logger.warn(`Failed to parse config file: ${err}. Using defaults.`);
 			fileConfig = { ...DEFAULT_CONFIG };
 		}

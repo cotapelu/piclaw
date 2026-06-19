@@ -14,6 +14,10 @@ const managers = new WeakMap<ExtensionContext, TeamManager>();
  * Each context gets its own manager instance (wrapping legacy singleton for now).
  */
 export function getTeamManager(ctx: ExtensionContext): TeamManager {
+  // Allow explicit injection (e.g., tests)
+  if ((ctx as any).teamManager) {
+    return (ctx as any).teamManager;
+  }
   let mgr = managers.get(ctx);
   if (!mgr) {
     mgr = getDefaultTeamManager();

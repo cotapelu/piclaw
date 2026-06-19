@@ -933,7 +933,7 @@ export class TeamRegistry {
   private autoDisposeTimers: Map<string, NodeJS.Timeout> = new Map();
   private readonly AUTO_DISPOSE_DELAY = 5 * 60 * 1000; // 5 minutes
 
-  private constructor() {}
+  constructor() {}
 
   static getInstance(): TeamRegistry {
     if (!TeamRegistry.instance) {
@@ -1171,6 +1171,37 @@ class LegacyTeamManager implements TeamManager {
   }
   waitForTeam(teamId: string, timeoutMs?: number): Promise<boolean> {
     return TeamRegistry.getInstance().waitForTeam(teamId, timeoutMs);
+  }
+}
+
+/**
+ * InstanceTeamManager provides a fresh TeamRegistry instance for per-session isolation.
+ */
+export class InstanceTeamManager implements TeamManager {
+  private registry: TeamRegistry;
+  constructor() {
+    this.registry = new TeamRegistry();
+  }
+  get(teamId: string): AgentTeam | undefined {
+    return this.registry.get(teamId);
+  }
+  getAll(): Map<string, AgentTeam> {
+    return this.registry.getAll();
+  }
+  has(teamId: string): boolean {
+    return this.registry.has(teamId);
+  }
+  register(teamId: string, team: AgentTeam): void {
+    this.registry.register(teamId, team);
+  }
+  unregister(teamId: string): void {
+    this.registry.unregister(teamId);
+  }
+  resetAutoDisposeTimer(teamId: string): void {
+    this.registry.resetAutoDisposeTimer(teamId);
+  }
+  waitForTeam(teamId: string, timeoutMs?: number): Promise<boolean> {
+    return this.registry.waitForTeam(teamId, timeoutMs);
   }
 }
 

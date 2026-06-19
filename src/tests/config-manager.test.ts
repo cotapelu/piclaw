@@ -82,6 +82,15 @@ describe("ConfigManager", () => {
       expect(config.model).toBe(undefined);
     });
 
+    it('should fallback default keybindings if invalid type', () => {
+      const configDir = join(tempHome, '.piclaw');
+      mkdirSync(configDir, { recursive: true });
+      writeFileSync(join(configDir, 'config.json'), JSON.stringify({ keybindings: 'not-an-object' }, null, 2));
+
+      const config = loadConfig();
+      expect(config.keybindings).toBeUndefined();
+    });
+
     it('should merge CLI overrides on top of file config', () => {
       const configDir = join(tempHome, ".piclaw");
       mkdirSync(configDir, { recursive: true });

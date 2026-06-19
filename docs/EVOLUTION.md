@@ -512,6 +512,27 @@ Config robustness improved; users receive immediate feedback on misconfigured mo
 **Next**
 Continue quality improvements (e.g., extend validation to `keybindings` schema) or proceed with P6 per‑session manager design.
 
+### Iteration 26 — 2026-06-19 (Config Keybindings Validation)
+
+**Context**
+The `keybindings` field in the configuration maps commands to key sequences. Invalid types (e.g., string, array, null) can cause runtime errors when the TUI attempts to bind keys.
+
+**Changes**
+- Added type check: if `keybindings` is provided, it must be an object; otherwise it is set to undefined and a warning is logged.
+- Implemented in `loadConfig` after existing validations.
+- Added unit test to ensure non-object values are rejected and defaulted.
+
+**Metrics**
+- Tests: 1096 passing (+1), 3 skipped.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome**
+Keybindings configuration is now validated for type, improving user feedback and preventing crashes.
+
+**Next**
+Consider further validation (e.g., ensure values are non‑empty strings) or move to P6 per‑session manager implementation.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

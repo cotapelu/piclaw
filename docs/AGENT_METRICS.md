@@ -364,4 +364,20 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Continue P5 testing goals or revisit P6 per-session manager implementation.*
 
+### Iteration 26 — 2026-06-19 (Config Keybindings Validation)
+
+**P2 — Quality & Reliability (Cont):**
+- Added validation for `keybindings` config: must be an object if provided; otherwise fallback to undefined.
+- Logs warning on invalid type.
+- Added unit test to verify fallback for non-object `keybindings`.
+
+**Metrics:**
+- Tests: 1096 passing (+1), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome:** Config validation extended to keybindings, improving input sanity. No breaking changes.
+
+*Next: Address remaining validation gaps (e.g., tool name validation) or proceed with P6 per-session manager.*
+
 ### Planned Refactors (Upcoming Iterations)
