@@ -9,6 +9,7 @@ export class PluginManager {
   private workers = new Map<string, PluginWorker>();
   private mainApi?: ExtensionAPI;
   private toolCallOnUpdates = new Map<string, (update: any) => void>();
+  private commandWorkers = new Map<string, PluginWorker>(); // commandName -> worker
 
   constructor(mainApi?: ExtensionAPI) {
     this.mainApi = mainApi;
@@ -20,14 +21,14 @@ export class PluginManager {
    * @param name Optional name; defaults to basename of modulePath.
    * @returns The extension name used.
    */
-  async loadExtension(modulePath: string, name?: string): Promise<string> {
+  async loadExtension(modulePath: string, name?: string, entryName?: string): Promise<string> {
     const extensionName = name ?? this.getNameFromPath(modulePath);
     if (this.workers.has(extensionName)) {
       throw new Error(`Extension ${extensionName} is already loaded`);
     }
-    // The generic worker entry that knows how to host a plugin. It will receive modulePath via workerData.
+    // The generic worker entry that knows how to host a plugin. It will receive modulePath and optional entryName via workerData.
     const entry = new URL('./plugin-worker-entry.js', import.meta.url).pathname;
-    const worker = new PluginWorker(entry, { modulePath });
+    const worker = new PluginWorker(entry, { modulePath, entryName });
     this.workers.set(extensionName, worker);
     if (this.mainApi) {
       // Attach message handler for registration and updates
@@ -43,6 +44,12 @@ export class PluginManager {
     const worker = this.workers.get(name);
     if (worker) {
       worker.terminate();
+      // Remove command mappings for this worker
+      for (const [cmdName, w] of this.commandWorkers.entries()) {
+        if (w === worker) {
+          this.commandWorkers.delete(cmdName);
+        }
+      }
       this.workers.delete(name);
     }
   }
@@ -73,7 +80,6 @@ export class PluginManager {
       const tool = msg.tool as any;
       const worker = this.workers.get(extensionName)!;
       // Wrap tool.execute to proxy to worker
-      const originalExecute = tool.execute;
       tool.execute = async (toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: (update: any) => void, ctx?: any) => {
         if (onUpdate) {
           this.toolCallOnUpdates.set(toolCallId, onUpdate);
@@ -93,11 +99,24 @@ export class PluginManager {
         }
       };
       this.mainApi.registerTool(tool);
+    } else if (msg.type === 'register_command') {
+      const { name, command } = msg as any;
+      const worker = this.workers.get(extensionName)!;
+      // Track which worker owns this command
+      this.commandWorkers.set(name, worker);
+      // Wrap command.execute to proxy to worker
+      command.execute = async (params: any, ctx?: any) => {
+        return await worker.invoke('execute_command', {
+          commandName: name,
+          params,
+          ctx,
+        });
+      };
+      this.mainApi.registerCommand(name, command);
     } else if (msg.type === 'tool_update') {
       const { toolCallId, update } = msg as any;
       const onUpdate = this.toolCallOnUpdates.get(toolCallId);
       if (onUpdate) onUpdate(update);
     }
-    // TODO: handle other registration types: register_command, register_renderer, etc.
   }
 }

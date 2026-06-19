@@ -55,7 +55,8 @@
 - [x] Decouple team workspace from session tree
 - [ ] Consider WebSocket transport for TUI instead of stdio
 - [ ] Evaluate WASM integration for performance-critical paths
-- [ ] Plugin isolation using worker threads
+- [x] Plugin isolation using worker threads (tools and commands)
+- [ ] Extend plugin isolation to renderers, hooks, and widgets
 
 ---
 
@@ -82,6 +83,7 @@
 - P3 Database Client Tool — added db_client (SQLite parameterized queries)
 - P4 ADRs — documented key architectural decisions (5 ADRs)
 - P5 Logger Mock Utility — created logger-mock for test stability
+- P6 Plugin Isolation Phase 4 — added command support to plugin isolation; extended plugin system to isolate command extensions
 
 ---
 

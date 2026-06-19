@@ -653,6 +653,22 @@ The majority of tool extensions now run isolated, significantly improving system
 **Next**
 Add support for other extension types (commands, renderers, hooks) to the proxy; migrate them; evaluate making isolation default for all built‑ins.
 
+### Iteration 34 — 2026-06-19 (Plugin Isolation Phase 4: Command Support)
+
+**P6 — Architecture (Phase 4 Implementation):**
+- Extended plugin system to support commands: `PluginWorker` and `PluginManager` now track command workers.
+- Updated `plugin-worker-entry.ts` to provide `registerCommand(name, command)` API, store commands in a registry, and handle `execute_command` RPC.
+- Updated `plugin-manager.ts` to wrap command `execute` and forward calls to worker.
+- Enhanced `extensionsAggregator` to isolate built-in command extensions (session-tree, settings, providers, copy, team, metrics) when `plugins.isolate` is true.
+- Adjusted tests remain passing.
+- Tests: 1112 passing; build successful; no regressions.
+
+**Outcome**
+Command extensions can now run in isolated workers; interactive commands provided by extensions are safely sandboxed.
+
+**Next**
+Consider extending isolation to renderers, hooks, widgets; evaluate making isolation default for all built‑ins; improve plugin manager observability.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

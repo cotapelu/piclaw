@@ -45,10 +45,9 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Improvement Focus (Next)
 
-- **Config validation extension**:  Ensure `keybindings` values are non‑empty strings, and potentially validate key combination syntax.
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
 - **Metrics retention policy**: Implement age-based cleanup for daily metric files to avoid disk bloat over time.
-- **Plugin isolation** (P6): Investigate worker threads to isolate extensions and prevent crashes from affecting core.
+- **Plugin isolation** (P6): Extend isolation to remaining extension types (renderers, hooks, widgets) and consider making isolation default for all built‑ins.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
 

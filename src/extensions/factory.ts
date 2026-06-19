@@ -83,14 +83,48 @@ export default async function extensionsAggregator(api: import("@earendil-works/
     'memory-tool'
   ];
 
+  // List of command modules that can be isolated
+  const commandModules = [
+    'session-tree-command',
+    'settings-command',
+    'provider-command',
+    'copy-command',
+    'team-command',
+    'metrics-command'
+  ];
+
+  // Helper: convert kebab-case to PascalCase
+  const toPascal = (s: string) => s.split('-').map(p => p.charAt(0).toUpperCase() + p.slice(1)).join('');
+
   if (isolatePlugins) {
     pluginManager = new PluginManager(api);
     const __dirname = dirname(fileURLToPath(import.meta.url));
+
+    // Load tools in workers and wait for ready
     for (const name of toolModules) {
-      const modulePath = join(__dirname, 'tools', name + '.js');
-      await pluginManager.loadExtension(modulePath, name);
+      const modulePath = join(__dirname, 'tools', `${name}.js`);
+      const entryName = `register${toPascal(name)}`;
+      await pluginManager.loadExtension(modulePath, name, entryName);
       const worker = pluginManager.getWorker(name)!;
       // Wait for worker ready event
+      await new Promise<void>((resolve, reject) => {
+        const onMessage = (msg: any) => {
+          if (msg.type === 'event' && msg.event === 'ready') {
+            worker.underlying.removeListener('message', onMessage);
+            resolve();
+          }
+        };
+        worker.underlying.on('message', onMessage);
+        worker.underlying.once('error', reject);
+      });
+    }
+
+    // Load commands in workers and wait for ready
+    for (const name of commandModules) {
+      const modulePath = join(__dirname, 'commands', `${name}.js`);
+      const entryName = `register${toPascal(name)}`;
+      await pluginManager.loadExtension(modulePath, name, entryName);
+      const worker = pluginManager.getWorker(name)!;
       await new Promise<void>((resolve, reject) => {
         const onMessage = (msg: any) => {
           if (msg.type === 'event' && msg.event === 'ready') {
@@ -150,9 +184,33 @@ export default async function extensionsAggregator(api: import("@earendil-works/
           break;
       }
     }
+
+    // Direct registration for commands
+    for (const name of commandModules) {
+      switch (name) {
+        case 'session-tree-command':
+          registerSessionTreeCommand(api);
+          break;
+        case 'settings-command':
+          registerSettingsCommand(api);
+          break;
+        case 'provider-command':
+          registerProviderCommand(api);
+          break;
+        case 'copy-command':
+          registerCopyCommand(api);
+          break;
+        case 'team-command':
+          registerTeamCommand(api);
+          break;
+        case 'metrics-command':
+          registerMetricsCommand(api);
+          break;
+      }
+    }
   }
 
-  // Non-tool extensions (always direct)
+  // Non-tool, non-command extensions (always direct)
   registerTodosTool(api);
   registerTeamTool(api);
   registerToolTemplate(api);
@@ -168,18 +226,11 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   registerTeamOpsRenderer(api);
   registerMetricsWidget(api);
 
-  // Commands
-  registerSessionTreeCommand(api);
-  registerSettingsCommand(api);
-  registerProviderCommand(api);
-  registerCopyCommand(api);
-  registerTeamCommand(api);
-  registerMetricsCommand(api);
-  registerKeybindingExtension(api);
-
   // Hooks
   autoContinueExtension(api);
   autoCompact85Extension(api);
+  // Keybinding extension
+  registerKeybindingExtension(api);
 
   // Header
   piclawHeader(api);
