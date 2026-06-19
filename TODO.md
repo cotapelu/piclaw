@@ -32,7 +32,7 @@
 - [x] Chaos engineering: random network failures — added chaos utility and integrated into runCommandCapture
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
-- [ ] Property-based testing for core algorithms
+- [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
 
 ## P3 — Ecosystem & DX
 - [x] Create extension template repository (provided starter template in extension-template/)
