@@ -81,7 +81,7 @@ describe("Todos State Property Tests", () => {
   });
 
   test("can reach large number of tasks with mixed operations", async () => {
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
       if (state.getPhases().length === 0 || Math.random() < 0.4) {
         await state.addPhase({ name: `Phase ${randomWord(1,3)}` });
       } else {

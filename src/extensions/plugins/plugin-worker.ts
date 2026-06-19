@@ -17,6 +17,11 @@ export class PluginWorker {
     this.worker.on('exit', (code) => this.handleExit(code));
   }
 
+  /** Expose the underlying Worker for external event attachment (e.g., PluginManager). */
+  get underlying(): Worker {
+    return this.worker;
+  }
+
   private handleMessage(msg: PluginMessage): void {
     if (this.terminated) return;
     if (msg.type === 'response') {
@@ -34,13 +39,6 @@ export class PluginWorker {
 
   private handleError(err: Error): void {
     this.rejectAll(err);
-  }
-
-  private handleExit(code: number | null): void {
-    if (code !== 0 && !this.terminated) {
-      const err = new Error(`Plugin worker exited with code ${code}`);
-      this.rejectAll(err);
-    }
   }
 
   private handleExit(code: number | null): void {

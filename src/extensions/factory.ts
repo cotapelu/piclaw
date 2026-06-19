@@ -9,6 +9,12 @@
 
 import { registerKiloProvider } from "./providers/kilo-provider.js";
 import { registerTodosTool, registerMemoryTool, registerUniversalTool } from "./tools/index.js";
+
+// Plugin isolation support
+import { fileURLToPath } from "node:url";
+import { join, dirname } from "node:path";
+import { loadConfig } from "../config/config-manager.js";
+import { PluginManager } from "./plugins/plugin-manager.js";
 import { registerGitTool } from "./tools/git-tool.js";
 import { registerTestTool } from "./tools/test-tool.js";
 import { registerFormatterTool } from "./tools/formatter-tool.js";
@@ -51,48 +57,73 @@ import { registerKeybindingExtension } from "./keybinding/keybinding-extension.j
  * Registers all custom extensions for Piclaw.
  * Called by the extension factory system.
  */
-export default function extensionsAggregator(api: import("@earendil-works/pi-coding-agent").ExtensionAPI) {
+export default async function extensionsAggregator(api: import("@earendil-works/pi-coding-agent").ExtensionAPI) {
+  const config = loadConfig();
+  const isolatePlugins = (config as any).plugins?.isolate ?? false;
+  let pluginManager: PluginManager | null = null;
+
+  if (isolatePlugins) {
+    pluginManager = new PluginManager(api);
+    const __dirname = dirname(fileURLToPath(import.meta.url));
+    const universalPath = join(__dirname, 'tools', 'universal-tool.js');
+    await pluginManager.loadExtension(universalPath, 'universal-tool');
+    const worker = pluginManager.getWorker('universal-tool')!;
+    // Wait for worker ready event
+    await new Promise<void>((resolve, reject) => {
+      const onMessage = (msg: any) => {
+        if (msg.type === 'event' && msg.event === 'ready') {
+          worker.underlying.removeListener('message', onMessage);
+          resolve();
+        }
+      };
+      worker.underlying.on('message', onMessage);
+      worker.underlying.once('error', (err: any) => reject(err));
+    });
+  }
+
+  // Register non-isolated built-in extensions
+  if (!isolatePlugins) {
+    registerUniversalTool(api);
+  }
+
   // Register providers
   registerKiloProvider(api);
 
-  // Register custom tools
+  // Register custom tools (others remain direct)
   registerTodosTool(api);
   registerMemoryTool(api);
   registerTeamTool(api);
   registerToolTemplate(api);
   registerSkillReaderExtension(api);
 
-  // Register universal tool (replaces echo and system_info)
-  registerUniversalTool(api);
-  // Register git tool
+  // Git tool
   registerGitTool(api);
-  // Register test tool
+  // Test tool
   registerTestTool(api);
-  // Register formatter tool
+  // Formatter tool
   registerFormatterTool(api);
-  // Register audit tool
+  // Audit tool
   registerAuditTool(api);
-  // Register build tool
+  // Build tool
   registerBuildTool(api);
-  // Register metrics tool
+  // Metrics tool
   registerMetricsTool(api);
-  // Register Prometheus metrics tool (P4 Observability)
+  // Prometheus metrics tool
   registerPrometheusMetricsTool(api);
-  // Register session health check tool (P4)
+  // Session health check tool
   registerSessionHealthTool(api);
-  // Register scripts tool
+  // Scripts tool
   registerScriptsTool(api);
-  // Register HTTP client tool (P3 Ecosystem)
+  // HTTP client tool
   registerHttpClientTool(api);
-  // Register cache manager tool (P3 Ecosystem)
+  // Cache manager tool
   registerCacheManagerTool(api);
-  // Register database client tool (P3 Ecosystem)
+  // Database client tool
   registerDbClientTool(api);
-  // Register subtool loader extension
+  // Subtool loader extension
   registerSubToolLoaderExtension(api);
-  // (subtool-loader replaced by skill-loader)
 
-  // Register custom message renderers
+  // Custom message renderers
   registerTodosRenderer(api);
   registerMemoryRenderer(api);
   registerTeamWidget(api);
@@ -100,26 +131,24 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerTeamOpsRenderer(api);
   registerMetricsWidget(api);
 
-  // Register commands
+  // Commands
   registerSessionTreeCommand(api);
   registerSettingsCommand(api);
   registerProviderCommand(api);
   registerCopyCommand(api);
   registerTeamCommand(api);
   registerMetricsCommand(api);
-  // Register keybinding extension
+  // Keybinding extension
   registerKeybindingExtension(api);
 
-  // Register Auto Continue Extension
+  // Hooks
   autoContinueExtension(api);
-
-  // Register Auto Compact at 75% Extension
   autoCompact85Extension(api);
 
-  // Register Piclaw Header
+  // Header
   piclawHeader(api);
 
-  // Register Context Logger Extension
+  // Context Logger
   contextLoggerExtension(api);
 }
 

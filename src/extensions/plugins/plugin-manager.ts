@@ -1,10 +1,18 @@
 import { PluginWorker } from './plugin-worker.js';
+import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
+import type { PluginMessage } from './plugin-protocol.js';
 
 /**
- * Manages lifecycle of plugin workers.
+ * Manages lifecycle of plugin workers and integrates with main API.
  */
 export class PluginManager {
   private workers = new Map<string, PluginWorker>();
+  private mainApi?: ExtensionAPI;
+  private toolCallOnUpdates = new Map<string, (update: any) => void>();
+
+  constructor(mainApi?: ExtensionAPI) {
+    this.mainApi = mainApi;
+  }
 
   /**
    * Load an extension module in its own worker.
@@ -19,10 +27,12 @@ export class PluginManager {
     }
     // The generic worker entry that knows how to host a plugin. It will receive modulePath via workerData.
     const entry = new URL('./plugin-worker-entry.js', import.meta.url).pathname;
-    // In development, the entry might be a .ts file; we rely on node to run compiled .js. For simplicity, use .js extension.
-    // For tests, Worker can be mocked so entry path is irrelevant.
     const worker = new PluginWorker(entry, { modulePath });
     this.workers.set(extensionName, worker);
+    if (this.mainApi) {
+      // Attach message handler for registration and updates
+      worker.underlying.on('message', (msg: PluginMessage) => this.handleWorkerMessage(extensionName, msg));
+    }
     return extensionName;
   }
 
@@ -54,5 +64,40 @@ export class PluginManager {
   private getNameFromPath(path: string): string {
     const base = path.split('/').pop() ?? path;
     return base.replace(/\.[^.]*$/, ''); // strip extension
+  }
+
+  private handleWorkerMessage(extensionName: string, msg: any): void {
+    if (!this.mainApi) return;
+
+    if (msg.type === 'register_tool') {
+      const tool = msg.tool as any;
+      const worker = this.workers.get(extensionName)!;
+      // Wrap tool.execute to proxy to worker
+      const originalExecute = tool.execute;
+      tool.execute = async (toolCallId: string, params: any, signal?: AbortSignal, onUpdate?: (update: any) => void, ctx?: any) => {
+        if (onUpdate) {
+          this.toolCallOnUpdates.set(toolCallId, onUpdate);
+        }
+        try {
+          const result = await worker.invoke('execute_tool', {
+            toolName: tool.name,
+            toolCallId,
+            params,
+            ctx,
+          });
+          return result;
+        } finally {
+          if (onUpdate) {
+            this.toolCallOnUpdates.delete(toolCallId);
+          }
+        }
+      };
+      this.mainApi.registerTool(tool);
+    } else if (msg.type === 'tool_update') {
+      const { toolCallId, update } = msg as any;
+      const onUpdate = this.toolCallOnUpdates.get(toolCallId);
+      if (onUpdate) onUpdate(update);
+    }
+    // TODO: handle other registration types: register_command, register_renderer, etc.
   }
 }

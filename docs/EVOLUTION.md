@@ -621,7 +621,23 @@ Phase 2: Adapt a built-in extension (e.g., secret-scanner) to run in a worker; v
 Extensions running in isolated workers can no longer cause indefinite hangs; the system remains responsive even if a plugin becomes unresponsive.
 
 **Next**
-Proceed with Phase 2 of plugin isolation: migrate a built‑in extension (e.g., `test-tool`) to run in a worker, verify functionality, and gather performance data.
+Generalize proxy for all extension types (commands, renderers, hooks); migrate more built-in extensions; make isolation default.
+
+### Iteration 32 — 2026-06-19 (Plugin Isolation Phase 2: Universal Tool Proxy)
+
+**P6 — Architecture (Phase 2 Implementation):**
+- Integrated `PluginManager` with main `ExtensionAPI`: manager now accepts `mainApi`, wraps tool `execute` to proxy to worker, and forwards registrations (`register_tool`) from the worker.
+- Updated `factory.ts` to conditionally load `universal-tool` via worker when config `plugins.isolate` is true.
+- Implemented `plugin-worker-entry.ts` enhancements: worker stores tools, exposes `workerApi` for registration, and handles `execute_tool` RPC with onUpdate forwarding.
+- Added unit test in `plugin-system.test.ts` verifying registration and execute proxying behavior.
+- System default (no isolation) still works.
+- Tests: 1112 passing (+1), 0 skipped.
+
+**Outcome**
+Validated plugin isolation infrastructure with a real extension. `universal-tool` can run isolated and tool calls are correctly proxied. Config toggle enables incremental migration.
+
+**Next**
+Expand proxy to support commands, renderers, hooks; migrate additional built-in extensions; consider making isolation the default for all built-ins.
 
 ---
 

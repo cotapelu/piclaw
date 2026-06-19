@@ -199,3 +199,41 @@ describe('PluginManager', () => {
     expect(mockWorkerInstance).toBeUndefined();
   });
 });
+
+describe('PluginManager with mainApi (isolated extension)', () => {
+  let manager: PluginManager;
+  let mockMainApi: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockWorkerInstance = undefined;
+    mockMainApi = { registerTool: vi.fn() };
+    manager = new PluginManager(mockMainApi);
+  });
+
+  it('forwards tool registration to mainApi and wraps execute to proxy to worker', async () => {
+    await manager.loadExtension('/dummy/ext.js', 'myext');
+    const worker = manager.getWorker('myext')!;
+    // Directly invoke the manager's internal message handler
+    const mockToolDef = { name: 'testtool', execute: vi.fn() };
+    const originalExecute = mockToolDef.execute; // keep reference before mutation
+    (manager as any).handleWorkerMessage('myext', { type: 'register_tool', tool: mockToolDef });
+    // mainApi.registerTool should have been called
+    expect(mockMainApi.registerTool).toHaveBeenCalledTimes(1);
+    const registeredTool = mockMainApi.registerTool.mock.calls[0][0];
+    expect(registeredTool.name).toBe('testtool');
+    // execute is wrapped (we will verify behavior by checking invoke)
+    // Spy on worker.invoke and mock return
+    const invokeSpy = vi.spyOn(worker, 'invoke').mockResolvedValue({ result: 'ok' });
+    // Call the wrapped execute
+    const result = await registeredTool.execute('call-1', { arg: 123 }, undefined, undefined, { cwd: '/tmp' });
+    expect(invokeSpy).toHaveBeenCalledWith('execute_tool', {
+      toolName: 'testtool',
+      toolCallId: 'call-1',
+      params: { arg: 123 },
+      ctx: { cwd: '/tmp' },
+    });
+    expect(result).toEqual({ result: 'ok' });
+    expect(originalExecute).not.toHaveBeenCalled();
+  });
+});
