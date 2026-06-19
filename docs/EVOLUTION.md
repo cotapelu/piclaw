@@ -558,6 +558,27 @@ The system now provides per‑session team isolation, eliminating global state c
 **Next**
 Proceed with remaining P6 items: evaluate WebSocket transport for the TUI, investigate worker threads for plugin isolation, or assess WASM integration for performance‑critical paths.
 
+
+### Iteration 28 — 2026-06-19 (ADR for Plugin Isolation)
+
+**P6 — Architecture (Planning Phase):**
+- Created ADR 0007 outlining worker‑thread based plugin isolation.
+- Proposed design: each extension runs in its own worker; main‑thread PluginManager orchestrates loading, message routing, and lifecycle.
+- Defined `PluginWorker` class, message protocol, and phased implementation plan.
+- Identified risks (worker leaks, deadlocks) and observability metrics.
+- No code changes yet; documentation deliverable only.
+
+**Metrics**
+- No test changes; tests remain 1096 passing, 3 skipped.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome**
+Shared understanding established for plugin isolation. Provides blueprint for future implementation to improve system robustness.
+
+**Next**
+Begin Phase 1 implementation: build core `PluginWorker` and `PluginManager` infrastructure; adapt a simple built‑in extension as proof‑of‑concept.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

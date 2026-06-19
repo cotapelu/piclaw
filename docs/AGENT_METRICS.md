@@ -395,4 +395,24 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 **Next:** Consider further architectural improvements (WebSocket transport, plugin isolation) or begin tackling P6 items: evaluate worker threads for plugin isolation, or investigate WASM integration for performance‑critical paths.
 
+### Iteration 28 — 2026-06-19 (ADR for Plugin Isolation)
+
+**P6 — Architecture (Planning Phase):**
+- Created ADR 0007 outlining worker‑thread based plugin isolation.
+- Proposed design: each extension runs in its own worker; main‑thread PluginManager orchestrates loading, message routing, and lifecycle.
+- Defined `PluginWorker` class, message protocol, and phased implementation plan.
+- Identified risks (worker leaks, deadlocks) and observability metrics.
+- No code changes yet; documentation deliverable only.
+
+**Metrics**
+- No test changes; tests remain 1096 passing, 3 skipped.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome**
+Shared understanding established for plugin isolation. Provides blueprint for future implementation to improve system robustness.
+
+**Next**
+Begin Phase 1 implementation: build core `PluginWorker` and `PluginManager` infrastructure; adapt a simple built‑in extension as proof‑of‑concept.
+
 ### Planned Refactors (Upcoming Iterations)
