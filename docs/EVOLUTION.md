@@ -383,4 +383,26 @@ Remaining P3 tasks (db-client, error message improvements) are moderate priority
 
 ---
 
+### Iteration 19 — 2026-06-19 (Database Client Tool)
+
+**Context**
+Ecosystem expansion (P3) called for a database client tool to enable agents to store and query data. SQLite was chosen for its zero-configuration, file-based nature.
+
+**Changes**
+- Implemented `db_client` tool using better-sqlite3.
+  - Parameterized queries only (no string interpolation) to prevent injection.
+  - Connection management per session with mutex for safe concurrent access within same session.
+  - Actions: `connect(database)`, `query(statement, values?)`, `execute(statement, values?)`, `exec(statement)`, `close(database)`.
+  - Comprehensive test suite (`db-client-tool.test.ts`, 8 tests).
+- Added `logger-mock.ts` test utility to facilitate future migration away from console spies.
+- Updated `TODO.md` accordingly.
+
+**Outcome**
+Agents can now safely interact with SQLite databases. Test suite expanded to 1080 passing tests.
+
+**Next**
+Potential extensions: Postgres/MySQL support, connection pooling improvements, query builder helper. Could also migrate existing logger-using tests to the new mock.
+
+---
+
 *This file will be updated after each major iteration to reflect new trajectory changes.*

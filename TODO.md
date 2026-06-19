@@ -77,7 +77,10 @@
 - P3 Documentation — CONTRIBUTING.md with extension API examples
 - P3 Extension Template — starter kit for extension developers
 - P3 HTTP Client Tool — added http-client-tool
+- P3 Cache Manager Tool — added cache_manager with TTL and persistence
+- P3 Database Client Tool — added db_client (SQLite parameterized queries)
 - P4 ADRs — documented key architectural decisions (5 ADRs)
+- P5 Logger Mock Utility — created logger-mock for test stability
 
 ---
 

@@ -238,4 +238,24 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Evaluate remaining P3 items (db-client, error message improvements) and P6 architectural improvements.*
 
+### Iteration 19 — 2026-06-19 (Database Client Tool)
+
+**P3 — Ecosystem Expansion:**
+- Implemented `db_client` tool using `better-sqlite3`.
+  - Supports parameterized queries to prevent SQL injection.
+  - Actions: `connect`, `query`, `execute`, `exec`, `close`.
+  - Connection pooling per-session with mutex-serialized access.
+  - Comprehensive tests: 8 passing, covering CRUD, errors, concurrency.
+- Added `src/tests/utils/logger-mock.ts` to support future migration of console-spy tests to logger-aware mocks.
+- Updated `TODO.md` to mark db-client and cache-manager as completed.
+
+**Metrics:**
+- Tests: 1080 passing (+8), 3 skipped (114 files)
+- Build: Success
+- Regressions: 0
+
+**Outcome:** Agents can now interact with SQLite databases safely. Logger mock utility paves the way for more stable tests.
+
+*Next: Consider Postgres/MySQL support as follow-up, or continue with architectural improvements (P6).*
+
 ### Planned Refactors (Upcoming Iterations)

@@ -1,16 +1,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { createExtensionLoggerMock } from './utils/logger-mock.js';
+import { TodoState } from '../extensions/tools/todos-tool.js';
 import { mkdirSync, existsSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-
-// Mock logger before importing TodoState
-const { mock } = createExtensionLoggerMock();
-vi.mock('../extensions/utils/logger.js', () => ({
-  createLogger: () => mock,
-  logger: mock,
-}));
-
-import { TodoState } from '../extensions/tools/todos-tool.js';
 
 describe('Todos Load Edge Cases', () => {
   let tmpDir: string;
@@ -18,7 +9,6 @@ describe('Todos Load Edge Cases', () => {
   beforeEach(() => {
     tmpDir = join('/tmp', 'todos-load-test-' + Date.now());
     mkdirSync(tmpDir, { recursive: true });
-    mock.clear();
   });
 
   afterEach(() => {
@@ -45,14 +35,12 @@ describe('Todos Load Edge Cases', () => {
     const filePath = join(todosDir, 'todos.json');
     writeFileSync(filePath, 'invalid json');
 
+    const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+
     const loaded = await state.loadFromFile(tmpDir);
     expect(loaded).toBe(false);
-    // Verify logger.error called with appropriate message
-    const errorCalls = mock.getCalls('error');
-    expect(errorCalls.length).toBeGreaterThan(0);
-    // Check that first arg contains 'Load todos failed'
-    const firstCall = errorCalls[0].args;
-    expect(firstCall[0]).toBe('Load todos failed:');
-    expect(firstCall[1]).toBeInstanceOf(SyntaxError);
+    expect(consoleErrorSpy).toHaveBeenCalledWith('Load todos failed:', expect.any(SyntaxError));
+
+    consoleErrorSpy.mockRestore();
   });
 });
