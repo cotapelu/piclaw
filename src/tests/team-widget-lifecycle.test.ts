@@ -6,7 +6,8 @@ import { TeamRegistry } from "../extensions/team/team-manager";
 vi.mock("../extensions/team/team-manager", () => ({
   TeamRegistry: {
     getInstance: vi.fn()
-  }
+  },
+  getDefaultTeamManager: vi.fn(() => TeamRegistry.getInstance())
 }));
 
 describe("Team Widget Lifecycle", () => {

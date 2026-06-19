@@ -24,6 +24,19 @@ import { createLogger, type ExtensionLogger } from "../utils/logger.js";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
+/**
+ * TeamManager interface - abstracts team operations for injection and testability.
+ */
+export interface TeamManager {
+  get(teamId: string): AgentTeam | undefined;
+  getAll(): Map<string, AgentTeam>;
+  has(teamId: string): boolean;
+  register(teamId: string, team: AgentTeam): void;
+  unregister(teamId: string): void;
+  resetAutoDisposeTimer(teamId: string): void;
+  waitForTeam(teamId: string, timeoutMs?: number): Promise<boolean>;
+}
+
 const registryLogger = createLogger("TeamRegistry");
 
 const MAX_TEAM_SIZE = 4;
@@ -92,6 +105,7 @@ export class AgentTeam implements AgentTeamRuntime {
   private roleByAgentId: Map<string, string> = new Map(); // maps session.id -> role
   private agentLastSeen: Map<string, number> = new Map(); // role -> timestamp of last activity
   private workspace: SharedWorkspace;
+  private manager: TeamManager;
   private messageBus: Map<string, Array<{ from: string; content: string; timestamp: number }>> = new Map();
   private lockQueue: (() => void)[] = [];
   private locked = false;
@@ -120,8 +134,9 @@ export class AgentTeam implements AgentTeamRuntime {
 
   // Locking mechanism for concurrency control
 
-  constructor(logger?: ExtensionLogger) {
+  constructor(logger?: ExtensionLogger, manager?: TeamManager) {
     this.logger = logger ?? createLogger();
+    this.manager = manager ?? getDefaultTeamManager();
     this.dispose = async () => {
       if (this.monitorInterval) {
         clearInterval(this.monitorInterval);
@@ -147,14 +162,13 @@ export class AgentTeam implements AgentTeamRuntime {
         )
       );
       this.runtimes = [];
-      // Unregister from TeamRegistry
+      // Unregister from TeamManager
       try {
-        const registry = TeamRegistry.getInstance();
         if (this.id) {
-          registry.unregister(this.id);
+          this.manager.unregister(this.id);
         }
       } catch (e) {
-        this.logger.warn('Failed to unregister team from registry:', e);
+        this.logger.warn('Failed to unregister team from manager:', e);
       }
     };
     this.workspace = new SharedWorkspace();
@@ -1045,6 +1059,7 @@ export async function bootPiclawTeam(
     teamRoles?: string[];
     tools?: string[];
     agentCwd?: string | ((role: string) => string);
+    manager?: TeamManager;
   } = {}
 ): Promise<AgentTeam> {
   const { size: teamSize, roles: normalizedRoles } = validateOptions(
@@ -1052,7 +1067,8 @@ export async function bootPiclawTeam(
     Array.isArray(options.teamRoles) ? options.teamRoles : []
   );
 
-  const team = new AgentTeam();
+  const manager = options.manager ?? getDefaultTeamManager();
+  const team = new AgentTeam(undefined, manager);
   team.setTeamId(`team-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
 
   // Include parent as a role, size includes parent + children
@@ -1066,8 +1082,8 @@ export async function bootPiclawTeam(
   // Create isolated child runtimes and start agent loops
   await team.setupChildRuntimes(parentRuntime, options.agentCwd);
 
-  // Register team in global registry
-  TeamRegistry.getInstance().register(team.id, team);
+  // Register team in manager
+  manager.register(team.id, team);
 
   return team;
 }
@@ -1093,8 +1109,7 @@ export async function executeTeamTasks(
       clearInterval(team.monitorInterval!);
       team.monitorInterval = null;
       try {
-        const registry = TeamRegistry.getInstance();
-        registry.resetAutoDisposeTimer(team.id);
+        team.manager.resetAutoDisposeTimer(team.id);
       } catch (e) {
         logger.warn('Failed to schedule auto-dispose:', e);
       }
@@ -1124,3 +1139,38 @@ export async function executeTeamTasks(
   }
   return team;
 }
+
+/**
+ * Default factory for TeamManager (creates a new LegacyTeamManager each call)
+ */
+export function getDefaultTeamManager(): TeamManager {
+  return new LegacyTeamManager();
+}
+
+/**
+ * LegacyTeamManager adapts the singleton TeamRegistry to the TeamManager interface.
+ */
+class LegacyTeamManager implements TeamManager {
+  get(teamId: string): AgentTeam | undefined {
+    return TeamRegistry.getInstance().get(teamId);
+  }
+  getAll(): Map<string, AgentTeam> {
+    return TeamRegistry.getInstance().getAll();
+  }
+  has(teamId: string): boolean {
+    return TeamRegistry.getInstance().has(teamId);
+  }
+  register(teamId: string, team: AgentTeam): void {
+    TeamRegistry.getInstance().register(teamId, team);
+  }
+  unregister(teamId: string): void {
+    TeamRegistry.getInstance().unregister(teamId);
+  }
+  resetAutoDisposeTimer(teamId: string): void {
+    TeamRegistry.getInstance().resetAutoDisposeTimer(teamId);
+  }
+  waitForTeam(teamId: string, timeoutMs?: number): Promise<boolean> {
+    return TeamRegistry.getInstance().waitForTeam(teamId, timeoutMs);
+  }
+}
+

@@ -10,7 +10,8 @@ vi.mock('../extensions/team/team-manager.js', () => ({
       get: vi.fn(),
       resetAutoDisposeTimer: vi.fn()
     }))
-  }
+  },
+  getDefaultTeamManager: vi.fn(() => TeamRegistry.getInstance())
 }));
 
 import { bootPiclawTeam, executeTeamTasks, TeamRegistry } from '../extensions/team/team-manager.js';
@@ -59,7 +60,7 @@ describe('team_run tool', () => {
 
     const result = await tool.execute('id', '{"tasks":["t1"]}' as any, undefined, undefined, ctx);
     expect(result.isError).toBe(false);
-    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, { teamSize: undefined, teamRoles: undefined });
+    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, expect.objectContaining({ teamSize: undefined, teamRoles: undefined }));
     expect(executeTeamTasks).toHaveBeenCalledWith(mockTeam, ['t1'], undefined, {});
     expect(result.content[0].text).toContain('✅ Team started: team-json');
     expect(result.details.teamId).toBe('team-json');
@@ -77,7 +78,7 @@ describe('team_run tool', () => {
 
     const result = await tool.execute('id', { tasks: ['Task 1', 'Task 2'] }, undefined, undefined, ctx);
 
-    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, { teamSize: undefined, teamRoles: undefined });
+    expect(bootPiclawTeam).toHaveBeenCalledWith(parent, expect.objectContaining({ teamSize: undefined, teamRoles: undefined }));
     expect(executeTeamTasks).toHaveBeenCalledWith(mockTeam, ['Task 1', 'Task 2'], undefined, {});
     expect(result.isError).toBe(false);
     expect(result.content[0].text).toContain('✅ Team started: team-default');

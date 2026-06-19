@@ -6,7 +6,8 @@
  * Just provide tasks, team size, roles -> team auto-completes
  */
 
-import { bootPiclawTeam, executeTeamTasks, TeamRegistry } from "./team-manager.js";
+import { bootPiclawTeam, executeTeamTasks } from "./team-manager.js";
+import { getTeamManager } from "./team-manager-context.js";
 import type { ToolDefinition, ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
 
@@ -96,6 +97,8 @@ export function createTeamTool(): ToolDefinition {
         teamRoles?: string[];
       };
 
+      const manager = getTeamManager(ctx);
+
       // Prepare onUpdate wrapper for message accumulation (used for both new team and query)
       let wrappedOnUpdate: ((update: any) => void) | undefined;
       if (onUpdate) {
@@ -121,8 +124,7 @@ export function createTeamTool(): ToolDefinition {
 
             // If teamId is provided, query existing team status (always non-blocking)
       if (teamId) {
-        const registry = TeamRegistry.getInstance();
-        const team = registry.get(teamId);
+        const team = manager.get(teamId);
         if (!team) {
           return {
             content: [{ type: "text", text: `Error: Team with ID ${teamId} not found` }],
@@ -132,7 +134,7 @@ export function createTeamTool(): ToolDefinition {
         }
 
         // Reset auto-dispose timer on query
-        registry.resetAutoDisposeTimer(teamId);
+        manager.resetAutoDisposeTimer(teamId);
 
         // Always non-blocking: return current status immediately
         const status = await team.getTeamStatus();
@@ -168,7 +170,8 @@ export function createTeamTool(): ToolDefinition {
         // Boot team
         const team = await bootPiclawTeam(parentRuntime, {
           teamSize,
-          teamRoles
+          teamRoles,
+          manager
         });
 
         wrappedOnUpdate?.({

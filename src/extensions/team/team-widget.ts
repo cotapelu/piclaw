@@ -10,7 +10,8 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TeamRegistry } from "./team-manager.js";
+import { TeamRegistry } from "./team-manager.js"; // TODO: remove after migration
+import { getTeamManager } from "./team-manager-context.js";
 import { recordRender } from "../utils/widget-performance.js";
 
 // Unique symbol for per-session state attachment
@@ -74,8 +75,8 @@ async function refreshWidget(ctx: any): Promise<void> {
   lines.push(...buildHeaderLines(ui.theme));
 
   try {
-    const registry = TeamRegistry.getInstance();
-    const teams = registry.getAll();
+    const manager = getTeamManager(ctx);
+    const teams = manager.getAll();
 
     if (teams.size === 0) {
       lines.push(ui.theme.fg("muted", "No active teams"));
@@ -135,8 +136,8 @@ function attachTeam(team: any, ctx: any): void {
 // Discover and attach to all current teams
 function attachToAllTeams(ctx: any): void {
   try {
-    const registry = TeamRegistry.getInstance();
-    const teams = registry.getAll();
+    const manager = getTeamManager(ctx);
+    const teams = manager.getAll();
     const currentIds = new Set(teams.keys());
     const state = getState(ctx);
     if (!state) return;
@@ -195,25 +196,30 @@ function stopWidget(state: TeamWidgetSessionState) {
     clearInterval(state.discoveryIntervalId);
     state.discoveryIntervalId = null;
   }
-  if (state.ctx) {
+  const ctx = state.ctx;
+  if (ctx) {
     try {
-      state.ctx.ui.setWidget("team", undefined);
+      ctx.ui.setWidget("team", undefined);
     } catch {
       // ignore if UI gone
     }
-    state.ctx = null; // break reference
   }
+  // Clear reference
+  state.ctx = null;
   // Detach from all teams
-  try {
-    const registry = TeamRegistry.getInstance();
-    const teams = registry.getAll();
-    for (const teamId of state.attachedTeamIds) {
-      const team = teams.get(teamId);
-      if (team) {
-        team.setOnUpdate(undefined); // clear handler
+  if (ctx) {
+    try {
+      const manager = getTeamManager(ctx);
+      const teams = manager.getAll();
+      for (const teamId of state.attachedTeamIds) {
+        const team = teams.get(teamId);
+        if (team) {
+          team.setOnUpdate(undefined); // clear handler
+        }
       }
-    }
-  } catch {}
+    } catch {}
+  }
+
   state.attachedTeamIds.clear();
   state.lastLines = null;
   state.renderScheduled = false;

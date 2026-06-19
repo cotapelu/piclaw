@@ -468,7 +468,29 @@ The global `TeamRegistry` singleton creates test brittleness, prevents multi-ses
 Shared understanding established. ADR provides clear blueprint for implementation, enabling staged refactor with minimal risk.
 
 **Next**
-Start implementation: define `TeamManager` interface and `DefaultTeamManager` wrapper; begin migrating `AgentTeam` to accept manager.
+Consider further migration of remaining console-spy tests where feasible, or move to P6 architectural work (team workspace decoupling).
+
+### Iteration 24 — 2026-06-19 (TeamManager Implementation)
+
+**P6 — Architecture (Implementation Phase 1):**
+- Defined `TeamManager` interface with methods: get, getAll, has, register, unregister, resetAutoDisposeTimer, waitForTeam.
+- Implemented `LegacyTeamManager` as adapter to existing `TeamRegistry` singleton, preserving behavior.
+- Added `getTeamManager(ctx)` utility that caches a manager per `ExtensionContext` using a `WeakMap`, enabling future per-session managers.
+- Refactored `AgentTeam` to accept optional `manager` via constructor (default via `getDefaultTeamManager()`), storing and using it for unregister and other operations.
+- Updated `bootPiclawTeam` to accept `manager` in options and pass to `AgentTeam`, using manager for registration.
+- Updated `executeTeamTasks` to use `team.manager.resetAutoDisposeTimer` instead of global registry.
+- Migrated `team-tool` and `team-widget` to obtain manager via `getTeamManager(ctx)` and replaced all direct `TeamRegistry.getInstance` calls.
+- Adjusted tests: updated `team-tool.test.ts` to include `getDefaultTeamManager` in mock, and changed expectations to use `objectContaining` for flexibility; updated `team-widget-lifecycle.test.ts` similarly.
+
+**Metrics:**
+- Tests: 1094 passing (unchanged), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome:** Team workspace decoupling is now structurally in place. All core consumers use the abstraction, eliminating direct singleton dependencies. This paves the way for true per-session isolation by implementing a non-singleton manager in a future iteration.
+
+**Next**
+Consider implementing a true per-session manager (non-singleton) to replace LegacyTeamManager, then remove remaining direct `TeamRegistry.getInstance` calls (if any).
 
 ---
 
