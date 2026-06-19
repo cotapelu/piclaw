@@ -110,16 +110,20 @@ async function executeHttpClient(
     clearTimeout(timeoutId);
 
     if (error.name === 'AbortError') {
+      const msg = `HTTP request timed out after ${timeout}ms`;
+      const suggestion = '\nSuggestion: Consider increasing the timeout parameter or check if the server is overloaded.';
       return {
         isError: true,
-        content: [{ type: "text", text: `Request timed out after ${timeout}ms` }],
+        content: [{ type: "text", text: msg + suggestion }],
         details: { error: "Timeout", timeout },
       };
     }
 
+    const msg = `Request failed: ${error.message}`;
+    const suggestion = '\nSuggestion: Verify the URL, check network connectivity, ensure the server is running, and inspect firewall/proxy settings.';
     return {
       isError: true,
-      content: [{ type: "text", text: `Request failed: ${error.message}` }],
+      content: [{ type: "text", text: msg + suggestion }],
       details: { error: error.message, stack: error.stack },
     };
   }
