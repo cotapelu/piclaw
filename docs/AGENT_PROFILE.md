@@ -43,11 +43,11 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Improvement Focus (Next)
 
-1. **Test logger integration**: Provide a test-friendly logger mock and migrate console-spy tests gradually.
-2. **Metrics rotation**: Implement size-based rotation or compression for `.piclaw/metrics.json`.
-3. **Config schema**: Add robust validation with defaults using a lightweight schema library.
-4. **Windows compatibility**: Add CI matrix for Windows or adjust path utilities.
-5. **Consider DB client tool** (moderate priority) or confirm current toolset sufficient.
+- **Migrate tests to logger mock**: Use `src/tests/utils/logger-mock.ts` to replace console spies gradually, improving test stability.
+- **Metrics rotation**: Implement size-based rotation or compression for `.piclaw/metrics.json`.
+- **Config validation**: Extend runtime checks for more fields (tools array, model ID format).
+- **Windows compatibility**: Add CI matrix for Windows or adjust path utilities.
+- **Evaluate team workspace decoupling** (P6) to improve scalability and testability.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
 

@@ -6,7 +6,7 @@
  * Exports team metrics in Prometheus text format for monitoring.
  */
 
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 
@@ -27,9 +27,29 @@ export function createPrometheusMetricsTool(cwd: string): any {
     ) {
       const metricsFile = join(process.cwd(), ".piclaw", "metrics.json");
       try {
-        const data = await readFile(metricsFile, "utf-8");
-        let entries: any[] = JSON.parse(data);
-        if (!Array.isArray(entries)) entries = [entries];
+        let data;
+      try {
+        data = await readFile(metricsFile, "utf-8");
+      } catch (initErr) {
+        // Fallback: find the latest daily metrics file
+        const metricsDir = join(process.cwd(), ".piclaw");
+        try {
+          const files = await readdir(metricsDir);
+          const metricFiles = files.filter(f => f.startsWith("metrics-") && f.endsWith(".json"));
+          if (metricFiles.length > 0) {
+            metricFiles.sort();
+            const latest = metricFiles[metricFiles.length - 1];
+            const latestPath = join(metricsDir, latest);
+            data = await readFile(latestPath, "utf-8");
+          } else {
+            throw new Error("No metrics files found");
+          }
+        } catch (listErr) {
+          throw new Error(`Failed to read metrics: ${initErr instanceof Error ? initErr.message : 'unknown'}`);
+        }
+      }
+      let entries: any[] = JSON.parse(data);
+      if (!Array.isArray(entries)) entries = [entries];
 
         let output = "";
         for (const m of entries) {

@@ -977,11 +977,12 @@ export class TeamRegistry {
     if (team) {
       try {
         await team.dispose();
-        // Export metrics to .piclaw/metrics.json
+        // Export metrics to daily file: .piclaw/metrics-YYYY-MM-DD.json
         try {
           const metrics = team.getMetrics();
           const metricsDir = join(process.cwd(), ".piclaw");
-          const metricsFile = join(metricsDir, "metrics.json");
+          const dateStr = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+          const metricsFile = join(metricsDir, `metrics-${dateStr}.json`);
           await mkdir(metricsDir, { recursive: true });
           const existing: any[] = [];
           try {
@@ -990,7 +991,7 @@ export class TeamRegistry {
           } catch {}
           existing.push(metrics);
           await writeFile(metricsFile, JSON.stringify(existing, null, 2));
-          registryLogger.info(`Exported metrics for team ${teamId} to .piclaw/metrics.json`);
+          registryLogger.info(`Exported metrics for team ${teamId} to ${metricsFile}`);
         } catch (e) {
           registryLogger.warn(`Failed to export metrics for team ${teamId}:`, e);
         }
