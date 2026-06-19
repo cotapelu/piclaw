@@ -20,7 +20,7 @@ import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import { SharedWorkspace, type WorkspaceEntry } from "./workspace.js";
 import { createTeamOpsTool } from "./team-ops-tool.js";
 import * as path from "node:path";
-import { createLogger } from "../utils/logger.js";
+import { createLogger, type ExtensionLogger } from "../utils/logger.js";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
@@ -59,7 +59,7 @@ export class AgentTeam implements AgentTeamRuntime {
   roles: string[] = [];
   size = 0;
   dispose: () => Promise<void>;
-  private logger = createLogger();
+  private logger: any; // will be initialized in constructor
   childPromises: Promise<void>[] = [];
   private childControllers: Map<string, AbortController> = new Map();
   private disposed = false;
@@ -120,7 +120,8 @@ export class AgentTeam implements AgentTeamRuntime {
 
   // Locking mechanism for concurrency control
 
-  constructor() {
+  constructor(logger?: ExtensionLogger) {
+    this.logger = logger ?? createLogger();
     this.dispose = async () => {
       if (this.monitorInterval) {
         clearInterval(this.monitorInterval);
