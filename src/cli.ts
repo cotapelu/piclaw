@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { main as upstreamMain } from "@earendil-works/pi-coding-agent";
-import { handleCustomCommands } from "./custom-commands.js";
 import { getExtensionFactories } from "./extensions/index.js";
 import { initLogger, createLogger } from "./utils/logger.js";
 
@@ -15,9 +14,6 @@ async function main() {
   await initLogger();
 
   const args = process.argv.slice(2);
-
-  // Custom commands (pin, export, import, health)
-  if (await handleCustomCommands(args)) return;
 
   // Upstream handles everything else (including @file for including file content)
   await upstreamMain(args, {
