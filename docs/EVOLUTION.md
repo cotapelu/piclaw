@@ -533,6 +533,31 @@ Keybindings configuration is now validated for type, improving user feedback and
 **Next**
 Consider further validation (e.g., ensure values are non‑empty strings) or move to P6 per‑session manager implementation.
 
+### Iteration 27 — 2026-06-19 (Port to InstanceTeamManager)
+
+**Context**  
+The team workspace decoupling (ADR 0006) defined a `TeamManager` abstraction and `LegacyTeamManager` adapter to the singleton `TeamRegistry`. To achieve true per‑session isolation, the default manager must be switched to `InstanceTeamManager`, which gives each session its own registry.
+
+**Changes**
+- Modified `getTeamManager` to instantiate `InstanceTeamManager` by default (`new InstanceTeamManager()`), replacing `getDefaultTeamManager()`.
+- Kept `LegacyTeamManager` accessible via `getDefaultTeamManager()` for backward compatibility.
+- Updated test suite:
+  - Added `createMockManager()` helper in `team-tool.test.ts` to generate injectable mock managers.
+  - Injected `mockManager` into `ctx.teamManager` for all `team_run` tests; this avoids constructing a real `InstanceTeamManager` during tests.
+  - Removed all `TeamRegistry.getInstance` mock setup in tests; assertions now target `mockManager`.
+- Verified all tests pass with no regressions.
+
+**Metrics**
+- Tests: 1096 passing (unchanged), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome**
+The system now provides per‑session team isolation, eliminating global state coupling. This fulfills the primary goal of ADR 0006.
+
+**Next**
+Proceed with remaining P6 items: evaluate WebSocket transport for the TUI, investigate worker threads for plugin isolation, or assess WASM integration for performance‑critical paths.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

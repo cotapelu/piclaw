@@ -5,7 +5,7 @@
  */
 
 import type { ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { TeamManager, getDefaultTeamManager } from "./team-manager.js";
+import { TeamManager, InstanceTeamManager } from "./team-manager.js";
 
 const managers = new WeakMap<ExtensionContext, TeamManager>();
 
@@ -20,7 +20,7 @@ export function getTeamManager(ctx: ExtensionContext): TeamManager {
   }
   let mgr = managers.get(ctx);
   if (!mgr) {
-    mgr = getDefaultTeamManager();
+    mgr = new InstanceTeamManager();
     managers.set(ctx, mgr);
   }
   return mgr;

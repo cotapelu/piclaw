@@ -4,14 +4,7 @@ import { createTeamTool } from '../extensions/team/team-tool.js';
 // Mock the team-manager module
 vi.mock('../extensions/team/team-manager.js', () => ({
   bootPiclawTeam: vi.fn(),
-  executeTeamTasks: vi.fn(),
-  TeamRegistry: {
-    getInstance: vi.fn(() => ({
-      get: vi.fn(),
-      resetAutoDisposeTimer: vi.fn()
-    }))
-  },
-  getDefaultTeamManager: vi.fn(() => TeamRegistry.getInstance())
+  executeTeamTasks: vi.fn()
 }));
 
 import { bootPiclawTeam, executeTeamTasks, TeamRegistry } from '../extensions/team/team-manager.js';

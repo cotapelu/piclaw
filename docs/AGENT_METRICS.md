@@ -380,4 +380,19 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Address remaining validation gaps (e.g., tool name validation) or proceed with P6 per-session manager.*
 
+### Iteration 27 — 2026-06-19 (Port to InstanceTeamManager)
+
+**P6 — Architecture (Implementation Phase 2):**
+- Switched `getTeamManager` to instantiate `InstanceTeamManager` by default, providing per‑session team isolation.
+- Left `LegacyTeamManager` for backward compatibility (via `getDefaultTeamManager`).
+- Updated test suite:
+  - Added `createMockManager()` helper in `team-tool.test.ts` to produce injectable mock managers.
+  - Injected `mockManager` into `ctx.teamManager` for all tests, avoiding real `InstanceTeamManager` construction.
+  - Removed reliance on `TeamRegistry.getInstance` mocks; tests now assert on `mockManager` methods.
+- All tests passing: 1096 → **1096** (no regressions). Build successful.
+
+**Outcome:** The system now uses isolated team managers per session, eliminating global state leakage between sessions. This completes the team workspace decoupling.
+
+**Next:** Consider further architectural improvements (WebSocket transport, plugin isolation) or begin tackling P6 items: evaluate worker threads for plugin isolation, or investigate WASM integration for performance‑critical paths.
+
 ### Planned Refactors (Upcoming Iterations)

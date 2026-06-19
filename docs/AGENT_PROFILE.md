@@ -4,7 +4,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Strengths
 
-- **Comprehensive test suite**: 113 test files, 1072 passing, 3 skipped; coverage >80%.
+- **Comprehensive test suite**: 116 test files, 1096 passing, 3 skipped; coverage >80%.
 - **Modular architecture**: Clear separation between core, extensions, and tools.
 - **Robust team collaboration**: Multi-agent teams with task assignment, workspace isolation, zombie recovery, and metrics export.
 - **TypeScript strict mode**: Strong typing, early error detection.
@@ -13,6 +13,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Property-based testing**: Core invariants validated with `fast-check`.
 - **TUI performance**: Memoized rendering and event-driven updates reduce CPU usage; metrics dashboard provides observability.
 - **Documentation**: CONTRIBUTING guide, ADRs, and extensive inline comments.
+- **Team isolation**: `InstanceTeamManager` provides per-session team state, eliminating cross-session interference.
 
 ## Weaknesses
 
@@ -43,8 +44,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Improvement Focus (Next)
 
-- **Team workspace decoupling** (P6): Extract team management from global singleton to improve testability, multi-session isolation, and scalability.
-- **Config validation extension**: Ensure `keybindings` values are non‑empty strings, and potentially validate key combination syntax.
+- **Config validation extension**:  Ensure `keybindings` values are non‑empty strings, and potentially validate key combination syntax.
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
 - **Metrics retention policy**: Implement age-based cleanup for daily metric files to avoid disk bloat over time.
 - **Plugin isolation** (P6): Investigate worker threads to isolate extensions and prevent crashes from affecting core.
