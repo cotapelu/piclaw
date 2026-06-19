@@ -4,7 +4,9 @@
  *
  * Shows live team overview in the UI widget area.
  * Displays: active teams, task progress, agent statuses.
- * Supports toggle via /team command.
+ * Uses event-driven updates instead of polling for better performance.
+ *
+ * Toggle with /team command.
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
@@ -17,8 +19,10 @@ const TEAM_WIDGET_STATE = Symbol('teamWidgetState');
 interface TeamWidgetSessionState {
   enabled: boolean;
   ctx: any;
-  intervalId: NodeJS.Timeout | null;
+  discoveryIntervalId: NodeJS.Timeout | null; // polls for new teams
   lastLines: string[] | null; // memoization cache
+  attachedTeamIds: Set<string>; // teams we're subscribed to
+  renderScheduled: boolean; // debounce flag
 }
 
 function getState(ctx: any): TeamWidgetSessionState | undefined {
@@ -28,7 +32,14 @@ function getState(ctx: any): TeamWidgetSessionState | undefined {
 function ensureState(ctx: any): TeamWidgetSessionState {
   let state = getState(ctx);
   if (!state) {
-    state = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
+    state = {
+      enabled: true,
+      ctx: ctx,
+      discoveryIntervalId: null,
+      lastLines: null,
+      attachedTeamIds: new Set(),
+      renderScheduled: false,
+    };
     (ctx as any)[TEAM_WIDGET_STATE] = state;
   }
   return state;
@@ -105,6 +116,50 @@ async function refreshWidget(ctx: any): Promise<void> {
   }
 }
 
+// Debounced render scheduling to avoid flooding
+function scheduleRender(ctx: any): void {
+  const state = getState(ctx);
+  if (!state || !state.enabled) return;
+  if (state.renderScheduled) return;
+  state.renderScheduled = true;
+  refreshWidget(ctx).catch(() => {}).finally(() => {
+    state.renderScheduled = false;
+  });
+}
+
+// Attach to a single team's updates
+function attachTeam(team: any, ctx: any): void {
+  team.setOnUpdate(() => scheduleRender(ctx));
+}
+
+// Discover and attach to all current teams
+function attachToAllTeams(ctx: any): void {
+  try {
+    const registry = TeamRegistry.getInstance();
+    const teams = registry.getAll();
+    const currentIds = new Set(teams.keys());
+    const state = getState(ctx);
+    if (!state) return;
+
+    // Detach from teams no longer in registry (cleanup)
+    for (const teamId of state.attachedTeamIds) {
+      if (!currentIds.has(teamId)) {
+        state.attachedTeamIds.delete(teamId);
+      }
+    }
+
+    // Attach to new teams
+    for (const [teamId, team] of teams) {
+      if (!state.attachedTeamIds.has(teamId)) {
+        attachTeam(team, ctx);
+        state.attachedTeamIds.add(teamId);
+      }
+    }
+  } catch {
+    // ignore
+  }
+}
+
 // Helper: compare arrays for equality
 function arraysEqual<T>(a: T[], b: T[]): boolean {
   if (a.length !== b.length) return false;
@@ -117,23 +172,28 @@ function arraysEqual<T>(a: T[], b: T[]): boolean {
 function startWidget(ctx: any) {
   const state = ensureState(ctx);
   // Prevent double start
-  if (state.intervalId) return;
+  if (state.discoveryIntervalId) return;
   state.ctx = ctx;
-  state.lastLines = null; // reset cache
-  // Initial refresh
+  state.lastLines = null;
+  state.attachedTeamIds = new Set();
+  state.renderScheduled = false;
+
+  // Attach to existing teams and kick off initial render
+  attachToAllTeams(ctx);
   refreshWidget(ctx).catch(() => {});
-  // Periodic refresh every 2 seconds
-  state.intervalId = setInterval(() => {
+
+  // Periodically discover new teams (e.g., teams created after widget started)
+  state.discoveryIntervalId = setInterval(() => {
     if (state.enabled && state.ctx) {
-      refreshWidget(state.ctx).catch(() => {});
+      attachToAllTeams(state.ctx);
     }
-  }, 2000);
+  }, 5000);
 }
 
 function stopWidget(state: TeamWidgetSessionState) {
-  if (state.intervalId) {
-    clearInterval(state.intervalId);
-    state.intervalId = null;
+  if (state.discoveryIntervalId) {
+    clearInterval(state.discoveryIntervalId);
+    state.discoveryIntervalId = null;
   }
   if (state.ctx) {
     try {
@@ -143,7 +203,20 @@ function stopWidget(state: TeamWidgetSessionState) {
     }
     state.ctx = null; // break reference
   }
-  state.lastLines = null; // clear cache
+  // Detach from all teams
+  try {
+    const registry = TeamRegistry.getInstance();
+    const teams = registry.getAll();
+    for (const teamId of state.attachedTeamIds) {
+      const team = teams.get(teamId);
+      if (team) {
+        team.setOnUpdate(undefined); // clear handler
+      }
+    }
+  } catch {}
+  state.attachedTeamIds.clear();
+  state.lastLines = null;
+  state.renderScheduled = false;
 }
 
 /**
@@ -175,7 +248,14 @@ export function registerTeamWidget(api: ExtensionAPI): void {
   // Set up widget on session start
   api.on("session_start", async (_event, ctx) => {
     // Create per-session state (default enabled)
-    const state: TeamWidgetSessionState = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
+    const state: TeamWidgetSessionState = {
+      enabled: true,
+      ctx: ctx,
+      discoveryIntervalId: null,
+      lastLines: null,
+      attachedTeamIds: new Set(),
+      renderScheduled: false,
+    };
     (ctx as any)[TEAM_WIDGET_STATE] = state;
 
     // If enabled by default, start the widget
