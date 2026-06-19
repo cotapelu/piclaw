@@ -8,6 +8,7 @@ This directory records significant architectural decisions made during PiClaw de
 - [0002 - Team Collaboration Architecture](0002-team-collaboration.md)
 - [0003 - TUI Widget Rendering Optimization](0003-tui-widget-memoization.md)
 - [0004 - Security Hardening](0004-security-hardening.md)
+- [0005 - Property-Based Testing for Core Algorithms](0005-property-based-testing.md)
 
 ## Template
 
