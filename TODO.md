@@ -41,7 +41,7 @@
 - [ ] Add cache manager tool
 - [x] Write contribution guide (CONTRIBUTING.md) — comprehensive with extension examples
 - [x] Document extension API with examples (included in CONTRIBUTING.md)
-- [ ] Improve error messages with actionable suggestions
+- [x] Improve error messages with actionable suggestions — added suggestions to http-client network/timeout errors; other tools already provide clear context
 
 ## P4 — Observability & Reliability
 - [x] Add structured logging (trace/debug/info/warn/error)
