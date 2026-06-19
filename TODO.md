@@ -52,7 +52,7 @@
 - [x] Session health checks (auto-repair corrupted sessions) — added session-health-tool
 
 ## P6 — Architectural Improvements
-- [ ] Decouple team workspace from session tree
+- [x] Decouple team workspace from session tree
 - [ ] Consider WebSocket transport for TUI instead of stdio
 - [ ] Evaluate WASM integration for performance-critical paths
 - [ ] Plugin isolation using worker threads
