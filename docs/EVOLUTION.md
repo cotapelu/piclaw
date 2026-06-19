@@ -492,6 +492,26 @@ Consider further migration of remaining console-spy tests where feasible, or mov
 **Next**
 Consider implementing a true per-session manager (non-singleton) to replace LegacyTeamManager, then remove remaining direct `TeamRegistry.getInstance` calls (if any).
 
+### Iteration 25 — 2026-06-19 (Config Model Validation)
+
+**Context**
+Configuration files accept a `model` field identifying the LLM provider and model ID (e.g., `anthropic:claude-opus-4-5`). Previously there was no validation, allowing invalid values that cause runtime errors.
+
+**Changes**
+- Added model format validation in `loadConfig` with regex `^[^:]+:[^:]+$` (non-empty provider and model separated by single colon).
+- When model fails validation, logs a warning and falls back to `DEFAULT_CONFIG.model` (undefined).
+- Added unit test in `config-manager.test.ts` to ensure invalid model is rejected and default applied.
+
+**Metrics**
+- Tests: 1095 passing (+1), 3 skipped.
+- No regressions.
+
+**Outcome**
+Config robustness improved; users receive immediate feedback on misconfigured model IDs.
+
+**Next**
+Continue quality improvements (e.g., extend validation to `keybindings` schema) or proceed with P6 per‑session manager design.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

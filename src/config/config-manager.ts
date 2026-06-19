@@ -120,6 +120,11 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 				logger.warn('Invalid tools config (expected array of strings). Using default.');
 				fileConfig.tools = DEFAULT_CONFIG.tools;
 			}
+		// Validate model format (if provided)
+		if (fileConfig.model && typeof fileConfig.model === 'string' && !/^[^:]+:[^:]+$/.test(fileConfig.model)) {
+		  logger.warn(`Invalid model ID format: ${fileConfig.model}. Expected format 'provider:model'. Using default.`);
+		  fileConfig.model = DEFAULT_CONFIG.model;
+		}
 		} catch (err) {
 			logger.warn(`Failed to parse config file: ${err}. Using defaults.`);
 			fileConfig = { ...DEFAULT_CONFIG };

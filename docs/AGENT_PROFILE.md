@@ -18,7 +18,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 - **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
 - **Metrics rotation**: Implemented daily rotation to prevent unbounded growth; long-term cleanup strategy could be improved (e.g., age-based retention).
-- **Config validation**: Basic validation for `verbose`, `tools`, and `thinking` is in place; could extend to `model` ID format and nested `keybindings` schema.
+- **Config validation**: Basic validation for `verbose`, `tools`, `thinking`, and `model` (format `provider:model`) is in place; `keybindings` schema validation remains.
 - **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
 
 ## Fragile Modules
@@ -44,7 +44,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Team workspace decoupling** (P6): Extract team management from global singleton to improve testability, multi-session isolation, and scalability.
-- **Config schema extension**: Validate `model` strings (e.g., `provider:model`) and strengthen `keybindings` type checks.
+- **Config validation extension**: Strengthen `keybindings` schema validation (ensure non-empty strings).
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
 - **Metrics retention policy**: Implement age-based cleanup for daily metric files to avoid disk bloat over time.
 - **Plugin isolation** (P6): Investigate worker threads to isolate extensions and prevent crashes from affecting core.

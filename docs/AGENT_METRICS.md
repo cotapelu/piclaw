@@ -348,4 +348,20 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Consider implementing a true per-session manager (non-singleton) to replace LegacyTeamManager, then remove remaining direct `TeamRegistry.getInstance` calls (if any).*
 
+### Iteration 25 — 2026-06-19 (Config Model Validation)
+
+**P2 — Quality & Reliability:**
+- Added model ID format validation in `loadConfig` using regex `^[^:]+:[^:]+$`.
+- On invalid model, logs warning and falls back to default (undefined).
+- Added unit test to verify fallback behavior for invalid model format.
+
+**Metrics:**
+- Tests: 1095 passing (+1), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome:** Configuration now validates model format, preventing misconfiguration. Improves robustness with minimal impact.
+
+*Next: Continue P5 testing goals or revisit P6 per-session manager implementation.*
+
 ### Planned Refactors (Upcoming Iterations)
