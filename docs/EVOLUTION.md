@@ -448,6 +448,28 @@ Console coupling is now limited to logger unit tests. All other tests use inject
 **Next**
 Continue with P6 architectural improvements (team workspace decoupling) or address remaining configuration enhancements.
 
+
+### Iteration 23 — 2026-06-19 (Team Workspace Decoupling ADR)
+
+**Context**
+The global `TeamRegistry` singleton creates test brittleness, prevents multi-session isolation, and hides dependencies. To improve scalability and testability, we must decouple the team workspace from the session tree.
+
+**Changes**
+- Analyzed current team architecture: identified direct dependencies on `TeamRegistry.getInstance()` in `team-tool`, `team-widget`, `AgentTeam`, etc.
+- Drafted ADR 0006 outlining a `TeamManager` interface, `DefaultTeamManager` wrapper, and injection via `ExtensionContext`.
+- Proposed incremental migration plan: (1) define interface, (2) implement default wrapper, (3) refactor consumers to use injected manager, (4) migrate tests to use mocks.
+- Created `docs/adr/0006-team-workspace-decoupling.md` with detailed design, consequences, and alternatives.
+
+**Metrics**
+- No code changes; tests unchanged (1094 passing, 3 skipped).
+- Documentation: new ADR.
+
+**Outcome**
+Shared understanding established. ADR provides clear blueprint for implementation, enabling staged refactor with minimal risk.
+
+**Next**
+Start implementation: define `TeamManager` interface and `DefaultTeamManager` wrapper; begin migrating `AgentTeam` to accept manager.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

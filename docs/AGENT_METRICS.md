@@ -312,4 +312,19 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Continue P6 architectural improvements (team workspace decoupling) or remaining test migrations.*
 
+### Iteration 23 — 2026-06-19 (Team Workspace Decoupling ADR)
+
+**P6 — Architecture (Planning):**
+- Analyzed current team architecture: global `TeamRegistry` singleton causes test brittleness, multi-session interference, and hidden dependencies.
+- Drafted ADR 0006 proposing a `TeamManager` interface, `DefaultTeamManager` wrapper, and per-session injection via `ExtensionContext`.
+- Designed incremental migration: define interface, implement default wrapper, refactor `AgentTeam` and consumers (team-tool, team-widget, team-ops-tool) to use injected manager, update tests.
+
+**Metrics:**
+- No code changes; tests unchanged: 1094 passing, 3 skipped, 116 files.
+- Deliverable: `docs/adr/0006-team-workspace-decoupling.md`.
+
+**Outcome:** Clear roadmap and acceptance criteria defined for decoupling team workspace. ADR provides shared understanding and guides implementation effort.
+
+*Next: Begin implementation of TeamManager abstraction and per-session injection.*
+
 ### Planned Refactors (Upcoming Iterations)
