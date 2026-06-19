@@ -18,6 +18,7 @@ import { registerMetricsTool } from "./tools/metrics-tool.js";
 // import { registerSecretScannerTool } from "./tools/secret-scanner-tool.js"; // REMOVED: memory leak tool
 import { registerScriptsTool } from "./tools/scripts-tool.js";
 import { registerHttpClientTool } from "./tools/http-client-tool.js";
+import { registerDbClientTool } from "./tools/db-client-tool.js";
 import { registerCacheManagerTool } from "./tools/cache-manager-tool.js";
 import { registerPrometheusMetricsTool } from "./tools/prometheus-metrics-tool.js";
 import { registerSessionHealthTool } from "./tools/session-health-tool.js";
@@ -85,6 +86,8 @@ export default function extensionsAggregator(api: import("@earendil-works/pi-cod
   registerHttpClientTool(api);
   // Register cache manager tool (P3 Ecosystem)
   registerCacheManagerTool(api);
+  // Register database client tool (P3 Ecosystem)
+  registerDbClientTool(api);
   // Register subtool loader extension
   registerSubToolLoaderExtension(api);
   // (subtool-loader replaced by skill-loader)

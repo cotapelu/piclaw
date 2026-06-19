@@ -33,11 +33,12 @@
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
 - [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
+- [ ] Provide logger-aware test utilities and migrate console-spy tests
 
 ## P3 — Ecosystem & DX
 - [x] Create extension template repository (provided starter template in extension-template/)
 - [x] Add HTTP client tool (http-client)
-- [ ] Add DB client tool (Postgres/MySQL)
+- [x] Add DB client tool (SQLite parameterized queries, Postgres/MySQL future)
 - [x] Add cache manager tool (cache_manager with TTL, persistence, and stats)
 - [x] Write contribution guide (CONTRIBUTING.md) — comprehensive with extension examples
 - [x] Document extension API with examples (included in CONTRIBUTING.md)
