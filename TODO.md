@@ -23,7 +23,7 @@
 - [x] Profile team workspace concurrency under 50-agent load (added threshold; passes with ~27ms, 18518 ops/sec)
 - [x] Identify memory leaks in long-running sessions (added memory-stability.test.ts; passes with <2MB delta over 5 iterations)
 - [x] Optimize todos tool: claimTask O(1) already done (verified)
-- [x] Reduce TUI re-renders (measure with profile) — implemented memoization for team & metrics widgets; added performance tracking
+- [x] Reduce TUI re-renders (measure with profile) — memoization, perf tracking, and event-driven team widget (no polling)
 - [x] Benchmark package manager operations (created package-manager-benchmark.ts; measures update overhead)
 
 ## P5 — Testing & Quality
