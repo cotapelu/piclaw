@@ -110,6 +110,16 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 				logger.warn(`Invalid thinking level in config: ${fileConfig.thinking}. Using default.`);
 				fileConfig.thinking = DEFAULT_CONFIG.thinking;
 			}
+			// Validate verbose
+			if (fileConfig.verbose !== undefined && typeof fileConfig.verbose !== 'boolean') {
+				logger.warn(`Invalid verbose config (expected boolean), got ${typeof fileConfig.verbose}. Using default.`);
+				fileConfig.verbose = DEFAULT_CONFIG.verbose;
+			}
+			// Validate tools
+			if (fileConfig.tools !== undefined && !Array.isArray(fileConfig.tools)) {
+				logger.warn('Invalid tools config (expected array of strings). Using default.');
+				fileConfig.tools = DEFAULT_CONFIG.tools;
+			}
 		} catch (err) {
 			logger.warn(`Failed to parse config file: ${err}. Using defaults.`);
 			fileConfig = { ...DEFAULT_CONFIG };
