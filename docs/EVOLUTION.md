@@ -364,6 +364,23 @@ Reduced unnecessary TUI re-renders, lowering CPU usage and improving overall res
 - Investigate WASM for CPU-intensive tasks (e.g., diff, parsing).
 - Plugin isolation using worker threads to prevent crashes.
 
+### Iteration 18 — 2026-06-19 (Testing & Documentation Improvements)
+
+**Context**
+After establishing solid foundations (security, observability, TUI optimizations), we focused on testing quality and documentation.
+
+**Changes**
+- **Property-Based Testing**: Added `team-manager-property.test.ts` using `fast-check`. 5 invariants validated.
+- **Event-Driven Team Widget**: Replaced polling with subscription to `AgentTeam.onUpdate`; discovery interval for new teams. Combined with memoization for minimal renders.
+- **ADRs**: Created `docs/adr/` with 5 decision records explaining major architectural choices.
+- Updated `TODO.md` to reflect completed P5 (property testing) and detailed team widget improvements.
+
+**Outcome**
+Test suite: 1072 passing (+5). System stability maintained. Documentation improved for onboarding and future maintenance.
+
+**Next**
+Remaining P3 tasks (db-client, error message improvements) are moderate priority. System is in a stable, high-quality state; pause for feedback or explore P6 architectural research.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

@@ -36,9 +36,11 @@
 
 ## P3 — Ecosystem & DX
 - [x] Create extension template repository (provided starter template in extension-template/)
-- [x] Add more built-in tools: http-client (done), db-client, cache-manager
-- [ ] Write contribution guide (CONTRIBUTING.md)
-- [ ] Document extension API with examples
+- [x] Add HTTP client tool (http-client)
+- [ ] Add DB client tool (Postgres/MySQL)
+- [ ] Add cache manager tool
+- [x] Write contribution guide (CONTRIBUTING.md) — comprehensive with extension examples
+- [x] Document extension API with examples (included in CONTRIBUTING.md)
 - [ ] Improve error messages with actionable suggestions
 
 ## P4 — Observability & Reliability
@@ -61,15 +63,20 @@
 - P2 Concurrency Profiling — team workspace concurrency threshold added and passing
 - P2 Memory Stability — basic memory leak test for package manager added and passing
 - P2 Benchmark Package Manager — created benchmark script for performance regression detection
-- P2 TUI Re-render Optimization — memoization for team & metrics widgets; widget-performance tracker added
+- P2 TUI Re-render Optimization — memoization, perf tracking, and event-driven team widget (no polling)
 - P4 Prometheus Metrics Export — added prometheus-metrics-tool for observability
 - P4 Debug Mode Enhancement — logger.error now includes Error.stack
 - P4 Session Health Checks — added session-health-tool with auto-repair for corrupted JSON files
 - P4 TUI Performance Dashboard — enhanced metrics-widget with uptime, memory, and team metrics
-- P5 Coverage Milestone — increased coverage to >80% with comprehensive tests for subtool-loader and core logger
+- P5 Coverage Milestone — increased coverage to >80%
 - P5 Fuzzing Expansion — added security tests for test-tool file args
 - P5 Chaos Engineering — added chaos utility with env-controlled failure injection
-- P5 Long-Running Stability Test — added long-running-stability.test.ts validating no resource leaks over many cycles
+- P5 Long-Running Stability Test — memory stability validated
+- P5 Property-Based Testing — added team-manager-property.test.ts (5 invariants)
+- P3 Documentation — CONTRIBUTING.md with extension API examples
+- P3 Extension Template — starter kit for extension developers
+- P3 HTTP Client Tool — added http-client-tool
+- P4 ADRs — documented key architectural decisions (5 ADRs)
 
 ---
 
