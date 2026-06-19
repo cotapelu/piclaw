@@ -74,6 +74,7 @@
 - P5 Chaos Engineering — added chaos utility with env-controlled failure injection
 - P5 Long-Running Stability Test — memory stability validated
 - P5 Property-Based Testing — added team-manager-property.test.ts (5 invariants)
+- P5 Config Validation — added runtime checks in config-manager for invalid thinking level
 - P3 Documentation — CONTRIBUTING.md with extension API examples
 - P3 Extension Template — starter kit for extension developers
 - P3 HTTP Client Tool — added http-client-tool
