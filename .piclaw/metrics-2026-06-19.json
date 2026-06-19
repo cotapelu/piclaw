@@ -46,6 +46,186 @@
                                                                                           [
                                                                                             [
                                                                                               [
+                                                                                                [
+                                                                                                  [
+                                                                                                    [
+                                                                                                      [
+                                                                                                        [
+                                                                                                          [
+                                                                                                            [
+                                                                                                              [
+                                                                                                                [
+                                                                                                                  [
+                                                                                                                    [
+                                                                                                                      [
+                                                                                                                        {
+                                                                                                                          "teamId": "team-3",
+                                                                                                                          "totalTasks": 0,
+                                                                                                                          "completedTasks": 0,
+                                                                                                                          "failedTasks": 0,
+                                                                                                                          "pendingTasks": 0,
+                                                                                                                          "avgTaskDurationMs": 0,
+                                                                                                                          "totalTaskDurationMs": 0,
+                                                                                                                          "agentTaskCounts": {},
+                                                                                                                          "messageCounts": {},
+                                                                                                                          "totalMessages": 0,
+                                                                                                                          "teamRuntimeMs": 50
+                                                                                                                        }
+                                                                                                                      ],
+                                                                                                                      {
+                                                                                                                        "teamId": "team-6",
+                                                                                                                        "totalTasks": 1,
+                                                                                                                        "completedTasks": 0,
+                                                                                                                        "failedTasks": 0,
+                                                                                                                        "pendingTasks": 0,
+                                                                                                                        "avgTaskDurationMs": 0,
+                                                                                                                        "totalTaskDurationMs": 0,
+                                                                                                                        "agentTaskCounts": {},
+                                                                                                                        "messageCounts": {},
+                                                                                                                        "totalMessages": 0,
+                                                                                                                        "teamRuntimeMs": 50
+                                                                                                                      }
+                                                                                                                    ],
+                                                                                                                    {
+                                                                                                                      "teamId": "team-3",
+                                                                                                                      "totalTasks": 0,
+                                                                                                                      "completedTasks": 0,
+                                                                                                                      "failedTasks": 0,
+                                                                                                                      "pendingTasks": 0,
+                                                                                                                      "avgTaskDurationMs": 0,
+                                                                                                                      "totalTaskDurationMs": 0,
+                                                                                                                      "agentTaskCounts": {},
+                                                                                                                      "messageCounts": {},
+                                                                                                                      "totalMessages": 0,
+                                                                                                                      "teamRuntimeMs": 51
+                                                                                                                    }
+                                                                                                                  ],
+                                                                                                                  {
+                                                                                                                    "teamId": "team-6",
+                                                                                                                    "totalTasks": 1,
+                                                                                                                    "completedTasks": 0,
+                                                                                                                    "failedTasks": 0,
+                                                                                                                    "pendingTasks": 0,
+                                                                                                                    "avgTaskDurationMs": 0,
+                                                                                                                    "totalTaskDurationMs": 0,
+                                                                                                                    "agentTaskCounts": {},
+                                                                                                                    "messageCounts": {},
+                                                                                                                    "totalMessages": 0,
+                                                                                                                    "teamRuntimeMs": 51
+                                                                                                                  }
+                                                                                                                ],
+                                                                                                                {
+                                                                                                                  "teamId": "team-3",
+                                                                                                                  "totalTasks": 0,
+                                                                                                                  "completedTasks": 0,
+                                                                                                                  "failedTasks": 0,
+                                                                                                                  "pendingTasks": 0,
+                                                                                                                  "avgTaskDurationMs": 0,
+                                                                                                                  "totalTaskDurationMs": 0,
+                                                                                                                  "agentTaskCounts": {},
+                                                                                                                  "messageCounts": {},
+                                                                                                                  "totalMessages": 0,
+                                                                                                                  "teamRuntimeMs": 53
+                                                                                                                }
+                                                                                                              ],
+                                                                                                              {
+                                                                                                                "teamId": "team-6",
+                                                                                                                "totalTasks": 1,
+                                                                                                                "completedTasks": 0,
+                                                                                                                "failedTasks": 0,
+                                                                                                                "pendingTasks": 0,
+                                                                                                                "avgTaskDurationMs": 0,
+                                                                                                                "totalTaskDurationMs": 0,
+                                                                                                                "agentTaskCounts": {},
+                                                                                                                "messageCounts": {},
+                                                                                                                "totalMessages": 0,
+                                                                                                                "teamRuntimeMs": 50
+                                                                                                              }
+                                                                                                            ],
+                                                                                                            {
+                                                                                                              "teamId": "team-3",
+                                                                                                              "totalTasks": 0,
+                                                                                                              "completedTasks": 0,
+                                                                                                              "failedTasks": 0,
+                                                                                                              "pendingTasks": 0,
+                                                                                                              "avgTaskDurationMs": 0,
+                                                                                                              "totalTaskDurationMs": 0,
+                                                                                                              "agentTaskCounts": {},
+                                                                                                              "messageCounts": {},
+                                                                                                              "totalMessages": 0,
+                                                                                                              "teamRuntimeMs": 51
+                                                                                                            }
+                                                                                                          ],
+                                                                                                          {
+                                                                                                            "teamId": "team-6",
+                                                                                                            "totalTasks": 1,
+                                                                                                            "completedTasks": 0,
+                                                                                                            "failedTasks": 0,
+                                                                                                            "pendingTasks": 0,
+                                                                                                            "avgTaskDurationMs": 0,
+                                                                                                            "totalTaskDurationMs": 0,
+                                                                                                            "agentTaskCounts": {},
+                                                                                                            "messageCounts": {},
+                                                                                                            "totalMessages": 0,
+                                                                                                            "teamRuntimeMs": 51
+                                                                                                          }
+                                                                                                        ],
+                                                                                                        {
+                                                                                                          "teamId": "team-3",
+                                                                                                          "totalTasks": 0,
+                                                                                                          "completedTasks": 0,
+                                                                                                          "failedTasks": 0,
+                                                                                                          "pendingTasks": 0,
+                                                                                                          "avgTaskDurationMs": 0,
+                                                                                                          "totalTaskDurationMs": 0,
+                                                                                                          "agentTaskCounts": {},
+                                                                                                          "messageCounts": {},
+                                                                                                          "totalMessages": 0,
+                                                                                                          "teamRuntimeMs": 52
+                                                                                                        }
+                                                                                                      ],
+                                                                                                      {
+                                                                                                        "teamId": "team-6",
+                                                                                                        "totalTasks": 1,
+                                                                                                        "completedTasks": 0,
+                                                                                                        "failedTasks": 0,
+                                                                                                        "pendingTasks": 0,
+                                                                                                        "avgTaskDurationMs": 0,
+                                                                                                        "totalTaskDurationMs": 0,
+                                                                                                        "agentTaskCounts": {},
+                                                                                                        "messageCounts": {},
+                                                                                                        "totalMessages": 0,
+                                                                                                        "teamRuntimeMs": 52
+                                                                                                      }
+                                                                                                    ],
+                                                                                                    {
+                                                                                                      "teamId": "team-3",
+                                                                                                      "totalTasks": 0,
+                                                                                                      "completedTasks": 0,
+                                                                                                      "failedTasks": 0,
+                                                                                                      "pendingTasks": 0,
+                                                                                                      "avgTaskDurationMs": 0,
+                                                                                                      "totalTaskDurationMs": 0,
+                                                                                                      "agentTaskCounts": {},
+                                                                                                      "messageCounts": {},
+                                                                                                      "totalMessages": 0,
+                                                                                                      "teamRuntimeMs": 53
+                                                                                                    }
+                                                                                                  ],
+                                                                                                  {
+                                                                                                    "teamId": "team-6",
+                                                                                                    "totalTasks": 1,
+                                                                                                    "completedTasks": 0,
+                                                                                                    "failedTasks": 0,
+                                                                                                    "pendingTasks": 0,
+                                                                                                    "avgTaskDurationMs": 0,
+                                                                                                    "totalTaskDurationMs": 0,
+                                                                                                    "agentTaskCounts": {},
+                                                                                                    "messageCounts": {},
+                                                                                                    "totalMessages": 0,
+                                                                                                    "teamRuntimeMs": 51
+                                                                                                  }
+                                                                                                ],
                                                                                                 {
                                                                                                   "teamId": "team-3",
                                                                                                   "totalTasks": 0,
@@ -57,7 +237,7 @@
                                                                                                   "agentTaskCounts": {},
                                                                                                   "messageCounts": {},
                                                                                                   "totalMessages": 0,
-                                                                                                  "teamRuntimeMs": 50
+                                                                                                  "teamRuntimeMs": 52
                                                                                                 }
                                                                                               ],
                                                                                               {
@@ -85,7 +265,7 @@
                                                                                               "agentTaskCounts": {},
                                                                                               "messageCounts": {},
                                                                                               "totalMessages": 0,
-                                                                                              "teamRuntimeMs": 51
+                                                                                              "teamRuntimeMs": 52
                                                                                             }
                                                                                           ],
                                                                                           {
@@ -99,7 +279,7 @@
                                                                                             "agentTaskCounts": {},
                                                                                             "messageCounts": {},
                                                                                             "totalMessages": 0,
-                                                                                            "teamRuntimeMs": 51
+                                                                                            "teamRuntimeMs": 54
                                                                                           }
                                                                                         ],
                                                                                         {
@@ -113,7 +293,7 @@
                                                                                           "agentTaskCounts": {},
                                                                                           "messageCounts": {},
                                                                                           "totalMessages": 0,
-                                                                                          "teamRuntimeMs": 53
+                                                                                          "teamRuntimeMs": 51
                                                                                         }
                                                                                       ],
                                                                                       {
@@ -141,7 +321,7 @@
                                                                                       "agentTaskCounts": {},
                                                                                       "messageCounts": {},
                                                                                       "totalMessages": 0,
-                                                                                      "teamRuntimeMs": 51
+                                                                                      "teamRuntimeMs": 52
                                                                                     }
                                                                                   ],
                                                                                   {
@@ -155,7 +335,7 @@
                                                                                     "agentTaskCounts": {},
                                                                                     "messageCounts": {},
                                                                                     "totalMessages": 0,
-                                                                                    "teamRuntimeMs": 51
+                                                                                    "teamRuntimeMs": 55
                                                                                   }
                                                                                 ],
                                                                                 {
@@ -169,7 +349,7 @@
                                                                                   "agentTaskCounts": {},
                                                                                   "messageCounts": {},
                                                                                   "totalMessages": 0,
-                                                                                  "teamRuntimeMs": 52
+                                                                                  "teamRuntimeMs": 51
                                                                                 }
                                                                               ],
                                                                               {
@@ -183,7 +363,7 @@
                                                                                 "agentTaskCounts": {},
                                                                                 "messageCounts": {},
                                                                                 "totalMessages": 0,
-                                                                                "teamRuntimeMs": 52
+                                                                                "teamRuntimeMs": 51
                                                                               }
                                                                             ],
                                                                             {
@@ -197,7 +377,7 @@
                                                                               "agentTaskCounts": {},
                                                                               "messageCounts": {},
                                                                               "totalMessages": 0,
-                                                                              "teamRuntimeMs": 53
+                                                                              "teamRuntimeMs": 50
                                                                             }
                                                                           ],
                                                                           {
@@ -239,7 +419,7 @@
                                                                         "agentTaskCounts": {},
                                                                         "messageCounts": {},
                                                                         "totalMessages": 0,
-                                                                        "teamRuntimeMs": 50
+                                                                        "teamRuntimeMs": 51
                                                                       }
                                                                     ],
                                                                     {
@@ -253,7 +433,7 @@
                                                                       "agentTaskCounts": {},
                                                                       "messageCounts": {},
                                                                       "totalMessages": 0,
-                                                                      "teamRuntimeMs": 52
+                                                                      "teamRuntimeMs": 51
                                                                     }
                                                                   ],
                                                                   {
@@ -267,7 +447,7 @@
                                                                     "agentTaskCounts": {},
                                                                     "messageCounts": {},
                                                                     "totalMessages": 0,
-                                                                    "teamRuntimeMs": 54
+                                                                    "teamRuntimeMs": 55
                                                                   }
                                                                 ],
                                                                 {
@@ -295,7 +475,7 @@
                                                                 "agentTaskCounts": {},
                                                                 "messageCounts": {},
                                                                 "totalMessages": 0,
-                                                                "teamRuntimeMs": 50
+                                                                "teamRuntimeMs": 51
                                                               }
                                                             ],
                                                             {
@@ -309,7 +489,7 @@
                                                               "agentTaskCounts": {},
                                                               "messageCounts": {},
                                                               "totalMessages": 0,
-                                                              "teamRuntimeMs": 52
+                                                              "teamRuntimeMs": 51
                                                             }
                                                           ],
                                                           {
@@ -323,7 +503,7 @@
                                                             "agentTaskCounts": {},
                                                             "messageCounts": {},
                                                             "totalMessages": 0,
-                                                            "teamRuntimeMs": 55
+                                                            "teamRuntimeMs": 50
                                                           }
                                                         ],
                                                         {
@@ -337,7 +517,7 @@
                                                           "agentTaskCounts": {},
                                                           "messageCounts": {},
                                                           "totalMessages": 0,
-                                                          "teamRuntimeMs": 51
+                                                          "teamRuntimeMs": 52
                                                         }
                                                       ],
                                                       {
@@ -351,7 +531,7 @@
                                                         "agentTaskCounts": {},
                                                         "messageCounts": {},
                                                         "totalMessages": 0,
-                                                        "teamRuntimeMs": 51
+                                                        "teamRuntimeMs": 50
                                                       }
                                                     ],
                                                     {
@@ -365,7 +545,7 @@
                                                       "agentTaskCounts": {},
                                                       "messageCounts": {},
                                                       "totalMessages": 0,
-                                                      "teamRuntimeMs": 50
+                                                      "teamRuntimeMs": 53
                                                     }
                                                   ],
                                                   {
@@ -379,7 +559,7 @@
                                                     "agentTaskCounts": {},
                                                     "messageCounts": {},
                                                     "totalMessages": 0,
-                                                    "teamRuntimeMs": 51
+                                                    "teamRuntimeMs": 52
                                                   }
                                                 ],
                                                 {
@@ -393,7 +573,7 @@
                                                   "agentTaskCounts": {},
                                                   "messageCounts": {},
                                                   "totalMessages": 0,
-                                                  "teamRuntimeMs": 52
+                                                  "teamRuntimeMs": 57
                                                 }
                                               ],
                                               {
@@ -421,7 +601,7 @@
                                               "agentTaskCounts": {},
                                               "messageCounts": {},
                                               "totalMessages": 0,
-                                              "teamRuntimeMs": 51
+                                              "teamRuntimeMs": 69
                                             }
                                           ],
                                           {
@@ -435,7 +615,7 @@
                                             "agentTaskCounts": {},
                                             "messageCounts": {},
                                             "totalMessages": 0,
-                                            "teamRuntimeMs": 55
+                                            "teamRuntimeMs": 54
                                           }
                                         ],
                                         {
@@ -449,7 +629,7 @@
                                           "agentTaskCounts": {},
                                           "messageCounts": {},
                                           "totalMessages": 0,
-                                          "teamRuntimeMs": 51
+                                          "teamRuntimeMs": 56
                                         }
                                       ],
                                       {
@@ -463,7 +643,7 @@
                                         "agentTaskCounts": {},
                                         "messageCounts": {},
                                         "totalMessages": 0,
-                                        "teamRuntimeMs": 51
+                                        "teamRuntimeMs": 50
                                       }
                                     ],
                                     {
@@ -477,7 +657,7 @@
                                       "agentTaskCounts": {},
                                       "messageCounts": {},
                                       "totalMessages": 0,
-                                      "teamRuntimeMs": 51
+                                      "teamRuntimeMs": 52
                                     }
                                   ],
                                   {
@@ -491,7 +671,7 @@
                                     "agentTaskCounts": {},
                                     "messageCounts": {},
                                     "totalMessages": 0,
-                                    "teamRuntimeMs": 50
+                                    "teamRuntimeMs": 51
                                   }
                                 ],
                                 {
@@ -533,7 +713,7 @@
                               "agentTaskCounts": {},
                               "messageCounts": {},
                               "totalMessages": 0,
-                              "teamRuntimeMs": 53
+                              "teamRuntimeMs": 52
                             }
                           ],
                           {
@@ -547,7 +727,7 @@
                             "agentTaskCounts": {},
                             "messageCounts": {},
                             "totalMessages": 0,
-                            "teamRuntimeMs": 52
+                            "teamRuntimeMs": 50
                           }
                         ],
                         {
@@ -561,7 +741,7 @@
                           "agentTaskCounts": {},
                           "messageCounts": {},
                           "totalMessages": 0,
-                          "teamRuntimeMs": 57
+                          "teamRuntimeMs": 50
                         }
                       ],
                       {
@@ -575,7 +755,7 @@
                         "agentTaskCounts": {},
                         "messageCounts": {},
                         "totalMessages": 0,
-                        "teamRuntimeMs": 51
+                        "teamRuntimeMs": 50
                       }
                     ],
                     {
@@ -589,7 +769,7 @@
                       "agentTaskCounts": {},
                       "messageCounts": {},
                       "totalMessages": 0,
-                      "teamRuntimeMs": 69
+                      "teamRuntimeMs": 52
                     }
                   ],
                   {
@@ -603,7 +783,7 @@
                     "agentTaskCounts": {},
                     "messageCounts": {},
                     "totalMessages": 0,
-                    "teamRuntimeMs": 54
+                    "teamRuntimeMs": 50
                   }
                 ],
                 {
@@ -617,7 +797,7 @@
                   "agentTaskCounts": {},
                   "messageCounts": {},
                   "totalMessages": 0,
-                  "teamRuntimeMs": 56
+                  "teamRuntimeMs": 51
                 }
               ],
               {
@@ -659,7 +839,7 @@
             "agentTaskCounts": {},
             "messageCounts": {},
             "totalMessages": 0,
-            "teamRuntimeMs": 51
+            "teamRuntimeMs": 50
           }
         ],
         {
@@ -687,7 +867,7 @@
         "agentTaskCounts": {},
         "messageCounts": {},
         "totalMessages": 0,
-        "teamRuntimeMs": 50
+        "teamRuntimeMs": 51
       }
     ],
     {
@@ -715,6 +895,6 @@
     "agentTaskCounts": {},
     "messageCounts": {},
     "totalMessages": 0,
-    "teamRuntimeMs": 50
+    "teamRuntimeMs": 51
   }
 ]

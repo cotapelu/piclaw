@@ -186,6 +186,11 @@ export class AgentTeam implements AgentTeamRuntime {
     return this.workspace;
   }
 
+  /** Get the team manager (internal use). */
+  getManager(): TeamManager {
+    return this.manager;
+  }
+
   // Locking mechanism for concurrency control
   private async acquireLock(): Promise<void> {
     return new Promise<void>(resolve => {
@@ -1109,7 +1114,7 @@ export async function executeTeamTasks(
       clearInterval(team.monitorInterval!);
       team.monitorInterval = null;
       try {
-        team.manager.resetAutoDisposeTimer(team.id);
+        team.getManager().resetAutoDisposeTimer(team.id);
       } catch (e) {
         logger.warn('Failed to schedule auto-dispose:', e);
       }

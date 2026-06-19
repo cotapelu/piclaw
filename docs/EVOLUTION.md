@@ -594,6 +594,21 @@ Users receive immediate feedback on invalid keybinding configurations; system av
 **Next**
 Proceed with plugin isolation implementation (Phase 1) or continue with other P6 items (WebSocket transport, WASM). Maintain test stability.
 
+### Iteration 30 — 2026-06-19 (Plugin Isolation Core Infrastructure)
+
+**P6 — Architecture (Phase 1 Implementation):**
+- Implemented `PluginWorker` class: manages a worker thread, request/response messaging with correlation IDs, error handling, and termination.
+- Implemented `PluginManager` class: loads extensions into workers, tracks them, provides unload and listing.
+- Created `plugin-worker-entry.ts`: generic worker entry that loads an extension module and routes RPC calls.
+- Added comprehensive unit tests for `PluginWorker` and `PluginManager` covering message handling, errors, termination, and lifecycle.
+- Tests: 1109 passing (+12), 0 skipped (new tests added). Build successful.
+
+**Outcome**
+Core infrastructure for plugin isolation is in place. Extensions can now be loaded in isolated worker threads with async RPC. This sets the foundation for migrating built-in extensions to worker isolation and improving system robustness.
+
+**Next**
+Phase 2: Adapt a built-in extension (e.g., secret-scanner) to run in a worker; validate functionality and performance. Continue expanding test coverage (e.g., timeout handling, worker crashes).
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*
