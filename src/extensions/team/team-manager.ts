@@ -1141,10 +1141,10 @@ export async function executeTeamTasks(
 }
 
 /**
- * Default factory for TeamManager (creates a new LegacyTeamManager each call)
+ * Default factory for TeamManager (creates a new InstanceTeamManager each call)
  */
 export function getDefaultTeamManager(): TeamManager {
-  return new LegacyTeamManager();
+  return new InstanceTeamManager();
 }
 
 /**

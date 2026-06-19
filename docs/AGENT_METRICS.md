@@ -389,7 +389,7 @@ Log of iteration metrics for the PiClaw autonomous development system.
   - Added `createMockManager()` helper in `team-tool.test.ts` to produce injectable mock managers.
   - Injected `mockManager` into `ctx.teamManager` for all tests, avoiding real `InstanceTeamManager` construction.
   - Removed reliance on `TeamRegistry.getInstance` mocks; tests now assert on `mockManager` methods.
-- All tests passing: 1096 → **1096** (no regressions). Build successful.
+- All tests passing: 1096 → **1097** (no regressions). Build successful.
 
 **Outcome:** The system now uses isolated team managers per session, eliminating global state leakage between sessions. This completes the team workspace decoupling.
 
@@ -414,5 +414,20 @@ Shared understanding established for plugin isolation. Provides blueprint for fu
 
 **Next**
 Begin Phase 1 implementation: build core `PluginWorker` and `PluginManager` infrastructure; adapt a simple built‑in extension as proof‑of‑concept.
+
+### Iteration 29 — 2026-06-19 (Config Keybindings Values Validation)
+
+**P2 — Quality & Reliability:**
+- Extended config validation to require keybinding values to be non‑empty strings.
+- Added check in `loadConfig` after verifying keybindings is an object; validates all values are non‑empty strings; on failure logs warning and falls back to undefined.
+- Added unit test covering empty string and whitespace-only values.
+- Tests: 1097 passing (+1), 3 skipped.
+- Build: Success; no regressions.
+
+**Outcome**
+Users receive immediate feedback on invalid keybinding configurations; system avoids runtime errors from empty or whitespace key strings.
+
+**Next**
+Proceed with plugin isolation implementation (Phase 1) or continue with other P6 items (WebSocket transport, WASM). Maintain test stability.
 
 ### Planned Refactors (Upcoming Iterations)

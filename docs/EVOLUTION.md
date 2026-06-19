@@ -548,7 +548,7 @@ The team workspace decoupling (ADR 0006) defined a `TeamManager` abstraction and
 - Verified all tests pass with no regressions.
 
 **Metrics**
-- Tests: 1096 passing (unchanged), 3 skipped, 116 files.
+- Tests: 1097 passing (unchanged), 3 skipped, 116 files.
 - Build: Success.
 - Regressions: 0.
 
@@ -578,6 +578,21 @@ Shared understanding established for plugin isolation. Provides blueprint for fu
 
 **Next**
 Begin Phase 1 implementation: build core `PluginWorker` and `PluginManager` infrastructure; adapt a simple built‑in extension as proof‑of‑concept.
+
+### Iteration 29 — 2026-06-19 (Config Keybindings Values Validation)
+
+**P2 — Quality & Reliability:**
+- Extended config validation to require keybinding values to be non‑empty strings.
+- Added check in `loadConfig` after verifying keybindings is an object; validates all values are non‑empty strings; on failure logs warning and falls back to undefined.
+- Added unit test covering empty string and whitespace‑only values.
+- Tests: 1097 passing (+1), 3 skipped.
+- Build: Success; no regressions.
+
+**Outcome**
+Users receive immediate feedback on invalid keybinding configurations; system avoids runtime errors from empty or whitespace key strings.
+
+**Next**
+Proceed with plugin isolation implementation (Phase 1) or continue with other P6 items (WebSocket transport, WASM). Maintain test stability.
 
 ---
 

@@ -1,10 +1,23 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createTeamTool } from '../extensions/team/team-tool.js';
 
-// Mock the team-manager module
+const mockManager = {
+  get: vi.fn(),
+  getAll: vi.fn(() => new Map()),
+  has: vi.fn(),
+  register: vi.fn(),
+  unregister: vi.fn(),
+  resetAutoDisposeTimer: vi.fn(),
+  waitForTeam: vi.fn().mockResolvedValue(true)
+};
+
 vi.mock('../extensions/team/team-manager.js', () => ({
   bootPiclawTeam: vi.fn(),
-  executeTeamTasks: vi.fn()
+  executeTeamTasks: vi.fn(),
+  TeamRegistry: {
+    getInstance: vi.fn()
+  },
+  getDefaultTeamManager: vi.fn(() => mockManager)
 }));
 
 import { bootPiclawTeam, executeTeamTasks, TeamRegistry } from '../extensions/team/team-manager.js';
@@ -152,17 +165,13 @@ describe('team_run tool', () => {
         agents: [{}, {}]
       })
     };
-    const mockRegistry = {
-      get: vi.fn(),
-      resetAutoDisposeTimer: vi.fn()
-    };
-    mockRegistry.get.mockReturnValue(mockTeam);
-    (TeamRegistry.getInstance as any).mockReturnValue(mockRegistry);
+    mockManager.get.mockReturnValue(mockTeam);
+    ctx.teamManager = mockManager;
 
     const result = await tool.execute('id', { teamId: 'team-1' }, undefined, undefined, ctx);
 
-    expect(mockRegistry.get).toHaveBeenCalledWith('team-1');
-    expect(mockRegistry.resetAutoDisposeTimer).toHaveBeenCalledWith('team-1');
+    expect(mockManager.get).toHaveBeenCalledWith('team-1');
+    expect(mockManager.resetAutoDisposeTimer).toHaveBeenCalledWith('team-1');
     expect(result.isError).toBe(false);
     expect(result.content[0].text).toContain('📊 Team team-1 status: 1/2 tasks completed, 2 agents');
     expect(result.details.teamId).toBe('team-1');
@@ -172,12 +181,8 @@ describe('team_run tool', () => {
     const parent = createMockParentRuntime();
     const ctx = { runtime: parent } as any;
 
-    const mockRegistry = {
-      get: vi.fn(),
-      resetAutoDisposeTimer: vi.fn()
-    };
-    mockRegistry.get.mockReturnValue(undefined);
-    (TeamRegistry.getInstance as any).mockReturnValue(mockRegistry);
+    mockManager.get.mockReturnValue(undefined);
+    ctx.teamManager = mockManager;
 
     const result = await tool.execute('id', { teamId: 'missing' }, undefined, undefined, ctx);
 

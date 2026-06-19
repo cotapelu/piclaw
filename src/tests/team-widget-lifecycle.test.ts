@@ -2,12 +2,21 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { registerTeamWidget } from "../extensions/team/team-widget";
 import { TeamRegistry } from "../extensions/team/team-manager";
 
-// Mock TeamRegistry
+const mockManager = {
+  getAll: vi.fn(),
+  get: vi.fn(),
+  has: vi.fn(),
+  register: vi.fn(),
+  unregister: vi.fn(),
+  resetAutoDisposeTimer: vi.fn(),
+  waitForTeam: vi.fn().mockResolvedValue(true)
+};
+
 vi.mock("../extensions/team/team-manager", () => ({
   TeamRegistry: {
     getInstance: vi.fn()
   },
-  getDefaultTeamManager: vi.fn(() => TeamRegistry.getInstance())
+  getDefaultTeamManager: vi.fn(() => mockManager)
 }));
 
 describe("Team Widget Lifecycle", () => {
@@ -17,6 +26,7 @@ describe("Team Widget Lifecycle", () => {
   let ctx: any;
 
   beforeEach(() => {
+    vi.clearAllMocks();
     mockSetWidget = vi.fn();
     mockTeam = {
       getTeamStatus: vi.fn().mockResolvedValue({
@@ -24,14 +34,14 @@ describe("Team Widget Lifecycle", () => {
         agents: []
       })
     };
-    mockRegistry = { getAll: vi.fn(() => new Map([["team1", mockTeam]])) };
-    (TeamRegistry.getInstance as any).mockReturnValue(mockRegistry);
+    mockManager.getAll.mockReturnValue(new Map([["team1", mockTeam]]));
     ctx = {
       ui: {
         setWidget: mockSetWidget,
         theme: { fg: (c: string, t?: string) => (t ?? c), bold: (t: string) => t }
       },
-      cwd: "/repo"
+      cwd: "/repo",
+      teamManager: mockManager
     };
   });
 

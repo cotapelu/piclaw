@@ -69,8 +69,9 @@ describe('AgentTeam Additional Coverage', () => {
     anyTeam.childControllers.set('ctrl', mockController);
     const childPromise = Promise.resolve();
     anyTeam.childPromises.push(childPromise);
-    const mockRegistry = { unregister: vi.fn() };
-    const spy = vi.spyOn(TeamRegistry, 'getInstance').mockReturnValue(mockRegistry as any);
+    const mockManager = { unregister: vi.fn() } as any;
+    // Inject mock manager
+    (team as any).manager = mockManager;
 
     await team.dispose();
 
@@ -78,8 +79,7 @@ describe('AgentTeam Additional Coverage', () => {
     expect(mockController.abort).toHaveBeenCalled();
     expect(anyTeam.childPromises).toHaveLength(0);
     expect(anyTeam.runtimes).toHaveLength(0);
-    expect(mockRegistry.unregister).toHaveBeenCalledWith('test-team');
-    spy.mockRestore();
+    expect(mockManager.unregister).toHaveBeenCalledWith('test-team');
   });
 
   it('should run full team lifecycle', async () => {

@@ -136,6 +136,22 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 		}
 	}
 
+	// Validate keybindings values (must be non-empty strings)
+	if (fileConfig.keybindings) {
+	  const kb = fileConfig.keybindings as Record<string, any>;
+	  let valid = true;
+	  for (const value of Object.values(kb)) {
+	    if (typeof value !== "string" || value.trim() === "") {
+	      valid = false;
+	      break;
+	    }
+	  }
+	  if (!valid) {
+	    logger.warn("Invalid keybinding values (must be non-empty strings). Using default.");
+	    fileConfig.keybindings = undefined;
+	  }
+	}
+
 	// Merge: fileConfig is base, cliOverrides take precedence
 	return { ...fileConfig, ...cliOverrides };
 }

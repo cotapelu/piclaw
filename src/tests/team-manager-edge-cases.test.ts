@@ -287,9 +287,9 @@ describe('AgentTeam Edge Cases', () => {
     // Mock childPromises
     const childPromise = Promise.resolve();
     (team as any).childPromises.push(childPromise);
-    // Mock TeamRegistry
-    const mockRegistry = { unregister: vi.fn() };
-    vi.spyOn(TeamRegistry, 'getInstance').mockReturnValue(mockRegistry as any);
+    // Inject mock manager
+    const mockManager = { unregister: vi.fn() } as any;
+    (team as any).manager = mockManager;
 
     await team.dispose();
 
@@ -297,6 +297,6 @@ describe('AgentTeam Edge Cases', () => {
     expect(mockController.abort).toHaveBeenCalled();
     expect((team as any).childPromises).toHaveLength(0);
     expect((team as any).runtimes).toHaveLength(0);
-    expect(mockRegistry.unregister).toHaveBeenCalledWith('test-team');
+    expect(mockManager.unregister).toHaveBeenCalledWith('test-team');
   });
 });

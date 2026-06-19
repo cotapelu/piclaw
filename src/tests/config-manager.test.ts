@@ -91,6 +91,17 @@ describe("ConfigManager", () => {
       expect(config.keybindings).toBeUndefined();
     });
 
+    it('should validate keybindings values (non-empty strings)', () => {
+      const configDir = join(tempHome, '.piclaw');
+      mkdirSync(configDir, { recursive: true });
+      writeFileSync(join(configDir, 'config.json'), JSON.stringify({
+        keybindings: { cmd1: '', cmd2: '  ', cmd3: 'valid' }
+      }, null, 2));
+
+      const config = loadConfig();
+      expect(config.keybindings).toBeUndefined();
+    });
+
     it('should merge CLI overrides on top of file config', () => {
       const configDir = join(tempHome, ".piclaw");
       mkdirSync(configDir, { recursive: true });
