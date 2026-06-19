@@ -16,16 +16,16 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Weaknesses
 
-- **Console coupling in tests**: Some tests still spy directly on `console` rather than logger, making them brittle to future logger enhancements. Migration to logger-aware test utilities is a medium-priority refactor.
-- **Metrics rotation**: `.piclaw/metrics.json` appends JSON lines indefinitely; long-running sessions could accumulate large files. Need rotation/cleanup.
-- **Config validation**: Minimal schema validation for `~/.piclaw/config.json`; could benefit from stricter defaults and type coercion.
+- **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
+- **Metrics rotation**: Implemented daily rotation to prevent unbounded growth; long-term cleanup strategy could be improved (e.g., age-based retention).
+- **Config validation**: Basic validation for `verbose`, `tools`, and `thinking` is in place; could extend to `model` ID format and nested `keybindings` schema.
 - **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
 
 ## Fragile Modules
 
 - `extensions/tools/todos-tool.ts`:
-  - Legacy error paths tested with console spies; sensitive to logger wrapper changes.
-  - `loadTodoFromFile` catch block is critical; any change may break edge case tests.
+  - `loadTodoFromFile` error handling now uses injectable logger; console coupling removed. Tests stable.
+  - Critical file I/O path still needs thorough edge case coverage, but logger abstraction no longer a fragility.
 - `extensions/team/team-manager.ts`:
   - `dispose()` sequence relies on correct ordering; errors during disposal could leave dangling promises.
   - `auto-dispose` timer interactions with team activity can be subtle.
@@ -43,11 +43,11 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Improvement Focus (Next)
 
-- **Migrate tests to logger mock**: Use `src/tests/utils/logger-mock.ts` to replace console spies gradually, improving test stability.
-- **Metrics rotation**: Implement size-based rotation or compression for `.piclaw/metrics.json`.
-- **Config validation**: Extend runtime checks for more fields (tools array, model ID format).
-- **Windows compatibility**: Add CI matrix for Windows or adjust path utilities.
-- **Evaluate team workspace decoupling** (P6) to improve scalability and testability.
+- **Team workspace decoupling** (P6): Extract team management from global singleton to improve testability, multi-session isolation, and scalability.
+- **Config schema extension**: Validate `model` strings (e.g., `provider:model`) and strengthen `keybindings` type checks.
+- **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
+- **Metrics retention policy**: Implement age-based cleanup for daily metric files to avoid disk bloat over time.
+- **Plugin isolation** (P6): Investigate worker threads to isolate extensions and prevent crashes from affecting core.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
 

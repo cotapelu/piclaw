@@ -295,4 +295,21 @@ Log of iteration metrics for the PiClaw autonomous development system.
 
 *Next: Consider P6 architectural improvements (team workspace decoupling) or further test migrations.*
 
+### Iteration 22 — 2026-06-19 (TodoState Logger Injection)
+
+**P5 — Testing Quality (Continued):**
+- Extended logger dependency injection to `TodoState` class in `todos-tool.ts`.
+- Converted module-level `loadTodoFromFile` helper into a private method of `TodoState` to enable `this.logger` usage.
+- Removed module-level `logger` constant; now each `TodoState` instance owns its logger (default or injected).
+- Migrated `todos-load-edgecases.test.ts` to use `createMockLogger` and assert on captured error calls instead of spying on `console.error`.
+
+**Metrics:**
+- Tests: 1094 passing (unchanged), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome:** Console coupling reduced to only logger unit tests (which legitimately verify console behavior). All other tests now use injected or mock loggers, improving stability and align with structured logging architecture.
+
+*Next: Continue P6 architectural improvements (team workspace decoupling) or remaining test migrations.*
+
 ### Planned Refactors (Upcoming Iterations)

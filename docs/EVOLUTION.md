@@ -425,6 +425,29 @@ Test suite remains at 1091 passing tests. Logger mock utility ready for future m
 **Next**
 Consider further migration of remaining console-spy tests where feasible, or move to P6 architectural work (team workspace decoupling).
 
+### Iteration 22 — 2026-06-19 (TodoState Logger Injection)
+
+**Context**
+Continuing the logger mock migration effort to reduce console coupling in tests and improve test stability.
+
+**Changes**
+- Injected optional `logger` into `TodoState` via constructor (dependency injection).
+- Converted module-level `loadTodoFromFile` helper into a private method of `TodoState`, enabling use of `this.logger`.
+- Removed module-level logger constant; each `TodoState` instance now owns its logger (default or injected).
+- Migrated `todos-load-edgecases.test.ts` to use `createMockLogger` and assert on captured error calls instead of spying on `console.error`.
+- Updated `AGENT_PROFILE.md` to reflect reduced console coupling.
+
+**Metrics**
+- Tests: 1094 passing (unchanged), 3 skipped, 116 files.
+- Build: Success.
+- Regressions: 0.
+
+**Outcome**
+Console coupling is now limited to logger unit tests. All other tests use injected or mock loggers, enhancing stability and aligning with structured logging architecture.
+
+**Next**
+Continue with P6 architectural improvements (team workspace decoupling) or address remaining configuration enhancements.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

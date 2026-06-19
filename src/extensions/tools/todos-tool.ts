@@ -26,9 +26,7 @@ import type {
   TodoTaskInput,
   TodoPhaseInput,
 } from "../utils/tool-types.js";
-import { createLogger } from "../utils/logger.js";
-
-const logger = createLogger();
+import { createLogger, type ExtensionLogger } from "../utils/logger.js";
 
 // Re-export types for external use
 export type { TodoStatus, TodoItem, TodoPhase, TodoToolDetails, TodosParams };
@@ -86,19 +84,7 @@ function getProjectTodoFilePath(cwd: string): string {
   return join(cwd, CONFIG_DIR_NAME, "agent", "todos.json");
 }
 
-async function loadTodoFromFile(cwd: string): Promise<TodoFile | null> {
-  const filePath = getProjectTodoFilePath(cwd);
-  if (!existsSync(filePath)) return null;
-  try {
-    const content = await fs.readFile(filePath, "utf-8");
-    const parsed: PersistedTodo = JSON.parse(content);
-    if (parsed.version !== 1) return null;
-    return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
-  } catch (e) {
-    logger.error("Load todos failed:", e);
-    return null;
-  }
-}
+
 
 async function saveTodoToFile(cwd: string, todo: TodoFile): Promise<void> {
   const filePath = getProjectTodoFilePath(cwd);
@@ -541,12 +527,31 @@ export class TodoState {
   nextPhaseId: number = 1;
   storageType: "session" | "memory" | "file" = "file"; // NEW: track storage type
   private listeners: Set<() => void> = new Set();
+  private logger: ExtensionLogger;
+
+  constructor(logger?: ExtensionLogger) {
+    this.logger = logger ?? createLogger();
+  }
 
   subscribe(listener: () => void): () => void { this.listeners.add(listener); return () => this.listeners.delete(listener); }
   private notify() { for (const l of this.listeners) l(); }
 
+  private async loadTodoFromFile(cwd: string): Promise<TodoFile | null> {
+    const filePath = getProjectTodoFilePath(cwd);
+    if (!existsSync(filePath)) return null;
+    try {
+      const content = await fs.readFile(filePath, "utf-8");
+      const parsed: PersistedTodo = JSON.parse(content);
+      if (parsed.version !== 1) return null;
+      return { phases: parsed.phases, nextTaskId: parsed.nextTaskId, nextPhaseId: parsed.nextPhaseId };
+    } catch (e) {
+      this.logger.error("Load todos failed:", e);
+      return null;
+    }
+  }
+
   async loadFromFile(cwd: string): Promise<boolean> {
-    const fileData = await loadTodoFromFile(cwd);
+    const fileData = await this.loadTodoFromFile(cwd);
     if (!fileData) { this.phases = []; this.nextTaskId = 1; this.nextPhaseId = 1; this.storageType = "file"; return false; }
     this.phases = clonePhases(fileData.phases);
     this.nextTaskId = fileData.nextTaskId;
