@@ -3,32 +3,17 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "P6 — Architectural Improvements",
+      "name": "Fix build error",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Decouple team workspace from session tree: make workspace persistent and pluggable",
+          "content": "Investigate missing 'better-sqlite3' module in db-client-tool.ts",
           "status": "in_progress"
-        },
-        {
-          "id": "task-2",
-          "content": "Evaluate WebSocket transport for TUI instead of stdio for better responsiveness",
-          "status": "pending"
-        },
-        {
-          "id": "task-3",
-          "content": "Evaluate WASM integration potential for performance improvements",
-          "status": "pending"
-        },
-        {
-          "id": "task-4",
-          "content": "Plugin isolation using worker threads for security and stability",
-          "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 5,
+  "nextTaskId": 2,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-19T15:41:16.592Z"
+  "updatedAt": "2026-06-20T00:24:55.558Z"
 }
