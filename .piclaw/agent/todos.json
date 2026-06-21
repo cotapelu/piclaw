@@ -3,47 +3,47 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Plugin Isolation Phase 5",
+      "name": "Plugin Worker Observability",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Update plugin-worker-entry.ts: implement renderer, hook, widget workerside logic",
-          "status": "in_progress"
+          "content": "Design metrics to track: worker lifespan, message counts, errors, RTT",
+          "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Update plugin-manager.ts: add main-side support for renderer/hook registration and event routing",
-          "status": "pending"
+          "content": "Implement worker lifecycle tracking in PluginWorker (start, exit, crash)",
+          "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Add event subscription API: workers can subscribe to events; main forwards them",
-          "status": "pending"
+          "content": "Add RPC latency tracking for worker.invoke()",
+          "status": "completed"
         },
         {
           "id": "task-4",
-          "content": "Update factory.ts: isolate renderer and hook extensions when plugins.isolate=true",
-          "status": "pending"
+          "content": "Expose metrics via PluginManager.getWorkersMetrics()",
+          "status": "completed"
         },
         {
           "id": "task-5",
-          "content": "Extend tests: add plugin-system.test.ts coverage for renderer/hook isolation",
-          "status": "pending"
+          "content": "Add unit tests for PluginWorker metrics",
+          "status": "completed"
         },
         {
           "id": "task-6",
-          "content": "Run tests and build; ensure no regressions",
-          "status": "pending"
+          "content": "Run full test suite; ensure no regressions",
+          "status": "completed"
         },
         {
           "id": "task-7",
-          "content": "Update evolution docs and commit",
-          "status": "pending"
+          "content": "Update AGENT_METRICS.md, EVOLUTION.md, TODO.md; commit",
+          "status": "completed"
         }
       ]
     }
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-21T11:16:06.826Z"
+  "updatedAt": "2026-06-21T12:02:58.136Z"
 }

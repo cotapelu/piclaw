@@ -694,6 +694,26 @@ Plugin isolation now covers tools, commands, and hooks, greatly improving robust
 - Consider making isolation the default for all built-in extensions.
 - Improve observability for plugin workers (start/stop events, crash counts).
 
+## Iteration 36 — 2026-06-21 (Plugin Worker Observability)
+
+**P6 — Observability:**
+- Added metrics tracking to `PluginWorker`: lifespan, request/response counts, errors, RPC latency.
+- Exposed `PluginManager.getWorkersMetrics()` to retrieve snapshots from all workers.
+- Extended unit tests to cover metrics collection (lifecycle, success, error, termination).
+- All tests: 1118 passing, 0 skipped. Build successful.
+
+**Metrics:**
+- New test count: +4 (PluginWorker metrics)
+- Total tests: 1118 passing
+- Regressions: 0
+
+**Outcome**
+Plugin workers are now observable. Operators can introspect health and performance of isolated extensions, enabling better monitoring and diagnostics.
+
+**Next**
+- Integrate plugin metrics into existing metrics widget and Prometheus exporter.
+- Consider making plugin isolation default.
+
 ---
 
 *This file will be updated after each major iteration to reflect new trajectory changes.*

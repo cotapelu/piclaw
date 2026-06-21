@@ -218,19 +218,21 @@ const hookRegistry = new Map<string, Set<any>>();
       let result: any;
       switch (method) {
         case 'execute_tool': {
-          const { toolName, toolCallId, params, ctx } = params as any;
+          const { toolName, toolCallId, ctx } = params as any;
           const tool = toolRegistry.get(toolName);
           if (!tool) throw new Error(`Tool ${toolName} not found`);
           const onUpdate = (update: any) => {
             parentPort?.postMessage({ type: 'event', event: 'tool_update', toolCallId, update } as any);
           };
+          // params (outer) contains the tool parameters
           result = await tool.execute(toolCallId, params, undefined, onUpdate, ctx);
           break;
         }
         case 'execute_command': {
-          const { commandName, params, ctx } = params as any;
+          const { commandName, ctx } = params as any;
           const command = commandRegistry.get(commandName);
           if (!command) throw new Error(`Command ${commandName} not found`);
+          // params (outer) contains command arguments
           result = await command.execute(params, ctx);
           break;
         }

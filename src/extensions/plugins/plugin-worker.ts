@@ -2,13 +2,49 @@ import { Worker } from 'node:worker_threads';
 import type { PluginMessage, RpcRequest, RpcResponse } from './plugin-protocol.js';
 
 /**
- * Manages a single plugin worker thread.
+ * Plugin worker metrics snapshot.
+ */
+export interface PluginWorkerMetrics {
+  /** Worker start time (ms since epoch) */
+  startTime: number;
+  /** Current status */
+  status: 'alive' | 'exited' | 'crashed';
+  /** Exit code, if terminated */
+  exitCode: number | null;
+  /** Total requests sent to worker */
+  requests: number;
+  /** Total responses received from worker */
+  responses: number;
+  /** Total error responses or worker errors */
+  errors: number;
+  /** Most recent error message (if any) */
+  lastError: string | null;
+  /** Total accumulated RPC latency in ms */
+  totalLatency: number;
+  /** Number of completed RPC calls (for average) */
+  latencyCount: number;
+  /** Estimated average latency (ms) */
+  avgLatency: number;
+}
+
+/**
+ * Manages a single plugin worker thread with observability.
  */
 export class PluginWorker {
   private worker: Worker;
-  private pending = new Map<string, { resolve: (value: any) => void; reject: (reason?: any) => void; timer?: NodeJS.Timeout }>();
+  private pending = new Map<string, { resolve: (value: any) => void; reject: (reason?: any) => void; timer?: NodeJS.Timeout; sentTime: number }>();
   private nextId = 0;
   private terminated = false;
+
+  // Metrics
+  private startTime = Date.now();
+  private requests = 0;
+  private responses = 0;
+  private errors = 0;
+  private lastError: string | null = null;
+  private totalLatency = 0;
+  private latencyCount = 0;
+  private exitCode: number | null = null;
 
   constructor(entry: string, workerData?: any) {
     this.worker = new Worker(entry, { workerData });
@@ -28,24 +64,39 @@ export class PluginWorker {
       const { id, result, error } = msg as RpcResponse;
       const pending = this.pending.get(id);
       if (pending) {
+        const latency = Date.now() - pending.sentTime;
+        this.totalLatency += latency;
+        this.latencyCount++;
         if (pending.timer) clearTimeout(pending.timer);
-        if (error) pending.reject(new Error(error));
-        else pending.resolve(result);
+        if (error) {
+          this.errors++;
+          this.lastError = error;
+          pending.reject(new Error(error));
+        } else {
+          pending.resolve(result);
+        }
         this.pending.delete(id);
       }
+      this.responses++;
     }
     // ignore other message types
   }
 
   private handleError(err: Error): void {
+    this.errors++;
+    this.lastError = err.message;
     this.rejectAll(err);
   }
 
   private handleExit(code: number | null): void {
-    if (code !== 0 && !this.terminated) {
-      const err = new Error(`Plugin worker exited with code ${code}`);
-      this.rejectAll(err);
+    if (!this.terminated) {
+      this.exitCode = code;
+      if (code !== 0) {
+        this.errors++;
+        this.lastError = `Worker exited with code ${code}`;
+      }
     }
+    this.rejectAll(new Error(`Plugin worker terminated (exit code ${code})`));
   }
 
   private rejectAll(err: Error): void {
@@ -66,6 +117,7 @@ export class PluginWorker {
     if (this.terminated) return Promise.reject(new Error('Plugin worker terminated'));
     const id = `${this.nextId++}`;
     const request: RpcRequest = { type: 'request', id, method, params };
+    this.requests++; // increment immediately when sending
     return new Promise((resolve, reject) => {
       let timer: NodeJS.Timeout | undefined;
       if (timeoutMs) {
@@ -74,12 +126,14 @@ export class PluginWorker {
           reject(new Error(`Plugin invocation timed out after ${timeoutMs}ms`));
         }, timeoutMs);
       }
-      this.pending.set(id, { resolve, reject, timer });
+      this.pending.set(id, { resolve, reject, timer, sentTime: Date.now() });
       try {
         this.worker.postMessage(request);
       } catch (e) {
         if (timer) clearTimeout(timer);
         this.pending.delete(id);
+        this.errors++;
+        this.lastError = (e as Error).message;
         reject(e);
       }
     });
@@ -99,7 +153,24 @@ export class PluginWorker {
    * Check if worker is still alive.
    */
   get alive(): boolean {
-    // Simplified: if we have explicitly terminated, not alive. Worker crash also handled via error/exit.
     return !this.terminated;
+  }
+
+  /**
+   * Collect current metrics snapshot.
+   */
+  getMetrics(): PluginWorkerMetrics {
+    return {
+      startTime: this.startTime,
+      status: this.terminated ? (this.exitCode === 0 ? 'exited' : 'crashed') : 'alive',
+      exitCode: this.exitCode,
+      requests: this.requests,
+      responses: this.responses,
+      errors: this.errors,
+      lastError: this.lastError,
+      totalLatency: this.totalLatency,
+      latencyCount: this.latencyCount,
+      avgLatency: this.latencyCount > 0 ? this.totalLatency / this.latencyCount : 0,
+    };
   }
 }

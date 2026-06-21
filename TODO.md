@@ -1,6 +1,6 @@
 # PiClaw TODO — Priority Task List
 
-**Last Updated**: 2026-06-15
+**Last Updated**: 2026-06-21
 **Source**: AUTO-CONTINUE.md workflow
 
 ---
@@ -57,6 +57,7 @@
 - [ ] Evaluate WASM integration for performance-critical paths
 - [x] Plugin isolation using worker threads (tools and commands)
 - [x] Extend plugin isolation to hooks (auto-continue, auto-compact-85, context-logger)
+- [x] Add plugin worker observability (metrics, getWorkersMetrics)
 - [ ] Extend plugin isolation to renderers and widgets
 
 ---

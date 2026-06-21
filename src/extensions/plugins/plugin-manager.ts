@@ -120,6 +120,17 @@ export class PluginManager {
     return Array.from(this.workers.keys());
   }
 
+  /**
+   * Get metrics snapshot for all plugin workers.
+   */
+  getWorkersMetrics(): Record<string, any> {
+    const snapshot: Record<string, any> = {};
+    for (const [name, worker] of this.workers) {
+      snapshot[name] = worker.getMetrics();
+    }
+    return snapshot;
+  }
+
   private getNameFromPath(path: string): string {
     const base = path.split('/').pop() ?? path;
     return base.replace(/\.[^.]*$/, '');

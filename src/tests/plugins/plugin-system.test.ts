@@ -73,7 +73,7 @@ describe('PluginWorker', () => {
     const promise = worker.invoke('method', {});
     const exitCb = instance.on.mock.calls.find((c: any) => c[0] === 'exit')[1];
     exitCb(1);
-    await expect(promise).rejects.toThrow('Plugin worker exited with code 1');
+    await expect(promise).rejects.toThrow('Plugin worker terminated');
   });
 
   it('terminate stops the worker and rejects pending promises', async () => {
@@ -145,6 +145,70 @@ describe('PluginWorker timeouts', () => {
     await expect(promise).resolves.toBe('ok');
     // Advance timers to clear any remaining tasks
     await vi.runAllTimersAsync();
+  });
+});
+
+describe('PluginWorker metrics', () => {
+  let worker: PluginWorker;
+  let instance: any;
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockWorkerInstance = undefined;
+    worker = new PluginWorker('dummy-entry.js', {});
+    instance = mockWorkerInstance;
+  });
+
+  it('tracks initial metrics correctly', () => {
+    const metrics = worker.getMetrics();
+    expect(metrics.startTime).toBeDefined();
+    expect(metrics.status).toBe('alive');
+    expect(metrics.exitCode).toBeNull();
+    expect(metrics.requests).toBe(0);
+    expect(metrics.responses).toBe(0);
+    expect(metrics.errors).toBe(0);
+    expect(metrics.lastError).toBeNull();
+    expect(metrics.totalLatency).toBe(0);
+    expect(metrics.latencyCount).toBe(0);
+    expect(metrics.avgLatency).toBe(0);
+  });
+
+  it('updates metrics on successful request/response', async () => {
+    // Send invoke
+    const promise = worker.invoke('method', { arg: 1 });
+    // Check that requests incremented
+    let metrics = worker.getMetrics();
+    expect(metrics.requests).toBe(1);
+    expect(metrics.responses).toBe(0);
+    // Simulate response
+    const messageCb = instance.on.mock.calls.find((c: any) => c[0] === 'message')[1];
+    messageCb({ type: 'response', id: '0', result: 'ok' });
+    await promise;
+    metrics = worker.getMetrics();
+    expect(metrics.responses).toBe(1);
+    expect(metrics.errors).toBe(0);
+    expect(metrics.latencyCount).toBe(1);
+    expect(metrics.avgLatency).toBeGreaterThanOrEqual(0);
+  });
+
+  it('updates metrics on error response', async () => {
+    const promise = worker.invoke('method', {});
+    // Simulate error response
+    const messageCb = instance.on.mock.calls.find((c: any) => c[0] === 'message')[1];
+    messageCb({ type: 'response', id: '0', result: undefined, error: 'plugin error' });
+    await expect(promise).rejects.toThrow('plugin error');
+    const metrics = worker.getMetrics();
+    expect(metrics.errors).toBe(1);
+    expect(metrics.lastError).toBe('plugin error');
+    expect(metrics.responses).toBe(1);
+  });
+
+  it('updates status after terminate', () => {
+    worker.terminate();
+    expect(worker.alive).toBe(false);
+    const metrics = worker.getMetrics();
+    expect(metrics.status).toBe('crashed'); // exitCode null -> crashed
+    expect(metrics.exitCode).toBeNull();
   });
 });
 
