@@ -4,7 +4,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Strengths
 
-- **Comprehensive test suite**: 117 test files, 1112 passing, 0 skipped; coverage >80%.
+- **Comprehensive test suite**: 117 test files, 1118 passing, 0 skipped; coverage >80%.
 - **Modular architecture**: Clear separation between core, extensions, and tools.
 - **Robust team collaboration**: Multi-agent teams with task assignment, workspace isolation, zombie recovery, and metrics export.
 - **TypeScript strict mode**: Strong typing, early error detection.
@@ -15,6 +15,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Documentation**: CONTRIBUTING guide, ADRs, and extensive inline comments.
 - **Team isolation**: `InstanceTeamManager` provides per-session team state, eliminating cross-session interference.
 - **Plugin isolation**: Core infrastructure (`PluginWorker`, `PluginManager`, and worker entry) enables extensions to run in separate worker threads, with request/response messaging and timeout support.
+- **Plugin observability**: Plugin worker metrics are exposed via the TUI metrics widget and Prometheus exporter, enabling real-time monitoring of plugin health and performance.
 
 ## Weaknesses
 
