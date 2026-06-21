@@ -3,17 +3,47 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Fix build error",
+      "name": "Plugin Isolation Phase 5",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Investigate missing 'better-sqlite3' module in db-client-tool.ts",
+          "content": "Update plugin-worker-entry.ts: implement renderer, hook, widget workerside logic",
           "status": "in_progress"
+        },
+        {
+          "id": "task-2",
+          "content": "Update plugin-manager.ts: add main-side support for renderer/hook registration and event routing",
+          "status": "pending"
+        },
+        {
+          "id": "task-3",
+          "content": "Add event subscription API: workers can subscribe to events; main forwards them",
+          "status": "pending"
+        },
+        {
+          "id": "task-4",
+          "content": "Update factory.ts: isolate renderer and hook extensions when plugins.isolate=true",
+          "status": "pending"
+        },
+        {
+          "id": "task-5",
+          "content": "Extend tests: add plugin-system.test.ts coverage for renderer/hook isolation",
+          "status": "pending"
+        },
+        {
+          "id": "task-6",
+          "content": "Run tests and build; ensure no regressions",
+          "status": "pending"
+        },
+        {
+          "id": "task-7",
+          "content": "Update evolution docs and commit",
+          "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 2,
+  "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-20T00:24:55.558Z"
+  "updatedAt": "2026-06-21T11:16:06.826Z"
 }

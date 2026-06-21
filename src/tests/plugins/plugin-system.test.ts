@@ -242,7 +242,7 @@ describe('PluginManager with mainApi (isolated extension)', () => {
       toolName: 'testtool',
       toolCallId: 'call-1',
       params: { arg: 123 },
-      ctx: { cwd: '/tmp' },
+      ctx: expect.objectContaining({ cwd: '/tmp' }),
     });
     expect(result).toEqual({ result: 'ok' });
     expect(originalExecute).not.toHaveBeenCalled();
@@ -264,7 +264,7 @@ describe('PluginManager with mainApi (isolated extension)', () => {
     expect(invokeSpy).toHaveBeenCalledWith('execute_command', {
       commandName: 'testcmd',
       params: { arg: 456 },
-      ctx: { cwd: '/tmp' },
+      ctx: expect.objectContaining({ cwd: '/tmp' }),
     });
     expect(result).toEqual({ result: 'cmd-ok' });
     expect(originalExecute).not.toHaveBeenCalled();

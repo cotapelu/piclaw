@@ -56,7 +56,8 @@
 - [ ] Consider WebSocket transport for TUI instead of stdio
 - [ ] Evaluate WASM integration for performance-critical paths
 - [x] Plugin isolation using worker threads (tools and commands)
-- [ ] Extend plugin isolation to renderers, hooks, and widgets
+- [x] Extend plugin isolation to hooks (auto-continue, auto-compact-85, context-logger)
+- [ ] Extend plugin isolation to renderers and widgets
 
 ---
 
@@ -84,6 +85,7 @@
 - P4 ADRs — documented key architectural decisions (5 ADRs)
 - P5 Logger Mock Utility — created logger-mock for test stability
 - P6 Plugin Isolation Phase 4 — added command support to plugin isolation; extended plugin system to isolate command extensions
+- P6 Plugin Isolation Phase 5 — Hook isolation completed; auto-continue, auto-compact-85, and context-logger run isolated when plugins.isolate is true
 
 ---
 

@@ -136,6 +136,28 @@ export default async function extensionsAggregator(api: import("@earendil-works/
         worker.underlying.once('error', reject);
       });
     }
+
+    // Load hooks in workers and wait for ready
+    const hookModules = [
+      'auto-continue',
+      'auto-compact-85',
+      'context-logger'
+    ];
+    for (const name of hookModules) {
+      const modulePath = join(__dirname, 'hooks', `${name}.js`);
+      await pluginManager.loadExtension(modulePath, name);
+      const worker = pluginManager.getWorker(name)!;
+      await new Promise<void>((resolve, reject) => {
+        const onMessage = (msg: any) => {
+          if (msg.type === 'event' && msg.event === 'ready') {
+            worker.underlying.removeListener('message', onMessage);
+            resolve();
+          }
+        };
+        worker.underlying.on('message', onMessage);
+        worker.underlying.once('error', reject);
+      });
+    }
   } else {
     // Direct registration for all simple tools
     for (const name of toolModules) {
@@ -218,7 +240,7 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   // Subtool loader extension
   registerSubToolLoaderExtension(api);
 
-  // Custom message renderers
+  // Custom message renderers (always direct for now)
   registerTodosRenderer(api);
   registerMemoryRenderer(api);
   registerTeamWidget(api);
@@ -226,17 +248,20 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   registerTeamOpsRenderer(api);
   registerMetricsWidget(api);
 
-  // Hooks
-  autoContinueExtension(api);
-  autoCompact85Extension(api);
-  // Keybinding extension
+  // Hooks: either load via worker or direct
+  if (isolatePlugins) {
+    // Hook modules loaded above in the isolate block
+  } else {
+    autoContinueExtension(api);
+    autoCompact85Extension(api);
+    contextLoggerExtension(api);
+  }
+
+  // Keybinding extension (always direct)
   registerKeybindingExtension(api);
 
   // Header
   piclawHeader(api);
-
-  // Context Logger
-  contextLoggerExtension(api);
 }
 
 /**

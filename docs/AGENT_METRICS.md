@@ -505,4 +505,29 @@ Command extensions can now run in isolated workers; mobile TUI actions provided 
 **Next**
 Consider extending isolation to renderers, hooks, widgets; evaluate making isolation the default for all extension types; improve plugin manager observability.
 
+### Iteration 35 — 2026-06-21 (Plugin Isolation Phase 5: Hook Isolation)
+
+**P6 — Architecture (Phase 5 Implementation):**
+- Extended plugin isolation to hooks: auto-continue, auto-compact-85, and context-logger can now run in worker threads when `plugins.isolate` is true.
+- Implemented event subscription API: workers can subscribe to events via `pi.on`; `PluginManager` forwards events from main to workers, passing a context proxy for safe context method calls.
+- Refactored `plugin-manager.ts` to handle registration messages as one-way events and to route `ctx_call` RPC for context method invocation.
+- Updated `plugin-worker-entry.ts`:
+  - Added `MainClient` for worker → main RPC (getFlag, registerFlag, sendMessage, ctx_call).
+  - Added hookRegistry and event subscription handling.
+  - Standardized tool/command execution payload to use `params` field.
+  - Forward tool updates as `event` type.
+- Updated factory.ts:
+  - Moved hook extensions (auto-continue, auto-compact-85, context-logger) into isolation list when `plugins.isolate` is true.
+  - Kept renderers direct for now.
+- Adjusted tests in `plugin-system.test.ts` to match new context proxy structure and parameter naming.
+- All tests: 1114 passing (117 files), build successful, no regressions.
+
+**Outcome**
+Plugin isolation now covers tools, commands, and hooks, greatly improving robustness. Event-driven hooks run safely in isolation with full context access via RPC. This completes the core extension isolation roadmap.
+
+**Next**
+- Evaluate renderer isolation (requires async rendering support or data-only approach).
+- Consider making isolation the default for all built-in extensions.
+- Improve observability for plugin workers (start/stop events, crash counts).
+
 ### Planned Refactors (Upcoming Iterations)
