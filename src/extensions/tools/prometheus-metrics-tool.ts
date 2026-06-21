@@ -83,20 +83,31 @@ export function createPrometheusMetricsTool(cwd: string): any {
           // Include agent counts as separate labels? For simplicity, output one metric per agent count entry? Could be many; skip for now.
         }
 
-        // Plugin worker metrics (if any)
+        // Plugin worker metrics (if any) — appended after all team entries
         try {
           const pluginManager = PluginManager.getInstance();
           const pluginMetrics = pluginManager.getWorkersMetrics();
           for (const [name, m] of Object.entries(pluginMetrics)) {
-            add(`piclaw_plugin_worker_requests`, m.requests, "gauge", `Total requests sent to plugin worker ${name}`);
-            add(`piclaw_plugin_worker_responses`, m.responses, "gauge", `Total responses received from plugin worker ${name}`);
-            add(`piclaw_plugin_worker_errors`, m.errors, "gauge", `Total errors from plugin worker ${name}`);
-            add(`piclaw_plugin_worker_avg_latency_ms`, m.avgLatency, "gauge", `Average RPC latency for plugin worker ${name}`);
+            const safeName = name.replace(/\"/g, '\\\"');
+            output += `# HELP piclaw_plugin_worker_requests Total requests sent to plugin worker ${name}\n`;
+            output += `# TYPE piclaw_plugin_worker_requests gauge\n`;
+            output += `piclaw_plugin_worker_requests{worker="${safeName}"} ${m.requests}\n`;
+            output += `# HELP piclaw_plugin_worker_responses Total responses received from plugin worker ${name}\n`;
+            output += `# TYPE piclaw_plugin_worker_responses gauge\n`;
+            output += `piclaw_plugin_worker_responses{worker="${safeName}"} ${m.responses}\n`;
+            output += `# HELP piclaw_plugin_worker_errors Total errors from plugin worker ${name}\n`;
+            output += `# TYPE piclaw_plugin_worker_errors gauge\n`;
+            output += `piclaw_plugin_worker_errors{worker="${safeName}"} ${m.errors}\n`;
+            output += `# HELP piclaw_plugin_worker_avg_latency_ms Average RPC latency for plugin worker ${name}\n`;
+            output += `# TYPE piclaw_plugin_worker_avg_latency_ms gauge\n`;
+            output += `piclaw_plugin_worker_avg_latency_ms{worker="${safeName}"} ${m.avgLatency}\n`;
             const statusVal = m.status === 'alive' ? 1 : 0;
-            add(`piclaw_plugin_worker_up`, statusVal, "gauge", `Plugin worker ${name} up (1) or down/crashed (0)`);
+            output += `# HELP piclaw_plugin_worker_up Plugin worker ${name} up (1) or down/crashed (0)\n`;
+            output += `# TYPE piclaw_plugin_worker_up gauge\n`;
+            output += `piclaw_plugin_worker_up{worker="${safeName}"} ${statusVal}\n`;
           }
         } catch (e) {
-          // PluginManager may not be available in tool context; ignore
+          // ignore if PluginManager not available
         }
 
         return { content: [{ type: "text", text: output }], isError: false };
