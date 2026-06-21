@@ -734,5 +734,25 @@ Plugin worker health is now visible to both users (TUI) and operators (Prometheu
 - Consider making plugin isolation default for built-in extensions.
 - Evaluate renderer isolation.
 
+### Iteration 38 — 2026-06-21 (Make Plugin Isolation Default)
+
+**P6 — Architecture:**
+- Set `plugins.isolate` default to `true` in configuration.
+- All built-in tools, commands, and hooks now run in worker threads by default.
+- Renderers and widgets remain direct; no impact.
+- Updated config schema and tests accordingly.
+
+**Metrics:**
+- Tests: 1118 passing, 0 skipped; build success.
+- Regressions: 0
+
+**Outcome**
+System now provides isolation out‑of‑the‑box for safe extension types, enhancing robustness with zero user effort. No breaking changes; existing configs without explicit setting adopt the secure default.
+
+**Next**
+- Investigate renderer isolation (requires async rendering support in core).
+- Evaluate WebSocket transport for TUI.
+- Explore WASM integration for performance‑critical paths.
+
 ---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

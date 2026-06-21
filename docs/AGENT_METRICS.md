@@ -569,4 +569,26 @@ Operators can now monitor plugin health directly in the TUI and via Prometheus. 
 - Consider making plugin isolation default for all built-in extensions.
 - Evaluate renderer isolation.
 
+### Iteration 38 — 2026-06-21 (Make Plugin Isolation Default)
+
+**P6 — Architecture (Configuration Default):**
+- Changed default configuration: `plugins.isolate` now defaults to `true`.
+- All built-in tools, commands, and hooks run isolated by default without user intervention.
+- Renderers and widgets remain direct (non-isolated) due to synchronous rendering constraints.
+- Updated config validation to accept `plugins` object with `isolate` boolean.
+- All tests pass (1118); build successful; no regressions.
+
+**Metrics:**
+- Tests: 1118 passing (unchanged)
+- Regressions: 0
+
+**Outcome**
+Out-of-the-box robustness improved; no action required from users. Existing configs without explicit `plugins.isolate` inherit the safe default.
+
+**Next**
+- Continue addressing P6 items: renderer isolation (requires core changes), WebSocket transport evaluation, WASM integration for performance-critical paths.
+- Maintain test stability and coverage.
+
+---
+
 ### Planned Refactors (Upcoming Iterations)

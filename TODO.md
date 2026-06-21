@@ -89,6 +89,7 @@
 - P6 Plugin Isolation Phase 4 — added command support to plugin isolation; extended plugin system to isolate command extensions
 - P6 Plugin Isolation Phase 5 — Hook isolation completed; auto-continue, auto-compact-85, and context-logger run isolated when plugins.isolate is true
 - P6 Plugin Metrics Integration — integrated plugin worker metrics into TUI metrics widget and Prometheus exporter
+- P6 Plugin Isolation Default — set `plugins.isolate` to `true` as the default; built-in tools, commands, and hooks run isolated out-of-the-box
 
 ---
 

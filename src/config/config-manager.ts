@@ -48,6 +48,9 @@ export interface PiclawConfig {
 	/** Default model to use (e.g., "anthropic:claude-opus-4-5") */
 	model?: string;
 	/** Default thinking level */
+	/** Plugin isolation settings */
+	plugins?: { isolate: boolean };
+	/** Default thinking level */
 	thinking?: "off" | "minimal" | "low" | "medium" | "high" | "xhigh";
 	/** Default tool allowlist. If not set, all tools are available. */
 	tools?: string[];
@@ -69,6 +72,7 @@ function getConfigFilePath(): string {
 
 const DEFAULT_CONFIG: PiclawConfig = {
 	model: undefined,
+	plugins: { isolate: true },
 	thinking: "medium",
 	// Include all custom tools by default
 	tools: [

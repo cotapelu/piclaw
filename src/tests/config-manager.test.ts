@@ -36,6 +36,7 @@ describe("ConfigManager", () => {
       const config = loadConfig();
       expect(config).toEqual({
         model: undefined,
+        plugins: { isolate: true },
         thinking: "medium",
         tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
@@ -135,6 +136,7 @@ describe("ConfigManager", () => {
       const config = loadConfig();
       expect(config).toEqual({
         model: undefined,
+        plugins: { isolate: true },
         thinking: "medium",
         tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
