@@ -10,6 +10,7 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { recordRender, getWidgetMetrics } from "../utils/widget-performance.js";
+import { PluginManager } from "../plugins/plugin-manager.js";
 
 const METRICS_WIDGET_STATE = Symbol('metricsWidgetState');
 
@@ -122,6 +123,25 @@ function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any |
     if (teamMetrics.avgTaskDurationMs != null) {
       lines.push(`${theme.fg("muted", "Avg task:")} ${teamMetrics.avgTaskDurationMs} ms`);
     }
+  }
+
+  // Plugin worker metrics (if isolation enabled)
+  try {
+    const pluginMetrics = PluginManager.getInstance().getWorkersMetrics();
+    const workers = Object.entries(pluginMetrics) as [string, any][];
+    if (workers.length > 0) {
+      lines.push('');
+      lines.push(theme.fg('accent', '🧩 Plugin Workers').bold());
+      for (const [name, m] of workers) {
+        const status = m.status === 'alive' ? theme.fg('green', 'alive') : theme.fg('error', m.status);
+        lines.push(`${theme.fg('muted', name)}: ${status}, ${m.requests} req, ${m.responses} resp, ${m.errors} err`);
+        if (m.lastError) {
+          lines.push(`  ${theme.fg('dim', 'Last error: ' + m.lastError)}`);
+        }
+      }
+    }
+  } catch (e) {
+    // ignore if PluginManager not available
   }
 
   return lines;

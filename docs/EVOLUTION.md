@@ -716,4 +716,23 @@ Plugin workers are now observable. Operators can introspect health and performan
 
 ---
 
+### Iteration 37 — 2026-06-21 (Plugin Metrics Integration)
+
+**P6 — Observability:**
+- Integrated plugin worker metrics into TUI: `metrics-widget` now shows plugin workers status (alive, requests, responses, errors, last error).
+- Extended `prometheus-metrics-tool` to export plugin metrics as Prometheus gauges: `piclaw_plugin_worker_requests`, `responses`, `errors`, `avg_latency_ms`, `up`.
+- All tests: 1118 passing; build success.
+
+**Metrics:**
+- Tests: unchanged (1118 passing)
+- Regressions: 0
+
+**Outcome**
+Plugin worker health is now visible to both users (TUI) and operators (Prometheus), completing the plugin observability feature set.
+
+**Next**
+- Consider making plugin isolation default for built-in extensions.
+- Evaluate renderer isolation.
+
+---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

@@ -3,12 +3,13 @@
 /**
  * Prometheus Metrics Tool
  *
- * Exports team metrics in Prometheus text format for monitoring.
+ * Exports team metrics and plugin worker metrics in Prometheus text format for monitoring.
  */
 
 import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
+import { PluginManager } from "../plugins/plugin-manager.js";
 
 export function createPrometheusMetricsTool(cwd: string): any {
   return {
@@ -80,6 +81,22 @@ export function createPrometheusMetricsTool(cwd: string): any {
           }
 
           // Include agent counts as separate labels? For simplicity, output one metric per agent count entry? Could be many; skip for now.
+        }
+
+        // Plugin worker metrics (if any)
+        try {
+          const pluginManager = PluginManager.getInstance();
+          const pluginMetrics = pluginManager.getWorkersMetrics();
+          for (const [name, m] of Object.entries(pluginMetrics)) {
+            add(`piclaw_plugin_worker_requests`, m.requests, "gauge", `Total requests sent to plugin worker ${name}`);
+            add(`piclaw_plugin_worker_responses`, m.responses, "gauge", `Total responses received from plugin worker ${name}`);
+            add(`piclaw_plugin_worker_errors`, m.errors, "gauge", `Total errors from plugin worker ${name}`);
+            add(`piclaw_plugin_worker_avg_latency_ms`, m.avgLatency, "gauge", `Average RPC latency for plugin worker ${name}`);
+            const statusVal = m.status === 'alive' ? 1 : 0;
+            add(`piclaw_plugin_worker_up`, statusVal, "gauge", `Plugin worker ${name} up (1) or down/crashed (0)`);
+          }
+        } catch (e) {
+          // PluginManager may not be available in tool context; ignore
         }
 
         return { content: [{ type: "text", text: output }], isError: false };

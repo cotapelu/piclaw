@@ -58,6 +58,7 @@
 - [x] Plugin isolation using worker threads (tools and commands)
 - [x] Extend plugin isolation to hooks (auto-continue, auto-compact-85, context-logger)
 - [x] Add plugin worker observability (metrics, getWorkersMetrics)
+- [x] Integrate plugin metrics into metrics widget and Prometheus exporter
 - [ ] Extend plugin isolation to renderers and widgets
 
 ---
@@ -87,6 +88,7 @@
 - P5 Logger Mock Utility — created logger-mock for test stability
 - P6 Plugin Isolation Phase 4 — added command support to plugin isolation; extended plugin system to isolate command extensions
 - P6 Plugin Isolation Phase 5 — Hook isolation completed; auto-continue, auto-compact-85, and context-logger run isolated when plugins.isolate is true
+- P6 Plugin Metrics Integration — integrated plugin worker metrics into TUI metrics widget and Prometheus exporter
 
 ---
 
