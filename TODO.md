@@ -92,7 +92,8 @@
 - P6 Plugin Isolation Default — set `plugins.isolate` to `true` as the default; built-in tools, commands, and hooks run isolated out-of-the-box
 - Metrics Retention Policy — age-based cleanup of old metrics files, configurable via `metricsRetentionDays` (default 30)
 - P6 Widget Isolation — isolated both metrics-widget and team-widget via RPC context proxy and worker loading; team-widget uses polling via RPC
-- P6 Renderer Isolation (Phase 2) — migrated built-in renderers (todos, memory, branch-summary, team-ops) to workers; added default exports for required modules; improved test robustness with polling wait; all 1125 tests passing
+- P6 Renderer Isolation (Phase 2) — migrated built-in renderers and added tests; full validation completed
+- P6 Renderer Isolation Testing — added unit test for renderer RPC registration; fixed flaky auto-dispose test
 
 ---
 
