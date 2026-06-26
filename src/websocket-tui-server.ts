@@ -15,6 +15,9 @@ import type { IPty } from 'node-pty';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { Server as HttpServer } from 'node:http';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { loadConfig } from './config/config-manager.js';
+import { cleanupOldMetrics } from './utils/metrics-retention.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -208,7 +211,7 @@ export function getWebSocketServerMetrics(): WebSocketServerMetrics | null {
  * @param options Server configuration
  * @returns A stop handle to gracefully shut down the server
  */
-export function startWebsocketTuiServer(options: StartOptions): { stop: () => void } {
+export function startWebsocketTuiServer(options: StartOptions): { stop: () => void; server: HttpServer } {
   const httpServer: HttpServer = createServer(async (req, res) => {
     const url = req.url || '/';
     if (url === '/' || url === '/index.html') {
@@ -379,8 +382,49 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
     }
   });
 
+  // Optional: persist metrics to daily file for historical analysis
+  let intervalId: any = null;
+  try {
+    const config = loadConfig();
+    const retentionDays = config.metricsRetentionDays ?? 30;
+    const metricsDir = join(process.cwd(), '.piclaw');
+    intervalId = setInterval(async () => {
+      try {
+        if (!serverMetrics) return;
+        const snapshot = serverMetrics.getSnapshot();
+        const entry = {
+          timestamp: new Date().toISOString(),
+          ...snapshot,
+          startTime: snapshot.startTime.toISOString(),
+        };
+        await mkdir(metricsDir, { recursive: true });
+        const dateStr = new Date().toISOString().slice(0, 10);
+        const filePath = join(metricsDir, `websocket-metrics-${dateStr}.json`);
+        const existing: any[] = [];
+        try {
+          const data = await readFile(filePath, 'utf-8');
+          existing.push(JSON.parse(data));
+        } catch {}
+        existing.push(entry);
+        await writeFile(filePath, JSON.stringify(existing, null, 2));
+        // cleanup old files based on retention
+        try {
+          await cleanupOldMetrics(metricsDir, retentionDays);
+        } catch (e) {
+          console.error('WebSocket metrics cleanup error:', e);
+        }
+      } catch (e) {
+        console.error('Failed to write WebSocket metrics:', e);
+      }
+    }, 10000); // every 10 seconds
+  } catch (e) {
+    // config load may fail; ignore persistence
+    console.error('Failed to initialize WebSocket metrics persistence:', e);
+  }
+
   return {
     stop: () => {
+      if (intervalId) clearInterval(intervalId);
       wss.clients.forEach((client) => {
         client.terminate();
         const proc = ptyProcesses.get(client);
