@@ -764,4 +764,58 @@ Architecture decision captured and shared. Provides a clear roadmap for implemen
 
 ---
 
+### Iteration 46 — 2026-06-26 (WebSocket TUI Implementation)
+
+**P6 — Architecture (WebSocket Transport):**
+- Implemented WebSocket TUI server with PTY backend (node-pty) and xterm.js client.
+- Added CLI flags: `--tui-websocket[=port]`, `--tui-port`, `--tui-address`, `--tui-token`.
+- Embedded HTML client served at `/`; connects to `/tui` WebSocket.
+- Security: localhost-only by default; token authentication optional.
+- Added `parseWebsocketArgs` function with comprehensive unit tests (9 passing).
+- Integrated into `cli.ts`: when flag present, starts server and spawns `dist/cli.js` child process per connection.
+- Updated README with usage instructions and security notes.
+- All tests: **1135 passing** (build successful). Regression count: 0.
+
+**Metrics**
+- Tests: +9 (from 1126 to 1135)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+Users can now access PiClaw's TUI remotely via a web browser. Feature works out of the box, opt-in via CLI flags.
+
+**Next**
+- P6: Consider WASM integration for performance‑critical paths (e.g., diff, parsing).
+- P4: Add observability for WebSocket server (connections, errors, PTY count).
+- Continue to monitor stability and gather user feedback.
+
+---
+
 ## Planned Refactors (Upcoming Iterations)
+
+### Iteration 46 — 2026-06-26 (WebSocket TUI Implementation)
+
+**P6 — Architecture (WebSocket Transport):**
+- Implemented WebSocket TUI server with PTY backend (node-pty) and xterm.js client.
+- Added CLI flags: `--tui-websocket[=port]`, `--tui-port`, `--tui-address`, `--tui-token`.
+- Embedded HTML client served at `/`; connects to `/tui` WebSocket.
+- Security: localhost-only by default; token authentication optional.
+- Added `parseWebsocketArgs` function with comprehensive unit tests (9 passing).
+- Integrated into `cli.ts`: when flag present, starts server and spawns `dist/cli.js` child process per connection.
+- Updated README with usage instructions and security notes.
+- All tests: **1135 passing** (build successful). Regression count: 0.
+
+**Metrics**
+- Tests: +9 (from 1126 to 1135)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+Users can now access PiClaw's TUI remotely via a web browser. Feature works out of the box, opt-in via CLI flags.
+
+**Next**
+- P6: Consider WASM integration for performance‑critical paths (e.g., diff, parsing).
+- P4: Add observability for WebSocket server (connections, errors, PTY count).
+- Continue to monitor stability and gather user feedback.
+
+---
