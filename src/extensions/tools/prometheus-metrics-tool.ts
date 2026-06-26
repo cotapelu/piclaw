@@ -110,6 +110,35 @@ export function createPrometheusMetricsTool(cwd: string): any {
           // ignore if PluginManager not available
         }
 
+        // WebSocket TUI server metrics (if configured)
+        const wsUrl = process.env.PI_WEBSOCKET_METRICS_URL;
+        if (wsUrl) {
+          try {
+            const cleanUrl = wsUrl.replace(/\/$/, '');
+            const res = await fetch(`${cleanUrl}/metrics`);
+            if (res.ok) {
+              const wsData = await res.json() as any;
+              output += `# HELP piclaw_websocket_active_connections Active WebSocket connections to TUI server\n`;
+              output += `# TYPE piclaw_websocket_active_connections gauge\n`;
+              output += `piclaw_websocket_active_connections ${wsData.activeConnections}\n`;
+              output += `# HELP piclaw_websocket_total_connections Total WebSocket connections accepted\n`;
+              output += `# TYPE piclaw_websocket_total_connections counter\n`;
+              output += `piclaw_websocket_total_connections ${wsData.totalConnections}\n`;
+              output += `# HELP piclaw_websocket_total_errors Total errors in TUI server\n`;
+              output += `# TYPE piclaw_websocket_total_errors counter\n`;
+              output += `piclaw_websocket_total_errors ${wsData.totalErrors}\n`;
+              output += `# HELP piclaw_websocket_pty_spawned Total PTY processes spawned\n`;
+              output += `# TYPE piclaw_websocket_pty_spawned counter\n`;
+              output += `piclaw_websocket_pty_spawned ${wsData.totalPtySpawned}\n`;
+              output += `# HELP piclaw_websocket_uptime_seconds TUI server uptime in seconds\n`;
+              output += `# TYPE piclaw_websocket_uptime_seconds gauge\n`;
+              output += `piclaw_websocket_uptime_seconds ${wsData.uptimeSeconds.toFixed(6)}\n`;
+            }
+          } catch (e2) {
+            // ignore errors; WebSocket metrics are optional
+          }
+        }
+
         return { content: [{ type: "text", text: output }], isError: false };
       } catch (err: any) {
         return {
