@@ -41,6 +41,7 @@ describe("ConfigManager", () => {
         tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
         verbose: false,
+        metricsRetentionDays: 30,
       });
     });
 
@@ -103,6 +104,24 @@ describe("ConfigManager", () => {
       expect(config.keybindings).toBeUndefined();
     });
 
+    it('should fallback to default metricsRetentionDays if invalid', () => {
+      const configDir = join(tempHome, '.piclaw');
+      mkdirSync(configDir, { recursive: true });
+      writeFileSync(join(configDir, 'config.json'), JSON.stringify({ metricsRetentionDays: -5 }, null, 2));
+
+      const config = loadConfig();
+      expect(config.metricsRetentionDays).toBe(30);
+    });
+
+    it('should accept valid metricsRetentionDays', () => {
+      const configDir = join(tempHome, '.piclaw');
+      mkdirSync(configDir, { recursive: true });
+      writeFileSync(join(configDir, 'config.json'), JSON.stringify({ metricsRetentionDays: 60 }, null, 2));
+
+      const config = loadConfig();
+      expect(config.metricsRetentionDays).toBe(60);
+    });
+
     it('should merge CLI overrides on top of file config', () => {
       const configDir = join(tempHome, ".piclaw");
       mkdirSync(configDir, { recursive: true });
@@ -141,6 +160,7 @@ describe("ConfigManager", () => {
         tools: ["read", "bash", "edit", "write", "todos", "memory", "echo", "system-info", "http"],
         sessionDir: undefined,
         verbose: false,
+        metricsRetentionDays: 30,
       });
     });
   });

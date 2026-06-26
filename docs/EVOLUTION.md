@@ -754,5 +754,24 @@ System now provides isolation out‑of‑the‑box for safe extension types, enh
 - Evaluate WebSocket transport for TUI.
 - Explore WASM integration for performance‑critical paths.
 
+### Iteration 39 — 2026-06-26 (Metrics Retention Policy)
+
+**Metrics Retention:**
+- Added `metricsRetentionDays` configuration (default 30) with validation to `config-manager.ts`.
+- Implemented `cleanupOldMetrics` utility in `src/utils/metrics-retention.ts`.
+- Integrated cleanup into team auto-dispose after metrics export; uses age-based deletion of old `metrics-YYYY-MM-DD.json` files.
+- Added unit tests for retention logic (`metrics-retention.test.ts`) and extended config validation tests.
+- All tests pass (1125); build successful; no regressions.
+
+**Metrics:**
+- Tests: 1125 passing (+7)
+- Regressions: 0
+
+**Outcome**
+Automatic cleanup prevents unbounded growth of metrics files; reduces manual maintenance. Configurable retention period allows flexibility.
+
+**Next**
+- Continue addressing P6 items: renderer isolation, WebSocket transport, WASM integration.
+
 ---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

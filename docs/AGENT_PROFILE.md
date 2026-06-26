@@ -21,7 +21,6 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Weaknesses
 
 - **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
-- **Metrics rotation**: Implemented daily rotation to prevent unbounded growth; long-term cleanup strategy could be improved (e.g., age-based retention).
 - **Config validation**: Basic validation for `verbose`, `tools`, `thinking`, `model` (format `provider:model`), and `keybindings` (object type) is in place; further value checks possible.
 - **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
 
@@ -48,7 +47,6 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
-- **Metrics retention policy**: Implement age-based cleanup for daily metric files to avoid disk bloat over time.
 - **Plugin isolation** (P6): Extend isolation to remaining extension types (renderers, hooks, widgets) and consider making isolation default for all built‑ins.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*

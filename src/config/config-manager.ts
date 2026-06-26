@@ -60,6 +60,8 @@ export interface PiclawConfig {
 	verbose?: boolean;
 	/** Custom keybindings: map command name (e.g., "team", "settings") to key string (e.g., "t", "ctrl+s") */
 	keybindings?: Record<string, string>;
+	/** Metrics retention period in days (default 30) */
+	metricsRetentionDays?: number;
 }
 
 function getConfigDir(): string {
@@ -88,6 +90,7 @@ const DEFAULT_CONFIG: PiclawConfig = {
 	],
 	sessionDir: undefined,
 	verbose: false,
+	metricsRetentionDays: 30,
 };
 
 /**
@@ -153,6 +156,14 @@ export function loadConfig(cliOverrides?: Partial<PiclawConfig>): PiclawConfig {
 	  if (!valid) {
 	    logger.warn("Invalid keybinding values (must be non-empty strings). Using default.");
 	    fileConfig.keybindings = undefined;
+	  }
+	}
+
+	// Validate metricsRetentionDays (must be a positive number)
+	if (fileConfig.metricsRetentionDays !== undefined) {
+	  if (typeof fileConfig.metricsRetentionDays !== 'number' || fileConfig.metricsRetentionDays < 1 || !Number.isFinite(fileConfig.metricsRetentionDays)) {
+		logger.warn(`Invalid metricsRetentionDays: ${fileConfig.metricsRetentionDays}. Must be a positive integer. Using default (30).`);
+		fileConfig.metricsRetentionDays = DEFAULT_CONFIG.metricsRetentionDays;
 	  }
 	}
 

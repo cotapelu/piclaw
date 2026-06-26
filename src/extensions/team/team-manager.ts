@@ -23,6 +23,8 @@ import * as path from "node:path";
 import { createLogger, type ExtensionLogger } from "../utils/logger.js";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadConfig } from "../../config/config-manager.js";
+import { cleanupOldMetrics } from "../../utils/metrics-retention.js";
 
 /**
  * TeamManager interface - abstracts team operations for injection and testability.
@@ -1012,6 +1014,13 @@ export class TeamRegistry {
           existing.push(metrics);
           await writeFile(metricsFile, JSON.stringify(existing, null, 2));
           registryLogger.info(`Exported metrics for team ${teamId} to ${metricsFile}`);
+          // Clean up old metrics files based on retention policy
+          try {
+            const retentionDays = loadConfig().metricsRetentionDays ?? 30;
+            await cleanupOldMetrics(metricsDir, retentionDays);
+          } catch (e) {
+            registryLogger.warn(`Failed to cleanup old metrics:`, e);
+          }
         } catch (e) {
           registryLogger.warn(`Failed to export metrics for team ${teamId}:`, e);
         }
