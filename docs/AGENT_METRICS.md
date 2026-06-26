@@ -919,3 +919,29 @@ The full WebSocket communication path is now covered by integration tests, ensur
 - Monitor real-world usage for any edge cases not covered.
 
 ---
+
+### Iteration 51 — 2026-06-26 (WebSocket Metrics Persistence)
+
+**P4 — Observability (Historical Metrics):**
+- Added automatic persistence of WebSocket TUI server metrics to daily JSON files.
+- Configuration: respects `metricsRetentionDays` (default 30 days) for cleanup.
+- Implementation:
+  - Starts interval (10s) after server begins listening.
+  - Snapshot includes timestamp, active connections, totals, PTY count, uptime.
+  - Files written to `.piclaw/websocket-metrics-YYYY-MM-DD.json` (JSON array of entries).
+  - Cleanup via existing `cleanupOldMetrics` utility.
+- All tests: **1153 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: unchanged (1153 passing)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+WebSocket server metrics are now persisted for historical analysis, enabling trend monitoring and capacity planning. Retention policy prevents unbounded growth.
+
+**Next**
+- Consider exposing WebSocket metrics retention config UI.
+- Evaluate adding alerts for abnormal connection counts/error rates.
+
+---
