@@ -18,7 +18,7 @@
         {
           "id": "task-3",
           "content": "Integrate metrics into TUI metrics widget",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-4",
@@ -45,5 +45,5 @@
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-26T23:19:37.192Z"
+  "updatedAt": "2026-06-26T23:24:42.639Z"
 }

@@ -146,6 +146,31 @@ async function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics:
     // ignore if PluginManager not available
   }
 
+  // WebSocket TUI server metrics (if configured)
+  const wsUrl = process.env.PI_WEBSOCKET_METRICS_URL;
+  if (wsUrl) {
+    try {
+      const cleanUrl = wsUrl.replace(/\/$/, '');
+      const res = await fetch(`${cleanUrl}/metrics`);
+      if (res.ok) {
+        const wsData = await res.json() as any;
+        lines.push('');
+        lines.push(theme.fg('accent', '🌐 WebSocket TUI Server').bold());
+        lines.push(`${theme.fg('muted', 'Active connections:')} ${wsData.activeConnections}`);
+        lines.push(`${theme.fg('muted', 'Total connections:')} ${wsData.totalConnections}`);
+        lines.push(`${theme.fg('muted', 'Total errors:')} ${wsData.totalErrors}`);
+        lines.push(`${theme.fg('muted', 'PTYs spawned:')} ${wsData.totalPtySpawned}`);
+        lines.push(`${theme.fg('muted', 'Uptime:')} ${wsData.uptimeSeconds.toFixed(2)}s`);
+      } else {
+        lines.push('');
+        lines.push(theme.fg('warning', 'WebSocket TUI: metrics endpoint returned ' + res.status));
+      }
+    } catch (e) {
+      lines.push('');
+      lines.push(theme.fg('warning', 'WebSocket TUI: failed to fetch metrics'));
+    }
+  }
+
   return lines;
 }
 
