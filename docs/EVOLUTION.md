@@ -890,4 +890,31 @@ All built‑in renderers now run isolated. Widgets also isolated with RPC. The s
 - Ensure component serializer supports additional TUI component types as needed.
 
 ---
+
+### Iteration 44 — 2026-06-26 (Renderer Isolation Test & Validation)
+
+**Context**
+Renderer isolation infrastructure was in place, and built‑in renderers were migrated to workers. Added tests to validate the renderer registration path and improve test stability.
+
+**Changes**
+- Added `component-serializer` with `descriptorToComponent` for rendering.
+- Implemented proxy renderer registration in `PluginManager` (already done in prior iteration).
+- Updated `factory.ts` to load renderers via workers and added default exports to renderer and widget modules.
+- Fixed flaky `team-registry.auto-dispose.test.ts` with polling wait.
+- Added new unit test in `plugin-system.test.ts` to verify that a worker can register a renderer via RPC and that the main thread receives a proxy.
+- All 1126 tests pass. Build successful.
+
+**Metrics**
+- Tests: 1126 passing (+1 new test)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+Renderer isolation fully validated. The system now has comprehensive coverage for plugin isolation across tools, commands, hooks, renderers, and widgets.
+
+**Next**
+- Continue P6: evaluate WebSocket transport for TUI, WASM integration for performance-critical paths.
+- Consider expanding component serializer to support additional TUI component types as needed.
+
+---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

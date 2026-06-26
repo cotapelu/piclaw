@@ -706,6 +706,31 @@ All built‑in renderers now run isolated. Widgets also isolated with RPC. The s
 
 ---
 
+### Iteration 44 — 2026-06-26 (Renderer Isolation Test & Validation)
+
+**Context**
+Renderer isolation infrastructure was in place, and built‑in renderers were migrated to workers. Added tests to validate the renderer registration path and improve test stability.
+
+**Changes**
+- Added unit test in `plugin-system.test.ts` to verify that a worker can register a renderer via RPC and that the main thread receives a proxy.
+- Confirmed that all built‑in renderers (todos, memory, branch-summary, team-ops) load correctly in isolated mode.
+- Fixed flaky `team-registry.auto-dispose.test.ts` by using a polling wait instead of fixed timeout.
+- All 1126 tests pass. Build successful.
+
+**Metrics**
+- Tests: 1126 passing (+1)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+Renderer isolation fully validated. Plugin isolation now covers tools, commands, hooks, renderers, and widgets with comprehensive tests.
+
+**Next**
+- Continue P6: investigate WebSocket transport for TUI and WASM integration for performance‑critical paths.
+- Consider expanding component serializer to support additional TUI component types as needed.
+
+---
+
 **Next highest‑impact tasks after Phase 2**
 1. **Renderer Isolation** — migrate remaining renderers (if any) or enable isolation by default.
 2. **P6 Remaining Items** — investigate WebSocket transport for TUI; evaluate WASM for critical paths.
