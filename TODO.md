@@ -115,8 +115,7 @@
 ---
 
 ## Follow-ups (Lower Priority)
-- [ ] Add WebSocket metrics to general `.piclaw/metrics.json` rotation for historical analysis
 - [ ] Consider WASM integration for performance-critical paths (diff, parsing)
-- [ ] Add WebSocket protocol integration tests (upgrade, message flow, PTY interaction)
+- [ ] Add fuzzing for WebSocket message handling (malformed frames, large payloads)
 
 ---
