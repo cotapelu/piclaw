@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { Text } from '@earendil-works/pi-tui';
 
 let mockWorkerInstance: any;
 
@@ -334,5 +335,35 @@ describe('PluginManager with mainApi (isolated extension)', () => {
     expect(originalExecute).not.toHaveBeenCalled();
     // check commandWorkers mapping
     expect((manager as any).commandWorkers.get('testcmd')).toBe(worker);
+  });
+});
+
+describe('Renderer registration and proxy', () => {
+  let manager: PluginManager;
+  let mockMainApi: any;
+  let worker: PluginWorker;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    mockWorkerInstance = undefined;
+    mockMainApi = { registerMessageRenderer: vi.fn() };
+    manager = new PluginManager(mockMainApi);
+    await manager.loadExtension('/dummy/renderer.js', 'test-renderer');
+    worker = manager.getWorker('test-renderer')!;
+  });
+
+  it('forwards renderer registration to mainApi', async () => {
+    (manager as any).handleWorkerMessage('test-renderer', {
+      type: 'request',
+      id: 'req0',
+      method: 'register_renderer',
+      params: { customType: 'test_type' },
+    });
+    expect(mockMainApi.registerMessageRenderer).toHaveBeenCalledTimes(1);
+    const [customType, registeredRenderer] = mockMainApi.registerMessageRenderer.mock.calls[0];
+    expect(customType).toBe('test_type');
+    expect(typeof registeredRenderer).toBe('function');
+    // Check that renderer worker is mapped
+    expect((manager as any).rendererWorkers.get('test_type')).toBe(worker);
   });
 });
