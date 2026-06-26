@@ -31,6 +31,7 @@
 - [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
 - [x] Expand fuzzing coverage to other tools (test-tool file args) — added test-tool-security.test.ts
 - [x] Chaos engineering: random network failures — added chaos utility and integrated into runCommandCapture
+- [ ] Fuzz WebSocket message handling (malformed frames, oversized payloads) — increase robustness of remote TUI
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
 - [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
