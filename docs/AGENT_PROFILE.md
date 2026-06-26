@@ -18,13 +18,14 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Plugin isolation default**: `plugins.isolate` is now `true` by default; built-in tools, commands, and hooks run isolated automatically.
 - **Plugin observability**: Plugin worker metrics are exposed via the TUI metrics widget and Prometheus exporter, enabling real-time monitoring of plugin health and performance.
 - **Remote TUI access**: WebSocket server with PTY backend allows browser-based terminal access (opt-in via `--tui-websocket`).
+- **WebSocket TUI observability**: Server collects connection, error, and PTY metrics; exposed via HTTP `/metrics` endpoint for external monitoring.
 
 ## Weaknesses
 
 - **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
 - **Config validation**: Basic validation for `verbose`, `tools`, `thinking`, `model` (format `provider:model`), and `keybindings` (object type) is in place; further value checks possible.
 - **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
-- **WebSocket observability**: The WebSocket TUI server currently has no metrics export; could be integrated into the existing metrics widget and Prometheus exporter.
+- **WebSocket observability integration**: The WebSocket TUI server exports metrics via HTTP `/metrics` endpoint; integration into TUI metrics widget and Prometheus exporter is a follow-up.
 
 ## Fragile Modules
 
@@ -49,7 +50,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
-- **WebSocket observability**: Add connection count, error count, and PTY process metrics for the remote TUI server.
+- **WebSocket metrics integration**: Integrate server metrics into TUI metrics widget and Prometheus exporter for unified observability.
 - **WASM integration**: Evaluate WebAssembly for performance‑critical paths (diff, parsing) as P6 research.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
