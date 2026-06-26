@@ -620,9 +620,37 @@ Plugin isolation covered tools, commands, hooks but widgets remained direct. To 
 First widget (`metrics-widget`) now runs isolated, validating the widget isolation path. Context proxy provides essential RPC surface for extensions.
 
 **Next**
-- Extend isolation to `team-widget` by adding team manager RPC methods (e.g., `getTeamStatus`, `getAllTeams`).
-- Consider renderer isolation (may need async rendering pipeline).
-- Continue P6 items.
+- Isolate `team-widget` (in progress) — implement TeamManager RPC and adapt widget.
+- Investigate renderer isolation.
+- Continue P6.
+
+---
+
+### Iteration 41 — 2026-06-26 (Widget Isolation — Team Widget)
+
+**Context**
+To complete widget isolation, `team-widget` required TeamManager RPC methods and factory changes.
+
+**Changes**
+- Extended `PluginManager.handleContextCall` with `'getAllTeams'` and `'getTeamStatus'`.
+- Updated context proxy to expose these methods.
+- Modified `team-widget`:
+  - Removed direct `TeamRegistry` and `getTeamManager` usage.
+  - Simplified rendering loop to poll via RPC (`ctx.getAllTeams()`, `ctx.getTeamStatus(id)`).
+  - Removed per-team event subscriptions; relies on 5s polling.
+- Factory: load `team-widget` via worker when isolating; conditional direct registration otherwise.
+
+**Metrics**
+- Tests: 1125 passing (unchanged)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+`team-widget` now runs isolated; main widgets (metrics, team) both support isolation. Polling is acceptable for current scale.
+
+**Next**
+- Evaluate renderer isolation (requires async render support).
+- Address any remaining P6 items (WebSocket, WASM).
 
 ---
 

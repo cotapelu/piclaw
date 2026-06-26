@@ -1,6 +1,7 @@
 import { PluginWorker } from './plugin-worker.js';
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import type { PluginMessage } from './plugin-protocol.js';
+import { TeamManager, getDefaultTeamManager } from '../team/team-manager.js';
 
 /**
  * Manages lifecycle of plugin workers and integrates with main API.
@@ -230,18 +231,27 @@ export class PluginManager {
     // Special UI methods prefixed with 'ui_'
     if (method.startsWith('ui_')) {
       const uiMethod = method.slice(3); // e.g., 'ui_setWidget' -> 'setWidget'
-      if (typeof ctx.ui[uiMethod] === 'function') {
+      if (typeof (ctx.ui as any)[uiMethod] === 'function') {
         return await (ctx.ui as any)[uiMethod](...args);
       }
       throw new Error(`UI method ${uiMethod} not found on context`);
     }
 
-    // Special getters/shortcuts
+    // Team manager methods
     switch (method) {
+      case 'getAllTeams': {
+        const teamManager = (ctx as any).teamManager ?? getDefaultTeamManager();
+        const teams = teamManager.getAll();
+        return Array.from(teams.keys());
+      }
+      case 'getTeamStatus': {
+        const teamId = args[0];
+        const teamManager = (ctx as any).teamManager ?? getDefaultTeamManager();
+        return await teamManager.getTeamStatus(teamId);
+      }
       case 'getModel': return (ctx as any).model;
       case 'getTheme': return (ctx.ui as any)?.theme;
       case 'getAllThemes':
-        // ctx.getAllThemes may be a function
         if (typeof ctx.getAllThemes === 'function') return await ctx.getAllThemes();
         return [];
       case 'getMode': return (ctx as any).mode;

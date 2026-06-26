@@ -10,9 +10,8 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { TeamRegistry } from "./team-manager.js"; // TODO: remove after migration
-import { getTeamManager } from "./team-manager-context.js";
 import { recordRender } from "../utils/widget-performance.js";
+import { getTeamManager } from "./team-manager-context.js"; // for direct fallback
 
 // Unique symbol for per-session state attachment
 const TEAM_WIDGET_STATE = Symbol('teamWidgetState');
@@ -20,10 +19,8 @@ const TEAM_WIDGET_STATE = Symbol('teamWidgetState');
 interface TeamWidgetSessionState {
   enabled: boolean;
   ctx: any;
-  discoveryIntervalId: NodeJS.Timeout | null; // polls for new teams
+  intervalId: NodeJS.Timeout | null; // polling interval
   lastLines: string[] | null; // memoization cache
-  attachedTeamIds: Set<string>; // teams we're subscribed to
-  renderScheduled: boolean; // debounce flag
 }
 
 function getState(ctx: any): TeamWidgetSessionState | undefined {
@@ -33,14 +30,7 @@ function getState(ctx: any): TeamWidgetSessionState | undefined {
 function ensureState(ctx: any): TeamWidgetSessionState {
   let state = getState(ctx);
   if (!state) {
-    state = {
-      enabled: true,
-      ctx: ctx,
-      discoveryIntervalId: null,
-      lastLines: null,
-      attachedTeamIds: new Set(),
-      renderScheduled: false,
-    };
+    state = { enabled: true, ctx: ctx, intervalId: null, lastLines: null };
     (ctx as any)[TEAM_WIDGET_STATE] = state;
   }
   return state;
@@ -69,96 +59,61 @@ function buildTeamLines(ui: any, teamId: string, status: any): string[] {
 async function refreshWidget(ctx: any): Promise<void> {
   const startTime = performance.now();
   const ui = ctx.ui;
-  const state = ensureState(ctx);
+  const state = getState(ctx) || ensureState(ctx);
   const lines: string[] = [];
 
   lines.push(...buildHeaderLines(ui.theme));
 
-  try {
-    const manager = getTeamManager(ctx);
-    const teams = manager.getAll();
+  const isolated = typeof (ctx as any).getAllTeams === 'function';
 
-    if (teams.size === 0) {
-      lines.push(ui.theme.fg("muted", "No active teams"));
-      // Memoization: only update if changed
-      const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
-      if (!cached) {
-        ui.setWidget("team", lines);
-        state.lastLines = lines;
+  if (isolated) {
+    try {
+      const teamIds = await (ctx as any).getAllTeams();
+      if (teamIds.length === 0) {
+        lines.push(ui.theme.fg("muted", "No active teams"));
+      } else {
+        for (const teamId of teamIds) {
+          try {
+            const status = await (ctx as any).getTeamStatus(teamId);
+            lines.push(...buildTeamLines(ui, teamId, status));
+          } catch {
+            lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
+          }
+        }
       }
-      const elapsed = performance.now() - startTime;
-      recordRender("team-widget", elapsed, cached);
-      return;
+    } catch (e) {
+      lines.push(ui.theme.fg("error", "Error fetching team data"));
     }
-
-    // Collect status for all teams (sequential to preserve order)
-    const teamEntries = Array.from(teams.entries());
-    for (const [teamId, team] of teamEntries) {
-      try {
-        const status = await team.getTeamStatus();
-        lines.push(...buildTeamLines(ui, teamId, status));
-      } catch {
-        lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
+  } else {
+    // Direct mode
+    try {
+      const manager = getTeamManager(ctx);
+      const teams = manager.getAll();
+      if (teams.size === 0) {
+        lines.push(ui.theme.fg("muted", "No active teams"));
+      } else {
+        const teamEntries = Array.from(teams.entries());
+        for (const [teamId, team] of teamEntries) {
+          try {
+            const status = await team.getTeamStatus();
+            lines.push(...buildTeamLines(ui, teamId, status));
+          } catch {
+            lines.push(ui.theme.fg("error", `Team ${teamId.slice(-6)}: error fetching status`));
+          }
+        }
       }
+    } catch (e) {
+      lines.push(ui.theme.fg("error", "Error fetching team data"));
     }
-
-    // Memoization: only update if changed
-    const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
-    if (!cached) {
-      ui.setWidget("team", lines);
-      state.lastLines = lines;
-    }
-    const elapsed = performance.now() - startTime;
-    recordRender("team-widget", elapsed, cached);
-  } catch (e) {
-    const elapsed = performance.now() - startTime;
-    recordRender("team-widget", elapsed, false);
-    // Ignore errors
   }
-}
 
-// Debounced render scheduling to avoid flooding
-function scheduleRender(ctx: any): void {
-  const state = getState(ctx);
-  if (!state || !state.enabled) return;
-  if (state.renderScheduled) return;
-  state.renderScheduled = true;
-  refreshWidget(ctx).catch(() => {}).finally(() => {
-    state.renderScheduled = false;
-  });
-}
-
-// Attach to a single team's updates
-function attachTeam(team: any, ctx: any): void {
-  team.setOnUpdate(() => scheduleRender(ctx));
-}
-
-// Discover and attach to all current teams
-function attachToAllTeams(ctx: any): void {
-  try {
-    const manager = getTeamManager(ctx);
-    const teams = manager.getAll();
-    const currentIds = new Set(teams.keys());
-    const state = getState(ctx);
-    if (!state) return;
-
-    // Detach from teams no longer in registry (cleanup)
-    for (const teamId of state.attachedTeamIds) {
-      if (!currentIds.has(teamId)) {
-        state.attachedTeamIds.delete(teamId);
-      }
-    }
-
-    // Attach to new teams
-    for (const [teamId, team] of teams) {
-      if (!state.attachedTeamIds.has(teamId)) {
-        attachTeam(team, ctx);
-        state.attachedTeamIds.add(teamId);
-      }
-    }
-  } catch {
-    // ignore
+  const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);
+  if (!cached) {
+    ui.setWidget("team", lines);
+    state.lastLines = lines;
   }
+  const elapsed = performance.now() - startTime;
+  recordRender("team-widget", elapsed, cached);
 }
 
 // Helper: compare arrays for equality
@@ -170,59 +125,33 @@ function arraysEqual<T>(a: T[], b: T[]): boolean {
   return true;
 }
 
-function startWidget(ctx: any) {
+function startWidget(ctx: any): void {
   const state = ensureState(ctx);
-  // Prevent double start
-  if (state.discoveryIntervalId) return;
+  if (state.intervalId) return;
   state.ctx = ctx;
   state.lastLines = null;
-  state.attachedTeamIds = new Set();
-  state.renderScheduled = false;
 
-  // Attach to existing teams and kick off initial render
-  attachToAllTeams(ctx);
   refreshWidget(ctx).catch(() => {});
 
-  // Periodically discover new teams (e.g., teams created after widget started)
-  state.discoveryIntervalId = setInterval(() => {
+  state.intervalId = setInterval(() => {
     if (state.enabled && state.ctx) {
-      attachToAllTeams(state.ctx);
+      refreshWidget(state.ctx).catch(() => {});
     }
   }, 5000);
 }
 
-function stopWidget(state: TeamWidgetSessionState) {
-  if (state.discoveryIntervalId) {
-    clearInterval(state.discoveryIntervalId);
-    state.discoveryIntervalId = null;
+function stopWidget(state: TeamWidgetSessionState): void {
+  if (state.intervalId) {
+    clearInterval(state.intervalId);
+    state.intervalId = null;
   }
-  const ctx = state.ctx;
-  if (ctx) {
+  if (state.ctx) {
     try {
-      ctx.ui.setWidget("team", undefined);
-    } catch {
-      // ignore if UI gone
-    }
-  }
-  // Clear reference
-  state.ctx = null;
-  // Detach from all teams
-  if (ctx) {
-    try {
-      const manager = getTeamManager(ctx);
-      const teams = manager.getAll();
-      for (const teamId of state.attachedTeamIds) {
-        const team = teams.get(teamId);
-        if (team) {
-          team.setOnUpdate(undefined); // clear handler
-        }
-      }
+      state.ctx.ui.setWidget("team", undefined);
     } catch {}
+    state.ctx = null;
   }
-
-  state.attachedTeamIds.clear();
   state.lastLines = null;
-  state.renderScheduled = false;
 }
 
 /**
@@ -253,30 +182,20 @@ export function getTeamWidgetEnabled(ctx: any): boolean {
 export function registerTeamWidget(api: ExtensionAPI): void {
   // Set up widget on session start
   api.on("session_start", async (_event, ctx) => {
-    // Create per-session state (default enabled)
-    const state: TeamWidgetSessionState = {
-      enabled: true,
-      ctx: ctx,
-      discoveryIntervalId: null,
-      lastLines: null,
-      attachedTeamIds: new Set(),
-      renderScheduled: false,
-    };
-    (ctx as any)[TEAM_WIDGET_STATE] = state;
+    // Ensure per-session state exists (default enabled)
+    const state = ensureState(ctx);
+    state.enabled = true;
+    state.ctx = ctx;
 
-    // If enabled by default, start the widget
-    if (state.enabled) {
-      startWidget(ctx);
-    }
+    // Start the widget
+    startWidget(ctx);
 
     // Clean up on session shutdown
     api.on("session_shutdown", () => {
       stopWidget(state);
-      // Remove reference from ctx
       delete (ctx as any)[TEAM_WIDGET_STATE];
     });
   });
 
-  // Also register the /team command through the command system? Actually team-command.ts registers separately.
-  // This function only registers the widget component and toggle logic.
+  // The /team command is registered separately by team-command.ts
 }
