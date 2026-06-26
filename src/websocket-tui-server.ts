@@ -391,5 +391,6 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
       ptyProcesses.clear();
       httpServer.close();
     },
+    server: httpServer,
   };
 }
