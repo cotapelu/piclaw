@@ -771,7 +771,43 @@ System now provides isolation out‑of‑the‑box for safe extension types, enh
 Automatic cleanup prevents unbounded growth of metrics files; reduces manual maintenance. Configurable retention period allows flexibility.
 
 **Next**
-- Continue addressing P6 items: renderer isolation, WebSocket transport, WASM integration.
+- Isolate remaining widget (`team-widget`) by implementing TeamManager RPC.
+- Investigate renderer isolation (requires async rendering in core).
+- Continue P6: WebSocket transport, WASM integration.
+
+---
+
+### Iteration 40 — 2026-06-26 (Widget Isolation & Context Proxy)
+
+**Context**
+Plugin isolation covered tools, commands, hooks but widgets remained direct. To extend isolation, we needed richer context RPC and adaptation.
+
+**Changes**
+- Fixed worker→main hook registration protocol: now uses `'register_hook'`/`'unregister_hook'` (was mismatched).
+- Extended `PluginManager.createContextProxy`:
+  - Added RPC for UI methods (`ui_*`), navigation (`navigateTree`), messaging (`sendMessage`), session ops (`fork`, `reload`), and `getPluginMetrics`.
+  - Snapshot synchronous properties (`model`, `ui.theme`) at proxy creation to avoid async in extensions.
+- Extended `handleWorkerMessage` with `'get_plugin_metrics'` RPC to expose plugin health.
+- Updated `handleContextCall` to handle `ui_*` methods and special getters (`getModel`, `getTheme`, `getAllThemes`, `getMode`, `getSystemPrompt`).
+- Adapted `metrics-widget`:
+  - Removed direct `PluginManager` access.
+  - Made `buildMetricsLines` async; uses `ctx.getPluginMetrics()` when available.
+  - Updated `refreshWidget` to await.
+- Factory: load `metrics-widget` via worker when `plugins.isolate=true`; direct registration only when not isolating.
+- Team widget remains direct (depends on TeamManager which requires further RPC).
+
+**Metrics**
+- Tests: 1125 passing (+7)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+First widget (`metrics-widget`) now runs isolated, validating the widget isolation path. Context proxy provides essential RPC surface for extensions.
+
+**Next**
+- Extend isolation to `team-widget` by adding team manager RPC methods (e.g., `getTeamStatus`, `getAllTeams`).
+- Consider renderer isolation (may need async rendering pipeline).
+- Continue P6 items.
 
 ---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

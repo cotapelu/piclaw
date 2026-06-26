@@ -91,6 +91,7 @@
 - P6 Plugin Metrics Integration — integrated plugin worker metrics into TUI metrics widget and Prometheus exporter
 - P6 Plugin Isolation Default — set `plugins.isolate` to `true` as the default; built-in tools, commands, and hooks run isolated out-of-the-box
 - Metrics Retention Policy — age-based cleanup of old metrics files, configurable via `metricsRetentionDays` (default 30)
+- P6 Widget Isolation (Partial) — isolated metrics-widget via enhanced context proxy and worker loading; team-widget remains direct (pending TeamManager RPC)
 
 ---
 

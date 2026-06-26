@@ -101,8 +101,8 @@ function subscribe(event: string, handler: EventHandler) {
     eventHandlers.set(event, set);
   }
   set.add(handler);
-  // Also subscribe on main if not already
-  mainClient?.invoke('subscribe_hook', { event }).catch(() => {});
+  // Register this hook subscription with main
+  mainClient?.invoke('register_hook', { event }).catch(() => {});
 }
 
 function unsubscribe(event: string, handler: EventHandler) {
@@ -110,7 +110,7 @@ function unsubscribe(event: string, handler: EventHandler) {
   if (set) {
     set.delete(handler);
     if (set.size === 0) {
-      mainClient?.invoke('unsubscribe_hook', { event }).catch(() => {});
+      mainClient?.invoke('unregister_hook', { event }).catch(() => {});
     }
   }
 }

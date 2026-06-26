@@ -10,7 +10,6 @@ import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-a
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { recordRender, getWidgetMetrics } from "../utils/widget-performance.js";
-import { PluginManager } from "../plugins/plugin-manager.js";
 
 const METRICS_WIDGET_STATE = Symbol('metricsWidgetState');
 
@@ -53,7 +52,7 @@ async function getLatestTeamMetrics(): Promise<any | null> {
   }
 }
 
-function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any | null): string[] {
+async function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any | null): Promise<string[]> {
   const lines: string[] = [];
 
   // Context usage (tokens)
@@ -127,16 +126,19 @@ function buildMetricsLines(ctx: ExtensionContext, theme: any, teamMetrics: any |
 
   // Plugin worker metrics (if isolation enabled)
   try {
-    const pluginMetrics = PluginManager.getInstance().getWorkersMetrics();
-    const workers = Object.entries(pluginMetrics) as [string, any][];
-    if (workers.length > 0) {
-      lines.push('');
-      lines.push(theme.fg('accent', '🧩 Plugin Workers').bold());
-      for (const [name, m] of workers) {
-        const status = m.status === 'alive' ? theme.fg('green', 'alive') : theme.fg('error', m.status);
-        lines.push(`${theme.fg('muted', name)}: ${status}, ${m.requests} req, ${m.responses} resp, ${m.errors} err`);
-        if (m.lastError) {
-          lines.push(`  ${theme.fg('dim', 'Last error: ' + m.lastError)}`);
+    const ctxAny = ctx as any;
+    if (typeof ctxAny.getPluginMetrics === 'function') {
+      const pluginMetrics = await ctxAny.getPluginMetrics();
+      const workers = Object.entries(pluginMetrics) as [string, any][];
+      if (workers.length > 0) {
+        lines.push('');
+        lines.push(theme.fg('accent', '🧩 Plugin Workers').bold());
+        for (const [name, m] of workers) {
+          const status = m.status === 'alive' ? theme.fg('green', 'alive') : theme.fg('error', m.status);
+          lines.push(`${theme.fg('muted', name)}: ${status}, ${m.requests} req, ${m.responses} resp, ${m.errors} err`);
+          if (m.lastError) {
+            lines.push(`  ${theme.fg('dim', 'Last error: ' + m.lastError)}`);
+          }
         }
       }
     }
@@ -157,7 +159,8 @@ async function refreshWidget(ctx: ExtensionContext): Promise<void> {
 
   // Fetch latest team metrics in the background
   const teamMetrics = await getLatestTeamMetrics();
-  lines.push(...buildMetricsLines(ctx, ui.theme, teamMetrics));
+  const metricsLines = await buildMetricsLines(ctx, ui.theme, teamMetrics);
+  lines.push(...metricsLines);
 
   // Memoization: only update if changed
   const cached = state.lastLines !== null && arraysEqual(state.lastLines, lines);

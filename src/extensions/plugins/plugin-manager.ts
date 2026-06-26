@@ -151,22 +151,72 @@ export class PluginManager {
     } else {
       // If worker not tracked (shouldn't happen), still add
     }
-    return {
+    // Snapshot synchronous properties from context at creation
+    const uiTheme = ctx.ui?.theme;
+    const ctxModel = ctx.model;
+
+    const proxy: any = {
       ctxId,
       cwd: ctx.cwd,
-      isIdle: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'isIdle', args: [] }),
       signal: ctx.signal,
+      model: ctxModel, // snapshot of current model
+      // Flags
+      getFlag: (name: string) => this.invokeWorkerMethod(worker, 'get_flag', { name }),
+      registerFlag: (name: string, options: any) => this.invokeWorkerMethod(worker, 'register_flag', { name, options }),
+      // UI methods plus snapshot properties
       ui: {
+        theme: uiTheme,
         notify: (message: string, type?: string) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_notify', args: [message, type] }),
         setWidget: (key: string, content: any, options?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_setWidget', args: [key, content, options] }),
+        setHeader: (factory: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_setHeader', args: [factory] }),
+        setFooter: (factory: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_setFooter', args: [factory] }),
+        setTitle: (title: string) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_setTitle', args: [title] }),
+        setToolsExpanded: (expanded: boolean) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_setToolsExpanded', args: [expanded] }),
+        getToolsExpanded: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_getToolsExpanded', args: [] }),
+        custom: (name: string, props?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'ui_custom', args: [name, props] }),
       },
+      // Actions
       abort: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'abort', args: [] }),
       hasPendingMessages: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'hasPendingMessages', args: [] }),
       shutdown: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'shutdown', args: [] }),
       getContextUsage: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getContextUsage', args: [] }),
       compact: (options?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'compact', args: [options] }),
       getSystemPrompt: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getSystemPrompt', args: [] }),
+      // Session navigation
+      navigateTree: (targetId: string, options?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'navigateTree', args: [targetId, options] }),
+      // Messaging
+      sendMessage: (message: any, options?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'sendMessage', args: [message, options] }),
+      // Fork/clone
+      fork: (entryId: string, forkOptions?: any) => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'fork', args: [entryId, forkOptions] }),
+      // Session reload
+      reload: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'reload', args: [] }),
+      // Idle status
+      isIdle: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'isIdle', args: [] }),
+      // Plugin metrics
+      getPluginMetrics: () => this.invokeWorkerMethod(worker, 'get_plugin_metrics', {}),
     };
+
+    // Expose model, theme, etc. as getters that query main on demand
+    Object.defineProperties(proxy, {
+      model: {
+        get: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getModel', args: [] }),
+        enumerable: true,
+      },
+      theme: {
+        get: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getTheme', args: [] }),
+        enumerable: true,
+      },
+      allThemes: {
+        get: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getAllThemes', args: [] }),
+        enumerable: true,
+      },
+      mode: {
+        get: () => this.invokeWorkerMethod(worker, 'ctx_call', { ctxId, method: 'getMode', args: [] }),
+        enumerable: true,
+      },
+    });
+
+    return proxy;
   }
 
   private async invokeWorkerMethod(worker: PluginWorker, method: string, params: any): Promise<any> {
@@ -176,6 +226,29 @@ export class PluginManager {
   private async handleContextCall(ctxId: string, method: string, args: any[]): Promise<any> {
     const ctx = this.contextMap.get(ctxId);
     if (!ctx) throw new Error(`Unknown context ID: ${ctxId}`);
+
+    // Special UI methods prefixed with 'ui_'
+    if (method.startsWith('ui_')) {
+      const uiMethod = method.slice(3); // e.g., 'ui_setWidget' -> 'setWidget'
+      if (typeof ctx.ui[uiMethod] === 'function') {
+        return await (ctx.ui as any)[uiMethod](...args);
+      }
+      throw new Error(`UI method ${uiMethod} not found on context`);
+    }
+
+    // Special getters/shortcuts
+    switch (method) {
+      case 'getModel': return (ctx as any).model;
+      case 'getTheme': return (ctx.ui as any)?.theme;
+      case 'getAllThemes':
+        // ctx.getAllThemes may be a function
+        if (typeof ctx.getAllThemes === 'function') return await ctx.getAllThemes();
+        return [];
+      case 'getMode': return (ctx as any).mode;
+      case 'getSystemPrompt': return ctx.getSystemPrompt ? await ctx.getSystemPrompt() : undefined;
+    }
+
+    // Regular method on context
     const fn = (ctx as any)[method];
     if (typeof fn !== 'function') throw new Error(`Context method ${method} not found`);
     return await fn.apply(ctx, args);
@@ -349,6 +422,19 @@ export class PluginManager {
             response.result = undefined;
             break;
           }
+          case 'unregister_hook': {
+            const { event } = params as any;
+            const workers = this.hookSubscriptions.get(event);
+            if (workers) {
+              workers.delete(worker);
+              if (workers.size === 0) {
+                // Optionally stop forwarding this event; but we keep the mainApi listener for simplicity
+                // Could call this.mainApi.off(event as any, ...) if we tracked the handler
+              }
+            }
+            response.result = undefined;
+            break;
+          }
           case 'send_message': {
             const { message, options } = params as any;
             if (this.mainApi) this.mainApi.sendMessage(message, options);
@@ -364,6 +450,10 @@ export class PluginManager {
             const { name, options } = params as any;
             if (this.mainApi?.registerFlag) this.mainApi.registerFlag(name, options);
             response.result = undefined;
+            break;
+          }
+          case 'get_plugin_metrics': {
+            response.result = this.getWorkersMetrics();
             break;
           }
           case 'ctx_call': {

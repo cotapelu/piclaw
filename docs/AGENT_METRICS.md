@@ -586,8 +586,43 @@ Operators can now monitor plugin health directly in the TUI and via Prometheus. 
 Out-of-the-box robustness improved; no action required from users. Existing configs without explicit `plugins.isolate` inherit the safe default.
 
 **Next**
-- Continue addressing P6 items: renderer isolation (requires core changes), WebSocket transport evaluation, WASM integration for performance-critical paths.
-- Maintain test stability and coverage.
+- Isolate remaining widgets (team-widget) by providing team manager RPC.
+- Investigate renderer isolation (async rendering support in core).
+- Continue P6: WebSocket transport, WASM integration.
+
+---
+
+### Iteration 40 — 2026-06-26 (Widget Isolation & Context Proxy)
+
+**Context**
+Plugin isolation covered tools, commands, hooks but widgets remained direct. To extend isolation, we needed richer context RPC and adaptation.
+
+**Changes**
+- Fixed worker→main hook registration protocol: now uses `'register_hook'`/`'unregister_hook'` (was mismatched).
+- Enhanced `PluginManager.createContextProxy`:
+  - Added RPC for UI methods (`ui_*`), navigation (`navigateTree`), messaging (`sendMessage`), session ops (`fork`, `reload`), and `getPluginMetrics`.
+  - Snapshot synchronous properties (`model`, `ui.theme`) at proxy creation to avoid async in extensions.
+- Extended `handleWorkerMessage` with `'get_plugin_metrics'` RPC to expose plugin health.
+- Updated `handleContextCall` to handle `ui_*` methods and special getters (`getModel`, `getTheme`, `getAllThemes`, `getMode`, `getSystemPrompt`).
+- Adapted `metrics-widget`:
+  - Removed direct `PluginManager` access.
+  - Made `buildMetricsLines` async; uses `ctx.getPluginMetrics()` when available.
+  - Updated `refreshWidget` to await.
+- Factory: load `metrics-widget` via worker when `plugins.isolate=true`; direct registration only when not isolating.
+- Team widget remains direct (depends on TeamManager which requires further RPC).
+
+**Metrics**
+- Tests: 1125 passing (+7 from 1118)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+First widget (`metrics-widget`) now runs isolated, validating the widget isolation path. Context proxy provides essential RPC surface for extensions.
+
+**Next**
+- Extend isolation to `team-widget` by adding team manager RPC methods (e.g., `getTeamStatus`, `getAllTeams`).
+- Consider renderer isolation (may need async rendering pipeline).
+- Continue P6 items.
 
 ---
 

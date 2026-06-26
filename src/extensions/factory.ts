@@ -158,6 +158,21 @@ export default async function extensionsAggregator(api: import("@earendil-works/
         worker.underlying.once('error', reject);
       });
     }
+
+    // Load metrics widget in worker (as proof-of-concept for widget isolation)
+    const metricsWidgetPath = join(__dirname, 'metrics', 'metrics-widget.js');
+    await pluginManager.loadExtension(metricsWidgetPath, 'metrics-widget');
+    const metricsWorker = pluginManager.getWorker('metrics-widget')!;
+    await new Promise<void>((resolve, reject) => {
+      const onMessage = (msg: any) => {
+        if (msg.type === 'event' && msg.event === 'ready') {
+          metricsWorker.underlying.removeListener('message', onMessage);
+          resolve();
+        }
+      };
+      metricsWorker.underlying.on('message', onMessage);
+      metricsWorker.underlying.once('error', reject);
+    });
   } else {
     // Direct registration for all simple tools
     for (const name of toolModules) {
@@ -243,10 +258,14 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   // Custom message renderers (always direct for now)
   registerTodosRenderer(api);
   registerMemoryRenderer(api);
-  registerTeamWidget(api);
   registerBranchSummaryRenderer(api);
   registerTeamOpsRenderer(api);
-  registerMetricsWidget(api);
+  // Team widget is always direct (cannot be isolated yet)
+  registerTeamWidget(api);
+  // Metrics widget is direct only when not isolating (isolated above)
+  if (!isolatePlugins) {
+    registerMetricsWidget(api);
+  }
 
   // Hooks: either load via worker or direct
   if (isolatePlugins) {

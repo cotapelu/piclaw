@@ -4,7 +4,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Strengths
 
-- **Comprehensive test suite**: 117 test files, 1118 passing, 0 skipped; coverage >80%.
+- **Comprehensive test suite**: 118 test files, 1125 passing, 0 skipped; coverage >80%.
 - **Modular architecture**: Clear separation between core, extensions, and tools.
 - **Robust team collaboration**: Multi-agent teams with task assignment, workspace isolation, zombie recovery, and metrics export.
 - **TypeScript strict mode**: Strong typing, early error detection.
@@ -14,7 +14,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **TUI performance**: Memoized rendering and event-driven updates reduce CPU usage; metrics dashboard provides observability.
 - **Documentation**: CONTRIBUTING guide, ADRs, and extensive inline comments.
 - **Team isolation**: `InstanceTeamManager` provides per-session team state, eliminating cross-session interference.
-- **Plugin isolation**: Core infrastructure (`PluginWorker`, `PluginManager`, and worker entry) enables extensions to run in separate worker threads, with request/response messaging and timeout support.
+- **Plugin isolation**: Worker-based isolation for tools, commands, hooks, and now widgets (metrics-widget). RPC context proxy enables safe access to main services.
 - **Plugin isolation default**: `plugins.isolate` is now `true` by default; built-in tools, commands, and hooks run isolated automatically.
 - **Plugin observability**: Plugin worker metrics are exposed via the TUI metrics widget and Prometheus exporter, enabling real-time monitoring of plugin health and performance.
 
@@ -47,7 +47,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
-- **Plugin isolation** (P6): Extend isolation to remaining extension types (renderers, hooks, widgets) and consider making isolation default for all built‑ins.
+- **Plugin isolation** (P6): Isolate remaining widget (`team-widget`) by implementing TeamManager RPC; then address renderer isolation.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
 
