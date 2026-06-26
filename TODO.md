@@ -66,6 +66,8 @@
 ---
 
 ## Completed Tasks
+- P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
+- P6 WebSocket Observability — Added metrics collection, Prometheus endpoint, tool, and TUI widget integration
 - P1 Security Hardening (full) — all security mitigations implemented and tested
 - P2 Concurrency Profiling — team workspace concurrency threshold added and passing
 - P2 Memory Stability — basic memory leak test for package manager added and passing
@@ -109,5 +111,12 @@
 - [ ] Add WebSocket TUI server metrics (active connections, total connections, errors, PTY processes) to metrics-widget
 - [ ] Export WebSocket metrics via Prometheus tool (counters/gauges)
 - [ ] Add config option for WebSocket metrics retention (same as general metrics)
+
+---
+
+## Follow-ups (Lower Priority)
+- [ ] Add WebSocket metrics to general `.piclaw/metrics.json` rotation for historical analysis
+- [ ] Consider WASM integration for performance-critical paths (diff, parsing)
+- [ ] Add integration tests for WebSocket TUI server (connection lifecycle, PTY spawning, resize)
 
 ---

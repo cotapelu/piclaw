@@ -25,7 +25,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
 - **Config validation**: Basic validation for `verbose`, `tools`, `thinking`, `model` (format `provider:model`), and `keybindings` (object type) is in place; further value checks possible.
 - **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
-- **WebSocket observability integration**: The WebSocket TUI server exports metrics via HTTP `/metrics` endpoint; integration into TUI metrics widget and Prometheus exporter is a follow-up.
+- **WebSocket observability**: The WebSocket TUI server exports metrics via `/metrics` (JSON) and `/prometheus-metrics` (Prometheus text); TUI widget integration complete.
 
 ## Fragile Modules
 
@@ -50,7 +50,6 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
-- **WebSocket metrics integration**: Integrate server metrics into TUI metrics widget and Prometheus exporter for unified observability.
 - **WASM integration**: Evaluate WebAssembly for performance‑critical paths (diff, parsing) as P6 research.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*

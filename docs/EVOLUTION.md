@@ -994,3 +994,31 @@ The WebSocket TUI server now provides live metrics for monitoring its health and
 - Consider adding metrics retention and alerting thresholds.
 
 ---
+
+### Iteration 48 — 2026-06-26 (WebSocket Metrics Integration)
+
+**P4 — Observability (WebSocket TUI Complete):**
+- Implemented Prometheus endpoint: `/prometheus-metrics` outputs text exposition format with gauges/counters (piclaw_websocket_*).
+- Created `websocket-metrics-tool` to query the metrics endpoint from within the agent.
+- Registered the tool in factory.ts; it is always direct (not isolated).
+- Integrated WebSocket server metrics into the TUI metrics widget (displays active connections, total connections, errors, PTYs, uptime).
+- Added unit tests for the tool (4 tests covering no-URL, success, fetch error, HTTP error).
+- All tests: **1148 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +4 (from 1144 to 1148)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+WebSocket TUI server is fully observable:
+- External monitoring via JSON (`/metrics`) and Prometheus (`/prometheus-metrics`).
+- Agent can query its own server via `websocket-metrics` tool.
+- Users can see stats in the TUI metrics widget (when PI_WEBSOCKET_METRICS_URL is set).
+
+**Next**
+- Consider adding WebSocket server metrics to the existing `.piclaw/metrics.json` rotation for historical analysis.
+- Possibly expose metrics retention configuration for WebSocket metrics.
+- Monitor real-world usage and adjust default intervals if needed.
+
+---
