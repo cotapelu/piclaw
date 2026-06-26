@@ -870,3 +870,28 @@ WebSocket TUI server is fully observable:
 - Monitor real-world usage and adjust default intervals if needed.
 
 ---
+
+### Iteration 49 — 2026-06-26 (WebSocket Integration Testing)
+
+**P5 — Testing & Quality:**
+- Added integration test suite `websocket-tui-server-integration.test.ts` covering:
+  - HTML client served at `/`
+  - `/metrics` returns valid JSON with expected fields
+  - `/prometheus-metrics` returns Prometheus text format with expected metric names
+  - Unknown paths return 404
+- Test starts server on ephemeral port, waits for listening, performs real HTTP requests, then shuts down.
+- All tests: **1152 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +4 (from 1148 to 1152)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+WebSocket TUI server now has end-to-end test coverage ensuring critical endpoints behave correctly. Increases confidence in the feature and guards against regressions.
+
+**Next**
+- Consider adding WebSocket protocol integration tests (upgrade, message flow, PTY interaction) if needed.
+- Continue monitoring test stability.
+
+---

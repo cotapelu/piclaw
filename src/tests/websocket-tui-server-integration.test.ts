@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { startWebsocketTuiServer, getWebSocketServerMetrics } from '../websocket-tui-server.js';
+import { WebSocket as WSClient } from 'ws';
 
 describe('WebSocket TUI Server Integration', () => {
   let handle: { stop: () => void; server: any } | null = null;
@@ -68,5 +69,39 @@ describe('WebSocket TUI Server Integration', () => {
   it('should return 404 for unknown paths', async () => {
     const res = await fetch(`http://127.0.0.1:${port}/unknown`);
     expect(res.status).toBe(404);
+  });
+
+  it('should handle WebSocket connection and receive PTY output', async () => {
+    const wsUrl = `ws://127.0.0.1:${port}/tui`;
+    const messages: string[] = [];
+    const errors: any[] = [];
+
+    await new Promise<void>((resolve, reject) => {
+      const ws = new WSClient(wsUrl);
+      ws.on('message', (data) => {
+        messages.push(data.toString());
+      });
+      ws.on('error', (err) => {
+        errors.push(err);
+      });
+      ws.on('close', () => {
+        // Done
+        resolve();
+      });
+      // No need to send anything; PTY runs --version and exits.
+      // Set a timeout to avoid hanging forever if close doesn't happen.
+      setTimeout(() => {
+        ws.terminate();
+        reject(new Error('WebSocket did not close within 5s'));
+      }, 5000);
+    });
+
+    // After close, check that we received some output containing version info
+    const combined = messages.join('');
+    // The version output should contain the word 'PiClaw' or a version number pattern
+    expect(combined.length).toBeGreaterThan(0);
+    // The child process prints version to stdout, which PTY forwards
+    expect(combined).toMatch(/PiClaw|piclaw/);
+    expect(errors).toHaveLength(0);
   });
 });
