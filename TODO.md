@@ -104,3 +104,10 @@
 - Each iteration must update evolution docs (AGENT_METRICS.md, AGENT_PROFILE.md, EVOLUTION.md)
 - After completing a phase, identify next highest-impact task and continue
 - Follow AGENTS.md protocol: Plan → Code → Test → Evaluate → Decide → Repeat
+
+## WebSocket Observability (P4 Follow-up)
+- [ ] Add WebSocket TUI server metrics (active connections, total connections, errors, PTY processes) to metrics-widget
+- [ ] Export WebSocket metrics via Prometheus tool (counters/gauges)
+- [ ] Add config option for WebSocket metrics retention (same as general metrics)
+
+---

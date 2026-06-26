@@ -26,6 +26,54 @@ interface StartOptions {
   cwd: string;
 }
 
+export interface WebSocketServerMetrics {
+  activeConnections: number;
+  totalConnections: number;
+  totalErrors: number;
+  totalPtySpawned: number;
+  startTime: Date;
+  uptimeSeconds: number;
+}
+
+export class WebSocketMetrics {
+  private activeConnections = 0;
+  private totalConnections = 0;
+  private totalErrors = 0;
+  private totalPtySpawned = 0;
+  private readonly startTime = new Date();
+
+  incConnection() {
+    this.activeConnections++;
+    this.totalConnections++;
+  }
+
+  decConnection() {
+    if (this.activeConnections > 0) this.activeConnections--;
+  }
+
+  incError() {
+    this.totalErrors++;
+  }
+
+  incPtySpawned() {
+    this.totalPtySpawned++;
+  }
+
+  getSnapshot(): WebSocketServerMetrics {
+    return {
+      activeConnections: this.activeConnections,
+      totalConnections: this.totalConnections,
+      totalErrors: this.totalErrors,
+      totalPtySpawned: this.totalPtySpawned,
+      startTime: new Date(this.startTime),
+      uptimeSeconds: (Date.now() - this.startTime.getTime()) / 1000,
+    };
+  }
+}
+
+// Global metrics instance (per server instance)
+let serverMetrics: WebSocketMetrics | null = null;
+
 /**
  * Embedded HTML client using xterm.js
  * Served at the root path.
@@ -147,6 +195,14 @@ export function parseWebsocketArgs(args: string[]): {
 }
 
 /**
+ * Get the current server metrics if the server is running.
+ * Returns null if the server hasn't been started.
+ */
+export function getWebSocketServerMetrics(): WebSocketServerMetrics | null {
+  return serverMetrics ? serverMetrics.getSnapshot() : null;
+}
+
+/**
  * Starts the WebSocket TUI server.
  *
  * @param options Server configuration
@@ -157,6 +213,21 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
     if (req.url === '/' || req.url === '/index.html') {
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(HTML_CLIENT);
+    } else if (req.url === '/metrics') {
+      if (serverMetrics) {
+        const snapshot = serverMetrics.getSnapshot();
+        // Convert Date to ISO string for JSON serialization
+        const payload = {
+          ...snapshot,
+          startTime: snapshot.startTime.toISOString(),
+        };
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(payload));
+      } else {
+        res.writeHead(503, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify({ error: 'Metrics not available' }));
+      }
+      return;
     } else {
       res.writeHead(404);
       res.end();
@@ -165,10 +236,15 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
 
   const wss = new WebSocketServer({ server: httpServer, path: '/tui' });
 
+  // Initialize metrics collector
+  serverMetrics = new WebSocketMetrics();
+
   // Track PTY processes per WebSocket
   const ptyProcesses = new Map<WebSocket, IPty>();
 
   wss.on('connection', (ws: WebSocket, req) => {
+    serverMetrics!.incConnection();
+
     // Token authentication: expect first message to be the token if required
     const authenticate = (): Promise<boolean> => {
       if (!options.token) return Promise.resolve(true);
@@ -176,6 +252,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
         const timeout = setTimeout(() => {
           ws.removeListener('message', onMessage);
           ws.close(1008, 'Token timeout');
+          serverMetrics!.incError();
           resolve(false);
         }, 5000);
 
@@ -191,6 +268,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
             resolve(true);
           } else {
             ws.close(1008, 'Invalid token');
+            serverMetrics!.incError();
             resolve(false);
           }
         }
@@ -214,6 +292,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
         env: process.env as NodeJS.ProcessEnv,
       });
 
+      serverMetrics!.incPtySpawned();
       ptyProcesses.set(ws, ptyProcess);
 
       ptyProcess.onData((data: string) => {
@@ -224,6 +303,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
 
       ptyProcess.onExit(({ exitCode }) => {
         ptyProcesses.delete(ws);
+        serverMetrics!.decConnection();
         if (ws.readyState === WebSocket.OPEN) {
           ws.close(1000, `Process exited with code ${exitCode}`);
         }
@@ -250,6 +330,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
       const cleanup = () => {
         ptyProcess.kill();
         ptyProcesses.delete(ws);
+        serverMetrics!.decConnection();
       };
       ws.on('close', cleanup);
       ws.on('error', cleanup);
@@ -259,6 +340,7 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
 
   httpServer.on('error', (err) => {
     console.error('WebSocket TUI server error:', err);
+    serverMetrics!.incError();
   });
 
   httpServer.listen(options.port, options.address, () => {

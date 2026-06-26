@@ -3,49 +3,42 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Phase: WebSocket TUI Transport",
+      "name": "Phase: WebSocket Observability",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Add dependencies (ws, node-pty) to package.json",
-          "status": "completed"
+          "content": "Add WebSocketMetrics collector to track connections, errors, PTY count",
+          "status": "in_progress"
         },
         {
           "id": "task-2",
-          "content": "Create WebSocket server module (src/websocket-tui-server.ts)",
-          "status": "completed"
+          "content": "Register websocket-metrics tool to expose stats",
+          "status": "pending"
         },
         {
           "id": "task-3",
-          "content": "Create HTML client page (public/tui.html)",
-          "status": "completed",
-          "notes": "Embedded in server module"
+          "content": "Integrate metrics into TUI metrics widget",
+          "status": "pending"
         },
         {
           "id": "task-4",
-          "content": "Integrate server into cli.ts with flags",
-          "status": "completed"
+          "content": "Add Prometheus exporter support for websocket metrics",
+          "status": "pending"
         },
         {
           "id": "task-5",
-          "content": "Add unit tests for WebSocket server",
-          "status": "completed"
+          "content": "Write unit tests for WebSocketMetrics",
+          "status": "pending"
         },
         {
           "id": "task-6",
-          "content": "Update README with remote TUI instructions",
-          "status": "completed"
-        },
-        {
-          "id": "task-7",
-          "content": "Run tests and ensure build passes",
-          "status": "completed",
-          "notes": "1135 passing tests, build successful"
+          "content": "Run tests and build",
+          "status": "pending"
         }
       ]
     }
   ],
-  "nextTaskId": 8,
+  "nextTaskId": 7,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-26T22:55:23.235Z"
+  "updatedAt": "2026-06-26T22:59:29.916Z"
 }
