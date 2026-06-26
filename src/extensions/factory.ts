@@ -28,6 +28,7 @@ import { registerDbClientTool } from "./tools/db-client-tool.js";
 import { registerCacheManagerTool } from "./tools/cache-manager-tool.js";
 import { registerPrometheusMetricsTool } from "./tools/prometheus-metrics-tool.js";
 import { registerSessionHealthTool } from "./tools/session-health-tool.js";
+import { registerWebsocketMetricsTool } from "./tools/websocket-metrics-tool.js";
 import { registerTeamTool } from "./team/index.js";
 import { registerSubToolLoaderExtension } from "./tools/subtool-loader.js";
 import { registerToolTemplate } from "./tools/tool-template.js";
@@ -291,6 +292,9 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   registerSkillReaderExtension(api);
   // Subtool loader extension
   registerSubToolLoaderExtension(api);
+
+  // WebSocket metrics tool (always direct)
+  registerWebsocketMetricsTool(api);
 
   // Custom message renderers: direct only when not isolating; otherwise loaded via worker above
   if (!isolatePlugins) {

@@ -210,13 +210,15 @@ export function getWebSocketServerMetrics(): WebSocketServerMetrics | null {
  */
 export function startWebsocketTuiServer(options: StartOptions): { stop: () => void } {
   const httpServer: HttpServer = createServer(async (req, res) => {
-    if (req.url === '/' || req.url === '/index.html') {
+    const url = req.url || '/';
+    if (url === '/' || url === '/index.html') {
       res.writeHead(200, { 'Content-Type': 'text/html' });
       res.end(HTML_CLIENT);
-    } else if (req.url === '/metrics') {
+      return;
+    }
+    if (url === '/metrics') {
       if (serverMetrics) {
         const snapshot = serverMetrics.getSnapshot();
-        // Convert Date to ISO string for JSON serialization
         const payload = {
           ...snapshot,
           startTime: snapshot.startTime.toISOString(),
@@ -228,10 +230,37 @@ export function startWebsocketTuiServer(options: StartOptions): { stop: () => vo
         res.end(JSON.stringify({ error: 'Metrics not available' }));
       }
       return;
-    } else {
-      res.writeHead(404);
-      res.end();
     }
+    if (url === '/prometheus-metrics') {
+      if (serverMetrics) {
+        const m = serverMetrics.getSnapshot();
+        const lines = [
+          '# HELP piclaw_websocket_active_connections Number of active WebSocket connections',
+          '# TYPE piclaw_websocket_active_connections gauge',
+          `piclaw_websocket_active_connections ${m.activeConnections}`,
+          '# HELP piclaw_websocket_total_connections Total number of WebSocket connections accepted',
+          '# TYPE piclaw_websocket_total_connections counter',
+          `piclaw_websocket_total_connections ${m.totalConnections}`,
+          '# HELP piclaw_websocket_total_errors Total number of errors encountered',
+          '# TYPE piclaw_websocket_total_errors counter',
+          `piclaw_websocket_total_errors ${m.totalErrors}`,
+          '# HELP piclaw_websocket_pty_spawned Total number of PTY processes spawned',
+          '# TYPE piclaw_websocket_pty_spawned counter',
+          `piclaw_websocket_pty_spawned ${m.totalPtySpawned}`,
+          '# HELP piclaw_websocket_uptime_seconds Server uptime in seconds',
+          '# TYPE piclaw_websocket_uptime_seconds gauge',
+          `piclaw_websocket_uptime_seconds ${m.uptimeSeconds.toFixed(6)}`,
+        ];
+        res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
+        res.end(lines.join('\n'));
+      } else {
+        res.writeHead(503, { 'Content-Type': 'text/plain' });
+        res.end('# Metrics not available\n');
+      }
+      return;
+    }
+    res.writeHead(404);
+    res.end();
   });
 
   const wss = new WebSocketServer({ server: httpServer, path: '/tui' });

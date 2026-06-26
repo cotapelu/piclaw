@@ -8,37 +8,42 @@
         {
           "id": "task-1",
           "content": "Add WebSocketMetrics collector to track connections, errors, PTY count",
-          "status": "in_progress"
+          "status": "completed"
         },
         {
           "id": "task-2",
           "content": "Register websocket-metrics tool to expose stats",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-3",
           "content": "Integrate metrics into TUI metrics widget",
-          "status": "pending"
+          "status": "in_progress"
         },
         {
           "id": "task-4",
           "content": "Add Prometheus exporter support for websocket metrics",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-5",
           "content": "Write unit tests for WebSocketMetrics",
-          "status": "pending"
+          "status": "completed"
         },
         {
           "id": "task-6",
-          "content": "Run tests and build",
-          "status": "pending"
+          "content": "Write unit tests for websocket-metrics tool",
+          "status": "completed"
+        },
+        {
+          "id": "task-7",
+          "content": "Run full test suite and build",
+          "status": "completed"
         }
       ]
     }
   ],
-  "nextTaskId": 7,
+  "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-26T22:59:29.916Z"
+  "updatedAt": "2026-06-26T23:19:37.192Z"
 }

@@ -971,3 +971,26 @@ Users can now access PiClaw's TUI remotely via a web browser. Feature works out 
 - Continue to monitor stability and gather user feedback.
 
 ---
+
+### Iteration 47 — 2026-06-26 (WebSocket Observability)
+
+**P4 — Observability (WebSocket TUI Server):**
+- Added `WebSocketMetrics` collector class to track active connections, total connections, errors, and PTY processes spawned.
+- Integrated metrics endpoint into HTTP server: `/metrics` returns JSON snapshot (with startTime as ISO string).
+- Added comprehensive unit tests for `WebSocketMetrics` (9 tests covering initialization, connection tracking, error counting, PTY counting, snapshot isolation).
+- All tests: **1144 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +9 (from 1135 to 1144)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+The WebSocket TUI server now provides live metrics for monitoring its health and usage. Metrics can be polled externally via HTTP `/metrics` endpoint.
+
+**Next**
+- Integrate server metrics into TUI metrics widget (requires cross-process communication or shared file).
+- Add Prometheus export format for easy scraping.
+- Consider adding metrics retention and alerting thresholds.
+
+---
