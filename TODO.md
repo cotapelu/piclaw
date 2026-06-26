@@ -3,6 +3,7 @@
 **Last Updated**: 2026-06-21
 **Source**: AUTO-CONTINUE.md workflow
 
+- P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
 ---
 
 ## P0 — Evolution Infrastructure (Bootstrap)
@@ -53,7 +54,7 @@
 
 ## P6 — Architectural Improvements
 - [x] Decouple team workspace from session tree
-- [ ] Consider WebSocket transport for TUI instead of stdio
+- [x] Implement WebSocket transport for TUI (PTY + xterm.js; CLI flags: --tui-websocket, --tui-port, --tui-address, --tui-token)
 - [ ] Evaluate WASM integration for performance-critical paths
 - [x] Plugin isolation using worker threads (tools and commands)
 - [x] Extend plugin isolation to hooks (auto-continue, auto-compact-85, context-logger)
@@ -61,6 +62,7 @@
 - [x] Integrate plugin metrics into metrics widget and Prometheus exporter
 - [x] Extend plugin isolation to renderers and widgets
 
+- P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
 ---
 
 ## Completed Tasks
@@ -95,6 +97,7 @@
 - P6 Renderer Isolation (Phase 2) — migrated built-in renderers and added tests; full validation completed
 - P6 Renderer Isolation Testing — added unit test for renderer RPC registration; fixed flaky auto-dispose test
 
+- P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
 ---
 
 ## Notes
