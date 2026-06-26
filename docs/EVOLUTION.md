@@ -1047,3 +1047,27 @@ WebSocket TUI server now has end-to-end test coverage ensuring critical endpoint
 - Continue monitoring test stability.
 
 ---
+
+### Iteration 50 — 2026-06-26 (WebSocket Protocol Integration Testing)
+
+**P5 — Testing & Quality:**
+- Extended integration test suite with WebSocket protocol test:
+  - Connects a WebSocket client to `/tui` endpoint
+  - Verifies PTY output streaming by sending `--version` child process
+  - Asserts non-empty output containing "PiClaw" identifier
+  - Confirms clean WebSocket close after PTY exit
+- All tests: **1157 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +5 (from 1152 to 1157)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+The full WebSocket communication path is now covered by integration tests, ensuring the server correctly upgrades connections, spawns PTY, and forwards data bidirectionally until process exit.
+
+**Next**
+- Consider adding fuzzing for WebSocket message handling (malformed frames, large payloads).
+- Monitor real-world usage for any edge cases not covered.
+
+---
