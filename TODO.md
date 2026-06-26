@@ -92,6 +92,7 @@
 - P6 Plugin Isolation Default — set `plugins.isolate` to `true` as the default; built-in tools, commands, and hooks run isolated out-of-the-box
 - Metrics Retention Policy — age-based cleanup of old metrics files, configurable via `metricsRetentionDays` (default 30)
 - P6 Widget Isolation — isolated both metrics-widget and team-widget via RPC context proxy and worker loading; team-widget uses polling via RPC
+- P6 Renderer Isolation (Phase 1) — added component serialization and plugin manager proxy registration (infrastructure only, renderers still direct)
 
 ---
 

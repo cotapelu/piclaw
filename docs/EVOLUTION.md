@@ -834,8 +834,33 @@ To complete widget isolation, `team-widget` required TeamManager RPC methods and
 `team-widget` now runs isolated; main widgets (metrics, team) both support isolation. Polling is acceptable for current scale.
 
 **Next**
-- Evaluate renderer isolation (requires async render support).
-- Address any remaining P6 items (WebSocket, WASM).
+- Start renderer isolation (infrastructure in place, need to migrate renderers).
+- Continue P6 (WebSocket, WASM).
+
+---
+
+### Iteration 42 — 2026-06-26 (Renderer Isolation Infrastructure)
+
+**Context**
+Renderer isolation requires async communication with workers and a way to serialize TUI components.
+
+**Changes**
+- Created `component-serializer.ts` with `componentToDescriptor` and `descriptorToComponent` functions (initially supports `Text`).
+- Modified `plugin-worker-entry.ts`: `render_message` RPC returns a descriptor instead of raw Component.
+- Extended `PluginManager.handleWorkerMessage('register_renderer')` to register a proxy renderer with `mainApi` that forwards to worker and converts descriptor to Component.
+- No changes to built-in renderers yet; they remain direct. Infrastructure ready for future migration.
+
+**Metrics**
+- Tests: 1125 passing (unchanged)
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+Renderer isolation foundation established. Next step: migrate simple renderers (todos, memory, etc.) to workers.
+
+**Next**
+- Migrate built-in renderers to workers; extend serializer as needed.
+- Continue P6.
 
 ---
 *This file will be updated after each major iteration to reflect new trajectory changes.*

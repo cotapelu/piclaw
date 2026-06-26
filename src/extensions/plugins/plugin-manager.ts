@@ -1,6 +1,7 @@
 import { PluginWorker } from './plugin-worker.js';
 import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import type { PluginMessage } from './plugin-protocol.js';
+import { descriptorToComponent } from './component-serializer.js';
 import { TeamManager, getDefaultTeamManager } from '../team/team-manager.js';
 
 /**
@@ -400,20 +401,15 @@ export class PluginManager {
             break;
           }
           case 'register_renderer': {
-            const { customType, renderer } = params as any;
+            const { customType } = params as any;
             this.rendererWorkers.set(customType, worker);
-            // We could register a proxy renderer in main that calls worker.invoke('render_message').
-            // But for now, skip or register directly if not isolated? We'll assume this extension is isolated, so we need to proxy.
+            // Register a proxy renderer with main that forwards to worker and builds component from descriptor
             if (this.mainApi && typeof this.mainApi.registerMessageRenderer === 'function') {
-              // Wrap renderer to call worker
               const proxyRenderer = async (message: any, options: any, theme: any) => {
-                return await worker.invoke('render_message', { customType, message, options, theme });
+                const desc = await worker.invoke('render_message', { customType, message, options, theme });
+                return descriptorToComponent(desc);
               };
-              // Note: The system expects a synchronous function; but this returns a Promise.
-              // This may break if the system doesn't support async renderers. We'll not register proxy for now.
-              // Instead, we'll skip isolating renderers in this phase.
-              // For completeness, we could register a placeholder and later fill? Not applicable.
-              // So we'll leave rendererWorkers mapping for future use but not register with mainApi.
+              this.mainApi.registerMessageRenderer(customType, proxyRenderer as any);
             }
             response.result = undefined;
             break;

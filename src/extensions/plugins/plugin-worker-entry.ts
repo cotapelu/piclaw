@@ -1,5 +1,6 @@
 import { parentPort, workerData } from 'node:worker_threads';
 import type { PluginMessage, RpcRequest } from './plugin-protocol.js';
+import { componentToDescriptor } from './component-serializer.js';
 
 type ExtensionModule = any;
 
@@ -240,7 +241,9 @@ const hookRegistry = new Map<string, Set<any>>();
           const { customType, message, options, theme } = params as any;
           const renderer = rendererRegistry.get(customType);
           if (!renderer) throw new Error(`Renderer for ${customType} not found`);
-          result = renderer(message, options, theme);
+          const component = await renderer(message, options, theme);
+          // Convert component to serializable descriptor for IPC
+          result = componentToDescriptor(component);
           break;
         }
         case 'invoke_hook': {
