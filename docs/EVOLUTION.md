@@ -917,4 +917,30 @@ Renderer isolation fully validated. The system now has comprehensive coverage fo
 - Consider expanding component serializer to support additional TUI component types as needed.
 
 ---
+
+### Iteration 45 — 2026-06-26 (ADR: WebSocket Transport Design)
+
+**Context**
+With renderer isolation complete, the next high‑impact P6 item is enabling remote TUI access. This iteration produced a detailed design.
+
+**Changes**
+- Drafted ADR 0008: "WebSocket Transport for TUI".
+  - Proposes PTY + WebSocket server approach.
+  - Documents goals, options, design, risks, and phased implementation plan.
+- Updated `docs/adr/index.md` to list recent ADRs (0006, 0007, 0008).
+
+**Metrics**
+- New documentation: ADR 0008 (~600 lines).
+- No test changes; all 1126 tests pass.
+- Build: unchanged.
+
+**Outcome**
+Architecture decision captured and shared. Provides a clear roadmap for implementing remote TUI.
+
+**Next**
+- Review ADR 0008 with team; decide on implementation.
+- If approved, start prototype of PTY + WebSocket server.
+- Continue P6: evaluate WASM integration for performance‑critical paths.
+
+---
 *This file will be updated after each major iteration to reflect new trajectory changes.*
