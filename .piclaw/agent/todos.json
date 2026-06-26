@@ -3,47 +3,49 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Plugin Worker Observability",
+      "name": "Phase: WebSocket TUI Transport",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Design metrics to track: worker lifespan, message counts, errors, RTT",
+          "content": "Add dependencies (ws, node-pty) to package.json",
           "status": "completed"
         },
         {
           "id": "task-2",
-          "content": "Implement worker lifecycle tracking in PluginWorker (start, exit, crash)",
+          "content": "Create WebSocket server module (src/websocket-tui-server.ts)",
           "status": "completed"
         },
         {
           "id": "task-3",
-          "content": "Add RPC latency tracking for worker.invoke()",
-          "status": "completed"
+          "content": "Create HTML client page (public/tui.html)",
+          "status": "completed",
+          "notes": "Embedded in server module"
         },
         {
           "id": "task-4",
-          "content": "Expose metrics via PluginManager.getWorkersMetrics()",
+          "content": "Integrate server into cli.ts with flags",
           "status": "completed"
         },
         {
           "id": "task-5",
-          "content": "Add unit tests for PluginWorker metrics",
+          "content": "Add unit tests for WebSocket server",
           "status": "completed"
         },
         {
           "id": "task-6",
-          "content": "Run full test suite; ensure no regressions",
+          "content": "Update README with remote TUI instructions",
           "status": "completed"
         },
         {
           "id": "task-7",
-          "content": "Update AGENT_METRICS.md, EVOLUTION.md, TODO.md; commit",
-          "status": "completed"
+          "content": "Run tests and ensure build passes",
+          "status": "completed",
+          "notes": "1135 passing tests, build successful"
         }
       ]
     }
   ],
   "nextTaskId": 8,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-21T12:02:58.136Z"
+  "updatedAt": "2026-06-26T22:55:23.235Z"
 }

@@ -56,6 +56,44 @@ Or with options:
 piclaw --cwd /path/to/project --model anthropic:claude-opus-4-5 --thinking high --verbose
 ```
 
+## Remote TUI via WebSocket
+
+PiClaw can serve its terminal UI over WebSocket, allowing you to connect from a web browser on any device on your network.
+
+### Start the WebSocket server
+
+```bash
+# Build first
+npm run build
+
+# Start WebSocket TUI on port 8080 (default)
+piclaw --tui-websocket
+
+# Custom port and bind address
+piclaw --tui-websocket=9000 --tui-address=0.0.0.0
+
+# Enable token authentication
+piclaw --tui-websocket=8080 --tui-token=mysecret
+```
+
+Then open a browser to `http://localhost:8080/` (or your LAN IP). If you set a token, append it as `?token=mysecret`.
+
+### How it works
+
+- The `--tui-websocket` flag starts an HTTP server that serves a simple HTML page with xterm.js.
+- Each WebSocket connection spawns a new `piclaw` CLI process attached to a PTY.
+- The terminal input/output is forwarded over the WebSocket.
+- You can pass additional CLI arguments (e.g., `--model`, `--session`) that are forwarded to the child process.
+
+**Security**: By default the server only listens on `127.0.0.1`. Use `--tui-address=0.0.0.0` to expose on all interfaces (use with caution). Token authentication (`--tui-token`) is recommended when exposing beyond localhost.
+
+### Notes
+
+- The child process uses `dist/cli.js`, so you must run `npm run build` before enabling this feature.
+- The server runs until you stop it (Ctrl+C).
+- Connections are independent; each gets its own session and workspace.
+
+
 ### CLI Options
 
 - `--cwd <path>` - Working directory (default: current)
