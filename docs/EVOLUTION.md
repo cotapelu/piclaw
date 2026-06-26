@@ -1097,3 +1097,28 @@ WebSocket server metrics are now persisted for historical analysis, enabling tre
 - Evaluate adding alerts for abnormal connection counts/error rates.
 
 ---
+
+### Iteration 52 — 2026-06-26 (WebSocket Edge Case Fuzzing)
+
+**P5 — Testing & Quality:**
+- Added edge case test suite `websocket-tui-server-edge-cases.test.ts` with 4 tests:
+  - Invalid JSON messages tolerated without crash
+  - Binary data handled safely
+  - Resize messages with missing/null fields ignored
+  - Flood of malformed messages does not cause unhandled errors
+- Tests exercise the WebSocket message handler against malformed inputs to ensure robustness.
+- All tests: **1157 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +4 (from 1153 to 1157)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+The WebSocket TUI server is now more resilient to malformed client inputs. These edge case tests guard against regressions in message parsing and error handling.
+
+**Next**
+- Consider expanding fuzzing to cover all tool inputs systematically.
+- Evaluate adding property-based tests for WebSocket message handling.
+
+---
