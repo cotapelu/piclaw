@@ -247,3 +247,5 @@ export function registerMetricsWidget(api: ExtensionAPI): void {
     });
   });
 }
+
+export default registerMetricsWidget;

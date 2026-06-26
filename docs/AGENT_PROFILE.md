@@ -14,7 +14,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **TUI performance**: Memoized rendering and event-driven updates reduce CPU usage; metrics dashboard provides observability.
 - **Documentation**: CONTRIBUTING guide, ADRs, and extensive inline comments.
 - **Team isolation**: `InstanceTeamManager` provides per-session team state, eliminating cross-session interference.
-- **Plugin isolation**: Worker-based isolation for tools, commands, hooks, and widgets (metrics-widget, team-widget). RPC context proxy enables safe access to main services.
+- **Plugin isolation**: Worker-based isolation for tools, commands, hooks, widgets (metrics-widget, team-widget), and renderers (todos, memory, branch-summary, team-ops). RPC context proxy enables safe access to main services.
 - **Plugin isolation default**: `plugins.isolate` is now `true` by default; built-in tools, commands, and hooks run isolated automatically.
 - **Plugin observability**: Plugin worker metrics are exposed via the TUI metrics widget and Prometheus exporter, enabling real-time monitoring of plugin health and performance.
 
@@ -47,7 +47,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 ## Improvement Focus (Next)
 
 - **Windows compatibility testing**: Ensure path handling and process spawning work on Windows; add CI matrix if feasible.
-- **Plugin isolation** (P6): Focus on renderer isolation (requires async rendering support in core).
+- **P6 Remaining Items**: evaluate WebSocket transport for TUI instead of stdio; investigate WASM integration for performance‑critical paths.
 
 *Note: Coverage target ≥80% achieved; continue to maintain as features evolve.*
 

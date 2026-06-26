@@ -679,4 +679,38 @@ Renderer isolation foundation established. Next step: migrate one renderer (e.g.
 
 ---
 
-### Planned Refactors (Upcoming Iterations)
+#### Iteration 43 — 2026-06-26 (Renderer Isolation Phase 2: Migrate Renderers)
+
+**Context**
+Renderer isolation infrastructure was in place but renderers still ran directly. Phase 2 migrates all built‑in renderers to worker isolation.
+
+**Changes**
+- Updated `factory.ts` isolate block: added loading of `todos-renderer`, `memory-renderer`, `branch-summary-renderer`, `team-ops-renderer` via `pluginManager.loadExtension` with `entryName = register${toPascal(name)}`.
+- Adjusted renderer registration to conditional: direct only when `!isolatePlugins`.
+- Added `default` export to each built-in renderer module to make them plugin‑compatible (`export default registerXRenderer`).
+- Added `default` export to `metrics-widget` and `team-widget` (previously missing).
+- Fixed flaky `team-registry.auto-dispose.test.ts`: replaced fixed‑time wait with polling loop (accounts for async file I/O under load).
+- All 1125 tests pass. Build succeeds. No regressions.
+
+**Metrics**
+- Tests: 1125 passing
+- Build: Successful
+- Regressions: 0
+
+**Outcome**
+All built‑in renderers now run isolated. Widgets also isolated with RPC. The system's core extensibility surface (tools, commands, hooks, renderers, widgets) is fully isolatable, improving robustness and security.
+
+**Next**
+- Continue P6: evaluate remaining items (WebSocket transport, WASM integration).
+- Ensure component serializer supports additional TUI component types as needed.
+
+---
+
+**Next highest‑impact tasks after Phase 2**
+1. **Renderer Isolation** — migrate remaining renderers (if any) or enable isolation by default.
+2. **P6 Remaining Items** — investigate WebSocket transport for TUI; evaluate WASM for critical paths.
+3. **Testing** — add tests for edge‑cases in component serialization; extend coverage for new async rendering flow.
+
+---
+
+## Planned Refactors (Upcoming Iterations)

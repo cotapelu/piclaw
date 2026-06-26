@@ -61,3 +61,5 @@ export function registerBranchSummaryRenderer(api: ExtensionAPI): void {
     return new Text(lines.join("\n"));
   });
 }
+
+export default registerBranchSummaryRenderer;

@@ -199,3 +199,5 @@ export function registerTeamWidget(api: ExtensionAPI): void {
 
   // The /team command is registered separately by team-command.ts
 }
+
+export default registerTeamWidget;

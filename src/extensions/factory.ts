@@ -159,7 +159,7 @@ export default async function extensionsAggregator(api: import("@earendil-works/
       });
     }
 
-    // Load metrics widget in worker (as proof-of-concept for widget isolation)
+    // Load metrics widget in worker
     const metricsWidgetPath = join(__dirname, 'metrics', 'metrics-widget.js');
     await pluginManager.loadExtension(metricsWidgetPath, 'metrics-widget');
     const metricsWorker = pluginManager.getWorker('metrics-widget')!;
@@ -188,6 +188,28 @@ export default async function extensionsAggregator(api: import("@earendil-works/
       teamWorker.underlying.on('message', onMessage);
       teamWorker.underlying.once('error', reject);
     });
+
+    // Load simple renderers in workers (todos, memory, branch-summary, team-ops)
+    const rendererModules = [
+      { name: 'todos-renderer', path: join(__dirname, 'renderers', 'todos-renderer.js') },
+      { name: 'memory-renderer', path: join(__dirname, 'renderers', 'memory-renderer.js') },
+      { name: 'branch-summary-renderer', path: join(__dirname, 'renderers', 'branch-summary-renderer.js') },
+      { name: 'team-ops-renderer', path: join(__dirname, 'renderers', 'team-ops-renderer.js') },
+    ];
+    for (const { name, path: modulePath } of rendererModules) {
+      await pluginManager.loadExtension(modulePath, name);
+      const worker = pluginManager.getWorker(name)!;
+      await new Promise<void>((resolve, reject) => {
+        const onMessage = (msg: any) => {
+          if (msg.type === 'event' && msg.event === 'ready') {
+            worker.underlying.removeListener('message', onMessage);
+            resolve();
+          }
+        };
+        worker.underlying.on('message', onMessage);
+        worker.underlying.once('error', reject);
+      });
+    }
   } else {
     // Direct registration for all simple tools
     for (const name of toolModules) {
@@ -270,11 +292,13 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   // Subtool loader extension
   registerSubToolLoaderExtension(api);
 
-  // Custom message renderers (always direct for now)
-  registerTodosRenderer(api);
-  registerMemoryRenderer(api);
-  registerBranchSummaryRenderer(api);
-  registerTeamOpsRenderer(api);
+  // Custom message renderers: direct only when not isolating; otherwise loaded via worker above
+  if (!isolatePlugins) {
+    registerTodosRenderer(api);
+    registerMemoryRenderer(api);
+    registerBranchSummaryRenderer(api);
+    registerTeamOpsRenderer(api);
+  }
   // Widgets: direct only when not isolating
   if (!isolatePlugins) {
     registerTeamWidget(api);

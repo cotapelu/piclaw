@@ -85,6 +85,8 @@ export function registerTodosRenderer(api: ExtensionAPI): void {
   });
 }
 
+export default registerTodosRenderer;
+
 function getStatusIcon(status: string): string {
   switch (status) {
     case "completed": return "✅";
