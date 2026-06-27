@@ -1,6 +1,6 @@
 // THIS FILE IS AUTO-GENERATED
 // Source: https://models.dev/api.json
-// Generated: 2026-06-27T00:17:48.611Z
+// Generated: 2026-06-27T12:12:11.271Z
 // DO NOT EDIT MANUALLY - Run 'npm run generate-custom-models' to update
 
 import type { Model } from "@earendil-works/pi-ai";
@@ -3124,7 +3124,7 @@ export const CUSTOM_MODELS = {
       api: "openai-completions",
       provider: "kilo",
       baseUrl: "https://api.kilo.ai/api/gateway",
-      reasoning: true,
+      reasoning: false,
       input: ["text"],
       cost: {
         input: 0.071,

@@ -81,7 +81,8 @@ export default async function extensionsAggregator(api: import("@earendil-works/
     'http-client-tool',
     'cache-manager-tool',
     'db-client-tool',
-    'memory-tool'
+    'memory-tool',
+    'websocket-metrics-tool'
   ];
 
   // List of command modules that can be isolated
@@ -257,6 +258,9 @@ export default async function extensionsAggregator(api: import("@earendil-works/
         case 'memory-tool':
           registerMemoryTool(api);
           break;
+        case 'websocket-metrics-tool':
+          registerWebsocketMetricsTool(api);
+          break;
       }
     }
 
@@ -293,8 +297,7 @@ export default async function extensionsAggregator(api: import("@earendil-works/
   // Subtool loader extension
   registerSubToolLoaderExtension(api);
 
-  // WebSocket metrics tool (always direct)
-  registerWebsocketMetricsTool(api);
+
 
   // Custom message renderers: direct only when not isolating; otherwise loaded via worker above
   if (!isolatePlugins) {
