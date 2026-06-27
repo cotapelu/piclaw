@@ -21,7 +21,8 @@
     "check": "npm run typecheck",
     "test": "vitest run",
     "prepublishOnly": "npm run build && npm test",
-    "benchmark": "tsx src/benchmarks/team-performance.ts"
+    "benchmark": "tsx src/benchmarks/team-performance.ts",
+    "test:docker": "./scripts/docker-run-tests.sh"
   },
   "dependencies": {
     "@earendil-works/pi-agent-core": "^0.80.2",

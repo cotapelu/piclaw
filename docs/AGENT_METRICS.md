@@ -1013,6 +1013,32 @@ WebSocket TUI server robustness significantly improved against malformed frames 
 
 **Next**
 - Evaluate WASM integration for performance-critical paths (P6).
-- Address reproducible integration test environments (P5).
+- Continue with remaining P5 tasks (reproducible environments addressed).
+
+---
+
+### Iteration 55 — 2026-06-27 (Reproducible Integration Test Environments)
+
+**P5 — Testing & Reliability:**
+- Implemented Docker-based reproducible test environment to ensure consistent CI and onboarding.
+  - Added `Dockerfile.test` based on `node:20-alpine` with build dependencies for native modules.
+  - Added `docker-compose.test.yml` for orchestration.
+  - Added `scripts/docker-run-tests.sh` convenience wrapper.
+  - Updated `package.json` with `test:docker` script.
+  - Updated `CONTRIBUTING.md` with detailed instructions.
+- The environment installs dependencies, builds the project, and runs the full test suite.
+- All existing tests pass unchanged inside the Docker container.
+
+**Metrics**
+- Tests: 1158 passing (unchanged), 124 files, 0 skipped.
+- Build: Success (both host and Docker).
+- Regressions: 0.
+
+**Outcome**
+Developers can now run tests in a clean, isolated environment with `./scripts/docker-run-tests.sh` or `npm run test:docker`. This eliminates "works on my machine" issues and improves CI reliability. Docker setup also documents system dependencies implicitly.
+
+**Next**
+- Evaluate WASM integration for performance-critical paths (P6).
+- Continue monitoring stability and consider expanding fuzzing to other tools.
 
 ---

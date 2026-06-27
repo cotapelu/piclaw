@@ -67,6 +67,37 @@ We follow the autonomous development protocol defined in `AGENTS.md`. In short:
 
 6. Push and open a Pull Request.
 
+## Reproducible Integration Tests (Docker)
+
+For testing in a clean, isolated environment—especially integration tests that start servers, spawn processes, or require system dependencies—use the provided Docker setup.
+
+### Prerequisites
+- Docker and Docker Compose installed.
+
+### Build and Run Tests
+```bash
+# Build the test image (only needed once or after dependency changes)
+docker compose -f docker-compose.test.yml build
+
+# Run the full test suite
+docker compose -f docker-compose.test.yml run --rm test-runner
+
+# Or use the convenience script
+./scripts/docker-run-tests.sh
+```
+
+### Environment Variables
+You can pass environment variables to the test container:
+```bash
+PICLAW_CHAOS_RATE=0.1 ./scripts/docker-run-tests.sh
+```
+
+### Notes
+- The Docker image is based on `node:20-alpine` and installs build dependencies for native modules.
+- Source code is mounted as a volume, so changes on the host are reflected inside the container.
+- The container runs as a non-root user for security.
+- This setup is also used in CI to ensure consistent test runs.
+
 ## Extension Development
 
 PiClaw is built on a modular extension system. Extensions can register tools, commands, slash commands, widgets, and event handlers.

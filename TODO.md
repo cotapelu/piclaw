@@ -33,7 +33,7 @@
 - [x] Chaos engineering: random network failures — added chaos utility and integrated into runCommandCapture
 - [x] Fuzz WebSocket message handling (malformed frames, oversized payloads) — increase robustness of remote TUI
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
-- [ ] Reproducible integration test environments
+- [x] Reproducible integration test environments
 - [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
 - [x] Provide logger-aware test utilities and migrate console-spy tests — created logger-mock.ts; migrated AgentTeam and PiclawPackageManager tests
 
@@ -103,6 +103,7 @@
 
 - P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
 - WebSocket Fuzzing — Added comprehensive fuzz test for malformed frames and oversized payloads.
+- Reproducible Integration Test Environments — Added Docker setup (Dockerfile.test, docker-compose.test.yml, scripts/docker-run-tests.sh) and documentation.
 ---
 
 ## Notes

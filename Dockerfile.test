@@ -1,0 +1,34 @@
+# Dockerfile for running PiClaw integration tests in a clean, reproducible environment
+# Build with: docker build -f Dockerfile.test -t piclaw-test .
+# Run tests: docker run --rm -e PICLAW_CHAOS_RATE=0 piclaw-test
+
+FROM node:20-alpine AS builder
+
+# Install build dependencies for native modules (node-pty, sharp, better-sqlite3)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    bash \
+    && npm config set python python3
+
+WORKDIR /app
+
+# Copy package files first for better layer caching
+COPY package.json package-lock.json ./
+COPY src/extensions/providers/models/custom-models.generated.ts ./src/extensions/providers/models/
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Build the project
+RUN npm run build
+
+# Test stage (optional: we could run tests here directly)
+FROM builder AS test
+
+# Run tests by default when container starts
+CMD ["npm", "test"]

@@ -13,6 +13,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 - **Property-based testing**: Core invariants validated with `fast-check`.
 - **TUI performance**: Memoized rendering and event-driven updates reduce CPU usage; metrics dashboard provides observability.
 - **Documentation**: CONTRIBUTING guide, ADRs, and extensive inline comments.
+- **Reproducible testing**: Docker-based test environment ensures consistent runs across platforms and simplifies CI setup.
 - **Team isolation**: `InstanceTeamManager` provides per-session team state, eliminating cross-session interference.
 - **Plugin isolation**: Worker-based isolation for tools, commands, hooks, widgets (metrics-widget, team-widget), and renderers (todos, memory, branch-summary, team-ops). RPC context proxy enables safe access to main services.
 - **Plugin isolation default**: `plugins.isolate` is now `true` by default; built-in tools, commands, and hooks run isolated automatically.

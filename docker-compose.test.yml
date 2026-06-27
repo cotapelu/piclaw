@@ -1,0 +1,25 @@
+# Docker Compose configuration for running PiClaw tests
+# Usage: docker compose -f docker-compose.test.yml run --rm test-runner
+
+services:
+  test-runner:
+    build:
+      context: .
+      dockerfile: Dockerfile.test
+    image: piclaw-test:latest
+    container_name: piclaw-test
+    # Mount source code for live testing during development (optional)
+    volumes:
+      - .:/app
+      - /app/node_modules  # keep node_modules from container
+      - /app/dist         # keep built dist from container
+    environment:
+      - NODE_ENV=test
+      - PICLAW_CHAOS_RATE=${PICLAW_CHAOS_RATE:-0}
+      # Add any other env vars needed for tests
+    working_dir: /app
+    # Keep container alive for interactive debugging if needed
+    stdin_open: true
+    tty: true
+    # Default command runs tests
+    command: npm test

@@ -202,6 +202,7 @@ Based on AUTO-CONTINUE.md workflow, priority order:
 
 ## 6. RECENT CHANGES (Last Build)
 
+- Docker setup for reproducible integration test environments (Dockerfile.test, docker-compose.test.yml, script, and docs).
 - WebSocket fuzzing test added for robustness against malformed frames and oversized payloads.
 - Kilo custom model generation (259 models)
 - Structured logging system (core + extension logger)
