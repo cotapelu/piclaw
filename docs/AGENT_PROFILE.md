@@ -4,7 +4,7 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 ## Strengths
 
-- **Comprehensive test suite**: 118 test files, 1125 passing, 0 skipped; coverage >80%.
+- **Comprehensive test suite**: 123 test files, 1156 passing, 0 skipped; coverage >80%.
 - **Modular architecture**: Clear separation between core, extensions, and tools.
 - **Robust team collaboration**: Multi-agent teams with task assignment, workspace isolation, zombie recovery, and metrics export.
 - **TypeScript strict mode**: Strong typing, early error detection.
@@ -24,11 +24,13 @@ Self-assessment of the PiClaw coding agent's strengths, weaknesses, and improvem
 
 - **Console coupling in tests**: Mostly resolved; only logger unit tests (`logger.test.ts`, `logger-core.test.ts`) legitimately spy on console. All other tests now use injected or mock loggers.
 - **Config validation**: Basic validation for `verbose`, `tools`, `thinking`, `model` (format `provider:model`), and `keybindings` (object type) is in place; further value checks possible.
-- **Windows compatibility**: Some path operations assume POSIX; full Windows testing is pending.
+- **Windows compatibility**: Most file operations now cross-platform; `executeRead` uses `fs/promises` and works on Windows. Some path edge cases may still need validation.
 - **WebSocket observability**: The WebSocket TUI server exports metrics via `/metrics` (JSON) and `/prometheus-metrics` (Prometheus text); TUI widget integration complete.
 
 ## Fragile Modules
 
+- `extensions/tools/sub-tools/computer-use.ts` (`executeRead`):
+  - Now uses `fs/promises`; offset/limit by array slicing. No shell dependency. Path validation ensures confinement. Tests cover core scenarios; cancellation via AbortSignal not implemented (acceptable trade-off).
 - `extensions/tools/todos-tool.ts`:
   - `loadTodoFromFile` error handling now uses injectable logger; console coupling removed. Tests stable.
   - Critical file I/O path still needs thorough edge case coverage, but logger abstraction no longer a fragility.

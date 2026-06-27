@@ -5,6 +5,7 @@ import { executeLs, lsSchema } from '../extensions/tools/sub-tools/computer-use.
 import { executeFind, findSchema } from '../extensions/tools/sub-tools/computer-use.js';
 import { executeGrep, grepSchema } from '../extensions/tools/sub-tools/computer-use.js';
 import { executeRead, readSchema } from '../extensions/tools/sub-tools/computer-use.js';
+import { join } from 'node:path';
 
 const mockExecResult = (stdout = '', stderr = '', code = 0) => ({ stdout, stderr, code });
 
@@ -90,66 +91,85 @@ describe('computer-use sub-tools', () => {
   });
 
   describe('executeRead', () => {
-    let ctx: any;
-    beforeEach(() => { ctx = createMockCtx(); });
+    let tempDir: string;
+    let dummyCtx: any;
 
-    it('should call cat', async () => {
-      ctx.exec.mockResolvedValue(mockExecResult('content'));
-      await executeRead({ path: 'file.txt' }, '/cwd', undefined, ctx);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', ['-c', "cat 'file.txt'"], expect.anything());
+    beforeAll(async () => {
+      const { mkdtemp } = await import('node:fs/promises');
+      const { tmpdir } = await import('node:os');
+      tempDir = await mkdtemp(join(tmpdir(), 'piclaw-test-'));
+      dummyCtx = {};
     });
 
-    it('should pipe to tail for offset', async () => {
-      ctx.exec.mockResolvedValue(mockExecResult(''));
-      await executeRead({ path: 'file.txt', offset: 5 }, '/cwd', undefined, ctx);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', expect.arrayContaining(['-c', expect.stringMatching(/tail -n \+5/)]), expect.anything());
+    afterAll(async () => {
+      const { rm } = await import('node:fs/promises');
+      await rm(tempDir, { recursive: true, force: true });
     });
 
-    it('should pipe to head for limit', async () => {
-      ctx.exec.mockResolvedValue(mockExecResult(''));
-      await executeRead({ path: 'file.txt', limit: 10 }, '/cwd', undefined, ctx);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', expect.arrayContaining(['-c', expect.stringMatching(/head -n 10/)]), expect.anything());
+    it('should read entire file', async () => {
+      const { writeFile } = await import('node:fs/promises');
+      const filePath = join(tempDir, 'file.txt');
+      const content = 'Hello, world!';
+      await writeFile(filePath, content, 'utf-8');
+      const result = await executeRead({ path: 'file.txt' }, tempDir, undefined, dummyCtx);
+      expect(result.isError).toBe(false);
+      expect(result.content[0].text).toBe(content);
+      expect(result.details).toEqual({ exitCode: 0, killed: false, path: 'file.txt', offset: undefined, limit: undefined });
     });
 
-    it('should return error result on path traversal outside cwd', async () => {
-      const result = await executeRead({ path: '../../../etc/passwd' }, '/cwd', undefined, ctx);
+    it('should apply offset (tail)', async () => {
+      const { writeFile } = await import('node:fs/promises');
+      const lines = ['line1', 'line2', 'line3', 'line4', 'line5'];
+      await writeFile(join(tempDir, 'file.txt'), lines.join('\n'), 'utf-8');
+      const result = await executeRead({ path: 'file.txt', offset: 3 }, tempDir, undefined, dummyCtx);
+      expect(result.isError).toBe(false);
+      expect(result.content[0].text).toBe(lines.slice(2).join('\n'));
+    });
+
+    it('should apply limit (head)', async () => {
+      const { writeFile } = await import('node:fs/promises');
+      const lines = ['a', 'b', 'c', 'd'];
+      await writeFile(join(tempDir, 'file.txt'), lines.join('\n'), 'utf-8');
+      const result = await executeRead({ path: 'file.txt', limit: 2 }, tempDir, undefined, dummyCtx);
+      expect(result.isError).toBe(false);
+      expect(result.content[0].text).toBe('a\nb');
+    });
+
+    it('should combine offset and limit', async () => {
+      const { writeFile } = await import('node:fs/promises');
+      const lines = ['1','2','3','4','5'];
+      await writeFile(join(tempDir, 'file.txt'), lines.join('\n'), 'utf-8');
+      const result = await executeRead({ path: 'file.txt', offset: 2, limit: 2 }, tempDir, undefined, dummyCtx);
+      expect(result.isError).toBe(false);
+      expect(result.content[0].text).toBe('2\n3');
+    });
+
+    it('should return error on path traversal', async () => {
+      const result = await executeRead({ path: '../../../etc/passwd' }, tempDir, undefined, dummyCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('Path traversal detected');
-      expect(ctx.exec).not.toHaveBeenCalled();
     });
 
-    it('should return error result on absolute path outside cwd', async () => {
-      const result = await executeRead({ path: '/etc/passwd' }, '/cwd', undefined, ctx);
+    it('should return error on absolute path outside cwd', async () => {
+      const result = await executeRead({ path: '/etc/passwd' }, tempDir, undefined, dummyCtx);
       expect(result.isError).toBe(true);
       expect(result.content[0].text).toContain('Path traversal detected');
-      expect(ctx.exec).not.toHaveBeenCalled();
     });
 
-    it('should escape single quotes in path', async () => {
-      ctx.exec.mockResolvedValue(mockExecResult('content'));
-      await executeRead({ path: "file'name.txt" }, '/cwd', undefined, ctx);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', ['-c', "cat 'file'\\''name.txt'"], expect.anything());
+    it('should read file with single quote in name', async () => {
+      const { writeFile } = await import('node:fs/promises');
+      const fileName = "file'name.txt";
+      await writeFile(join(tempDir, fileName), 'content with quote', 'utf-8');
+      const result = await executeRead({ path: fileName }, tempDir, undefined, dummyCtx);
+      expect(result.isError).toBe(false);
+      expect(result.content[0].text).toBe('content with quote');
     });
 
-    it('should combine offset and limit correctly', async () => {
-      ctx.exec.mockResolvedValue(mockExecResult(''));
-      await executeRead({ path: 'file.txt', offset: 10, limit: 5 }, '/cwd', undefined, ctx);
-      const cmd = expect.arrayContaining(['-c', expect.stringMatching(/cat 'file.txt' \| tail -n \+10 \| head -n 5/)]);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', cmd, expect.anything());
-    });
-
-    it('should pass signal to exec', async () => {
-      const signal = new AbortController().signal;
-      ctx.exec.mockResolvedValue(mockExecResult(''));
-      await executeRead({ path: 'file.txt' }, '/cwd', signal, ctx);
-      expect(ctx.exec).toHaveBeenCalledWith('bash', expect.anything(), expect.objectContaining({ signal }));
-    });
-
-    it('should return error result when exec fails', async () => {
-      ctx.exec.mockResolvedValue({ stdout: '', stderr: 'No such file', code: 1 });
-      const result = await executeRead({ path: 'missing.txt' }, '/cwd', undefined, ctx);
+    it('should return error when file missing', async () => {
+      const result = await executeRead({ path: 'missing.txt' }, tempDir, undefined, dummyCtx);
       expect(result.isError).toBe(true);
-      expect(result.content[0].text).toContain('No such file');
+      const text = result.content[0].text;
+      expect(text).toMatch(/no such file|ENOENT/i);
     });
   });
 });

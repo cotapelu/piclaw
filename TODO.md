@@ -99,6 +99,7 @@
 - P6 Widget Isolation — isolated both metrics-widget and team-widget via RPC context proxy and worker loading; team-widget uses polling via RPC
 - P6 Renderer Isolation (Phase 2) — migrated built-in renderers and added tests; full validation completed
 - P6 Renderer Isolation Testing — added unit test for renderer RPC registration; fixed flaky auto-dispose test
+- P6 Cross-Platform executeRead — Refactored `executeRead` to use `fs/promises`, eliminating bash dependency for Windows compatibility.
 
 - P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
 ---

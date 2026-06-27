@@ -1,0 +1,22 @@
+[
+  [
+    {
+      "timestamp": "2026-06-26T23:56:18.823Z",
+      "activeConnections": 1,
+      "totalConnections": 4,
+      "totalErrors": 0,
+      "totalPtySpawned": 4,
+      "startTime": "2026-06-26T23:56:05.855Z",
+      "uptimeSeconds": 12.968
+    }
+  ],
+  {
+    "timestamp": "2026-06-26T23:56:54.681Z",
+    "activeConnections": 1,
+    "totalConnections": 3,
+    "totalErrors": 0,
+    "totalPtySpawned": 3,
+    "startTime": "2026-06-26T23:56:41.765Z",
+    "uptimeSeconds": 12.916
+  }
+]

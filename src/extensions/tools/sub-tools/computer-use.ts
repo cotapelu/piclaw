@@ -10,6 +10,7 @@
 
 import { Type } from "typebox";
 import { resolve } from "node:path";
+import { readFile } from "node:fs/promises";
 
 // ============================================================================
 // Schemas
@@ -153,18 +154,22 @@ export async function executeRead(
     if (!resolved.startsWith(baseDir + "/") && resolved !== baseDir) {
       throw new Error(`Path traversal detected: ${filePath}`);
     }
-    // Escape single quotes for safe bash usage
-    const escapedPath = filePath.replace(/'/g, "'\\''");
-    // Build command using cat with escaped path
-    let cmd = `cat '${escapedPath}'`;
-    if (offset && offset > 0) cmd += ` | tail -n +${offset}`;
-    if (limit !== undefined) cmd += ` | head -n ${limit}`;
-
-    const result = await ctx!.exec("bash", ["-c", cmd], { cwd, signal });
+    // Read file directly using Node.js (cross-platform)
+    const content = await readFile(resolved, "utf-8");
+    let lines = content.split(/\r?\n/);
+    // Offset: tail -n +N starts at line N (1-indexed)
+    if (offset && offset > 0) {
+      lines = lines.slice(offset - 1);
+    }
+    // Limit: head -n N
+    if (limit !== undefined) {
+      lines = lines.slice(0, limit);
+    }
+    const output = lines.join("\n");
     return {
-      content: [{ type: "text", text: result.stdout || result.stderr }],
-      details: { exitCode: result.code, killed: result.killed, path: filePath, offset, limit },
-      isError: result.code !== 0,
+      content: [{ type: "text", text: output }],
+      details: { exitCode: 0, killed: false, path: filePath, offset, limit },
+      isError: false,
     } as const;
   } catch (error: any) {
     return { content: [{ type: "text", text: `read error: ${error.message}` }], details: undefined, isError: true } as const;

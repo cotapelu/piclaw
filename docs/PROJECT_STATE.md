@@ -1,10 +1,10 @@
 # PiClaw Project State — Capability Snapshot
 
-**Date**: 2026-06-15
+**Date**: 2026-06-26
 **Version**: 0.0.1
 **Commit**: (working tree)
 **Build Status**: ✅ Successful
-**Test Status**: ✅ 975 passed, 3 skipped (103 test files)
+**Test Status**: ✅ 1156 passed, 0 skipped (123 test files)
 
 ---
 
@@ -17,6 +17,10 @@
 - **Extensions**: Modular system with 23+ built-in extensions
   - All production extensions now use structured logging (`logger` abstraction)
   - Team auto-dispose exports metrics to `.piclaw/metrics.json`
+  - Plugin isolation (worker threads) enabled by default for tools, commands, hooks, and renderers.
+  - Remote TUI access via WebSocket (PTY backend; opt-in via `--tui-websocket`).
+  - WebSocket observability: `/metrics` (JSON), `/prometheus-metrics` (Prometheus), and TUI widget integration.
+  - Configurable metrics retention (default 30 days) with auto-cleanup.
 
 ### 1.2 Tools Implemented
 | Tool | Status | Description |
@@ -30,10 +34,16 @@
 | `memory` | ✅ Full | Store/retrieve text snippets with tags (session-scoped) |
 | `todos` | ✅ Full | Project todo management with phases & tasks (persistent) |
 | `scripts` | ✅ Full | List and run npm scripts |
-| `secret-scanner` | ✅ Full | Detect leaked API keys and tokens |
 | `tool-template` | ✅ Full | Template for creating custom tools |
 | `skill-reader` | ✅ Full | Read skill definitions from skills/ |
 | `universal` | ✅ Full | echo, system_info, date, uuid, random, calc |
+| `http-client` | ✅ Full | HTTP requests (GET, POST, PUT, DELETE, PATCH) with headers, body, timeout |
+| `cache-manager` | ✅ Full | Cache operations (set/get/delete/clear/stats/cleanup) with TTL |
+| `db-client` | ✅ Full | SQLite parameterized queries (connect, query, execute, exec, close) |
+| `prometheus-metrics` | ✅ Full | Export observability metrics in Prometheus text format |
+| `session-health` | ✅ Full | Scan and repair corrupted session files |
+| `websocket-metrics` | ✅ Full | Query WebSocket TUI server metrics (active connections, totals, errors, PTYs) |
+| `team` | ✅ Full | Team collaboration operations (create, assign tasks, shared workspace) |
 | `subtool-loader` | ✅ Full | Unified access to read, ls, find, grep, http |
 
 ### 1.3 Commands (Slash)
@@ -85,7 +95,7 @@
 
 | Metric | Value |
 |--------|-------|
-| Test Coverage | 968 tests passing |
+| Test Coverage | 1156 tests passing |
 | Total lines (src/) | ~18,000+ (estimated) |
 | TypeScript strict | ✅ |
 | ESLint configured | ✅ |
@@ -118,12 +128,13 @@ src/
 
 ## 4. CURRENT LIMITATIONS & GAPS
 
-### 4.1 Missing Evolution Infrastructure
-- ❌ `docs/PROJECT_STATE.md` - Just created (this file)
-- ❌ `docs/AGENT_METRICS.md` - Not tracking iterations, failure rates
-- ❌ `docs/AGENT_PROFILE.md` - No documented strengths/weaknesses
-- ❌ `docs/EVOLUTION.md` - No planned refactors tracked
-- ❌ Missing phase/task structure for continuous improvement
+### 4.1 Evolution Infrastructure
+- ✅ All evolution tracking docs in place and actively maintained:
+  - `docs/PROJECT_STATE.md` — Capability snapshot updated each iteration.
+  - `docs/AGENT_METRICS.md` — Iteration metrics and outcomes.
+  - `docs/AGENT_PROFILE.md` — Strengths, weaknesses, and fragile modules.
+  - `docs/EVOLUTION.md` — Trajectory changes and planned refactors.
+- ✅ Continuous improvement loop established per AUTO-CONTINUE.md.
 
 ### 4.2 Test Coverage Gaps (Despite High Numbers)
 - Need targeted edge case tests for race conditions in team workspace
@@ -148,13 +159,13 @@ src/
 
 Based on AUTO-CONTINUE.md workflow, priority order:
 
-### P0 — Bootstrap Evolution Tracking (In Progress)
+### P0 — Bootstrap Evolution Tracking (Completed)
 - [x] Create docs/ directory
-- [ ] Write PROJECT_STATE.md (this file complete)
-- [ ] Write TODO.md with prioritized tasks
-- [ ] Write AGENT_METRICS.md with baseline
-- [ ] Write AGENT_PROFILE.md with self-assessment
-- [ ] Write EVOLUTION.md with planned trajectory
+- [x] Write PROJECT_STATE.md (this file complete)
+- [x] Write TODO.md with prioritized tasks
+- [x] Write AGENT_METRICS.md with baseline
+- [x] Write AGENT_PROFILE.md with self-assessment
+- [x] Write EVOLUTION.md with planned trajectory
 - [ ] Commit changes to git
 
 ### P1 — System-Wide Security Audit

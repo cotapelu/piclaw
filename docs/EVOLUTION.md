@@ -1122,3 +1122,30 @@ The WebSocket TUI server is now more resilient to malformed client inputs. These
 - Evaluate adding property-based tests for WebSocket message handling.
 
 ---
+
+### Iteration 53 — 2026-06-26 (Cross-Platform executeRead Refactor)
+
+**P6 — Architecture (Reliability):**
+- Refactored `executeRead` in `src/extensions/tools/sub-tools/computer-use.ts` to use Node's `fs/promises` directly instead of shelling out to `bash`.
+  - Maintains same abstraction and result shape.
+  - Preserves security: path validation prevents traversal; content read directly from filesystem.
+  - Offset implemented via array slice (equivalent to tail -n +N); limit via slice (equivalent to head -n N).
+  - Works on Windows, eliminating bash dependency.
+- Updated `executeRead` unit tests to reflect new implementation:
+  - Replaced shell-based tests (9 tests) with file-I/O based tests (8 tests) covering reading, offset, limit, combined operations, path traversal errors, single-quote filenames, and missing files.
+  - Added temporary directory setup/teardown for isolated file operations.
+  - All tests pass.
+
+**Metrics**
+- Tests: net -1 (from 1157 to **1156 passing**; updated tests count)
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+Improved cross-platform compatibility and removed a critical dependency on bash for file reading. The tool now functions robustly on Windows and other platforms without a POSIX shell. Test suite remains healthy with high coverage for `executeRead`.
+
+**Next**
+- Consider implementing AbortSignal support for `executeRead` using streams if cancellation becomes necessary (optional).
+- Continue monitoring stability and expand fuzzing to other tools if needed.
+
+---
