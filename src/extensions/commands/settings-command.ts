@@ -11,6 +11,7 @@ import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { Container, Text, Spacer, SettingsList } from "@earendil-works/pi-tui";
 import { getSettingsListTheme } from "@earendil-works/pi-coding-agent";
 import { loadConfig, saveConfig, type PiclawConfig } from "../../config/config-manager.js";
+import { syncPiclawToUpstream } from "../../utils/config-sync.js";
 
 interface SettingItem {
   id: string;
@@ -113,7 +114,9 @@ export function registerSettingsCommand(api: ExtensionAPI): void {
             (async () => {
               try {
                 await saveConfig(currentConfig);
-                ctx.ui.notify(`Saved ${id} = ${newValue}`, "info");
+                // Sync to upstream settings file to make changes effective
+                syncPiclawToUpstream(currentConfig);
+                ctx.ui.notify(`Saved ${id} = ${newValue} (synced to agent config)`, "info");
               } catch (err: any) {
                 ctx.ui.notify(`Failed to save ${id}: ${err.message}`, "error");
               }

@@ -2,6 +2,9 @@
 import { main as upstreamMain } from "@earendil-works/pi-coding-agent";
 import { getExtensionFactories } from "./extensions/index.js";
 import { initLogger, createLogger } from "./utils/logger.js";
+import { loadConfig } from "./config/config-manager.js";
+import { getAgentDir } from "./config/config-manager.js";
+import { syncPiclawToUpstream } from "./utils/config-sync.js";
 import { parseWebsocketArgs, startWebsocketTuiServer } from "./websocket-tui-server.js";
 import { join } from "node:path";
 import { existsSync } from "node:fs";
@@ -15,6 +18,14 @@ async function main() {
   try { process.umask(0o077); } catch {}
   // Initialize structured logging early
   await initLogger();
+
+  // Override upstream agent directory to use Piclaw's agent dir
+  // This consolidates all upstream files (~/.pi/agent) into ~/.piclaw/agent
+  process.env.PI_CODING_AGENT_DIR = getAgentDir();
+
+  // Load Piclaw config and sync to upstream settings before starting upstream
+  const piclawConfig = loadConfig();
+  syncPiclawToUpstream(piclawConfig);
 
   const args = process.argv.slice(2);
   const wsOptions = parseWebsocketArgs(args);

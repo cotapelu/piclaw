@@ -3,47 +3,17 @@
   "phases": [
     {
       "id": "phase-1",
-      "name": "Phase: WebSocket Observability",
+      "name": "Phase Test",
       "tasks": [
         {
           "id": "task-1",
-          "content": "Add WebSocketMetrics collector to track connections, errors, PTY count",
-          "status": "completed"
-        },
-        {
-          "id": "task-2",
-          "content": "Register websocket-metrics tool to expose stats",
-          "status": "completed"
-        },
-        {
-          "id": "task-3",
-          "content": "Integrate metrics into TUI metrics widget",
-          "status": "completed"
-        },
-        {
-          "id": "task-4",
-          "content": "Add Prometheus exporter support for websocket metrics",
-          "status": "completed"
-        },
-        {
-          "id": "task-5",
-          "content": "Write unit tests for WebSocketMetrics",
-          "status": "completed"
-        },
-        {
-          "id": "task-6",
-          "content": "Write unit tests for websocket-metrics tool",
-          "status": "completed"
-        },
-        {
-          "id": "task-7",
-          "content": "Run full test suite and build",
-          "status": "completed"
+          "content": "Test todo tool đã bật",
+          "status": "in_progress"
         }
       ]
     }
   ],
-  "nextTaskId": 8,
+  "nextTaskId": 2,
   "nextPhaseId": 2,
-  "updatedAt": "2026-06-26T23:24:42.639Z"
+  "updatedAt": "2026-06-27T12:15:52.708Z"
 }
