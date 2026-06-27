@@ -993,3 +993,26 @@ Improved cross-platform compatibility and removed a critical dependency on bash 
 - Continue monitoring stability and expand fuzzing to other tools if needed.
 
 ---
+
+### Iteration 54 — 2026-06-27 (WebSocket Fuzzing)
+
+**P5 — Testing & Quality:**
+- Added `src/tests/websocket-tui-server-fuzz.test.ts` with 2 tests:
+  - Sends 500 random binary messages (1-16KB) and verifies server stays responsive.
+  - Sends a single 1MB payload to test large message handling.
+- Tests validate that server does not crash, metrics endpoint stays healthy, and new connections succeed.
+- All tests: **1158 passing** (build successful). Regressions: 0.
+
+**Metrics**
+- Tests: +2 (from 1156 to 1158), 124 test files
+- Build: Success
+- Regressions: 0
+
+**Outcome**
+WebSocket TUI server robustness significantly improved against malformed frames and oversized payloads. No resource leaks or crashes observed under extreme inputs.
+
+**Next**
+- Evaluate WASM integration for performance-critical paths (P6).
+- Address reproducible integration test environments (P5).
+
+---

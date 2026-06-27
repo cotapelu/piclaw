@@ -1,6 +1,6 @@
 # PiClaw TODO — Priority Task List
 
-**Last Updated**: 2026-06-21
+**Last Updated**: 2026-06-27
 **Source**: AUTO-CONTINUE.md workflow
 
 - P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
@@ -31,7 +31,7 @@
 - [x] Increase coverage to ≥80% (achieved >80% via subtool-loader & logger-core tests)
 - [x] Expand fuzzing coverage to other tools (test-tool file args) — added test-tool-security.test.ts
 - [x] Chaos engineering: random network failures — added chaos utility and integrated into runCommandCapture
-- [ ] Fuzz WebSocket message handling (malformed frames, oversized payloads) — increase robustness of remote TUI
+- [x] Fuzz WebSocket message handling (malformed frames, oversized payloads) — increase robustness of remote TUI
 - [x] Long-running stability test (24h+) — added long-running-stability.test.ts with PM cycles and team lifecycle
 - [ ] Reproducible integration test environments
 - [x] Property-based testing for core algorithms — added team-manager-property.test.ts (5 invariants)
@@ -102,6 +102,7 @@
 - P6 Cross-Platform executeRead — Refactored `executeRead` to use `fs/promises`, eliminating bash dependency for Windows compatibility.
 
 - P6 WebSocket TUI Transport — Implemented remote TUI via WebSocket with PTY backend; added CLI flags and embedded xterm.js client
+- WebSocket Fuzzing — Added comprehensive fuzz test for malformed frames and oversized payloads.
 ---
 
 ## Notes
@@ -110,14 +111,14 @@
 - Follow AGENTS.md protocol: Plan → Code → Test → Evaluate → Decide → Repeat
 
 ## WebSocket Observability (P4 Follow-up)
-- [ ] Add WebSocket TUI server metrics (active connections, total connections, errors, PTY processes) to metrics-widget
-- [ ] Export WebSocket metrics via Prometheus tool (counters/gauges)
-- [ ] Add config option for WebSocket metrics retention (same as general metrics)
+- [x] Add WebSocket TUI server metrics (active connections, total connections, errors, PTY processes) to metrics-widget
+- [x] Export WebSocket metrics via Prometheus tool (counters/gauges)
+- [x] Add config option for WebSocket metrics retention (same as general metrics)
 
 ---
 
 ## Follow-ups (Lower Priority)
 - [ ] Consider WASM integration for performance-critical paths (diff, parsing)
-- [ ] Add fuzzing for WebSocket message handling (malformed frames, large payloads)
+- [x] Add fuzzing for WebSocket message handling (malformed frames, large payloads)
 
 ---

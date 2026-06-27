@@ -1,10 +1,10 @@
 # PiClaw Project State — Capability Snapshot
 
-**Date**: 2026-06-26
+**Date**: 2026-06-27
 **Version**: 0.0.1
 **Commit**: (working tree)
 **Build Status**: ✅ Successful
-**Test Status**: ✅ 1156 passed, 0 skipped (123 test files)
+**Test Status**: ✅ 1158 passed, 0 skipped (124 test files)
 
 ---
 
@@ -193,7 +193,7 @@ Based on AUTO-CONTINUE.md workflow, priority order:
 - Debug mode with verbose traces
 
 ### P5 — Testing & Reliability
-- Increase coverage to ≥80% (currently ~70% estimated)
+- Increase coverage to ≥80% (achieved >80%)
 - Add fault injection tests for network errors
 - Chaos testing for team collaboration (random failures)
 - Build reproducible integration test environments
@@ -202,6 +202,7 @@ Based on AUTO-CONTINUE.md workflow, priority order:
 
 ## 6. RECENT CHANGES (Last Build)
 
+- WebSocket fuzzing test added for robustness against malformed frames and oversized payloads.
 - Kilo custom model generation (259 models)
 - Structured logging system (core + extension logger)
 - Complete replacement of `console.*` with `logger` in all extensions
@@ -214,7 +215,7 @@ Based on AUTO-CONTINUE.md workflow, priority order:
 - Auto-compact at 85% threshold
 - Context logger extension for debugging
 - Tool-template enhancements
-- 103 test files, 975 passing tests, 3 skipped
+- 124 test files, 1158 passing tests, 0 skipped
 
 ---
 
